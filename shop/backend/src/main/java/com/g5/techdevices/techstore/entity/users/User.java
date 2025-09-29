@@ -33,7 +33,7 @@ public class User {
     @Column(name = "Gender")
     private Boolean gender;
 
-    @Column(name = "PhoneNumber", length = 50)
+    @Column(name = "PhoneNumber", length = 50, nullable = false)
     private String phoneNumber;
 
     @Column(name = "Role", length = 50)
