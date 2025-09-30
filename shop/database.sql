@@ -32,7 +32,7 @@ CREATE TABLE dbo.Users
     UserId BIGINT IDENTITY(1,1) PRIMARY KEY,
     FullName NVARCHAR(200) NOT NULL,
     Email NVARCHAR(255) NOT NULL UNIQUE,
-    PasswordHash NVARCHAR(512) NOT NULL,
+    PasswordHash NVARCHAR(255) NOT NULL,
     Gender BIT NULL,                          -- 0/1 or NULL
     PhoneNumber NVARCHAR(50) NULL,
     Role NVARCHAR(50) NOT NULL DEFAULT N'Customer',

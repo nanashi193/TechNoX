@@ -42,6 +42,12 @@ public class User {
     @Column(name = "IsActive")
     private Boolean isActive;
 
+    @Column(name = "FacebookAccountId", length = 100)
+    private String facebookAccountId;
+
+    @Column(name = "GoogleAccountId", length = 100)
+    private String googleAccountId;
+
     @OneToMany(mappedBy = "user")
     private List<Bill> bills;
 
