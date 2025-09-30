@@ -28,9 +28,6 @@ public class Review {
     @JoinColumn(name = "UserId")
     private User user;
 
-    @Column(name = "Rating")
-    private Integer rating;
-
     @Column(name = "Comment", columnDefinition = "nvarchar(max)")
     private String comment;
 
