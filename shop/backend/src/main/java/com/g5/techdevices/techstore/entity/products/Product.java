@@ -36,8 +36,8 @@ public class Product {
     @Column(name = "Description", columnDefinition = "nvarchar(max)")
     private String description;
 
-    @Column(name = "ImageUrl", length = 1000)
-    private String imageUrl;
+    @Column(name = "Thumbnail", length = 300)
+    private String thumbnail;
 
     @OneToMany(mappedBy = "product")
     private List<ProductVariant> variants;
