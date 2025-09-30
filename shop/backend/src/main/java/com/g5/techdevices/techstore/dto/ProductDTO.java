@@ -14,21 +14,24 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ProductDTO {
+    @NotBlank(message = "Title is required!")
+    @Size (min = 3, max = 200, message = "Title must be between 3 and 200 characters")
+    private String name;            // nvarchar(255)
+
+    @JsonProperty("product_id")
     private Long productId;// bigint
 
     @JsonProperty("category_id")
     private String categoryId;// int
 
-    @NotBlank(message = "Title is required!")
-    @Size (min = 3, max = 200, message = "Title must be between 3 and 200 characters")
-    private String name;            // nvarchar(255)
+
 
     @Min(value = 0, message = "Price must be great than or equal to 0")
     private Double price;       // decimal(18,2)
 
-    @JsonProperty("category_id")
     private String description;     // nvarchar(MAX)
 
-    private String imageUrl;        // nvarchar(1000)
+    private String imageUrl;// nvarchar(1000)
+
     private LocalDateTime createdAt; // datetime2(7)
 }
