@@ -31,7 +31,20 @@
   background: rgba(0, 0, 0, 0.3); /* lớp mờ đen 30% */
   z-index: -1;
 }
+.auth-layout .card a {
+    color: #e74b45 !important;
+    font-weight: 600;
+}
 
+.auth-layout .card a:visited {
+    color: #e74b45 !important;
+}
+
+.auth-layout .card a:hover,
+.auth-layout .card a:focus {
+    text-decoration: none;
+    outline: none;
+}
 
 /* ===== Left (Logo + Text) ===== */
 .brand-pane {
