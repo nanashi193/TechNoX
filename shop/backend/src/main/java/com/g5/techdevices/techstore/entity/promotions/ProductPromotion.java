@@ -8,13 +8,13 @@ import lombok.*;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "product_promotion")
+@Table(name = "ProductPromotion")
 @IdClass(ProductPromotionId.class) // composite key
 public class ProductPromotion {
 
     @Id
     @Column(name = "product_id", length = 100, nullable = false)
-    private String productId;
+    private Long productId;
 
     @Id
     @Column(name = "promo_id", nullable = false)
