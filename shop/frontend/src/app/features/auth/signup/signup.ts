@@ -3,7 +3,7 @@ import {CommonModule, NgOptimizedImage} from "@angular/common";
 import {
     AbstractControl,
     FormBuilder,
-    FormGroup,
+    FormGroup, FormsModule,
     ReactiveFormsModule,
     ValidationErrors,
     Validators
@@ -12,21 +12,24 @@ import {Router, RouterModule} from "@angular/router";
 
 @Component({
     selector: 'app-signup',
-    imports: [CommonModule, ReactiveFormsModule, RouterModule, NgOptimizedImage],
+    imports: [CommonModule, ReactiveFormsModule, RouterModule, NgOptimizedImage, FormsModule],
     templateUrl: './signup.html',
-    styleUrl: './signup.css'
+    styleUrls:[ './signup.css']
 })
 export class SignupComponent {
     form!: FormGroup;
+    agree =false;
     constructor(private fb: FormBuilder, private router: Router) {
         this.form = this.fb.group(
             {
                 username: ['', [Validators.required, Validators.minLength(3)]],
                 email: ['', [Validators.required, Validators.email]],
-                password: ['', [Validators.required, Validators.minLength(6)]],
-                confirmPassword: ['', [Validators.required]]
+                password: ['', [Validators.required, Validators.minLength(8)]],
+                confirmPassword: ['', [Validators.required]],
+                agree: [false, [Validators.requiredTrue]],
+
             },
-            {validators: this.match('password', 'confirm')}
+            {validators: this.match('password', 'confirmPassword')}
         );
     }
         match(a: string, b: string){

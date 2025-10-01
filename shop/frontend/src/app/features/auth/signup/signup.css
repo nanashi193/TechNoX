@@ -175,7 +175,7 @@
     display: block;
 }
 
-.card input:focus {
+.card input:not([type="checkbox"]):focus {
     border-color: #e74b45;
     background: #fff;
     box-shadow: 0 0 0 3px rgba(231, 75, 69, 0.2);
@@ -212,6 +212,9 @@
 
 .card button:active {
     transform: translateY(1px);
+}
+.alert {
+    text-align: left;
 }
 
 /* ===== Responsive ===== */
