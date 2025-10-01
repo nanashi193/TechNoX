@@ -1,0 +1,77 @@
+<div class="auth-layout">
+    <div class="brand-pane">
+        <img class="brand-logo" ngSrc="/assets/Pokecut_1759070674094.png" alt="AppleLogo" height="1200" width="1200"/>
+        <h1 class="brand-title">Create your account</h1>
+        <p class="brand-note">Join our electronics shop and start shopping today.</p>
+
+        <div class="hotlines">
+            <a href="tel:+245041660355">+245 04 166 0355</a>
+            <a href="tel:+347423902456">+347 42 390 2456</a>
+        </div>
+
+        <div class="socials">
+            <a href="#" aria-label="facebook">f</a>
+            <a href="#" aria-label="twitter">t</a>
+            <a href="#" aria-label="linkedin">in</a>
+        </div>
+    </div>
+
+    <div class="form-pane">
+        <div class="card">
+            <h2>Sign up</h2>
+            <p class="description">Please enter your information below.</p>
+
+            <form [formGroup]="form" (ngSubmit)="onSubmit()">
+                <input type="text" placeholder="User name" formControlName="username" />
+                <input type="email" placeholder="Email" formControlName="email" />
+
+                <input type="password"
+                       placeholder="Password"
+                       formControlName="password"
+                       class="form-control" />
+
+                <div class="alert alert-secondary-subtitle border my-2 py-2 px-3 note"
+                     role="note">
+                    <strong>Lưu ý:</strong> Mật khẩu phải có tối thiểu 8 ký tự bao gồm chữ, số và các ký tự đặc biệt.
+                </div>
+
+                <input type="password"
+                       placeholder="Confirm password"
+                       formControlName="confirmPassword"
+                       class="form-control" />
+
+                <div *ngIf="form.touched && form.hasError('mismatch')" style="color:#e74b45; text-align:left; font-size:14px;">
+                    Passwords do not match.
+                </div>
+
+            </form>
+
+            <div class="form-check mt-3 text-start">
+                <input class="form-check-input"
+                       type="checkbox"
+                       id="agree"
+                       [(ngModel)]="agree"
+                       name="agree"
+                       required>
+                <label class="form-check-label" for="agree">
+                    Bằng việc đăng ký tài khoản tôi đồng ý với các
+                    <a href="/terms" target="_blank">điều khoản bảo mật</a>
+                    &amp;
+                    <a href="/privacy" target="_blank">sử dụng thông tin cá nhân</a>
+                    của TechnoX
+                </label>
+            </div>
+
+            <button type="submit"
+                    [disabled]="form.invalid || !agree"
+                    class="btn btn-danger w-100 mt-3">
+                Create account
+            </button>
+
+            <p style="margin-top: 16px;">
+                Already have an account?
+                <a routerLink="/login">Login</a>
+            </p>
+        </div>
+    </div>
+</div>
