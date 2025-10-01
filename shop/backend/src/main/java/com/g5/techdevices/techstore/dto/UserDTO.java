@@ -12,6 +12,7 @@ import org.apache.logging.log4j.message.Message;
 @Getter
 @Setter
 public class UserDTO {
+    @NotBlank(message = "Name is required")
     @JsonProperty("FullName")
     private String fullName;
 
