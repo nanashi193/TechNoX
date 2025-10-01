@@ -1,5 +1,5 @@
 /* ===== Fonts (Poppins) ===== */
-@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap");
+/*@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap");*/
 
 .auth-layout {
   position: relative;
@@ -157,6 +157,37 @@
   color: #666;
   font-size: 15px;
   user-select: none;
+}
+.remember-forgot {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.forgot-link {
+    color: #e74b45;
+    text-decoration: none;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.forgot-link:hover {
+    text-decoration: underline;
+}
+.no-account {
+    margin-top: 16px;
+    font-size: 14px;
+}
+
+.create-link {
+    color: #e74b45;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.create-link:hover {
+    text-decoration: underline;
 }
 
 /* Button chính */

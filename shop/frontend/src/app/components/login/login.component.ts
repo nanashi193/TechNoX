@@ -1,14 +1,14 @@
 import { Component } from '@angular/core';
 import {CommonModule, NgOptimizedImage} from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import {Router, RouterLink} from '@angular/router';
 
 @Component({
   selector: 'app-login',
   standalone: true,
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.css'],
-    imports: [CommonModule, FormsModule, NgOptimizedImage]
+    imports: [CommonModule, FormsModule, NgOptimizedImage, RouterLink]
 })
 export class LoginComponent {
   model: { username: string; password: string; remember: boolean } = {
