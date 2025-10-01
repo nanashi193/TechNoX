@@ -36,6 +36,7 @@ public class ProductController {
                         .toList();
                 return ResponseEntity.badRequest().body(errorMassage);
             }
+            //ktra kich thuoc va dinh dang
             if(file != null ){
                 if(file.getSize() >10 *1024 * 1024){ //10mb
                     return ResponseEntity.status(HttpStatus.PAYLOAD_TOO_LARGE)
@@ -47,7 +48,8 @@ public class ProductController {
                             .body("File must contain image");
                 }
                 //luu file va update thumbnaild trong DTO
-
+                String fileName = storeFile(file); //thay the lai code ở đây
+                //luu vào đối tượng product trong DB => sẽ làm sau
             }
 
             return ResponseEntity.ok("Product created successfully");
@@ -59,7 +61,7 @@ public class ProductController {
         String fileName = StringUtils.cleanPath(file.getOriginalFilename());
 
         //them UUID vao truoc ten file de dam bao la file duy nhat
-        String uniqueFilename = UUID.randomUUID().toString() + "." + fileName;
+        String uniqueFilename = UUID.randomUUID().toString() + "_" + fileName;
 
         // duong dan den thu muc muon luu file
         java.nio.file.Path uploadDir = Paths.get("upload") ;
