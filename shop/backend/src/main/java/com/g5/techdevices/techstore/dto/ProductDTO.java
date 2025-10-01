@@ -5,8 +5,10 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 @Getter
@@ -34,4 +36,5 @@ public class ProductDTO {
     private String imageUrl;// nvarchar(1000)
 
     private LocalDateTime createdAt; // datetime2(7)
+    private List<MultipartFile> files;
 }

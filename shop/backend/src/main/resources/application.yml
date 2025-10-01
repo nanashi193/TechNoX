@@ -23,7 +23,7 @@ spring:
 server:
   port: 8088
 
-# dùng trong @RequestMapping("${api.prefix}/products")
+# dï¿½ng trong @RequestMapping("${api.prefix}/products")
 api:
   prefix: /api/v1
 
