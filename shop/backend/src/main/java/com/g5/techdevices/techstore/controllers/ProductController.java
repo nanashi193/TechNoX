@@ -14,6 +14,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.nio.file.*;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -36,9 +37,9 @@ public class ProductController {
                 return ResponseEntity.badRequest().body(errorMassage);
             }
             List<MultipartFile> files = productDTO.getFiles();
+              files = files ==null ? new ArrayList<MultipartFile>() : files;
             for(MultipartFile file : files){
                 //ktra kich thuoc va dinh dang
-
                     if(file.getSize() >10 *1024 * 1024){ //10mb
                         return ResponseEntity.status(HttpStatus.PAYLOAD_TOO_LARGE)
                                 .body("File is too large");
@@ -50,11 +51,8 @@ public class ProductController {
                     }
                     //luu file va update thumbnaild trong DTO
                     String fileName = storeFile(file); //thay the lai code ở đây
-
-
-//luu vào đối tượng product trong DB => sẽ làm sau
+                    //luu vào đối tượng product trong DB => sẽ làm sau
             }
-
             return ResponseEntity.ok("Product created successfully");
             }catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
