@@ -7,13 +7,13 @@ import java.util.Objects;
 
 @Embeddable
 public class RelatedProductId implements Serializable {
-    private Long productId;
+    private int productId;
     @Column(name = "RelatedProductId")
-    private Long relatedProductId;
+    private int relatedProductId;
 
     public RelatedProductId() {}
 
-    public RelatedProductId(Long productId, Long relatedProductId) {
+    public RelatedProductId(int productId, int relatedProductId) {
         this.productId = productId;
         this.relatedProductId = relatedProductId;
     }

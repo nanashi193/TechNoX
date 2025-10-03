@@ -18,7 +18,7 @@ public class BillDetail {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "BillDetailId")
-    private Long id;
+    private int id;
 
     @ManyToOne
     @JoinColumn(name = "BillId", nullable = false)

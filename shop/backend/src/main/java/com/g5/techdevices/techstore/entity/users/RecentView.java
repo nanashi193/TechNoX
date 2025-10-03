@@ -18,7 +18,7 @@ public class RecentView {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "RecentViewId")
-    private Long id;
+    private int id;
 
     @ManyToOne
     @JoinColumn(name = "ProductId")

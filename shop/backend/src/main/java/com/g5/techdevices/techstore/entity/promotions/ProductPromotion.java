@@ -14,7 +14,7 @@ public class ProductPromotion {
 
     @Id
     @Column(name = "product_id", length = 100, nullable = false)
-    private Long productId;
+    private int productId;
 
     @Id
     @Column(name = "promo_id", nullable = false)
