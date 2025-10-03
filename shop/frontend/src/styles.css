@@ -1,8 +1,7 @@
-@import url('https://fonts.googleapis.com/css2?family=Inconsolata:wght@400;600;700&display=swap&subset=vietnamese');
-
 body {
-    font-family: 'Inconsolata', monospace;
+    font-family: 'Be Vietnam Pro', sans-serif;
 }
+
 /* Reset mặc định gây viền trắng */
 html, body {
   height: 100%;

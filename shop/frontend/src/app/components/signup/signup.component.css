@@ -1,12 +1,10 @@
-/*signup css*/
-/*@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap");*/
 
 .auth-layout {
     position: relative;
     display: grid;
     grid-template-columns: 40% 60%;
     min-height: 100vh;
-    font-family: "Poppins", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+    font-family: 'Be Vietnam Pro', sans-serif;
 
     /* Xóa background màu trắng */
     background: none;
@@ -33,9 +31,11 @@
     font-weight: 600;
     text-decoration: underline;
 }
+
 .auth-layout .card a:hover {
     text-decoration: none;
 }
+
 .auth-layout .card a:visited {
     color: #e74b45;
 }
@@ -82,6 +82,7 @@
     color: #ddd;
     margin-top: 16px;
 }
+
 .note {
     font-style: italic;
     font-size: 14px;
@@ -89,6 +90,7 @@
     margin: 0;
     display: block;
 }
+
 .field {
     display: flex;
     flex-direction: column;
@@ -226,6 +228,7 @@
 .card button:active {
     transform: translateY(1px);
 }
+
 .alert {
     text-align: left;
 }

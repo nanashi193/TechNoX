@@ -5,7 +5,7 @@
   [class.force-off]="forceOff"
   (animationend)="onCoverAnimEnd($event)"
 >
-  <img class="poster-media" src="assets/Phone/IPhone.jpg" alt="TechNoX poster" />
+  <img class="poster-media" ngSrc="assets/Phone/IPhone.jpg" alt="TechNoX poster" height="1500" width="1200"/>
   <h1 class="poster-title">TECHNO<span>X</span></h1>
   <!-- <button class="poster-skip" type="button" (click)="skipCover()">Skip</button> -->
 </section>
@@ -29,7 +29,7 @@
 
     <div class="header-actions">
       <a class="link-auth" routerLink="/login">Đăng nhập</a>
-      <a class="btn btn--accent btn-auth" routerLink="/register">Đăng ký</a>
+      <a class="btn btn--accent btn-auth" routerLink="/signup">Đăng ký</a>
       <a class="cart" routerLink="/cart" aria-label="Giỏ hàng">giỏ hàng (0)</a>
     </div>
   </div>
@@ -48,7 +48,7 @@
       <li><a routerLink="/about" (click)="closeMenu()">Về chúng tôi</a></li>
       <li class="divider"></li>
       <li><a routerLink="/login" (click)="closeMenu()">Đăng nhập</a></li>
-      <li><a routerLink="/register" (click)="closeMenu()">Đăng ký</a></li>
+      <li><a routerLink="/signup" (click)="closeMenu()">Đăng ký</a></li>
     </ul>
   </div>
 </nav>
