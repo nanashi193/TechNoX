@@ -39,8 +39,34 @@ CREATE TABLE dbo.Users
     IsActive BIT NOT NULL DEFAULT 1,
     CreatedAt DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME()
 );
+/***************************************
+ * Bảng Tokens
+ ***************************************/
 GO
-
+CREATE TABLE dbo.Tokens
+(
+    Id INT IDENTITY(1,1) PRIMARY KEY,
+    Token VARCHAR(255) UNIQUE NOT NULL,
+    TokenType VARCHAR(50) NOT NULL,
+    ExpirationDate DATETIME,
+    Revoked BIT NOT NULL,
+    Expire BIT NOT NULL,
+    UserId BIGINT,
+    FOREIGN KEY (UserId) REFERENCES Users(UserId)
+)
+GO
+--Hỗ trợ đăng nhập từ Facebook hoặc Google
+CREATE TABLE SocialAccount
+(
+    Id INT IDENTITY(1,1) PRIMARY KEY,
+    Provider VARCHAR(20) NOT NULL, --TEN NHA SOCIAL
+    ProviderId varchar(50) NOT NULL,
+    Email VARCHAR(150) NOT NULL, --Email tai khoan
+    Name VARCHAR(100) NOT NULL, --Ten nguoi dung
+    UserId BIGINT,
+    FOREIGN KEY (UserId) REFERENCES Users(UserId)
+)
+GO
 /***************************************
  * Bảng Category
  ***************************************/

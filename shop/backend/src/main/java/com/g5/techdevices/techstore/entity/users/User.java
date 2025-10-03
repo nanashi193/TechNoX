@@ -48,6 +48,12 @@ public class User {
     @Column(name = "GoogleAccountId", length = 100)
     private String googleAccountId;
 
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Token> tokens;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<SocialAccount> socialAccounts;
+
     @OneToMany(mappedBy = "user")
     private List<Bill> bills;
 
