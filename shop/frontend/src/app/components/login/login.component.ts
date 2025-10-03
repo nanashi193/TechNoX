@@ -1,56 +1,57 @@
-import { Component } from '@angular/core';
+import {Component} from '@angular/core';
 import {CommonModule, NgOptimizedImage} from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import {FormsModule} from '@angular/forms';
 import {Router, RouterLink} from '@angular/router';
 
 @Component({
-  selector: 'app-login',
-  standalone: true,
-  templateUrl: './login.component.html',
-  styleUrls: ['./login.component.css'],
+    selector: 'app-login',
+    standalone: true,
+    templateUrl: './login.component.html',
+    styleUrls: ['./login.component.css'],
     imports: [CommonModule, FormsModule, NgOptimizedImage, RouterLink]
 })
 export class LoginComponent {
-  model: { username: string; password: string; remember: boolean } = {
-    username: '',
-    password: '',
-    remember: false
-  };
+    model: { username: string; password: string; remember: boolean } = {
+        username: '',
+        password: '',
+        remember: false
+    };
 
-  isSubmitting: boolean = false;
+    isSubmitting: boolean = false;
 
-  constructor(private router: Router) {}
-
-  onSubmit(): void {
-    if (!this.model.username || !this.model.password) {
-      alert('Vui lòng nhập đủ Username và Password');
-      return;
+    constructor(private router: Router) {
     }
 
-    this.isSubmitting = true;
+    onSubmit(): void {
+        if (!this.model.username || !this.model.password) {
+            alert('Vui lòng nhập đủ Username và Password');
+            return;
+        }
 
-    setTimeout(() => {
-      this.isSubmitting = false;
+        this.isSubmitting = true;
 
-      if (this.model.remember) {
-        localStorage.setItem('rememberUser', this.model.username);
-      } else {
-        localStorage.removeItem('rememberUser');
-      }
+        setTimeout(() => {
+            this.isSubmitting = false;
 
-      this.router.navigate(['/']);
-    }, 500);
-  }
+            if (this.model.remember) {
+                localStorage.setItem('rememberUser', this.model.username);
+            } else {
+                localStorage.removeItem('rememberUser');
+            }
 
-  onForgotPassword(): void {
-    // Điều hướng đến trang quên mật khẩu
-    this.router.navigate(['/forgot-password']);
-    console.log('Forgot password clicked');
-  }
+            this.router.navigate(['/']);
+        }, 500);
+    }
 
-  onSignUp(): void {
-    // Điều hướng đến trang đăng ký
-    this.router.navigate(['/signup']);
-    console.log('Signup clicked');
-  }
+    onForgotPassword(): void {
+        // Điều hướng đến trang quên mật khẩu
+        this.router.navigate(['/forgot-password']);
+        console.log('Forgot password clicked');
+    }
+
+    onSignUp(): void {
+        // Điều hướng đến trang đăng ký
+        this.router.navigate(['/signup']);
+        console.log('Signup clicked');
+    }
 }

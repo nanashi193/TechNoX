@@ -36,6 +36,17 @@
     z-index: 1;
 }
 
+/*link trên logo táo*/
+.logo-link {
+    display: inline-block;
+    width: 200px;
+    height: 200px;
+    background: url('/assets/Pokecut_1759070674094.png') no-repeat center / contain;
+    cursor: pointer;
+    filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.3));
+    mix-blend-mode: screen;
+}
+
 .brand-logo {
     width: 200px;
     height: auto;
