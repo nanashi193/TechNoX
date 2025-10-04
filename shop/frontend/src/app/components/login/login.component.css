@@ -173,7 +173,13 @@
     align-items: center;
     margin-bottom: 1rem;
 }
-
+.error-text {
+    color: #e74b45;
+    font-size: 14px;
+    text-align: left;
+    margin: 0;
+    display: block;
+}
 .forgot-link {
     color: #e74b45;
     text-decoration: none;

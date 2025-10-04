@@ -2,7 +2,7 @@ import {Component} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {Router, RouterModule} from '@angular/router';
-import {ForgotPasswordService} from '../../services/forgot-password.service';
+import {AuthService} from "../../services/auth.service";
 import {finalize} from 'rxjs/operators';
 
 @Component({
@@ -25,7 +25,7 @@ export class ForgotPasswordComponent {
     constructor(
         private fb: FormBuilder,
         private router: Router,
-        private forgotSvc: ForgotPasswordService
+        private forgotSvc: AuthService
     ) {
 
         this.form = this.fb.group({

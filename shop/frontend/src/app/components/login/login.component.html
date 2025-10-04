@@ -1,17 +1,18 @@
 <div class="auth-layout">
     <aside class="brand-pane">
-        <a routerLink="/"
-           class="logo-link" aria-label="Home"></a>
+        <a routerLink="/" class="logo-link" aria-label="Home"></a>
 
         <h1 class="brand-title">
             Welcome<br/>
             to TechNoX <br/>
         </h1>
-        <p class="brand-note">Hướng đến tương lai cùng chúng tôi.
+        <p class="brand-note">Hướng đến tương lai cùng chúng tôi.</p>
+
         <div class="hotlines">
             <a href="tel:+245941660355">+245 04 166 0355</a>
             <a href="tel:+347423902456">+347 42 390 2456</a>
         </div>
+
         <div class="socials">
             <a aria-label="Facebook" href="#i">f</a>
             <a aria-label="Twitter/X" href="#i">t</a>
@@ -22,48 +23,66 @@
     <main class="form-pane">
         <div class="card">
             <h2>Đăng nhập</h2>
-            <p class="description">
-                Hãy cho chúng tôi biết bạn là ai.<br/>
-            </p>
+            <p class="description">Hãy cho chúng tôi biết bạn là ai.</p>
 
-            <form (ngSubmit)="onSubmit()" #formRef="ngForm" novalidate>
-                <input
-                        type="text"
-                        name="username"
-                        [(ngModel)]="model.username"
-                        placeholder="Tên đăng nhập"
-                        required
-                />
-                <input
-                        type="password"
-                        name="password"
-                        [(ngModel)]="model.password"
-                        placeholder="Mật khẩu"
-                        required
-                        minlength="6"
-                />
+            <!-- Thông báo lỗi chung từ server -->
+            <div *ngIf="errorMsg" class="alert error">
+                {{ errorMsg }}
+            </div>
+
+            <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
+                <!-- USERNAME -->
+                <div class="field">
+                    <input
+                            type="text"
+                            formControlName="username"
+                            placeholder="Tên đăng nhập"
+                            autocomplete="username"
+                            [class.invalid]="usernameCtrl.touched && usernameCtrl.invalid"
+                            [attr.aria-invalid]="usernameCtrl.touched && usernameCtrl.invalid"
+                    />
+                    <div class="error-text" *ngIf="usernameCtrl.touched && usernameCtrl.hasError('required')">
+                        Vui lòng nhập tên đăng nhập.
+                    </div>
+                    <div class="error-text" *ngIf="usernameCtrl.touched && usernameCtrl.hasError('minlength')">
+                        Tên đăng nhập phải có ít nhất 3 ký tự.
+                    </div>
+                </div>
+
+                <!-- PASSWORD -->
+                <div class="field">
+                    <input
+                            type="password"
+                            formControlName="password"
+                            placeholder="Mật khẩu"
+                            autocomplete="current-password"
+                            [class.invalid]="passwordCtrl.touched && passwordCtrl.invalid"
+                            [attr.aria-invalid]="passwordCtrl.touched && passwordCtrl.invalid"
+                    />
+                    <div class="error-text" *ngIf="passwordCtrl.touched && passwordCtrl.hasError('required')">
+                        Vui lòng nhập mật khẩu.
+                    </div>
+                    <div class="error-text" *ngIf="passwordCtrl.touched && passwordCtrl.hasError('minlength')">
+                        Mật khẩu phải có ít nhất 8 ký tự.
+                    </div>
+                </div>
 
                 <div class="remember-forgot">
                     <label>
-                        <input
-                                type="checkbox"
-                                name="remember"
-                                [(ngModel)]="model.remember"
-                        />
+                        <input type="checkbox" formControlName="remember"/>
                         Nhớ mật khẩu
                     </label>
 
                     <a routerLink="/forgot-password" class="forgot-link">Quên mật khẩu?</a>
                 </div>
 
-
                 <button
                         type="submit"
                         class="primary-btn"
-                        [disabled]="isSubmitting"
+                        [disabled]="loading || form.invalid"
                 >
-                    <span *ngIf="!isSubmitting">Đăng nhập</span>
-                    <span *ngIf="isSubmitting">Đang đăng nhập...</span>
+                    <span *ngIf="!loading">Đăng nhập</span>
+                    <span *ngIf="loading">Đang đăng nhập...</span>
                 </button>
             </form>
 
@@ -71,7 +90,6 @@
                 Bạn chưa có tài khoản?
                 <a routerLink="/signup" class="create-link">Đăng ký</a>
             </p>
-
         </div>
     </main>
 </div>

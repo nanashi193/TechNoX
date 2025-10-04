@@ -1,45 +1,49 @@
-import {Component} from '@angular/core';
-import {CommonModule, NgOptimizedImage} from '@angular/common';
-import {FormsModule} from '@angular/forms';
-import {Router, RouterLink} from '@angular/router';
+import { Component } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormBuilder, FormGroup, FormControl, Validators, ReactiveFormsModule } from '@angular/forms';
+import { Router, RouterModule } from '@angular/router';
+import { AuthService } from '../../services/auth.service';
+import { finalize } from 'rxjs/operators';
 
 @Component({
     selector: 'app-login',
     standalone: true,
+    imports: [CommonModule, ReactiveFormsModule, RouterModule],
     templateUrl: './login.component.html',
     styleUrls: ['./login.component.css'],
-    imports: [CommonModule, FormsModule, NgOptimizedImage, RouterLink]
 })
 export class LoginComponent {
-    model: { username: string; password: string; remember: boolean } = {
-        username: '',
-        password: '',
-        remember: false
-    };
+    form: FormGroup;
+    loading = false;
+    errorMsg: string | null = null;
 
-    isSubmitting: boolean = false;
+    get usernameCtrl(): FormControl { return this.form.get('username') as FormControl; }
+    get passwordCtrl(): FormControl { return this.form.get('password') as FormControl; }
 
-    constructor(private router: Router) {
+    constructor(private fb: FormBuilder, private router: Router, private auth: AuthService) {
+        this.form = this.fb.group({
+            username: ['', [Validators.required, Validators.minLength(3)]],
+            password: ['', [Validators.required, Validators.minLength(8)]],
+            remember: [false],
+        });
     }
 
-    onSubmit(): void {
-        if (!this.model.username || !this.model.password) {
-            alert('Vui lòng nhập đủ Username và Password');
-            return;
-        }
+    onSubmit() {
+        this.errorMsg = null;
+        if (this.form.invalid) { this.form.markAllAsTouched(); return; }
 
-        this.isSubmitting = true;
+        const { username, password, remember } = this.form.value;
+        this.loading = true;
 
-        setTimeout(() => {
-            this.isSubmitting = false;
-
-            if (this.model.remember) {
-                localStorage.setItem('rememberUser', this.model.username);
-            } else {
-                localStorage.removeItem('rememberUser');
-            }
-
-            this.router.navigate(['/']);
-        }, 500);
+        this.auth.login({ username, password })
+            .pipe(finalize(() => this.loading = false))
+            .subscribe({
+                next: (res) => {
+                    localStorage.setItem('token', res.token);
+                    if (remember) localStorage.setItem('rememberUser', username); else localStorage.removeItem('rememberUser');
+                    this.router.navigateByUrl('/home');
+                },
+                error: () => this.errorMsg = 'Sai tên đăng nhập hoặc mật khẩu.'
+            });
     }
 }
