@@ -42,16 +42,4 @@ export class LoginComponent {
             this.router.navigate(['/']);
         }, 500);
     }
-
-    onForgotPassword(): void {
-        // Điều hướng đến trang quên mật khẩu
-        this.router.navigate(['/forgot-password']);
-        console.log('Forgot password clicked');
-    }
-
-    onSignUp(): void {
-        // Điều hướng đến trang đăng ký
-        this.router.navigate(['/signup']);
-        console.log('Signup clicked');
-    }
 }

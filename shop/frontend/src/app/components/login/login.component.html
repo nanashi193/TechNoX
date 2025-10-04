@@ -53,7 +53,7 @@
                         Nhớ mật khẩu
                     </label>
 
-                    <a href="#!" class="forgot-link" (click)="onForgotPassword()">Quên mật khẩu?</a>
+                    <a routerLink="/forgot-password" class="forgot-link">Quên mật khẩu?</a>
                 </div>
 
 
@@ -62,8 +62,8 @@
                         class="primary-btn"
                         [disabled]="isSubmitting"
                 >
-                    <span *ngIf="!isSubmitting">Sign in</span>
-                    <span *ngIf="isSubmitting">Signing in...</span>
+                    <span *ngIf="!isSubmitting">Đăng nhập</span>
+                    <span *ngIf="isSubmitting">Đang đăng nhập...</span>
                 </button>
             </form>
 
