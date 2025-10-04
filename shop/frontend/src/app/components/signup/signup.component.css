@@ -1,26 +1,4 @@
 
-.auth-layout {
-    position: relative;
-    display: grid;
-    grid-template-columns: 40% 60%;
-    min-height: 100vh;
-    font-family: 'Be Vietnam Pro', sans-serif;
-
-    /* Xóa background màu trắng */
-    background: none;
-}
-
-/* Background ảnh phủ toàn màn hình */
-/* login.css hoặc styles.css */
-
-.auth-layout::before {
-    content: "";
-    position: absolute;
-    inset: 0; /* phủ kín, không chừa viền */
-    background: url("/assets/1.jpg") no-repeat center center / cover;
-    z-index: -1;
-}
-
 .auth-layout .card a {
     cursor: pointer !important;
     color: #e74b45;
@@ -36,38 +14,8 @@
     color: #e74b45;
 }
 
-
-/* Nếu muốn overlay mờ để chữ dễ đọc */
-.auth-layout::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.3); /* lớp mờ đen 30% */
-    z-index: -1;
-}
-
-
-/* ===== Left (Logo + Text) ===== */
-.brand-pane {
-    padding: 56px 56px 32px 72px;
-    display: flex;
-    flex-direction: column;
-    gap: 28px;
-    color: #fff; /* chữ trắng nổi bật trên nền ảnh */
-    position: relative;
-    z-index: 1;
-}
-
 /*link trên logo táo*/
-.logo-link {
-    display: inline-block;
-    width: 200px;
-    height: 200px;
-    background: url('/assets/Pokecut_1759070674094.png') no-repeat center / contain;
-    cursor: pointer;
-    filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.3));
-    mix-blend-mode: screen;
-}
+
 
 .brand-logo {
     width: 200px; /* logo to hơn */
@@ -75,27 +23,6 @@
     margin-bottom: 24px;
     filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.3));
     mix-blend-mode: screen
-}
-
-.brand-title {
-    font-size: 66px; /* chữ Welcome to hơn */
-    line-height: 1.2;
-    font-weight: 800;
-    letter-spacing: -0.02em;
-}
-
-.brand-note {
-    font-size: 15px;
-    color: #ddd;
-    margin-top: 16px;
-}
-
-.error-text {
-    color: #e74b45;
-    font-size: 14px;
-    text-align: left;
-    margin: 0;
-    display: block;
 }
 
 .note {
@@ -146,104 +73,9 @@
     text-decoration: none;
 }
 
-/* ===== Right / Card (Login Box) ===== */
-.form-pane {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 24px;
-    position: relative;
-    z-index: 1;
-}
-
-/* Box login to hơn */
-.card {
-    width: 640px;
-    max-width: 96vw;
-    background: #fff;
-    border-radius: 24px;
-    padding: 56px 48px;
-    box-shadow: 0 40px 80px rgba(0, 0, 0, 0.2);
-    text-align: center;
-}
-
 .card input::placeholder {
     font-size: 14px;
     color: #aaa;
-}
-
-.card h2 {
-    margin: 0 0 16px;
-    font-size: 40px;
-    font-weight: 800;
-}
-
-.description {
-    margin: 0 0 32px;
-    color: #555;
-    font-size: 16px;
-}
-
-.card form {
-    display: grid;
-    gap: 24px;
-}
-
-/* Inputs */
-/*.card input[type="password"] {*/
-/*    padding: 14px 16px;*/
-/*}*/
-.card input[type="text"],
-.card input[type="email"],
-.card input[type="password"] {
-    width: 100%;
-    box-sizing: border-box;
-    padding: 18px 20px;
-    border-radius: 14px;
-    border: 1px solid #ddd;
-    background: #fafafa;
-    font-size: 17px;
-    transition: all 0.2s ease;
-    display: block;
-}
-
-.card input:not([type="checkbox"]):focus {
-    border-color: #e74b45;
-    background: #fff;
-    box-shadow: 0 0 0 3px rgba(231, 75, 69, 0.2);
-}
-
-/* Remember checkbox */
-.remember {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    color: #666;
-    font-size: 15px;
-    user-select: none;
-}
-
-/* Button */
-.card button {
-    width: 100%;
-    padding: 18px;
-    border: none;
-    border-radius: 14px;
-    font-size: 20px;
-    font-weight: 700;
-    background: #e74b45;
-    color: #fff;
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
-
-.card button:hover {
-    background: #d32f2f;
-    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.2);
-}
-
-.card button:active {
-    transform: translateY(1px);
 }
 
 .alert {
@@ -259,25 +91,4 @@
     color: #e74b45;
     text-decoration: none;
     font-weight: 500;
-}
-
-/* ===== Responsive ===== */
-@media (max-width: 920px) {
-    .auth-layout {
-        grid-template-columns: 1fr;
-    }
-
-    .brand-pane {
-        padding: 36px 28px 8px;
-        text-align: center;
-        align-items: center;
-    }
-
-    .brand-title {
-        font-size: 36px;
-    }
-
-    .form-pane {
-        padding-top: 0;
-    }
 }
