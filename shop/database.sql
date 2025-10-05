@@ -1,8 +1,14 @@
--- Tạo database TEStore (nếu chưa có)
-IF DB_ID(N'TEStore') IS NULL
+-- Xoá database nếu đã tồn tại
+USE MASTER
+IF DB_ID(N'TEStore') IS NOT NULL
     BEGIN
-        CREATE DATABASE TEStore;
-    END;
+        ALTER DATABASE TEStore SET SINGLE_USER WITH ROLLBACK IMMEDIATE;
+        DROP DATABASE TEStore;
+    END
+GO
+
+-- Tạo database mới
+CREATE DATABASE TEStore;
 GO
 
 USE TEStore;
@@ -24,23 +30,61 @@ IF OBJECT_ID('dbo.Category', 'U') IS NOT NULL DROP TABLE dbo.Category;
 IF OBJECT_ID('dbo.Users', 'U') IS NOT NULL DROP TABLE dbo.Users;
 GO
 
+--Roles
+CREATE TABLE dbo.Roles (
+                           Id INT IDENTITY(1,1) PRIMARY KEY,
+                           Name NVARCHAR(30) NOT NULL UNIQUE
+);
+GO
+INSERT INTO dbo.Roles (Name)
+VALUES (N'Admin'), (N'Staff'), (N'Customer'), (N'Owner');
+GO
 /***************************************
  * Bảng Users
  ***************************************/
-CREATE TABLE dbo.Users
-(
-    UserId BIGINT IDENTITY(1,1) PRIMARY KEY,
-    FullName NVARCHAR(200) NOT NULL,
-    Email NVARCHAR(255) NOT NULL UNIQUE,
-    PasswordHash NVARCHAR(512) NOT NULL,
-    Gender BIT NULL,                          -- 0/1 or NULL
-    PhoneNumber NVARCHAR(50) NULL,
-    Role NVARCHAR(50) NOT NULL DEFAULT N'Customer',
-    IsActive BIT NOT NULL DEFAULT 1,
-    CreatedAt DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME()
+CREATE TABLE dbo.Users (
+                           UserId BIGINT IDENTITY(1,1) PRIMARY KEY,
+                           FullName NVARCHAR(200) NOT NULL,
+                           Email NVARCHAR(255) NOT NULL UNIQUE,
+                           PasswordHash NVARCHAR(255) NOT NULL,
+                           Gender BIT DEFAULT 0,                          -- 0/1 or NULL
+                           PhoneNumber NVARCHAR(50) NULL,
+                           RoleId INT NOT NULL
+                               CONSTRAINT DF_Users_RoleId DEFAULT 3,
+                           FacebookAccountId VARCHAR(100) DEFAULT '',
+                           GoogleAccountId VARCHAR(100) DEFAULT '',
+                           IsActive BIT NOT NULL DEFAULT 1,
+                           CreatedAt DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME(),
+                           CONSTRAINT FK_Users_Role FOREIGN KEY (RoleId) REFERENCES dbo.Roles(Id)
 );
+/***************************************
+ * Bảng Tokens
+ ***************************************/
 GO
-
+CREATE TABLE dbo.Tokens
+(
+    Id INT IDENTITY(1,1) PRIMARY KEY,
+    Token VARCHAR(255) UNIQUE NOT NULL,
+    TokenType VARCHAR(50) NOT NULL,
+    ExpirationDate DATETIME,
+    Revoked BIT NOT NULL,
+    Expire BIT NOT NULL,
+    UserId BIGINT,
+    FOREIGN KEY (UserId) REFERENCES dbo.Users(UserId)
+)
+GO
+--Hỗ trợ đăng nhập từ Facebook hoặc Google
+CREATE TABLE SocialAccount
+(
+    Id INT IDENTITY(1,1) PRIMARY KEY,
+    Provider VARCHAR(20) NOT NULL, --TEN NHA SOCIAL
+    ProviderId varchar(50) NOT NULL,
+    Email VARCHAR(150) NOT NULL, --Email tai khoan
+    Name VARCHAR(100) NOT NULL, --Ten nguoi dung
+    UserId BIGINT,
+    FOREIGN KEY (UserId) REFERENCES dbo.Users(UserId)
+)
+GO
 /***************************************
  * Bảng Category
  ***************************************/
@@ -72,14 +116,14 @@ GO
  * Bảng ProductVariant
  * (mỗi variant là 1 màu/size của product)
  ***************************************/
- CREATE TABLE ProductImages(
-     id INT IDENTITY(1,1) PRIMARY KEY,
-     ProductId BIGINT,
-     FOREIGN KEY (ProductId) REFERENCES Product(ProductId),
-     CONSTRAINT fk_ProductImages_ProductId
-        FOREIGN KEY (ProductId) REFERENCES Product(ProductId) ON DELETE CASCADE
- );
- GO
+CREATE TABLE ProductImages(
+                              id INT IDENTITY(1,1) PRIMARY KEY,
+                              ProductId BIGINT,
+                              FOREIGN KEY (ProductId) REFERENCES Product(ProductId),
+                              CONSTRAINT fk_ProductImages_ProductId
+                                  FOREIGN KEY (ProductId) REFERENCES Product(ProductId) ON DELETE CASCADE
+);
+GO
 /***************************************
  * Bảng ProductVariant
  * (mỗi variant là 1 màu/size của product)
@@ -137,13 +181,18 @@ CREATE TABLE dbo.Bill
 (
     BillId BIGINT IDENTITY(1,1) PRIMARY KEY,
     UserId BIGINT NOT NULL,
+    FullName NVARCHAR(100) DEFAULT '',
+    Email VARCHAR(100) DEFAULT '',
     Total DECIMAL(18,2) NOT NULL DEFAULT 0,
     PaymentMethod NVARCHAR(250) NULL,
     OrderDate DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME(),
-    ShippingAddress NVARCHAR(MAX) NULL,
-    Phone NVARCHAR(50) NULL,
+    ShippingAddress NVARCHAR(MAX) NOT NULL,
+    Phone VARCHAR(20) NOT NULL,
+    Status VARCHAR(30) NOT NULL DEFAULT 'Processing',
+    CONSTRAINT CK_Bill_Status CHECK (Status IN ('Processing','Confirmed','Delivering','Succeed','Cancelled')),
     CONSTRAINT FK_Bill_User FOREIGN KEY (UserId) REFERENCES dbo.Users(UserId)
 );
+
 CREATE INDEX IX_Bill_UserId ON dbo.Bill(UserId);
 GO
 
@@ -159,8 +208,8 @@ CREATE TABLE dbo.BillDetail
     VariantId BIGINT NULL,                 -- có thể NULL nếu order sản phẩm không có variant
     Quantity INT NOT NULL CHECK (Quantity > 0),
     UnitPrice DECIMAL(18,2) NOT NULL,     -- snapshot price
-    Model NVARCHAR(250) NULL,              -- snapshot thông tin mô tả (nếu cần)
-    Color NVARCHAR(100) NULL,              -- snapshot
+    Model NVARCHAR(250) DEFAULT '',              -- snapshot thông tin mô tả (nếu cần)
+    Color NVARCHAR(100) DEFAULT '',              -- snapshot
     CONSTRAINT FK_BillDetail_Bill FOREIGN KEY (BillId) REFERENCES dbo.Bill(BillId),
     CONSTRAINT FK_BillDetail_Product FOREIGN KEY (ProductId) REFERENCES dbo.Product(ProductId),
     CONSTRAINT FK_BillDetail_Variant FOREIGN KEY (VariantId) REFERENCES dbo.ProductVariant(VariantId)
@@ -301,14 +350,13 @@ VALUES
     (4, N'Apple Pencil 2', 2900000, N'Apple Pencil 2 nhập từ bên thứ 3', 'applepencil2.jpg'),
     (4, N'Magic Mouse 2', 2400000, N'Magic Mouse 2 nhập từ bên thứ 3', 'magicmouse2.jpg');
 GO
-INSERT INTO dbo.Users (FullName, Email, PasswordHash, Gender, PhoneNumber, Role, IsActive)
+INSERT INTO dbo.Users (FullName, Email, PasswordHash, Gender, PhoneNumber, RoleId, IsActive)
 VALUES
-    (N'Trần Thanh Quân', 'quan111@estore.com', N'111111', 0, '0909000001', 'owner', 1),
+    (N'Trần Thanh Quân', 'quan111@estore.com', N'111111', 0, '0909000001', 4, 1),
 
-    (N'Nguyễn Quốc Huy', 'huynq2@estore.com', N'1', 0, '0909000002', 'adm', 1),
-    (N'Châu Thanh Thanh', 'ctt321@estore.com', N'1', 1, '0909000003', 'adm', 1),
+    (N'Nguyễn Quốc Huy', 'huynq2@estore.com', N'1', 0, '0909000002', 1, 1),
+    (N'Châu Thanh Thanh', 'ctt321@estore.com', N'1', 1, '0909000003', 1, 1),
 
-    (N'Phạm Thị Nhàn', 'npt3214@estore.com', N'111111', 1, '0909000004', 'staff', 1),
-    (N'Hoàng Văn Kiên', 'khv545213@estore.com', N'111111', 0, '0909000005', 'staff', 1),
-    (N'Đỗ Thị Tâm', 'tdt9832@estore.com', N'111111', 1, '0909000006', 'staff', 1);
-
+    (N'Phạm Thị Nhàn', 'npt3214@estore.com', N'111111', 1, '0909000004', 2, 1),
+    (N'Hoàng Văn Kiên', 'khv545213@estore.com', N'111111', 0, '0909000005', 2, 1),
+    (N'Đỗ Thị Tâm', 'tdt9832@estore.com', N'111111', 1, '0909000006', 3, 1);

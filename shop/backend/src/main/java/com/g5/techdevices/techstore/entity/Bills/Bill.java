@@ -7,7 +7,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -20,11 +19,20 @@ public class Bill {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "BillId")
-    private Long id;
+    private int id;
 
     @ManyToOne
     @JoinColumn(name = "UserId")
     private User user;
+
+    @Column(name = "FullName", columnDefinition = "nvarchar(100)")
+    private String fullName;
+
+    @Column(name = "Email", columnDefinition = "varchar(100)")
+    private String Email;
+
+    @Column(name = "Status", columnDefinition = "varchar(30)")
+    private String Status;
 
     @Column(name = "Total", precision = 18, scale = 2)
     private BigDecimal total;
@@ -35,10 +43,10 @@ public class Bill {
     @Column(name = "OrderDate")
     private LocalDateTime orderDate;
 
-    @Column(name = "ShippingAddress", columnDefinition = "nvarchar(max)")
+    @Column(name = "ShippingAddress", nullable = false, columnDefinition = "nvarchar(max)")
     private String shippingAddress;
 
-    @Column(name = "Phone", length = 50)
+    @Column(name = "Phone", length = 20)
     private String phone;
 
     @OneToMany(mappedBy = "bill")

@@ -6,7 +6,6 @@ import jakarta.persistence.Entity;
 import lombok.Data;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
-import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
@@ -21,7 +20,7 @@ public class ProductVariant {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "VariantId")
-    private Long id;
+    private int id;
 
     @ManyToOne
     @JoinColumn(name = "ProductId", nullable = false)

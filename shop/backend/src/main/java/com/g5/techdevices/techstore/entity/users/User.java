@@ -19,7 +19,7 @@ public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "UserId")
-    private Long id;
+    private int id;
 
     @Column(name = "FullName", nullable = false, columnDefinition = "nvarchar(200)")
     private String fullName;
@@ -36,11 +36,24 @@ public class User {
     @Column(name = "PhoneNumber", length = 50, nullable = false)
     private String phoneNumber;
 
-    @Column(name = "Role", length = 50)
-    private String role;
-
     @Column(name = "IsActive")
     private Boolean isActive;
+
+    @Column(name = "FacebookAccountId", length = 100)
+    private String facebookAccountId;
+
+    @Column(name = "GoogleAccountId", length = 100)
+    private String googleAccountId;
+
+    @ManyToOne
+    @JoinColumn(name = "RoleId", nullable = false)
+    private Role role;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Token> tokens;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<SocialAccount> socialAccounts;
 
     @OneToMany(mappedBy = "user")
     private List<Bill> bills;

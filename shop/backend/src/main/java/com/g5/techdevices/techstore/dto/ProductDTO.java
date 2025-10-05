@@ -19,7 +19,7 @@ public class ProductDTO {
     private String name;            // nvarchar(255)
 
     @JsonProperty("product_id")
-    private Long productId;// bigint
+    private int productId;// bigint
 
     @JsonProperty("category_id")
     private String categoryId;// int
