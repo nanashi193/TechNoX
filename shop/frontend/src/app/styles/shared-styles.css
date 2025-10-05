@@ -1,0 +1,197 @@
+/*main layout*/
+.auth-layout {
+    position: relative;
+    display: grid;
+    grid-template-columns: 40% 60%;
+    min-height: 100vh;
+    font-family: 'Be Vietnam Pro', sans-serif;
+    background: none;
+}
+
+.auth-layout::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: url("/assets/1.jpg") no-repeat center center / cover;
+    z-index: -1;
+}
+
+.auth-layout::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.3); /* lớp mờ đen 30% */
+    z-index: -1;
+}
+
+/*brand*/
+.brand-pane {
+    padding: 56px 56px 32px 72px;
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+    color: #fff;
+    z-index: 1;
+    position: relative;
+}
+
+.logo-link {
+    width: 200px;
+    height: 200px;
+    display: inline-block;
+    background: url('/assets/Pokecut_1759070674094.png') no-repeat center/contain;
+    cursor: pointer;
+    filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.3));
+    mix-blend-mode: screen;
+}
+
+.brand-title {
+    font-size: 66px;
+    line-height: 1.2;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+}
+
+.brand-note {
+    font-size: 15px;
+    color: #ddd;
+    margin-top: 16px;
+}
+
+/*form*/
+.form-pane {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 24px;
+    position: relative;
+    z-index: 1;
+}
+
+/*card*/
+
+.card {
+    width: 640px;
+    max-width: 96vw;
+    background: #fff;
+    border-radius: 24px;
+    padding: 56px 48px;
+    box-shadow: 0 40px 80px rgba(0, 0, 0, 0.2);
+    text-align: center;
+}
+
+.card h2 {
+    margin: 0 0 16px;
+    font-size: 40px;
+    font-weight: 800;
+}
+
+.card .description {
+    margin: 0 0 32px;
+    color: #555;
+    font-size: 16px;
+}
+
+.card form {
+    display: grid;
+    gap: 24px;
+}
+
+/*input & field*/
+
+.card input[type="text"],
+.card input[type="email"],
+.card input[type="password"] {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 18px 20px;
+    border-radius: 14px;
+    border: 1px solid #ddd;
+    background: #fafafa;
+    font-size: 17px;
+    transition: all 0.2s ease;
+    display: block;
+}
+
+.card input:not([type="checkbox"]):focus {
+    border-color: #e74b45;
+    background: #fff;
+    box-shadow: 0 0 0 3px rgba(231, 75, 69, 0.2);
+}
+.error-text {
+    color: #e74b45;
+    font-size: 14px;
+    margin: 0;
+    text-align: left;
+    display: block;
+}
+/*primary-button*/
+
+.primary-btn {
+    width: 100%;
+    padding: 18px;
+    border: none;
+    border-radius: 14px;
+    background: #e74b45;
+    color: #fff;
+    font-size: 20px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.primary-btn:hover {
+    background: #d32f2f;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.2);
+}
+
+.primary-btn:disabled,
+.primary-btn[disabled],
+.primary-btn:disabled:hover,
+.primary-btn[disabled]:hover {
+    opacity: 0.6;
+    cursor: not-allowed;
+    box-shadow: none;
+    transform: none;
+}
+ /*---------*/
+.remember-forgot {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 15px;
+    margin-bottom: 1rem;
+}
+
+.forgot-link,
+.create-link {
+    color: #e74b45;
+    text-decoration: none;
+}
+
+.forgot-link:hover,
+.create-link:hover {
+    text-decoration: underline;
+}
+
+/*responsive*/
+
+@media (max-width: 920px) {
+    .auth-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .brand-pane {
+        padding: 36px 28px 8px;
+        text-align: center;
+        align-items: center;
+    }
+
+    .brand-title {
+        font-size: 36px;
+    }
+
+    .form-pane {
+        padding-top: 0;
+    }
+}
