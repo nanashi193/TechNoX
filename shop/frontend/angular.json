@@ -30,10 +30,7 @@
               }
             ],
             "styles": [
-              "src/styles.css",
-              "node_modules/bootstrap/dist/css/bootstrap.min.css",
-              "node_modules/boxicons/css/boxicons.min.css",
-              "src/app/styles/shared-styles.css"
+              "src/styles.css"
             ]
           },
           "configurations": {
@@ -95,10 +92,7 @@
               }
             ],
             "styles": [
-              "src/styles.css",
-              "src/app/styles/shared-styles.css",
-              "node_modules/bootstrap/dist/css/bootstrap.min.css",
-              "node_modules/boxicons/css/boxicons.min.css"
+              "src/styles.css"
             ]
           }
         }
