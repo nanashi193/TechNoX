@@ -145,9 +145,13 @@
     box-shadow: 0 6px 18px rgba(0, 0, 0, 0.2);
 }
 
-.primary-btn:disabled {
+.primary-btn:disabled,
+.primary-btn[disabled],
+.primary-btn:disabled:hover,
+.primary-btn[disabled]:hover {
     opacity: 0.6;
     cursor: not-allowed;
+    box-shadow: none;
     transform: none;
 }
  /*---------*/
