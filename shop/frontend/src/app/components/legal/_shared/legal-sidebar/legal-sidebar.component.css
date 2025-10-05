@@ -1,0 +1,3 @@
+.toc ul { list-style: none; padding: 0; display: grid; gap: 10px; }
+.toc a { display:block; padding:12px 14px; border:1px solid #e5e7eb; border-radius:12px; text-decoration:none; color:#374151; }
+.toc a.active,.toc a:hover { border-color:#ef4444; color:#ef4444; }

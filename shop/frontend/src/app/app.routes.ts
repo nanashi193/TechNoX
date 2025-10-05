@@ -11,6 +11,27 @@ export const routes: Routes = [
     { path: 'login', component: LoginComponent },
     { path: 'signup', component: SignupComponent },
     {path: 'forgot-password', component: ForgotPasswordComponent},
+    {path: 'legal',
+        loadComponent: () => import('./components/legal/legal-layout/legal-layout.component')
+            .then(m => m.LegalLayoutComponent),
+        children: [
+            { path: 'about',
+                loadComponent: () => import('./components/legal/about/about.component').then(m => m.AboutComponent),
+                title: 'Giới thiệu | TechNoX' },
+            { path: 'privacy-policy',
+                loadComponent: () => import('./components/legal/privacy-policy/privacy-policy.component').then(m => m.PrivacyPolicyComponent),
+                title: 'Chính sách bảo mật | TechNoX' },
+            { path: 'terms',
+                loadComponent: () => import('./components/legal/terms/terms.component').then(m => m.TermsComponent),
+                title: 'Điều khoản sử dụng | TechNoX' },
+            { path: 'warranty',
+                loadComponent: () => import('./components/legal/warranty/warranty.component').then(m => m.WarrantyComponent),
+                title: 'Chính sách bảo hành | TechNoX' },
+            { path: 'returns',
+                loadComponent: () => import('./components/legal/returns/returns.component').then(m => m.ReturnsComponent),
+                title: 'Hủy giao dịch, đổi trả | TechNoX' },
+            { path: '', redirectTo: 'about', pathMatch: 'full' }
+        ]},
     { path: '**', redirectTo: 'home' },
 
 ];
