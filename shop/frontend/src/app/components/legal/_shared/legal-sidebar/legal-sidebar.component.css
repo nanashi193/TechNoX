@@ -1,3 +1,73 @@
-.toc ul { list-style: none; padding: 0; display: grid; gap: 10px; }
-.toc a { display:block; padding:12px 14px; border:1px solid #e5e7eb; border-radius:12px; text-decoration:none; color:#374151; }
-.toc a.active,.toc a:hover { border-color:#ef4444; color:#ef4444; }
+.legal-sidebar {
+    background: #f9fafb;               /* nền mờ nhạt */
+    border-radius: 12px;
+    padding: 16px 0;
+    box-shadow: 0 0 0 1px #e5e7eb inset; /* viền nhẹ giống FPT */
+    font-family: inherit;
+}
+
+.sidebar-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: #374151;                     /* text-gray-700 */
+    padding: 0 20px 12px;
+    border-bottom: 1px solid #e5e7eb;
+    margin: 0 0 12px;
+}
+
+.sidebar-menu {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.sidebar-menu li {
+    position: relative;
+}
+
+.sidebar-menu a {
+    display: block;
+    padding: 10px 20px;
+    color: #111827;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+/* thanh đỏ bên trái khi active */
+.sidebar-menu a.active::before,
+.sidebar-menu a:hover::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 6px;
+    bottom: 6px;
+    width: 4px;
+    background-color: #dc2626; /* đỏ chủ đạo */
+    border-radius: 2px;
+}
+
+/* di chuyển nhẹ sang phải khi hover */
+.sidebar-menu a:hover {
+    color: #dc2626;
+    transform: translateX(4px);
+}
+
+/* active giữ màu chữ đỏ */
+.sidebar-menu a.active {
+    color: #dc2626;
+    font-weight: 600;
+}
+
+/* khoảng cách giữa các mục */
+.sidebar-menu li + li {
+    margin-top: 4px;
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+    .legal-sidebar {
+        border-radius: 8px;
+        padding: 8px 0;
+    }
+}
