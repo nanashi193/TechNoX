@@ -1,5 +1,7 @@
 package com.g5.techdevices.techstore.entity.products;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.Entity;
 import lombok.*;
 import jakarta.persistence.*;
@@ -22,9 +24,8 @@ public class Category {
     @Column(name = "Name", nullable = false, columnDefinition = "nvarchar(150)")
     private String name;
 
-    @Column(name = "Description", columnDefinition = "nvarchar(1000)")
-    private String description;
-
     @OneToMany(mappedBy = "category")
+    @JsonIgnore
     private List<Product> products;
+
 }

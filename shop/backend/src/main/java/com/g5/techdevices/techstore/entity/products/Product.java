@@ -1,5 +1,6 @@
 package com.g5.techdevices.techstore.entity.products;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.g5.techdevices.techstore.entity.Cart.CartItem;
 import com.g5.techdevices.techstore.entity.promotions.Promotion;
 import com.g5.techdevices.techstore.entity.Bills.BillDetail;
@@ -27,6 +28,7 @@ public class Product {
 
     @ManyToOne
     @JoinColumn(name = "CategoryId")
+    @JsonBackReference
     private Category category;
 
     @Column(name = "Name", nullable = false, columnDefinition = "nvarchar(255)")

@@ -2,6 +2,7 @@ package com.g5.techdevices.techstore.controllers;
 
 import com.g5.techdevices.techstore.Services.CategoryService;
 import com.g5.techdevices.techstore.dto.CategoryDTO;
+import com.g5.techdevices.techstore.entity.products.Category;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -27,24 +28,28 @@ public class CategoryController
             return ResponseEntity.badRequest().body(errorMessage);
         }
         categoryService.createCategory(categoryDTO);
-        return ResponseEntity.ok().body("This is insert category"+categoryDTO);
+        return ResponseEntity.ok().body("Insert category successfully"+ categoryDTO);
     }
 
     @GetMapping("")
-    public ResponseEntity<String> getAllCategories(
+    public ResponseEntity<List<Category>> getAllCategories(
             @RequestParam("page") int page,
             @RequestParam("limit") int limit
     ){
-        return ResponseEntity.ok(String.format("getAllCategory, Page: %d, %d", page, limit));
+        List<Category> categories = categoryService.getAllCategories();
+        return ResponseEntity.ok(categories);
     }
 
     @PutMapping("/{id}")
-        public ResponseEntity<String> updateCategory(@PathVariable int id){
-            return ResponseEntity.ok().body("This is update category with id " + id);
+        public ResponseEntity<String> updateCategory(@PathVariable int id,
+                                                     @RequestBody CategoryDTO categoryDTO){
+            categoryService.updateCategory(id, categoryDTO);
+            return ResponseEntity.ok().body("Update category successfully with id " + id);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteCategory(@PathVariable int id){
-        return ResponseEntity.ok().body("This is delete category with id " + id);
+        categoryService.deleteCategory(id);
+        return ResponseEntity.ok().body("Deleted category with id " + id);
     }
 }
