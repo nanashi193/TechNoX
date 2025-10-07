@@ -1,0 +1,21 @@
+.container { max-width: 1200px; margin: 0 auto; padding: 24px 20px; }
+
+.layout {
+    display: grid;
+    grid-template-columns: 300px 1fr;
+    gap: 24px;
+    align-items: start;
+}
+
+.toc-wrapper {
+    margin-top: 80px;
+    position: sticky;
+    top: 24px;
+}
+
+.content { min-width: 0; }
+
+@media (max-width: 900px) {
+    .layout { grid-template-columns: 1fr; }
+    .toc-wrapper { position: static; margin-top: 0; }
+}
