@@ -1,8 +1,11 @@
 package com.g5.techdevices.techstore.controllers;
 
+import com.g5.techdevices.techstore.Services.IUserService;
+import com.g5.techdevices.techstore.Services.UserService;
 import com.g5.techdevices.techstore.dto.UserDTO;
 import com.g5.techdevices.techstore.dto.UserLoginDTO;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,8 +21,9 @@ import java.util.List;
 
 @RestController
 @RequestMapping("${api.prefix}/users")
+@RequiredArgsConstructor
 public class UserController {
-
+    private final IUserService userService;
     @Autowired
     private PasswordEncoder passwordEncoder;
 
@@ -34,10 +38,10 @@ public class UserController {
                         .toList();
                 return ResponseEntity.badRequest().body(errorMassage);
             }
-            if(!userDTO.getPasswordHash().equals(userDTO.getRepeatPassword())){
+            if(!userDTO.getPassword.equals(userDTO.getRepeatPassword())){
                 return ResponseEntity.badRequest().body("Passwords do not match");
             }
-
+            userService.createUser(userDTO);
             return ResponseEntity.ok("Register successfully");
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());

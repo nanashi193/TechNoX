@@ -20,7 +20,7 @@ public class UserDTO {
     private String email;
 
     @NotBlank(message = "Password can not be blank.")
-    private String passwordHash;
+    private String password;
 
     @JsonProperty("RepeatPassword")
     private String repeatPassword;
@@ -43,4 +43,7 @@ public class UserDTO {
 
     @JsonProperty("GoogleAccountId")
     private String googleAccountId;
+
+    @JsonProperty("RoleId")
+    private long roleId;
 }
