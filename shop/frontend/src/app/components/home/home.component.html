@@ -10,49 +10,6 @@
   <!-- <button class="poster-skip" type="button" (click)="skipCover()">Skip</button> -->
 </section>
 
-<!-- HEADER -->
-<header class="site-header">
-  <div class="container header-inner">
-    <button class="icon-btn" type="button" (click)="toggleMenu()" aria-label="Open menu">☰</button>
-
-    <!-- LOGO -->
-    <a class="brand" routerLink="/">
-      <img
-        class="brand__logo"
-        src="assets/Phone/Logo.png"
-        alt="TechNoX"
-        width="200" height="40"
-        decoding="async" fetchpriority="high"
-      />
-      <span class="brand__name">TechNoX</span>
-    </a>
-
-    <div class="header-actions">
-      <a class="link-auth" routerLink="/login">Đăng nhập</a>
-      <a class="btn btn--accent btn-auth" routerLink="/signup">Đăng ký</a>
-      <a class="cart" routerLink="/cart" aria-label="Giỏ hàng">giỏ hàng (0)</a>
-    </div>
-  </div>
-</header>
-
-<!-- MOBILE MENU -->
-<nav class="mobile-menu" [class.open]="mobileMenuOpen" (click)="closeMenu()">
-  <div class="mobile-menu__panel" (click)="$event.stopPropagation()">
-    <button class="mobile-menu__close" type="button" (click)="closeMenu()">✕</button>
-    <ul>
-      <li><a routerLink="/shop" (click)="closeMenu()">Điện thoại</a></li>
-      <li><a routerLink="/accessories" (click)="closeMenu()">Phụ kiện</a></li>
-      <li><a routerLink="/deals" (click)="closeMenu()">Khuyến mãi</a></li>
-      <li><a routerLink="/stores" (click)="closeMenu()">Cửa hàng</a></li>
-      <li><a routerLink="/news" (click)="closeMenu()">Tin tức</a></li>
-      <li><a routerLink="/about" (click)="closeMenu()">Về chúng tôi</a></li>
-      <li class="divider"></li>
-      <li><a routerLink="/login" (click)="closeMenu()">Đăng nhập</a></li>
-      <li><a routerLink="/signup" (click)="closeMenu()">Đăng ký</a></li>
-    </ul>
-  </div>
-</nav>
-
 <main>
   <!-- HERO -->
   <section class="hero section-pad">
@@ -204,49 +161,6 @@
     </div>
   </section>
 </main>
-
-<!-- FOOTER -->
-<footer class="site-footer">
-  <div class="container footer-grid">
-    <div>
-      <div class="brand brand--footer">TechNoX</div>
-      <p class="muted small">Điện thoại chính hãng — giá tốt.</p>
-    </div>
-    <div>
-      <h4 class="footer-title">Sản phẩm</h4>
-      <ul>
-        <li><a href="#">Flagship</a></li>
-        <li><a href="#">Tầm trung</a></li>
-        <li><a href="#">Phụ kiện</a></li>
-      </ul>
-    </div>
-    <div>
-      <h4 class="footer-title">Về TechNoX</h4>
-      <ul>
-        <li><a href="#">Giới thiệu</a></li>
-        <li><a href="#">Cửa hàng</a></li>
-        <li><a href="#">Tuyển dụng</a></li>
-      </ul>
-    </div>
-    <div>
-      <h4 class="footer-title">Hỗ trợ</h4>
-      <ul>
-        <li><a href="#">Bảo hành</a></li>
-        <li><a href="#">Giao hàng</a></li>
-        <li><a href="#">Liên hệ</a></li>
-      </ul>
-    </div>
-  </div>
-
-  <div class="container footer-bottom">
-    <span class="muted small">© TechNoX — All rights reserved</span>
-    <nav class="footer-links">
-      <a href="#">Privacy</a>
-      <a href="#">Terms</a>
-      <a href="#">Cookies</a>
-    </nav>
-  </div>
-</footer>
 
 <!-- COOKIE BANNER -->
 <div class="cookie" *ngIf="cookieOpen" role="dialog" aria-live="polite" aria-label="Cookie preference">
