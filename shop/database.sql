@@ -95,7 +95,9 @@ CREATE TABLE dbo.Category
     Description NVARCHAR(1000) NULL
 );
 GO
-
+ALTER TABLE dbo.Category
+DROP COLUMN Description;
+GO
 /***************************************
  * Bảng Product
  ***************************************/
