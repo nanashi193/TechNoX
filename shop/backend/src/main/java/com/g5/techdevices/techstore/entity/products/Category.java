@@ -1,11 +1,9 @@
 package com.g5.techdevices.techstore.entity.products;
 
 import jakarta.persistence.Entity;
-import lombok.Data;
+import lombok.*;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import java.util.List;
 
@@ -13,6 +11,7 @@ import java.util.List;
 @NoArgsConstructor
 @Data
 @Entity
+@Builder
 @Table(name = "Category")
 public class Category {
     @Id

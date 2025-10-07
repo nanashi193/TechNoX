@@ -1,0 +1,46 @@
+package com.g5.techdevices.techstore.Services;
+
+import com.g5.techdevices.techstore.dto.CategoryDTO;
+import com.g5.techdevices.techstore.entity.products.Category;
+import com.g5.techdevices.techstore.repositories.CategoryRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+
+@Service
+@RequiredArgsConstructor
+
+public class CategoryService implements ICategoryService{
+    private final CategoryRepository categoryRepository;
+    @Override
+    public Category createCategory(CategoryDTO categoryDTO) {
+        Category newCategory= Category.builder()
+                .name(categoryDTO.getName())
+                .build();
+        return categoryRepository.save(newCategory);
+    }
+
+    @Override
+    public Category getCategoryById(long id) {
+        return categoryRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Category Not Found") );
+    }
+
+    @Override
+    public List<Category> getAllCategories() {
+        return categoryRepository.findAll();
+    }
+
+    @Override
+    public Category updateCategory(long categoryId, CategoryDTO categoryDTO) {
+        Category existingCategory = getCategoryById(categoryId);
+        existingCategory.setName(categoryDTO.getName());
+        return existingCategory;
+    }
+
+    @Override
+    public void deleteCategory(long categoryId) {
+        categoryRepository.deleteById(categoryId);
+    }
+}
