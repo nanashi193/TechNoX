@@ -10,7 +10,7 @@ import { finalize } from 'rxjs/operators';
     standalone: true,
     imports: [CommonModule, ReactiveFormsModule, RouterModule],
     templateUrl: './login.component.html',
-    styleUrls: ['./login.component.css'],
+    styleUrls: ['./login.component.css', '../../styles/shared-styles.css'],
 })
 export class LoginComponent {
     form: FormGroup;
