@@ -101,7 +101,8 @@
 
 .card input[type="text"],
 .card input[type="email"],
-.card input[type="password"] {
+.card input[type="password"],
+.card input[type="tel"]{
     width: 100%;
     box-sizing: border-box;
     padding: 18px 20px;
