@@ -13,7 +13,7 @@ import {AuthService} from '../../services/auth.service';
     standalone: true,
     imports: [CommonModule, ReactiveFormsModule, RouterModule],
     templateUrl: './signup.component.html',
-    styleUrls: ['./signup.component.css']
+    styleUrls: ['./signup.component.css', '../../styles/shared-styles.css']
 })
 export class SignupComponent {
     form: FormGroup;
@@ -22,6 +22,14 @@ export class SignupComponent {
 
     get emailCtrl(): FormControl {
         return this.form.get('email') as FormControl;
+    }
+
+    get phoneCtrl() {
+        return this.form.get('phone') as FormControl;
+    }
+
+    get genderCtrl() {
+        return this.form.get('gender') as FormControl;
     }
 
     get usernameCtrl(): FormControl {
@@ -40,6 +48,11 @@ export class SignupComponent {
                     Validators.required, Validators.email,
                     Validators.pattern(/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/)
                 ]],
+                phone: ['', [
+                    Validators.required,
+                    Validators.pattern(/^(0\d{9,10}|(\+84)\d{9,10})$/)
+                ]],
+                gender: ['', Validators.required],
                 password: ['', [Validators.required, Validators.minLength(8)]],
                 confirmPassword: ['', [Validators.required]],
                 agree: [false, [Validators.requiredTrue]]
