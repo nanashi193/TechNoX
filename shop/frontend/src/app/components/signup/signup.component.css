@@ -92,3 +92,51 @@
     text-decoration: none;
     font-weight: 500;
 }
+.card select {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 18px 20px;
+    border-radius: 14px;
+    border: 1px solid #ddd;
+    background: #fafafa;
+    font-size: 17px;
+    transition: all .2s ease;
+    display: block;
+}
+.card select:focus {
+    border-color: #e74b45;
+    background: #fff;
+    box-shadow: 0 0 0 3px rgba(231,75,69,.2);
+}
+.gender-field {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.gender-label {
+    font-size: 16px;
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+.radio-row {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+}
+
+.radio {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    user-select: none;
+    font-size: 16px;
+}
+
+
+.radio input[type="radio"] {
+    width: 18px;
+    height: 18px;
+}
