@@ -1,2 +1,6 @@
 api:
   prefix: api/v1
+
+jwt:
+  expiration: 2592000
+  secretKey: I am handsome
