@@ -10,7 +10,7 @@ import {finalize} from 'rxjs/operators';
     standalone: true,
     imports: [CommonModule, ReactiveFormsModule, RouterModule],
     templateUrl: './forgot-password.component.html',
-    styleUrls: ['./forgot-password.component.css']
+    styleUrls: ['./forgot-password.component.css', '../../styles/shared-styles.css']
 })
 export class ForgotPasswordComponent {
     form: FormGroup;
