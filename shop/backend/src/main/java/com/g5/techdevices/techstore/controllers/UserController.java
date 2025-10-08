@@ -38,7 +38,7 @@ public class UserController {
                         .toList();
                 return ResponseEntity.badRequest().body(errorMassage);
             }
-            if(!userDTO.getPassword.equals(userDTO.getRepeatPassword())){
+            if(!userDTO.getPassword().equals(userDTO.getRepeatPassword())){
                 return ResponseEntity.badRequest().body("Passwords do not match");
             }
             userService.createUser(userDTO);

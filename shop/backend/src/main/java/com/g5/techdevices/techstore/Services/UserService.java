@@ -36,7 +36,7 @@ public class UserService implements IUserService{
         newUser.setRole(role);
         //Kiểm tra nếu có accountId thì ko yêu cầu mât khẩu
         if(userDTO.getFacebookAccountId() == null && userDTO.getGoogleAccountId() == null){
-            String password = userDTO.getPassword;
+            String password = userDTO.getPassword();
             //Se lam trong phan Spring Security
 //            String password = userDTO.getPassword();
 //            String encodedPassword = passwordEncoder.encode(password);
