@@ -13,6 +13,12 @@ export const routes: Routes = [
     { path: 'signup', component: SignupComponent },
     {path: 'forgot-password', component: ForgotPasswordComponent},
     {path: 'products', component: ProductPageComponent},
+    {
+        path: 'product/:id',
+        loadComponent: () =>
+            import('./components/detail-product/detail-product.component').then(m => m.DetailProductComponent),
+    },
+
     {path: 'legal',
         loadComponent: () => import('./components/legal/legal-layout/legal-layout.component')
             .then(m => m.LegalLayoutComponent),
