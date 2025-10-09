@@ -140,3 +140,26 @@
     width: 18px;
     height: 18px;
 }
+.notice {
+    margin-top: 8px;
+    font-size: 14px;
+    line-height: 1.45;
+    border-radius: 10px;
+    padding: 10px 12px;
+}
+.notice.success {
+    background-color: #e8f6ee;
+    color: #176a3a;
+    border: 1px solid #a7e0be;
+    border-radius: 10px;
+    padding: 10px 12px;
+    margin-top: 8px;
+    font-size: 14px;
+}
+
+.notice.error {
+    background: #fdecea;
+    border: 1px solid #f5c2c7;
+    color: #b4232c;
+}
+

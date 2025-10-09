@@ -25,11 +25,11 @@
         <div class="card">
             <h2>Đăng ký tài khoản</h2>
             <p class="description">Vui lòng nhập thông tin của bạn.</p>
-            <form (ngSubmit)="onSubmit()" [formGroup]="form">
+            <form (ngSubmit)="onSubmit()" [formGroup]="form" novalidate>
                 <!--  fullname-->
                 <div class="field">
                     <input formControlName="fullname" placeholder="Họ và tên" type="text"/>
-                    <div *ngIf="fullnameCtrl.touched && fullnameCtrl.hasError('require')"
+                    <div *ngIf="fullnameCtrl.touched && fullnameCtrl.hasError('required')"
                          class="error-text">
                         Vui lòng nhập họ và tên.
                     </div>
@@ -56,12 +56,15 @@
                             <span>Nữ</span>
                         </label>
                     </div>
+                    <div class="error-text" *ngIf="genderCtrl.touched && genderCtrl.hasError('required')">
+                        Vui lòng chọn giới tính.
+                    </div>
                 </div>
 
                 <!--email-->
                 <div class="field">
                     <input formControlName="email" placeholder="Email" type="email"/>
-                    <div *ngIf="emailCtrl.touched && emailCtrl.hasError('require')"
+                    <div *ngIf="emailCtrl.touched && emailCtrl.hasError('required')"
                          class="error-text">
                         Vui lòng nhập email của bạn.
                     </div>
@@ -75,7 +78,7 @@
                 <div class="field">
                     <input autocomplete="tel" formControlName="phone" inputmode="tel" placeholder="Số điện thoại"
                            type="tel"/>
-                    <div *ngIf="phoneCtrl.touched && phoneCtrl.hasError('require')"
+                    <div *ngIf="phoneCtrl.touched && phoneCtrl.hasError('required')"
                          class="error-text">
                         Vui lòng nhập số điện thoại.
                     </div>
@@ -83,10 +86,6 @@
                          class="error-text">
                         Số điện thoại không hợp lệ (Ví dụ: 0xxxxxxxxx hoặc +84xxxxxxxxx).
                     </div>
-                </div>
-
-                <div class="error-text" *ngIf="genderCtrl.touched && genderCtrl.hasError('required')">
-                    Vui lòng chọn giới tính.
                 </div>
 
                 <!--password-->
@@ -135,12 +134,18 @@
                     {{ loading ? 'Đang tạo tài khoản...' : 'Tạo tài khoản' }}
                 </button>
             </form>
-            <p *ngIf="errorMsg" class="alert error-text">{{ errorMsg }}</p>
 
             <p class="had-account">
                 Bạn đã có tài khoản?
                 <a class="create-link" routerLink="/login">Đăng nhập</a>
             </p>
+            <div *ngIf="signupSuccess" class="notice success" aria-live="polite">
+                Bạn đã tạo tài khoản thành công, bạn sẽ được quay lại trang Đăng nhập sau {{ countdown }}s.
+            </div>
+
+            <div *ngIf="errorMsg" class="notice error" aria-live="assertive">
+                {{ errorMsg }}
+            </div>
         </div>
     </div>
 </div>

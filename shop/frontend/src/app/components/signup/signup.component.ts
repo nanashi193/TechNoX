@@ -18,7 +18,10 @@ import {AuthService} from '../../services/auth.service';
 export class SignupComponent {
     form: FormGroup;
     loading = false;
-    errorMsg: string | null = null;
+    errorMsg = '';
+    signupSuccess = false;
+    countdown = 5;
+    private timer?: any;
 
     get emailCtrl(): FormControl {
         return this.form.get('email') as FormControl;
@@ -32,10 +35,6 @@ export class SignupComponent {
         return this.form.get('gender') as FormControl;
     }
 
-    get usernameCtrl(): FormControl {
-        return this.form.get('username') as FormControl;
-    }
-
     get fullnameCtrl(): FormControl {
         return this.form.get('fullname') as FormControl;
     }
@@ -47,10 +46,9 @@ export class SignupComponent {
     constructor(private fb: FormBuilder, private router: Router, private auth: AuthService) {
         this.form = this.fb.group(
             {
-                fullname:['', [Validators.required, Validators.minLength(2), Validators.pattern(/^[a-zA-ZÀ-ỹ\s]+$/)]],
-                username: ['', [Validators.required, Validators.minLength(3)]],
+                fullname: ['', [Validators.required, Validators.minLength(2), Validators.pattern(/^[a-zA-ZÀ-ỹ\s]+$/)]],
                 email: ['', [
-                    Validators.required, Validators.email,
+                    Validators.required,
                     Validators.pattern(/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/)
                 ]],
                 phone: ['', [
@@ -75,30 +73,44 @@ export class SignupComponent {
     }
 
     onSubmit() {
-        this.errorMsg = null;
-        if (this.form.invalid) {
-            this.form.markAllAsTouched();
-            return;
-        }
-
-        const {username, email, password} = this.form.value;
+        if (this.form.invalid || this.loading) return;
+        this.errorMsg = '';
         this.loading = true;
-        this.auth.signup({username, email, password})
-            .pipe(finalize(() => this.loading = false))
-            .subscribe({
-                next: () => this.router.navigateByUrl('/login'),
-                error: (err) => {
-                    const code = err?.error?.code;
-                    if (code === 'USERNAME_TAKEN') {
-                        this.usernameCtrl.setErrors({taken: true});
-                        this.usernameCtrl.markAsTouched();
-                    } else if (code === 'EMAIL_TAKEN') {
-                        this.emailCtrl.setErrors({taken: true});
-                        this.emailCtrl.markAsTouched();
-                    } else {
-                        this.errorMsg = err?.error?.message || 'Có lỗi xảy ra. Vui lòng thử lại.';
-                    }
-                }
-            });
+
+        // co api thi dung
+        // this.auth.signup(this.form.value)
+        //     .pipe(finalize(() => this.loading = false))
+        //     .subscribe({
+        //         next: () => this.handleSuccess(),
+        //         error: (err) => this.handleError(err?.error?.message)
+        //         });
+
+        setTimeout(() => this.handleSuccess(), 400);
+
+    }
+
+    private handleSuccess() {
+        this.form.disable();
+        this.loading = false;
+        this.signupSuccess = true;
+        this.countdown = 5;
+
+        this.timer = setInterval(() => {
+            this.countdown--;
+            if (this.countdown === 0) {
+                clearInterval(this.timer);
+                this.router.navigate(['/login']);
+            }
+        }, 1000);
+    }
+
+    private handleError(msg?: string) {
+        this.loading = false;
+        this.signupSuccess = false;
+        this.errorMsg = msg || 'Đăng kí thất bại. Vui lòng thử lại.';
+    }
+
+    ngOnDestroy() {
+        if (this.timer) clearInterval(this.timer);
     }
 }
