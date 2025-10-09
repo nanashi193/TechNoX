@@ -1,9 +1,9 @@
-import { Component } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, FormControl, Validators, ReactiveFormsModule } from '@angular/forms';
-import { Router, RouterModule } from '@angular/router';
-import { AuthService } from '../../services/auth.service';
-import { finalize } from 'rxjs/operators';
+import {Component} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {FormBuilder, FormGroup, FormControl, Validators, ReactiveFormsModule} from '@angular/forms';
+import {Router, RouterModule} from '@angular/router';
+import {AuthService} from '../../services/auth.service';
+import {finalize} from 'rxjs/operators';
 
 @Component({
     selector: 'app-login',
@@ -17,25 +17,35 @@ export class LoginComponent {
     loading = false;
     errorMsg: string | null = null;
 
-    get usernameCtrl(): FormControl { return this.form.get('username') as FormControl; }
-    get passwordCtrl(): FormControl { return this.form.get('password') as FormControl; }
+    get emailCtrl(): FormControl {
+        return this.form.get('email') as FormControl;
+    }
+
+    get passwordCtrl(): FormControl {
+        return this.form.get('password') as FormControl;
+    }
 
     constructor(private fb: FormBuilder, private router: Router, private auth: AuthService) {
         this.form = this.fb.group({
-            username: ['', [Validators.required, Validators.minLength(3)]],
-            password: ['', [Validators.required, Validators.minLength(8)]],
+            email: ['', [
+                Validators.required, Validators.email,
+                Validators.pattern(/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/)
+            ]], password: ['', [Validators.required, Validators.minLength(8)]],
             remember: [false],
         });
     }
 
     onSubmit() {
         this.errorMsg = null;
-        if (this.form.invalid) { this.form.markAllAsTouched(); return; }
+        if (this.form.invalid) {
+            this.form.markAllAsTouched();
+            return;
+        }
 
-        const { username, password, remember } = this.form.value;
+        const {username, password, remember} = this.form.value;
         this.loading = true;
 
-        this.auth.login({ username, password })
+        this.auth.login({username, password})
             .pipe(finalize(() => this.loading = false))
             .subscribe({
                 next: (res) => {
@@ -43,7 +53,7 @@ export class LoginComponent {
                     if (remember) localStorage.setItem('rememberUser', username); else localStorage.removeItem('rememberUser');
                     this.router.navigateByUrl('/home');
                 },
-                error: () => this.errorMsg = 'Sai tên đăng nhập hoặc mật khẩu.'
+                error: () => this.errorMsg = 'Sai email hoặc mật khẩu.'
             });
     }
 }

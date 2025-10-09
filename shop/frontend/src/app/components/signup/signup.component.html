@@ -25,30 +25,24 @@
         <div class="card">
             <h2>Đăng ký tài khoản</h2>
             <p class="description">Vui lòng nhập thông tin của bạn.</p>
-            <!--email-->
             <form (ngSubmit)="onSubmit()" [formGroup]="form">
+                <!--  fullname-->
                 <div class="field">
-                    <input formControlName="email" placeholder="Email" type="email"/>
-                    <div *ngIf="emailCtrl.touched && emailCtrl.invalid && emailCtrl.hasError('pattern')"
+                    <input formControlName="fullname" placeholder="Họ và tên" type="text"/>
+                    <div *ngIf="fullnameCtrl.touched && fullnameCtrl.hasError('require')"
                          class="error-text">
-                        Định dạng email không hợp lệ.
+                        Vui lòng nhập họ và tên.
+                    </div>
+                    <div *ngIf="fullnameCtrl.touched && fullnameCtrl.hasError('minlength')"
+                         class="error-text">
+                        Họ và tên phải có ít nhất 2 ký tự.
+                    </div>
+                    <div *ngIf="fullnameCtrl.touched && fullnameCtrl.hasError('pattern')"
+                         class="error-text">
+                        Họ và tên chỉ được chứa chữ cái và khoảng trắng.
                     </div>
                 </div>
-                <!--phone-->
-                <div class="field">
-                    <input
-                            autocomplete="tel"
-                            formControlName="phone"
-                            inputmode="tel"
-                            placeholder="Số điện thoại"
-                            type="tel"/>
-                    <div *ngIf="phoneCtrl.touched && phoneCtrl.invalid" class="error-text">
-                        <span *ngIf="phoneCtrl.hasError('required')">Vui lòng nhập số điện thoại.</span>
-                        <span *ngIf="phoneCtrl.hasError('pattern')">
-                        Số điện thoại không hợp lệ (vd: 0xxxxxxxxx hoặc +84xxxxxxxxx).
-                        </span>
-                    </div>
-                </div>
+
                 <!--gender-->
                 <div class="gender-field">
                     <label class="gender-label">Giới tính:</label>
@@ -64,16 +58,35 @@
                     </div>
                 </div>
 
+                <!--email-->
+                <div class="field">
+                    <input formControlName="email" placeholder="Email" type="email"/>
+                    <div *ngIf="emailCtrl.touched && emailCtrl.hasError('require')"
+                         class="error-text">
+                        Vui lòng nhập email của bạn.
+                    </div>
+                    <div *ngIf="emailCtrl.touched && emailCtrl.invalid && emailCtrl.hasError('pattern')"
+                         class="error-text">
+                        Định dạng email không hợp lệ.
+                    </div>
+                </div>
+
+                <!--phone-->
+                <div class="field">
+                    <input autocomplete="tel" formControlName="phone" inputmode="tel" placeholder="Số điện thoại"
+                           type="tel"/>
+                    <div *ngIf="phoneCtrl.touched && phoneCtrl.hasError('require')"
+                         class="error-text">
+                        Vui lòng nhập số điện thoại.
+                    </div>
+                    <div *ngIf="phoneCtrl.touched && phoneCtrl.hasError('pattern')"
+                         class="error-text">
+                        Số điện thoại không hợp lệ (Ví dụ: 0xxxxxxxxx hoặc +84xxxxxxxxx).
+                    </div>
+                </div>
+
                 <div class="error-text" *ngIf="genderCtrl.touched && genderCtrl.hasError('required')">
                     Vui lòng chọn giới tính.
-                </div>
-                <!--username-->
-                <div class="field">
-                    <input formControlName="username" placeholder="Tên đăng nhập" type="text"/>
-                    <div *ngIf="usernameCtrl.touched && usernameCtrl.hasError('minlength')"
-                         class="error-text">
-                        Tên đăng nhập phải có ít nhất 3 ký tự.
-                    </div>
                 </div>
 
                 <!--password-->

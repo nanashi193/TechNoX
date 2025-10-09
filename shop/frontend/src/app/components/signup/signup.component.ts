@@ -36,6 +36,10 @@ export class SignupComponent {
         return this.form.get('username') as FormControl;
     }
 
+    get fullnameCtrl(): FormControl {
+        return this.form.get('fullname') as FormControl;
+    }
+
     get passwordCtrl(): FormControl {
         return this.form.get('password') as FormControl;
     }
@@ -43,6 +47,7 @@ export class SignupComponent {
     constructor(private fb: FormBuilder, private router: Router, private auth: AuthService) {
         this.form = this.fb.group(
             {
+                fullname:['', [Validators.required, Validators.minLength(2), Validators.pattern(/^[a-zA-ZÀ-ỹ\s]+$/)]],
                 username: ['', [Validators.required, Validators.minLength(3)]],
                 email: ['', [
                     Validators.required, Validators.email,
