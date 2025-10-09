@@ -6,5 +6,5 @@ import com.g5.techdevices.techstore.exceptions.DataNotFoundException;
 
 public interface IUserService {
     User createUser(UserDTO userDTO) throws DataNotFoundException;
-    String login(String email, String password) throws DataNotFoundException;
+    String login(String email, String password) throws Exception;
 }

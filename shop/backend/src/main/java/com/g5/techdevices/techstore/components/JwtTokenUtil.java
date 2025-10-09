@@ -5,10 +5,13 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
+import io.jsonwebtoken.io.Encoders;
 import io.jsonwebtoken.security.Keys;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import java.security.SecureRandom;
+import java.security.InvalidParameterException;
 import java.security.Key;
 import java.util.*;
 import java.util.function.Function;
@@ -20,8 +23,9 @@ public class JwtTokenUtil {
     private long expiration;
     @Value("${jwt.secretKey}")
     private String secretKey;
-    public String generateToken(com.g5.techdevices.techstore.entity.users.User user) {
+    public String generateToken(com.g5.techdevices.techstore.entity.users.User user) throws Exception {
         Map<String, Object> claims = new HashMap<>();
+        this.generateSecretKey();
         claims.put("email", user.getEmail());
         try {
             String token = Jwts.builder()
@@ -32,15 +36,21 @@ public class JwtTokenUtil {
                     .compact();
             return token;
         } catch (Exception e) {
-            System.out.println("Cannot generate JWT token, error: " + e.getMessage());
-            return null;
+            throw new InvalidParameterException("Can not create JWT Token, error message: " + e.getMessage());
+            //return null;
         }
     }
     private Key getSignInKey(){
         byte[] bytes = Decoders.BASE64.decode(secretKey);
         return Keys.hmacShaKeyFor(bytes);
     }
-
+    private String generateSecretKey(){
+        SecureRandom random = new SecureRandom();
+        byte[] keyBytes = new byte[32];
+        random.nextBytes(keyBytes);
+        String secretKey = Encoders.BASE64.encode(keyBytes);
+        return secretKey;
+    }
     private Claims extractAllClaims(String token) {
         return Jwts.parser()
                 .setSigningKey(getSignInKey())

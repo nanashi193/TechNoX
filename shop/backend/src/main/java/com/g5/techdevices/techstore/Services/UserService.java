@@ -35,8 +35,10 @@ public class UserService implements IUserService{
         User newUser = User.builder()
                 .fullName(userDTO.getFullName())
                 .email(userDTO.getEmail())
+                .password(passwordEncoder.encode(userDTO.getPassword()))
                 .gender(userDTO.isGender())
                 .phoneNumber(userDTO.getPhoneNumber())
+                .isActive(userDTO.isActive())
                 .facebookAccountId(userDTO.getFacebookAccountId())
                 .googleAccountId(userDTO.getGoogleAccountId())
                 .build();
@@ -55,7 +57,7 @@ public class UserService implements IUserService{
     }
 
     @Override
-    public String login(String email, String password) throws DataNotFoundException {
+    public String login(String email, String password) throws Exception {
         Optional<User> optionalUser =  userRepository.findByEmail(email);
         if(optionalUser.isEmpty()){
             throw new DataNotFoundException("Invalid enmail/password");
@@ -68,7 +70,9 @@ public class UserService implements IUserService{
             }
         }
         UsernamePasswordAuthenticationToken authenticationToken =
-                new UsernamePasswordAuthenticationToken(email, password);
+                new UsernamePasswordAuthenticationToken(
+                        email, password,
+                        existingUser.getAuthorities());
         authenticationManager.authenticate(authenticationToken);
         return jwtTokenUtil.generateToken(existingUser);
     }

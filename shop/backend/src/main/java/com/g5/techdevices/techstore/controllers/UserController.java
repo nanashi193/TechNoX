@@ -4,6 +4,8 @@ import com.g5.techdevices.techstore.Services.IUserService;
 import com.g5.techdevices.techstore.Services.UserService;
 import com.g5.techdevices.techstore.dto.UserDTO;
 import com.g5.techdevices.techstore.dto.UserLoginDTO;
+import com.g5.techdevices.techstore.entity.users.User;
+import com.g5.techdevices.techstore.exceptions.DataNotFoundException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,7 +43,7 @@ public class UserController {
             if(!userDTO.getPassword().equals(userDTO.getRepeatPassword())){
                 return ResponseEntity.badRequest().body("Passwords do not match");
             }
-            userService.createUser(userDTO);
+            User user = userService.createUser(userDTO);
             return ResponseEntity.ok("Register successfully");
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
@@ -49,9 +51,14 @@ public class UserController {
     }
     @PostMapping("/login")
     public ResponseEntity<?> login(
-            @Valid @RequestBody UserLoginDTO UserLoginDTO) {
-        //Kiem tra thong tin dang nhap va sinh Token
-        //Tra ve token trong response
-        return ResponseEntity.ok("Some token");
+            @Valid @RequestBody UserLoginDTO userLoginDTO) throws DataNotFoundException {
+        try {
+            String token = userService.login(userLoginDTO.getEmail(), userLoginDTO.getPassword());
+            //Kiem tra thong tin dang nhap va sinh Token
+            //Tra ve token trong response
+            return ResponseEntity.ok(token);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 }

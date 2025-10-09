@@ -32,9 +32,6 @@ public class UserDTO {
     @JsonProperty("PhoneNumber")
     private String phoneNumber;
 
-    @JsonProperty("Role")
-    private String role;
-
     @JsonProperty("IsActive")
     private boolean active;
 
