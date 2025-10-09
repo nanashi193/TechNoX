@@ -25,7 +25,7 @@ public class JwtTokenUtil {
     private String secretKey;
     public String generateToken(com.g5.techdevices.techstore.entity.users.User user) throws Exception {
         Map<String, Object> claims = new HashMap<>();
-        this.generateSecretKey();
+//        this.generateSecretKey();
         claims.put("email", user.getEmail());
         try {
             String token = Jwts.builder()

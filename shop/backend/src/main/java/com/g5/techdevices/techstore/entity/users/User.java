@@ -1,13 +1,11 @@
 package com.g5.techdevices.techstore.entity.users;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.g5.techdevices.techstore.entity.Bills.Bill;
 import com.g5.techdevices.techstore.entity.Cart.Cart;
 import com.g5.techdevices.techstore.entity.review.Review;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -32,7 +30,7 @@ public class User implements UserDetails {
 
     @Override
     public String getPassword() {
-        return "";
+        return password;
     }
 
     @Override
@@ -91,6 +89,8 @@ public class User implements UserDetails {
 
     @ManyToOne
     @JoinColumn(name = "RoleId", nullable = false)
+    @ToString.Exclude
+    @JsonIgnoreProperties("users")
     private Role role;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)

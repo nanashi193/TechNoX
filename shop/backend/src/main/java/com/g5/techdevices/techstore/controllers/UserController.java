@@ -44,14 +44,14 @@ public class UserController {
                 return ResponseEntity.badRequest().body("Passwords do not match");
             }
             User user = userService.createUser(userDTO);
-            return ResponseEntity.ok("Register successfully");
+            return ResponseEntity.ok(user);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
     }
     @PostMapping("/login")
-    public ResponseEntity<?> login(
-            @Valid @RequestBody UserLoginDTO userLoginDTO) throws DataNotFoundException {
+    public ResponseEntity<String> login(
+            @Valid @RequestBody UserLoginDTO userLoginDTO){
         try {
             String token = userService.login(userLoginDTO.getEmail(), userLoginDTO.getPassword());
             //Kiem tra thong tin dang nhap va sinh Token

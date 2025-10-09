@@ -2,6 +2,7 @@ package com.g5.techdevices.techstore.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.*;
 import org.apache.logging.log4j.message.Message;
 
@@ -19,6 +20,7 @@ public class UserDTO {
     @NotBlank(message = "Email is required.")
     private String email;
 
+    @Size(min = 8, message = "Password at least 8 characters.")
     @NotBlank(message = "Password can not be blank.")
     private String password;
 
@@ -26,7 +28,7 @@ public class UserDTO {
     private String repeatPassword;
 
     @JsonProperty("Gender")
-    private boolean gender;
+    private String gender;
 
     @NotBlank(message = "Phone number is required.")
     @JsonProperty("PhoneNumber")

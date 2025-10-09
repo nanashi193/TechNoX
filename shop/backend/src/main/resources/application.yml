@@ -3,4 +3,4 @@ api:
 
 jwt:
   expiration: 2592000
-  secretKey: I am handsome
+  secretKey: QFj6plpOzUysQzNFGQwdZRMpebEpCicqSknkcg2Kx0E=

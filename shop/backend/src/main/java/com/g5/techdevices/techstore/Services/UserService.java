@@ -32,17 +32,21 @@ public class UserService implements IUserService{
         if(userRepository.existsByEmail(email)){
             throw new DataIntegrityViolationException("Email already exists");
         }
+        boolean genderValue = "Nam".equalsIgnoreCase(userDTO.getGender());
         User newUser = User.builder()
                 .fullName(userDTO.getFullName())
                 .email(userDTO.getEmail())
                 .password(passwordEncoder.encode(userDTO.getPassword()))
-                .gender(userDTO.isGender())
                 .phoneNumber(userDTO.getPhoneNumber())
-                .isActive(userDTO.isActive())
-                .facebookAccountId(userDTO.getFacebookAccountId())
-                .googleAccountId(userDTO.getGoogleAccountId())
+                .gender(genderValue)
+
+                .isActive(true)
+                .facebookAccountId(userDTO.getFacebookAccountId()
+                        != null ? userDTO.getFacebookAccountId() : "0")
+                .googleAccountId(userDTO.getGoogleAccountId()
+                        !=null ? userDTO.getGoogleAccountId() : "0")
                 .build();
-        Role role = roleRepository.findById(userDTO.getRoleId())
+        Role role = roleRepository.findById(3L)
                 .orElseThrow(() ->  new DataNotFoundException("Role is not found."));
         newUser.setRole(role);
         //Kiểm tra nếu có accountId thì ko yêu cầu mât khẩu
