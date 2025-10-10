@@ -6,7 +6,7 @@
     --bg-gray: #f3f4f6;
 }
 
-.admin-wrap {
+.owner-wrap {
     display: grid;
     grid-template-columns: 240px 1fr;
     min-height: 100vh;
@@ -15,7 +15,7 @@
 }
 
 /* Sidebar */
-.admin-aside {
+.owner-aside {
     background: var(--sidebar-bg);
     border-right: 1px solid var(--border);
     padding: 18px 16px;
@@ -84,7 +84,7 @@
 }
 
 /* Main */
-.admin-main {
+.owner-main {
     display: flex;
     flex-direction: column;
     min-width: 0;
@@ -139,11 +139,11 @@
 }
 
 @media (max-width: 980px) {
-    .admin-wrap {
+    .owner-wrap {
         grid-template-columns: 1fr;
     }
 
-    .admin-aside {
+    .owner-aside {
         border-right: none;
         border-bottom: 1px solid var(--border);
     }

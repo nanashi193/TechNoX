@@ -4,7 +4,7 @@ import { SignupComponent } from './components/signup/signup.component';
 import { HomeComponent } from './components/home/home.component';
 import {ForgotPasswordComponent} from "./components/forgot-password/forgot-password.component";
 import {ProductPageComponent} from "./components/product/product-page.component";
-import {adminGuard} from "./guards/admin.guard";
+import {ownerGuard} from "./guards/owner.guard";
 
 export const routes: Routes = [
     { path: '', redirectTo: 'home', pathMatch: 'full' },  // vào intro trước
@@ -41,13 +41,13 @@ export const routes: Routes = [
             { path: '', redirectTo: 'about', pathMatch: 'full' }
         ]},
     {
-        path: 'admin',
-        // canActivate: [adminGuard], co token ADMIN thi bat
-        loadComponent: () => import('./components/admin/layout/admin-layout.component').then(m => m.AdminLayout),
+        path: 'owner',
+        // canActivate: [ownerGuard], co token ADMIN thi bat
+        loadComponent: () => import('./components/owner/layout/owner-layout.component').then(m => m.OwnerLayoutComponent),
         children: [
             { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
             // tạo tạm 1 trang dashboard rỗng để thấy layout
-            { path: 'dashboard', loadComponent: () => import('./components/admin/dashboard/dashboard.component').then(m => m.DashboardComponent) },
+            { path: 'dashboard', loadComponent: () => import('./components/owner/dashboard/dashboard.component').then(m => m.DashboardComponent) },
             // các mục còn lại sẽ làm sau
             // { path: 'products', loadComponent: () => import('../admin/products/products-list.component').then(m => m.ProductsList) },
             // { path: 'orders', loadComponent: () => import('../admin/orders/orders-list.component').then(m => m.OrdersList) },

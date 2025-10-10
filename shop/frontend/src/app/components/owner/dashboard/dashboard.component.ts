@@ -5,7 +5,7 @@ import { ChartConfiguration, ChartOptions } from 'chart.js';
 import {RouterLink} from "@angular/router";
 
 @Component({
-    selector: 'admin-dashboard',
+    selector: 'owner-dashboard',
     standalone: true,
     imports: [CommonModule, BaseChartDirective, RouterLink],
     templateUrl: './dashboard.component.html',
