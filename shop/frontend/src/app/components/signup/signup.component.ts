@@ -1,4 +1,4 @@
-import {Component} from '@angular/core';
+import {Component, CUSTOM_ELEMENTS_SCHEMA} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {
     AbstractControl, FormBuilder, FormControl, FormGroup,
@@ -13,7 +13,8 @@ import {AuthService} from '../../services/auth.service';
     standalone: true,
     imports: [CommonModule, ReactiveFormsModule, RouterModule],
     templateUrl: './signup.component.html',
-    styleUrls: ['./signup.component.css', '../../styles/shared-styles.css']
+    styleUrls: ['./signup.component.css', '../../styles/shared-styles.css'],
+    schemas: [CUSTOM_ELEMENTS_SCHEMA]
 })
 export class SignupComponent {
     form: FormGroup;
@@ -88,12 +89,21 @@ export class SignupComponent {
         setTimeout(() => this.handleSuccess(), 400);
 
     }
+    goLoginNow() {
+        if (this.timer) clearInterval(this.timer);
+        this.router.navigate(['/login']);
+    }
 
     private handleSuccess() {
         this.form.disable();
         this.loading = false;
         this.signupSuccess = true;
-        this.countdown = 5;
+        this.countdown = 7;
+
+        setTimeout(() => {
+            document.querySelector('.modal-card')?.scrollIntoView({behavior:'smooth', block:'center'});
+            (document.querySelector('.modal-card .primary-btn') as HTMLButtonElement)?.focus?.();
+        });
 
         this.timer = setInterval(() => {
             this.countdown--;
@@ -109,6 +119,7 @@ export class SignupComponent {
         this.signupSuccess = false;
         this.errorMsg = msg || 'Đăng kí thất bại. Vui lòng thử lại.';
     }
+
 
     ngOnDestroy() {
         if (this.timer) clearInterval(this.timer);
