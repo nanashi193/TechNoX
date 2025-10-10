@@ -1,4 +1,4 @@
-import {Component} from '@angular/core';
+import {Component, OnInit, OnDestroy} from '@angular/core';
 import {RouterLink, RouterLinkActive, RouterOutlet} from '@angular/router';
 import {CommonModule} from '@angular/common';
 import {AuthService} from "../../../services/auth.service";
@@ -18,4 +18,6 @@ export class AdminLayout {
         this.auth.clearToken();
         location.href = '/login';
     }
+    ngOnInit(){ document.body.classList.add('admin-scope'); }
+    ngOnDestroy(){ document.body.classList.remove('admin-scope'); }
 }
