@@ -1,0 +1,45 @@
+<div class="admin-wrap">
+    <!-- Sidebar -->
+    <aside class="admin-aside">
+        <a class="brand" routerLink="/admin/dashboard">TechNoX Admin</a>
+
+        <nav class="menu">
+            <a routerLink="/admin/dashboard" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}">
+                <span class="dot"></span> Tổng quan
+            </a>
+            <a routerLink="/admin/products" routerLinkActive="active">
+                <span class="dot"></span> Sản phẩm
+            </a>
+            <a routerLink="/admin/orders" routerLinkActive="active">
+                <span class="dot"></span> Đơn hàng
+            </a>
+            <a routerLink="/admin/users" routerLinkActive="active">
+                <span class="dot"></span> Người dùng
+            </a>
+        </nav>
+
+        <div class="aside-foot">
+            <a routerLink="/" class="back-site">← Về trang chủ</a>
+        </div>
+    </aside>
+
+    <!-- Main -->
+    <main class="admin-main">
+        <!-- Topbar -->
+        <header class="topbar">
+            <div class="search">
+                <input type="text" placeholder="Tìm kiếm (⌘/Ctrl + K)" />
+            </div>
+            <div class="actions">
+                <button title="Thông báo">🔔</button>
+                <button title="Cài đặt">⚙️</button>
+                <button title="Đăng xuất" (click)="onLogout()">🚪</button>
+            </div>
+        </header>
+
+        <!-- Content -->
+        <section class="content">
+            <router-outlet></router-outlet>
+        </section>
+    </main>
+</div>

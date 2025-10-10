@@ -1,0 +1,136 @@
+:host {
+    --border: rgba(0, 0, 0, .08);
+    --muted: #666;
+    --accent: #1a73e8
+}
+
+.page-title {
+    font-size: 22px;
+    font-weight: 800;
+    margin: 10px 0 16px
+}
+
+.card {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, .04)
+}
+
+.card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px
+}
+
+.card h3 {
+    margin: 0 0 8px;
+    font-size: 16px
+}
+
+.grid-3 {
+    display: grid;
+    grid-template-columns:repeat(auto-fit, minmax(240px, 1fr));
+    gap: 14px;
+    margin-bottom: 20px
+}
+
+.grid-2 {
+    display: grid;
+    grid-template-columns:repeat(auto-fit, minmax(320px, 1fr));
+    gap: 14px;
+    margin-top: 20px
+}
+
+.stat .value {
+    font-size: 26px;
+    font-weight: 800;
+    color: var(--accent);
+    line-height: 1.2
+}
+
+.stat .link {
+    color: var(--accent);
+    text-decoration: none;
+    font-size: 13px
+}
+
+.stat .link:hover {
+    text-decoration: underline
+}
+
+.charts {
+    display: grid;
+    grid-template-columns:2fr 1fr;
+    gap: 14px
+}
+
+.chart-wrap {
+    height: 260px;
+    margin-top: 8px
+}
+
+.orders ul {
+    list-style: none;
+    margin: 0;
+    padding: 0
+}
+
+.orders li {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border)
+}
+
+.orders li:last-child {
+    border-bottom: none
+}
+
+.list-links {
+    list-style: none;
+    margin: 0;
+    padding: 0
+}
+
+.list-links li {
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border)
+}
+
+.list-links li:last-child {
+    border-bottom: none
+}
+
+.list-links a {
+    color: #2a2e33;
+    text-decoration: none
+}
+
+.list-links a:hover {
+    text-decoration: underline
+}
+
+.activities ul {
+    list-style: none;
+    margin: 0;
+    padding: 0
+}
+
+.activities li {
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border)
+}
+
+.activities li:last-child {
+    border-bottom: none
+}
+
+@media (max-width: 980px) {
+    .charts {
+        grid-template-columns:1fr
+    }
+}
