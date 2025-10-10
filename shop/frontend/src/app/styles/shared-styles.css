@@ -6,6 +6,7 @@
     min-height: 100vh;
     font-family: 'Be Vietnam Pro', sans-serif;
     background: none;
+    isolation: isolate; /*tao stack rieng cho nen*/
 }
 
 .auth-layout::before {
@@ -13,7 +14,7 @@
     position: absolute;
     inset: 0;
     background: url("/assets/1.jpg") no-repeat center center / cover;
-    z-index: -1;
+    z-index: 0;
 }
 
 .auth-layout::after {
@@ -21,7 +22,7 @@
     position: absolute;
     inset: 0;
     background: rgba(0, 0, 0, 0.3); /* lớp mờ đen 30% */
-    z-index: -1;
+    z-index: 0;
 }
 
 /*brand*/
