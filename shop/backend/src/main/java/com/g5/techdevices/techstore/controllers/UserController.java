@@ -1,11 +1,9 @@
 package com.g5.techdevices.techstore.controllers;
 
-import com.g5.techdevices.techstore.Services.IUserService;
-import com.g5.techdevices.techstore.Services.UserService;
+import com.g5.techdevices.techstore.services.IUserService;
 import com.g5.techdevices.techstore.dto.UserDTO;
 import com.g5.techdevices.techstore.dto.UserLoginDTO;
 import com.g5.techdevices.techstore.entity.users.User;
-import com.g5.techdevices.techstore.exceptions.DataNotFoundException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
