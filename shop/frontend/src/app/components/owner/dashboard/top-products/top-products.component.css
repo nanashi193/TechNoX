@@ -1,0 +1,20 @@
+
+.top-products table { width: 100%; border-collapse: collapse; }
+.top-products thead th {
+    color: var(--muted); font-weight: 600; padding: 10px 8px; font-size: 13px;
+    border-bottom: 1px solid var(--border);
+}
+.top-products tbody td { padding: 14px 8px; border-bottom: 1px solid var(--border); }
+.top-products tbody tr:last-child td { border-bottom: 0; }
+
+.item { display: flex; align-items: center; gap: 12px; }
+.item img { width: 48px; height: 48px; border-radius: 12px; object-fit: cover; background: #f6f7f9; }
+.item .name { font-weight: 600; color: #222; }
+
+.change { display: flex; align-items: center; gap: 8px; color: #6b7280; }
+.change .icon { font-size: 16px; line-height: 1; }
+.change.positive { color: #10b981; }   /* xanh */
+.change.negative { color: #ef4444; }   /* đỏ */
+
+.num { text-align: right; color: #2a2e33; }
+.num.strong { font-weight: 800; }

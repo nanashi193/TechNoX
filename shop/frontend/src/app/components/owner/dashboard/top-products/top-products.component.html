@@ -1,0 +1,38 @@
+<div class="card top-products">
+    <div class="card-header">
+        <h3>{{ title }}</h3>
+        <a *ngIf="viewAllLink" class="link" [routerLink]="viewAllLink">Xem tất cả</a>
+    </div>
+
+    <table>
+        <thead>
+        <tr>
+            <th>ITEM</th>
+            <th>CHANGE</th>
+            <th>PRICE</th>
+            <th>SOLD</th>
+            <th>SALES</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        <tr *ngFor="let p of items; trackBy: trackByName">
+            <td class="item">
+                <img [ngSrc]="p.image" width="48" height="48" alt="" />
+                <span class="name">{{ p.name }}</span>
+            </td>
+
+            <td class="change" [class.positive]="p.changePct > 0" [class.negative]="p.changePct < 0">
+          <span class="icon" aria-hidden="true">
+              {{ p.changePct > 0 ? '📈' : '📉' }}
+          </span>
+                {{ p.changePct | number:'1.0-0' }}%
+            </td>
+
+            <td class="num">${{ p.price }}</td>
+            <td class="num">{{ p.sold | number }}</td>
+            <td class="num strong">${{ p.sales | number:'1.2-2' }}</td>
+        </tr>
+        </tbody>
+    </table>
+</div>

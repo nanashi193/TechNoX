@@ -42,11 +42,10 @@ export const routes: Routes = [
         ]},
     {
         path: 'owner',
-        // canActivate: [ownerGuard], co token ADMIN thi bat
+        // canActivate: [ownerGuard], TODO co token ADMIN thi bat
         loadComponent: () => import('./components/owner/layout/owner-layout.component').then(m => m.OwnerLayoutComponent),
         children: [
             { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
-            // tạo tạm 1 trang dashboard rỗng để thấy layout
             { path: 'dashboard', loadComponent: () => import('./components/owner/dashboard/dashboard.component').then(m => m.DashboardComponent) },
             // các mục còn lại sẽ làm sau
             // { path: 'products', loadComponent: () => import('../admin/products/products-list.component').then(m => m.ProductsList) },

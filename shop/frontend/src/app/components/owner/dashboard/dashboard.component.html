@@ -47,10 +47,5 @@
 </section>
 
 <section class="grid-2">
-    <div class="card activities">
-        <h3>Hoạt động gần đây</h3>
-        <ul>
-            <li *ngFor="let a of activities">{{ a }}</li>
-        </ul>
-    </div>
+    <app-top-products [items]="topProducts" viewAllLink="/owner/products"></app-top-products>
 </section>
