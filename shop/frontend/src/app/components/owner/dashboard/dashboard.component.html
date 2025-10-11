@@ -31,7 +31,7 @@
             </div>
         </div>
         <div class="chart-wrap">
-            <canvas baseChart [data]="lineData" [options]="lineOpts" chartType="line"></canvas>
+            <canvas baseChart [data]="lineData" [options]="lineOpts" [type]="'line'"></canvas>
         </div>
     </div>
 
@@ -47,5 +47,8 @@
 </section>
 
 <section class="grid-2">
-    <app-top-products [items]="topProducts" viewAllLink="/owner/products"></app-top-products>
+    <app-top-products [items]="topProducts"></app-top-products>
+    <app-new-products></app-new-products>
 </section>
+<!--[newProducts]="newProducts"-->
+
