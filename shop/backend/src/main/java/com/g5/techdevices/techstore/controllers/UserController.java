@@ -1,8 +1,11 @@
 package com.g5.techdevices.techstore.controllers;
 
+import com.g5.techdevices.techstore.services.IUserService;
 import com.g5.techdevices.techstore.dto.UserDTO;
 import com.g5.techdevices.techstore.dto.UserLoginDTO;
+import com.g5.techdevices.techstore.entity.users.User;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,9 +20,10 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 @RestController
-@RequestMapping("api/v1/users")
+@RequestMapping("${api.prefix}/users")
+@RequiredArgsConstructor
 public class UserController {
-
+    private final IUserService userService;
     @Autowired
     private PasswordEncoder passwordEncoder;
 
@@ -34,20 +38,25 @@ public class UserController {
                         .toList();
                 return ResponseEntity.badRequest().body(errorMassage);
             }
-            if(!userDTO.getPasswordHash().equals(userDTO.getRepeatPassword())){
+            if(!userDTO.getPassword().equals(userDTO.getRepeatPassword())){
                 return ResponseEntity.badRequest().body("Passwords do not match");
             }
-
-            return ResponseEntity.ok("Register successfully");
+            User user = userService.createUser(userDTO);
+            return ResponseEntity.ok(user);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
     }
     @PostMapping("/login")
-    public ResponseEntity<?> login(
-            @Valid @RequestBody UserLoginDTO UserLoginDTO) {
-        //Kiem tra thong tin dang nhap va sinh Token
-        //Tra ve token trong response
-        return ResponseEntity.ok("Some token");
+    public ResponseEntity<String> login(
+            @Valid @RequestBody UserLoginDTO userLoginDTO){
+        try {
+            String token = userService.login(userLoginDTO.getEmail(), userLoginDTO.getPassword());
+            //Kiem tra thong tin dang nhap va sinh Token
+            //Tra ve token trong response
+            return ResponseEntity.ok(token);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 }

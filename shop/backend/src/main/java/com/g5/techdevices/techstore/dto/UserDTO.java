@@ -2,6 +2,7 @@ package com.g5.techdevices.techstore.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.*;
 import org.apache.logging.log4j.message.Message;
 
@@ -19,21 +20,19 @@ public class UserDTO {
     @NotBlank(message = "Email is required.")
     private String email;
 
+    @Size(min = 8, message = "Password at least 8 characters.")
     @NotBlank(message = "Password can not be blank.")
-    private String passwordHash;
+    private String password;
 
     @JsonProperty("RepeatPassword")
     private String repeatPassword;
 
     @JsonProperty("Gender")
-    private boolean gender;
+    private String gender;
 
     @NotBlank(message = "Phone number is required.")
     @JsonProperty("PhoneNumber")
     private String phoneNumber;
-
-    @JsonProperty("Role")
-    private String role;
 
     @JsonProperty("IsActive")
     private boolean active;
@@ -43,4 +42,7 @@ public class UserDTO {
 
     @JsonProperty("GoogleAccountId")
     private String googleAccountId;
+
+    @JsonProperty("RoleId")
+    private long roleId;
 }

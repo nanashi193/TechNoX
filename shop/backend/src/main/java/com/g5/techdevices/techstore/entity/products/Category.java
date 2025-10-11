@@ -1,11 +1,11 @@
 package com.g5.techdevices.techstore.entity.products;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.Entity;
-import lombok.Data;
+import lombok.*;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import java.util.List;
 
@@ -13,6 +13,7 @@ import java.util.List;
 @NoArgsConstructor
 @Data
 @Entity
+@Builder
 @Table(name = "Category")
 public class Category {
     @Id
@@ -23,9 +24,8 @@ public class Category {
     @Column(name = "Name", nullable = false, columnDefinition = "nvarchar(150)")
     private String name;
 
-    @Column(name = "Description", columnDefinition = "nvarchar(1000)")
-    private String description;
-
     @OneToMany(mappedBy = "category")
+    @JsonIgnore
     private List<Product> products;
+
 }

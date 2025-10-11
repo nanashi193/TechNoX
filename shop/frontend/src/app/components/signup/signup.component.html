@@ -1,7 +1,7 @@
 <div class="auth-layout">
     <div class="brand-pane">
-        <a routerLink="/"
-           class="logo-link" aria-label="Home"></a>
+        <a aria-label="Home"
+           class="logo-link" routerLink="/"></a>
 
         <h1 class="brand-title">
             Welcome<br/>
@@ -15,9 +15,9 @@
         </div>
 
         <div class="socials">
-            <a href="#" aria-label="facebook">f</a>
-            <a href="#" aria-label="twitter">t</a>
-            <a href="#" aria-label="linkedin">in</a>
+            <a aria-label="facebook" href="#">f</a>
+            <a aria-label="twitter" href="#">t</a>
+            <a aria-label="linkedin" href="#">in</a>
         </div>
     </div>
 
@@ -25,33 +25,78 @@
         <div class="card">
             <h2>Đăng ký tài khoản</h2>
             <p class="description">Vui lòng nhập thông tin của bạn.</p>
-
-            <form [formGroup]="form" (ngSubmit)="onSubmit()">
+            <form (ngSubmit)="onSubmit()" [formGroup]="form" novalidate>
+                <!--  fullname-->
                 <div class="field">
-                    <input type="text" placeholder="Tên đăng nhập" formControlName="username"/>
-                    <div *ngIf="usernameCtrl.touched && usernameCtrl.hasError('minlength')"
+                    <input formControlName="fullname" placeholder="Họ và tên" type="text"/>
+                    <div *ngIf="fullnameCtrl.touched && fullnameCtrl.hasError('required')"
                          class="error-text">
-                        Tên đăng nhập phải có ít nhất 3 ký tự.
+                        Vui lòng nhập họ và tên.
+                    </div>
+                    <div *ngIf="fullnameCtrl.touched && fullnameCtrl.hasError('minlength')"
+                         class="error-text">
+                        Họ và tên phải có ít nhất 2 ký tự.
+                    </div>
+                    <div *ngIf="fullnameCtrl.touched && fullnameCtrl.hasError('pattern')"
+                         class="error-text">
+                        Họ và tên chỉ được chứa chữ cái và khoảng trắng.
                     </div>
                 </div>
 
+                <!--gender-->
+                <div class="gender-field">
+                    <label class="gender-label">Giới tính:</label>
+                    <div class="radio-row">
+                        <label class="radio">
+                            <input type="radio" [formControl]="genderCtrl" value="male">
+                            <span>Nam</span>
+                        </label>
+                        <label class="radio">
+                            <input type="radio" [formControl]="genderCtrl" value="female">
+                            <span>Nữ</span>
+                        </label>
+                    </div>
+                    <div class="error-text" *ngIf="genderCtrl.touched && genderCtrl.hasError('required')">
+                        Vui lòng chọn giới tính.
+                    </div>
+                </div>
+
+                <!--email-->
                 <div class="field">
-                    <input type="email" placeholder="Email" formControlName="email"/>
+                    <input formControlName="email" placeholder="Email" type="email"/>
+                    <div *ngIf="emailCtrl.touched && emailCtrl.hasError('required')"
+                         class="error-text">
+                        Vui lòng nhập email của bạn.
+                    </div>
                     <div *ngIf="emailCtrl.touched && emailCtrl.invalid && emailCtrl.hasError('pattern')"
                          class="error-text">
                         Định dạng email không hợp lệ.
                     </div>
                 </div>
 
-
+                <!--phone-->
                 <div class="field">
-                    <input type="password"
-                           placeholder="Mật khẩu"
+                    <input autocomplete="tel" formControlName="phone" inputmode="tel" placeholder="Số điện thoại"
+                           type="tel"/>
+                    <div *ngIf="phoneCtrl.touched && phoneCtrl.hasError('required')"
+                         class="error-text">
+                        Vui lòng nhập số điện thoại.
+                    </div>
+                    <div *ngIf="phoneCtrl.touched && phoneCtrl.hasError('pattern')"
+                         class="error-text">
+                        Số điện thoại không hợp lệ (Ví dụ: 0xxxxxxxxx hoặc +84xxxxxxxxx).
+                    </div>
+                </div>
+
+                <!--password-->
+                <div class="field">
+                    <input class="form-control"
                            formControlName="password"
-                           class="form-control"/>
+                           placeholder="Mật khẩu"
+                           type="password"/>
                     <div *ngIf="passwordCtrl.touched && passwordCtrl.hasError('minlength')"
                          class="error-text">
-                        Xin hãy nhập lại.
+                        Vui lòng đọc "Lưu ý" và nhập lại.
                     </div>
                     <small class="note">
                         <strong>Lưu ý:</strong> Mật khẩu phải có tối thiểu 8 ký tự.
@@ -59,41 +104,70 @@
                 </div>
 
                 <div class="field">
-                    <input type="password"
-                           placeholder="Nhập lại mật khẩu"
+                    <input class="form-control"
                            formControlName="confirmPassword"
-                           class="form-control"/>
+                           placeholder="Nhập lại mật khẩu"
+                           type="password"/>
                     <div *ngIf="form.hasError('mismatch') && form.touched "
                          class="error-text">
                         Mật khẩu không trùng khớp.
                     </div>
                 </div>
 
-
+                <!--checkbox-->
                 <div class="form-check mt-3 text-start">
                     <input class="form-check-input"
-                           type="checkbox"
+                           formControlName="agree"
                            id="agree"
-                           formControlName="agree">
+                           type="checkbox">
                     <label class="form-check-label" for="agree">
                         Bằng việc đăng ký tài khoản, tôi đồng ý với các
-                        <a href="/privacy" target="_blank">điều khoản bảo mật &amp; sử dụng thông tin cá nhân</a>
+                        <a href="/legal/privacy-policy" target="_blank">điều khoản bảo mật &amp; sử dụng thông tin cá
+                            nhân</a>
                         của TechNoX
                     </label>
                 </div>
 
-                <button type="submit"
-                        [disabled]="form.invalid || loading"
-                        class="primary-btn">
+                <button [disabled]="form.invalid || loading"
+                        class="primary-btn"
+                        type="submit">
                     {{ loading ? 'Đang tạo tài khoản...' : 'Tạo tài khoản' }}
                 </button>
             </form>
-            <p class="alert error-text" *ngIf="errorMsg">{{ errorMsg }}</p>
 
             <p class="had-account">
                 Bạn đã có tài khoản?
-                <a routerLink="/login" class="create-link">Đăng nhập</a>
+                <a class="create-link" routerLink="/login">Đăng nhập</a>
             </p>
+
+            <div *ngIf="errorMsg" class="notice error" aria-live="assertive">
+                {{ errorMsg }}
+            </div>
         </div>
     </div>
+    <!-- modal success -->
+    <div class="modal-backdrop" *ngIf="signupSuccess"></div>
+
+    <div class="modal" *ngIf="signupSuccess" role="dialog" aria-modal="true" aria-labelledby="successTitle">
+        <div class="modal-card">
+            <div class="anim-wrap">
+                <dotlottie-wc
+                        id="successAnim"
+                        src="https://lottie.host/43b6e939-0ae2-44c3-ae1c-db2fb69f8bd8/TlG1vIe7F2.lottie"
+                        style="width: 300px;height: 300px"
+                        autoplay
+                ></dotlottie-wc>
+            </div>
+
+
+            <h3 id="successTitle">Tạo tài khoản thành công 🎉</h3> <br>
+            <p>Bạn sẽ được chuyển về trang Đăng nhập sau <strong>{{ countdown }}s</strong>.</p>
+
+            <div class="actions">
+                <button type="button" class="primary-btn" (click)="goLoginNow()">Về trang Đăng nhập ngay</button>
+            </div>
+        </div>
+    </div>
+
+
 </div>

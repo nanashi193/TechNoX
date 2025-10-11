@@ -35,17 +35,17 @@
                 <div class="field">
                     <input
                             type="text"
-                            formControlName="username"
-                            placeholder="Tên đăng nhập"
-                            autocomplete="username"
-                            [class.invalid]="usernameCtrl.touched && usernameCtrl.invalid"
-                            [attr.aria-invalid]="usernameCtrl.touched && usernameCtrl.invalid"
+                            formControlName="email"
+                            placeholder="Email"
+                            autocomplete="email"
+                            [class.invalid]="emailCtrl.touched && emailCtrl.invalid"
+                            [attr.aria-invalid]="emailCtrl.touched && emailCtrl.invalid"
                     />
-                    <div class="error-text" *ngIf="usernameCtrl.touched && usernameCtrl.hasError('required')">
-                        Vui lòng nhập tên đăng nhập.
+                    <div class="error-text" *ngIf="emailCtrl.touched && emailCtrl.hasError('required')">
+                        Vui lòng nhập email của bạn.
                     </div>
-                    <div class="error-text" *ngIf="usernameCtrl.touched && usernameCtrl.hasError('minlength')">
-                        Tên đăng nhập phải có ít nhất 3 ký tự.
+                    <div class="error-text" *ngIf="emailCtrl.touched && emailCtrl.hasError('pattern')">
+                        Vui lòng nhập đúng định dạng email.
                     </div>
                 </div>
 

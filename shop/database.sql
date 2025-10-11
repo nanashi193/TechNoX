@@ -57,6 +57,8 @@ CREATE TABLE dbo.Users (
                            CreatedAt DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME(),
                            CONSTRAINT FK_Users_Role FOREIGN KEY (RoleId) REFERENCES dbo.Roles(Id)
 );
+GO
+EXEC sp_rename 'Users.PasswordHash', 'Password', 'COLUMN';
 /***************************************
  * Bảng Tokens
  ***************************************/
@@ -95,7 +97,9 @@ CREATE TABLE dbo.Category
     Description NVARCHAR(1000) NULL
 );
 GO
-
+ALTER TABLE dbo.Category
+DROP COLUMN Description;
+GO
 /***************************************
  * Bảng Product
  ***************************************/
@@ -350,7 +354,7 @@ VALUES
     (4, N'Apple Pencil 2', 2900000, N'Apple Pencil 2 nhập từ bên thứ 3', 'applepencil2.jpg'),
     (4, N'Magic Mouse 2', 2400000, N'Magic Mouse 2 nhập từ bên thứ 3', 'magicmouse2.jpg');
 GO
-INSERT INTO dbo.Users (FullName, Email, PasswordHash, Gender, PhoneNumber, RoleId, IsActive)
+INSERT INTO dbo.Users (FullName, Email, Password, Gender, PhoneNumber, RoleId, IsActive)
 VALUES
     (N'Trần Thanh Quân', 'quan111@estore.com', N'111111', 0, '0909000001', 4, 1),
 

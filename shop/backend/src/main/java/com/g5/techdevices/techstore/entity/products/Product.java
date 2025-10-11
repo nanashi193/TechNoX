@@ -1,11 +1,13 @@
 package com.g5.techdevices.techstore.entity.products;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.g5.techdevices.techstore.entity.Cart.CartItem;
 import com.g5.techdevices.techstore.entity.promotions.Promotion;
 import com.g5.techdevices.techstore.entity.Bills.BillDetail;
 import com.g5.techdevices.techstore.entity.review.Review;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -16,6 +18,7 @@ import java.util.List;
 @NoArgsConstructor
 @Data
 @Entity
+@Builder
 @Table(name = "Product")
 public class Product {
     @Id
@@ -25,6 +28,7 @@ public class Product {
 
     @ManyToOne
     @JoinColumn(name = "CategoryId")
+    @JsonBackReference
     private Category category;
 
     @Column(name = "Name", nullable = false, columnDefinition = "nvarchar(255)")
