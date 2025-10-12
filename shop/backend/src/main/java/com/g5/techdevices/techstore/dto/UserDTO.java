@@ -44,5 +44,5 @@ public class UserDTO {
     private String googleAccountId;
 
     @JsonProperty("RoleId")
-    private long roleId;
+    private long roleId =3L;
 }
