@@ -128,6 +128,8 @@ CREATE TABLE ProductImages(
                                   FOREIGN KEY (ProductId) REFERENCES Product(ProductId) ON DELETE CASCADE
 );
 GO
+ALTER TABLE ProductImages ADD ImageUrl VARCHAR(MAX);
+GO
 /***************************************
  * Bảng ProductVariant
  * (mỗi variant là 1 màu/size của product)
