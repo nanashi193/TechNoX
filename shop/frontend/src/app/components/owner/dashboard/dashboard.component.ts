@@ -9,7 +9,6 @@ import {RouterLink} from "@angular/router";
 import { ChartConfiguration, ChartOptions } from 'chart.js';
 
 
-
 @Component({
     selector: 'app-dashboard',
     standalone: true,

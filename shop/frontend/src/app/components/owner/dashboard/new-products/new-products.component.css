@@ -1,3 +1,24 @@
+.card {
+    background: #fff;
+    border: 1px solid rgba(0, 0, 0, .08);
+    border-radius: 12px;
+    padding: 16px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, .04);
+}
+
+.card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 8px;
+}
+
+.card h3 {
+    margin: 0;
+    font-size: 16px;
+}
+
 .new-products ul {
     list-style: none;
     margin: 0;
@@ -9,7 +30,7 @@
     align-items: center;
     gap: 12px;
     padding: 10px 0;
-    border-bottom: 1px solid var(--border);
+    border-bottom: 1px solid rgba(0, 0, 0, .08);
 }
 
 .new-products li:last-child {
@@ -36,6 +57,6 @@
 }
 
 .new-products .date {
-    color: var(--muted);
+    color: #666;
     font-size: 13px;
 }
