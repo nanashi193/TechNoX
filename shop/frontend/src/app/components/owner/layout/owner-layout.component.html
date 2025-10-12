@@ -4,7 +4,7 @@
         <a class="brand" routerLink="/owner/dashboard">TechNoX owner</a>
 
         <nav class="menu">
-            <a routerLink="/owner/dashboard" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}">
+            <a routerLink="/owner/dashboard" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
                 <span class="dot"></span> Tổng quan
             </a>
             <a routerLink="/owner/products" routerLinkActive="active">
@@ -23,23 +23,8 @@
         </div>
     </aside>
 
-    <!-- Main -->
+    <!-- Content -->
     <main class="owner-main">
-        <!-- Topbar -->
-        <header class="topbar">
-            <div class="search">
-                <input type="text" placeholder="Tìm kiếm (⌘/Ctrl + K)" />
-            </div>
-            <div class="actions">
-                <button title="Thông báo">🔔</button>
-                <button title="Cài đặt">⚙️</button>
-                <button title="Đăng xuất" (click)="onLogout()">🚪</button>
-            </div>
-        </header>
-
-        <!-- Content -->
-        <section class="content">
-            <router-outlet></router-outlet>
-        </section>
+        <router-outlet></router-outlet>
     </main>
 </div>

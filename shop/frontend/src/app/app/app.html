@@ -1,1 +1,3 @@
+<app-site-header *ngIf="!isOwner()"></app-site-header>
 <router-outlet></router-outlet>
+<app-site-footer *ngIf="!isOwner()"></app-site-footer>
