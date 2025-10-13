@@ -1,20 +1,22 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, of, delay } from 'rxjs';
+import { Observable, of, delay, BehaviorSubject } from 'rxjs';
+import { jwtDecode } from 'jwt-decode';
 
-export interface LoginRequest  { username: string; password: string; }
+export interface LoginRequest  { email: string; password: string; }
 export interface SignupRequest { username: string; email: string; password: string; }
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
-    private baseUrl = '/api/auth'; // doi theo backend
+    private baseUrl = 'http://localhost:8080/api/v1/users'; // đổi theo backend
+
+    private currentUserSubject = new BehaviorSubject<any>(this.getUserFromToken());
+    currentUser$ = this.currentUserSubject.asObservable();
 
     constructor(private http: HttpClient) {}
 
     login(body: LoginRequest): Observable<{token: string}> {
-        //co backend thi dung
-        // return this.http.post<{token:string}>(`${this.baseUrl}/login`, body);
-        return of({ token: 'fake-jwt' }).pipe(delay(800)); // MOCK
+        return this.http.post<{token: string}>(`${this.baseUrl}/login`, body);
     }
 
     signup(body: SignupRequest): Observable<void> {
@@ -27,39 +29,27 @@ export class AuthService {
         return of(void 0).pipe(delay(800)); // MOCK
     }
 
-    // --------
-    get token(): string | null {
-        return localStorage.getItem('access_token');
+    saveToken(token: string) {
+        localStorage.setItem('token', token);
+        const user = this.decodeToken(token);
+        this.currentUserSubject.next(user);
     }
 
-    setToken(token: string) {
-        localStorage.setItem('access_token', token);
+    logout() {
+        localStorage.removeItem('token');
+        this.currentUserSubject.next(null);
     }
 
-    clearToken() {
-        localStorage.removeItem('access_token');
-    }
-
-    getCurrentUser(): any {
-        const token = this.token;
-        if (!token || !token.includes('.')) return null;
+    private decodeToken(token: string) {
         try {
-            const payload = JSON.parse(atob(token.split('.')[1]));
-            return payload; // { sub, email, roles, exp, ... }
+            return jwtDecode(token);
         } catch {
             return null;
         }
     }
 
-    hasRole(role: string): boolean {
-        const user = this.getCurrentUser();
-        return user?.roles?.includes(role);
-    }
-
-    isLoggedIn(): boolean {
-        const user = this.getCurrentUser();
-        if (!user) return false;
-        if (user.exp && Date.now() / 1000 > user.exp) return false;
-        return true;
+    private getUserFromToken() {
+        const token = localStorage.getItem('token');
+        return token ? this.decodeToken(token) : null;
     }
 }
