@@ -6,7 +6,7 @@
     --bs-body-font-family: var(--font-sans);
 }
 
-/* 3) Reset & base */
+/* Reset & base */
 html {
     box-sizing: border-box;
     /* font smoothing cho toàn app */
@@ -21,13 +21,17 @@ html, body {
     margin: 0;
     padding: 0;
 }
+html, body { background:#ffffff; color:#1f1f1f; margin:0; padding:0; }
+
+/* admin nền xám */
+body.admin-scope { background:#f3f4f6; }
 
 body {
     font-family: var(--font-sans, sans-serif);
     line-height: 1.5;            /* đọc dễ */
     text-rendering: optimizeLegibility;
     /* (tuỳ chọn) nền mặc định đen để thấy rõ khi ảnh chưa load */
-    background: #000;
+    /*background: #000;*/
 }
 
 /* 4) Khung app mặc định phủ đủ chiều cao,

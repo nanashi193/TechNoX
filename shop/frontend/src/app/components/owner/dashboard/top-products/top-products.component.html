@@ -1,0 +1,49 @@
+<div class="card top-products">
+    <div class="card-header">
+        <h3>{{title}}</h3>
+        <a class="link" routerLink="/owner/products">Xem tất cả</a>
+    </div>
+    <div class="table-wrap">
+        <table class="tp-table">
+            <colgroup>
+                <col style="width:40%">
+                <col style="width:14%">
+                <col style="width:12%">
+                <col style="width:12%">
+                <col style="width:22%">
+            </colgroup>
+
+            <thead>
+            <tr>
+                <th class="col-item">Tên sản phẩm</th>
+                <th class="col-change">Biến động</th>
+                <th class="col-price">Giá</th>
+                <th class="col-sold">Đã bán</th>
+                <th class="col-sales">Tổng</th>
+            </tr>
+            </thead>
+
+            <tbody>
+            <tr *ngFor="let p of items">
+                <td class="col-item item">
+                    <img [src]="p.image" alt="" class="thumb"/>
+                    <span class="name">{{ p.name }}</span>
+                </td>
+
+                <td class="col-change change"
+                    [class.positive]="p.changePct > 0"
+                    [class.negative]="p.changePct < 0">
+                    <lucide-icon [name]="p.changePct > 0 ? 'trending-up' : 'trending-down'"></lucide-icon>
+                    <span class="pct">{{ p.changePct | number:'1.0-0' }}%</span>
+                </td>
+
+                <td class="col-price num">${{ p.price }}</td>
+
+                <td class="col-sold num muted">{{ p.sold | number }}</td>
+
+                <td class="col-sales num strong">${{ p.sales | number:'1.2-2' }}</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
