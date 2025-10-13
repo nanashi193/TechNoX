@@ -2,6 +2,7 @@ package com.g5.techdevices.techstore.services;
 
 import com.g5.techdevices.techstore.components.JwtTokenUtil;
 import com.g5.techdevices.techstore.dto.UserDTO;
+import com.g5.techdevices.techstore.dto.UserUpdateDTO;
 import com.g5.techdevices.techstore.entity.users.Role;
 import com.g5.techdevices.techstore.entity.users.User;
 import com.g5.techdevices.techstore.exceptions.DataNotFoundException;
@@ -10,13 +11,17 @@ import com.g5.techdevices.techstore.repositories.RoleRepository;
 import com.g5.techdevices.techstore.repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @Service
@@ -66,6 +71,46 @@ public class UserService implements IUserService{
     }
 
     @Override
+    public List<User> getAllUsers() throws DataNotFoundException {
+        // Lấy user đang đăng nhập hiện tại
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String currentEmail = authentication.getName();
+        User currentUser = userRepository.findByEmail(currentEmail)
+                .orElseThrow(() -> new DataNotFoundException("Current user not found."));
+
+        boolean isAdmin = currentUser.getRole().getName().equalsIgnoreCase(Role.ADMIN);
+        boolean isOwner = currentUser.getRole().getName().equalsIgnoreCase(Role.OWNER);
+
+        if (!(isAdmin || isOwner)) {
+            throw new AccessDeniedException("You don't have permission to get list user.");
+        }
+        return userRepository.findAll();
+    }
+
+    @Override
+    public User updateUser(Long id, UserUpdateDTO userDTO) throws DataNotFoundException {
+        User existingUser = userRepository.findById(id).orElseThrow(() ->
+                new DataNotFoundException("Can not find User with id:" +id));
+        // Lấy user đang đăng nhập hiện tại
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String currentEmail = authentication.getName();
+        User currentUser = userRepository.findByEmail(currentEmail)
+                .orElseThrow(() -> new DataNotFoundException("Current user not found."));
+
+        boolean isAdmin = currentUser.getRole().getName().equalsIgnoreCase(Role.ADMIN);
+        boolean isOwner = currentUser.getRole().getName().equalsIgnoreCase(Role.OWNER);
+        boolean isSelf = Objects.equals(currentUser.getId(), existingUser.getId());
+
+        if (!(isAdmin || isOwner || isSelf)) {
+            throw new AccessDeniedException("You don't have permission to update this user.");
+        }
+        existingUser.setFullName(userDTO.getFullName());
+        existingUser.setPhoneNumber(userDTO.getPhoneNumber());
+
+        return userRepository.save(existingUser);
+    }
+
+    @Override
     public String login(String email, String password) throws Exception {
         Optional<User> optionalUser =  userRepository.findByEmail(email);
         if(optionalUser.isEmpty()){
@@ -88,10 +133,5 @@ public class UserService implements IUserService{
             throw new BadCredentialsException("Invalid email or password");
         }
         return jwtTokenUtil.generateToken(existingUser);
-    }
-
-    @Override
-    public List<User> getAllUsers() {
-        return userRepository.findAll();
     }
 }

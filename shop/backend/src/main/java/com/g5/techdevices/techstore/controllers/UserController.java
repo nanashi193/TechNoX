@@ -1,6 +1,8 @@
 package com.g5.techdevices.techstore.controllers;
 
+import com.g5.techdevices.techstore.dto.UserUpdateDTO;
 import com.g5.techdevices.techstore.entity.products.Category;
+import com.g5.techdevices.techstore.exceptions.DataNotFoundException;
 import com.g5.techdevices.techstore.services.IUserService;
 import com.g5.techdevices.techstore.dto.UserDTO;
 import com.g5.techdevices.techstore.dto.UserLoginDTO;
@@ -51,10 +53,27 @@ public class UserController {
     public ResponseEntity<List<User>> getAllUsers(
             @RequestParam("page") int page,
             @RequestParam("limit") int limit
-    ){
+    ) throws DataNotFoundException {
         List<User> users = userService.getAllUsers();
         return ResponseEntity.ok(users);
     }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<?> updateUser(@PathVariable Long id,
+                                        @Valid @RequestBody UserUpdateDTO userUpdateDTO) {
+        try {
+            User updatedUser = userService.updateUser(id, userUpdateDTO);
+            return ResponseEntity.ok(Map.of(
+                    "message", "User updated successfully",
+                    "user", updatedUser
+            ));
+        } catch (DataNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
+    }
+
     @PostMapping("/login")
     public ResponseEntity<Map<String, String>> login(
             @Valid @RequestBody UserLoginDTO userLoginDTO){
