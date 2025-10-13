@@ -3,27 +3,29 @@ spring:
     name: techstore
 
   datasource:
-    url: "jdbc:sqlserver://localhost:1433;databaseName=TEStore;encrypt=true;trustServerCertificate=true"
+    url: jdbc:sqlserver://localhost:1433;databaseName=TEStore;encrypt=true;trustServerCertificate=true
     username: sa
-    password: "12345"
+    password: 12345
 
   jpa:
-    show-sql: true
     hibernate:
-      ddl-auto: update
       naming:
         physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+      ddl-auto: none
+    show-sql: true
     database-platform: org.hibernate.dialect.SQLServerDialect
 
-  servlet:
-    multipart:
-      max-file-size: 10MB
-      max-request-size: 50MB
+  autoconfigure:
+    exclude: org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration
 
-server:
-  port: 8088
+servlet:
+  multipart:
+    max-file-size: 10MB
+    max-request-size: 50MB
 
-# d�ng trong @RequestMapping("${api.prefix}/products")
 api:
-  prefix: /api/v1
+  prefix: api/v1
 
+jwt:
+  secretKey: QFj6plpOzUysQzNFGQwdZRMpebEpCicqSknkcg2Kx0E=
+  expiration: 86400000
