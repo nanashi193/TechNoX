@@ -1,4 +1,4 @@
-package com.g5.techdevices.techstore.Services;
+package com.g5.techdevices.techstore.services;
 
 import com.g5.techdevices.techstore.dto.UserDTO;
 import com.g5.techdevices.techstore.entity.users.User;

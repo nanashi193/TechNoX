@@ -9,6 +9,7 @@ import io.jsonwebtoken.io.Encoders;
 import io.jsonwebtoken.security.Keys;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 import java.security.SecureRandom;
 import java.security.InvalidParameterException;
@@ -65,5 +66,14 @@ public class JwtTokenUtil {
     private boolean isTokenExpired(String token) {
          Date expirationDate = this.extractClaim(token, Claims::getExpiration);
          return expirationDate.before(new Date());
+    }
+    public String extractEmail(String token) {
+        return extractClaim(token, Claims::getSubject);
+    }
+    //Kiểm tra xem token còn hạng ko
+    public boolean validateToken(String token, UserDetails userDetails) {
+        String email = extractEmail(token);
+        return (email.equals(userDetails.getUsername())
+                && !isTokenExpired(token));
     }
 }

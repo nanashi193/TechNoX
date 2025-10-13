@@ -1,10 +1,11 @@
-package com.g5.techdevices.techstore.Services;
+package com.g5.techdevices.techstore.services;
 
 import com.g5.techdevices.techstore.components.JwtTokenUtil;
 import com.g5.techdevices.techstore.dto.UserDTO;
 import com.g5.techdevices.techstore.entity.users.Role;
 import com.g5.techdevices.techstore.entity.users.User;
 import com.g5.techdevices.techstore.exceptions.DataNotFoundException;
+import com.g5.techdevices.techstore.exceptions.PermissionDenyException;
 import com.g5.techdevices.techstore.repositories.RoleRepository;
 import com.g5.techdevices.techstore.repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -32,6 +33,11 @@ public class UserService implements IUserService{
         if(userRepository.existsByEmail(email)){
             throw new DataIntegrityViolationException("Email already exists");
         }
+        Role role = roleRepository.findById(userDTO.getRoleId())
+                .orElseThrow(() ->  new DataNotFoundException("Role is not found."));
+        if(role.getName().toUpperCase().equals(Role.ADMIN)){
+            throw new PermissionDenyException("You can not register an admin account.");
+        }
         boolean genderValue = "Nam".equalsIgnoreCase(userDTO.getGender());
         User newUser = User.builder()
                 .fullName(userDTO.getFullName())
@@ -46,8 +52,6 @@ public class UserService implements IUserService{
                 .googleAccountId(userDTO.getGoogleAccountId()
                         !=null ? userDTO.getGoogleAccountId() : "0")
                 .build();
-        Role role = roleRepository.findById(3L)
-                .orElseThrow(() ->  new DataNotFoundException("Role is not found."));
         newUser.setRole(role);
         //Kiểm tra nếu có accountId thì ko yêu cầu mât khẩu
         if(userDTO.getFacebookAccountId() == null && userDTO.getGoogleAccountId() == null) {

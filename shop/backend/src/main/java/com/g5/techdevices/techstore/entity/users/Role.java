@@ -20,12 +20,17 @@ public class Role {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(name = "Name", nullable = false, unique = true, length = 30)
+    @Column(name = "Name", nullable = false, length = 30)
     private String name;
 
     @OneToMany(mappedBy = "role", fetch = FetchType.LAZY)
     @ToString.Exclude
     @JsonIgnore
     private List<User> users;
+
+    public static String ADMIN = "ADMIN";
+    public static String CUSTOMER = "CUSTOMER";
+    public static String OWNER = "OWNER";
+    public static String STAFF = "STAFF";
 }
 

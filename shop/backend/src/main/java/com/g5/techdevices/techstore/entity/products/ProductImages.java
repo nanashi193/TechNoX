@@ -17,6 +17,7 @@ public class ProductImages {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
+    @Column(name = "ImageUrl")
     private String imgUrl;
 
     @ManyToOne(fetch = FetchType.LAZY)

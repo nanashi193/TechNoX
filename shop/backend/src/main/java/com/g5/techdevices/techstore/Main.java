@@ -7,23 +7,13 @@ import jakarta.persistence.Persistence;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 import java.util.List;
-
-@SpringBootApplication
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 public class Main
+    //Tao pass thu cong
 {
-	public static void main(String[] args)
-	{
-//        getAllProducts();
-    }
-    public static void getAllProducts()
-    {
-        EntityManagerFactory emf = Persistence.createEntityManagerFactory("techstorePU");
-        EntityManager em = emf.createEntityManager();
-        List<Product> ds = em.createQuery("FROM Product", Product.class).getResultList();
-        for (Product p : ds)
-        {
-            System.out.println(p);
+        public static void main(String[] args) {
+            BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+            String hash = encoder.encode("123456789");
+            System.out.println(hash);
         }
-        em.close();
-    }
 }
