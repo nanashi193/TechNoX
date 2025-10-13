@@ -1,5 +1,6 @@
 package com.g5.techdevices.techstore.controllers;
 
+import com.g5.techdevices.techstore.entity.products.Category;
 import com.g5.techdevices.techstore.services.IUserService;
 import com.g5.techdevices.techstore.dto.UserDTO;
 import com.g5.techdevices.techstore.dto.UserLoginDTO;
@@ -45,6 +46,14 @@ public class UserController {
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
+    }
+    @GetMapping("")
+    public ResponseEntity<List<User>> getAllUsers(
+            @RequestParam("page") int page,
+            @RequestParam("limit") int limit
+    ){
+        List<User> users = userService.getAllUsers();
+        return ResponseEntity.ok(users);
     }
     @PostMapping("/login")
     public ResponseEntity<Map<String, String>> login(

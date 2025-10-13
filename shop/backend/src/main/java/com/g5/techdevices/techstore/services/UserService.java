@@ -16,6 +16,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -68,7 +69,7 @@ public class UserService implements IUserService{
     public String login(String email, String password) throws Exception {
         Optional<User> optionalUser =  userRepository.findByEmail(email);
         if(optionalUser.isEmpty()){
-            throw new DataNotFoundException("Invalid enmail/password");
+            throw new DataNotFoundException("Invalid email/password");
         }
         User existingUser = optionalUser.get();
         if(existingUser.getFacebookAccountId() == null &&
@@ -77,12 +78,20 @@ public class UserService implements IUserService{
                  throw new BadCredentialsException("Invalid email or password");
             }
         }
-        UsernamePasswordAuthenticationToken authenticationToken =
-                new UsernamePasswordAuthenticationToken(
-                        email, password,
-                        existingUser.getAuthorities());
-        authenticationManager.authenticate(authenticationToken);
+        try {
+            UsernamePasswordAuthenticationToken authenticationToken =
+                    new UsernamePasswordAuthenticationToken(
+                            email, password,
+                            existingUser.getAuthorities());
+            authenticationManager.authenticate(authenticationToken);
+        }catch (BadCredentialsException e){
+            throw new BadCredentialsException("Invalid email or password");
+        }
         return jwtTokenUtil.generateToken(existingUser);
     }
 
+    @Override
+    public List<User> getAllUsers() {
+        return userRepository.findAll();
+    }
 }

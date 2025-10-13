@@ -1,6 +1,7 @@
 package com.g5.techdevices.techstore.configurations;
 
 
+import com.g5.techdevices.techstore.entity.users.Role;
 import com.g5.techdevices.techstore.filters.JwtTokenFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -43,12 +44,15 @@ public class WebSecurityConfig {
                                     String.format("%s/categories", apiPrefix))
                             .permitAll()
 
+                            .requestMatchers(GET,
+                                    String.format("%s/users", apiPrefix)).hasAnyRole(Role.ADMIN, Role.OWNER)
+
                             .requestMatchers(PUT,
-                                    String.format("%s/categories/**", apiPrefix)).hasRole("USER.")
+                                    String.format("%s/categories/**", apiPrefix)).hasAnyRole(Role.ADMIN, Role.OWNER)
                             .requestMatchers(POST,
-                                    String.format("%s/categories", apiPrefix)).hasRole("ADMIN")
+                                    String.format("%s/categories", apiPrefix)).hasAnyRole(Role.ADMIN, Role.OWNER)
                             .requestMatchers(DELETE,
-                                    String.format("%s/categories/**", apiPrefix)).hasRole("ADMIN")
+                                    String.format("%s/categories/**", apiPrefix)).hasAnyRole(Role.ADMIN, Role.OWNER)
                             .anyRequest().authenticated();
 
                 });
@@ -57,10 +61,10 @@ public class WebSecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.addAllowedOrigin("http://localhost:4200"); // Angular dev
+        configuration.addAllowedOrigin("http://localhost:4200");
         configuration.addAllowedHeader("*");
         configuration.addAllowedMethod("*");
-        configuration.setAllowCredentials(true); // Cho phép gửi cookies/token nếu có
+        configuration.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
