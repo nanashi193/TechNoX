@@ -26,12 +26,23 @@
             />
             <span class="brand__name">TechNoX</span>
         </a>
-
+<!--        <div class="header-actions">-->
+<!--            <a class="link-auth" routerLink="/login">Đăng nhập</a>-->
+<!--            <a class="btn btn&#45;&#45;accent btn-auth" routerLink="/signup">Đăng ký</a>-->
+<!--            <a class="cart" routerLink="/cart" aria-label="Giỏ hàng">Giỏ hàng (0)</a>-->
+<!--        </div>-->
         <div class="header-actions">
-            <a class="link-auth" routerLink="/login">Đăng nhập</a>
-            <a class="btn btn--accent btn-auth" routerLink="/signup">Đăng ký</a>
+            @if (currentUser$ | async; as user) {
+                <span class="welcome">Xin chào, {{ user.fullName || user.sub }}</span>
+                <button class="btn btn--accent btn-auth" (click)="logout()">Đăng xuất</button>
+            } @else {
+                <a class="link-auth" routerLink="/login">Đăng nhập</a>
+                <a class="btn btn--accent btn-auth" routerLink="/signup">Đăng ký</a>
+            }
+
             <a class="cart" routerLink="/cart" aria-label="Giỏ hàng">Giỏ hàng (0)</a>
         </div>
+
     </div>
 </header>
 

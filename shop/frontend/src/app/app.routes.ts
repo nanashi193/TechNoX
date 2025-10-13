@@ -4,6 +4,7 @@ import { SignupComponent } from './components/signup/signup.component';
 import { HomeComponent } from './components/home/home.component';
 import {ForgotPasswordComponent} from "./components/forgot-password/forgot-password.component";
 import {ProductPageComponent} from "./components/product/product-page.component";
+import {ownerGuard} from "./guards/owner.guard";
 
 export const routes: Routes = [
     { path: '', redirectTo: 'home', pathMatch: 'full' },  // vào intro trước
@@ -18,7 +19,6 @@ export const routes: Routes = [
         loadComponent: () =>
             import('./components/detail-product/detail-product.component').then(m => m.DetailProductComponent),
     },
-
     {path: 'legal',
         loadComponent: () => import('./components/legal/legal-layout/legal-layout.component')
             .then(m => m.LegalLayoutComponent),
@@ -40,6 +40,19 @@ export const routes: Routes = [
                 title: 'Hủy giao dịch, đổi trả | TechNoX' },
             { path: '', redirectTo: 'about', pathMatch: 'full' }
         ]},
+    {
+        path: 'owner',
+        // canActivate: [ownerGuard], TODO co token ADMIN thi bat
+        loadComponent: () => import('./components/owner/layout/owner-layout.component').then(m => m.OwnerLayoutComponent),
+        children: [
+            { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
+            { path: 'dashboard', loadComponent: () => import('./components/owner/dashboard/dashboard.component').then(m => m.DashboardComponent) },
+            // các mục còn lại sẽ làm sau
+            // { path: 'products', loadComponent: () => import('../admin/products/products-list.component').then(m => m.ProductsList) },
+            // { path: 'orders', loadComponent: () => import('../admin/orders/orders-list.component').then(m => m.OrdersList) },
+            // { path: 'users', loadComponent: () => import('../admin/users/users-list.component').then(m => m.UsersList) },
+        ]
+    },
     { path: '**', redirectTo: 'home' },
 
 ];
