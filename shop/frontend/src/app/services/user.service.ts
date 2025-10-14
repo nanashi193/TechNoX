@@ -11,6 +11,8 @@ import {environment} from "../environments/environment";
 export class UserService {
     private apiRegister = `${environment.apiBaseUrl}/users/register`;
     private apiLogin = `${environment.apiBaseUrl}/users/login`;
+    private apiVerifyEmail = `${environment.apiBaseUrl}/users/verify-email`;
+    private apiResendEmail = `${environment.apiBaseUrl}/users/resend-verification`;
 
     private apiConfig = {
         headers: this.createHeaders(),

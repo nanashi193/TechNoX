@@ -146,8 +146,7 @@
         </div>
     </div>
     <!-- modal success -->
-    <div class="modal-backdrop" *ngIf="signupSuccess"></div>
-
+    <div class="modal-backdrop" *ngIf="signupSuccess" (click)="goVerify()"></div>
     <div class="modal" *ngIf="signupSuccess" role="dialog" aria-modal="true" aria-labelledby="successTitle">
         <div class="modal-card">
             <div class="anim-wrap">
@@ -161,10 +160,13 @@
 
 
             <h3 id="successTitle">Tạo tài khoản thành công 🎉</h3> <br>
-            <p>Bạn sẽ được chuyển về trang Đăng nhập sau <strong>{{ countdown }}s</strong>.</p>
+            <p>Chúng tôi đã gửi email xác minh đến <strong>{{ pendingEmail }}</strong>.
+                Hãy kiểm tra hộp thư và làm theo hướng dẫn.</p>
+
+            <p class="small muted" style="margin-top:6px">Tự chuyển sau {{ countdown }}s…</p>
 
             <div class="actions">
-                <button type="button" class="primary-btn" (click)="goLoginNow()">Về trang Đăng nhập ngay</button>
+                <button type="button" class="primary-btn" (click)="goVerify()">Đi tới xác minh</button>
             </div>
         </div>
     </div>
