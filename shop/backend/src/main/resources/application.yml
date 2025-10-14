@@ -26,13 +26,16 @@ spring:
     host: smtp.gmail.com
     port: 587
     username: trungdinh.dev@gmail.com
-    password: xdjv muxb paqe zazz # <-- App password, không phải mật khẩu thật
+    password: bpwy zooq odye mnqk
     properties:
       mail:
         smtp:
           auth: true
           starttls:
             enable: true
+          connectiontimeout: 5000
+          timeout: 5000
+          writetimeout: 5000
 
 api:
   prefix: api/v1
@@ -41,5 +44,3 @@ jwt:
   secretKey: QFj6plpOzUysQzNFGQwdZRMpebEpCicqSknkcg2Kx0E=
   expiration: 86400000
 
-support:
-  email: no-reply@techstore.com

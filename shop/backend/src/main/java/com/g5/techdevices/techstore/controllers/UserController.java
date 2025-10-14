@@ -2,7 +2,9 @@ package com.g5.techdevices.techstore.controllers;
 
 import com.g5.techdevices.techstore.dto.UserUpdateDTO;
 import com.g5.techdevices.techstore.entity.products.Category;
+import com.g5.techdevices.techstore.entity.users.PasswordResetToken;
 import com.g5.techdevices.techstore.exceptions.DataNotFoundException;
+import com.g5.techdevices.techstore.repositories.PasswordTokenRepository;
 import com.g5.techdevices.techstore.responses.GenericResponse;
 import com.g5.techdevices.techstore.services.IUserService;
 import com.g5.techdevices.techstore.dto.UserDTO;
@@ -23,10 +25,8 @@ import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.mail.SimpleMailMessage;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.UUID;
+
+import java.util.*;
 
 @CrossOrigin(origins = "http://localhost:4200")
 @RestController
@@ -121,8 +121,9 @@ public class UserController {
         if (user == null) {
             throw new UsernameNotFoundException("Cannot find user with email " + userEmail);
         }
-        String token = UUID.randomUUID().toString();
-        userService.createPasswordResetTokenForUser(user, token);
+//        String token = UUID.randomUUID().toString();
+//        userService.createPasswordResetTokenForUser(user, token);
+        String token = userService.generatePasswordResetToken(user);
         mailSender.send(constructResetTokenEmail(getAppUrl(request),
                 request.getLocale(), token, user));
         return new GenericResponse(
@@ -131,7 +132,7 @@ public class UserController {
     }
     private SimpleMailMessage constructResetTokenEmail(
             String contextPath, Locale locale, String token, User user) {
-        String url = contextPath + "http://localhost:4200/reset-password?token=" + token;
+        String url = "http://localhost:4200/reset-password?token=" + token;
         String message = messages.getMessage("message.resetPassword",
                 null, locale);
         return constructEmail("Reset Password", message + " \r\n" + url, user);
@@ -149,5 +150,4 @@ public class UserController {
     private String getAppUrl(HttpServletRequest request) {
         return request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort() + request.getContextPath();
     }
-
 }
