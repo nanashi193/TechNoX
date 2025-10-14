@@ -9,6 +9,9 @@ import java.util.List;
 
 public interface IUserService {
     User createUser(UserDTO userDTO) throws DataNotFoundException;
+
+    void deleteUser(Long id);
+
     String login(String email, String password) throws Exception;
     List<User> getAllUsers() throws DataNotFoundException;
     User updateUser(Long id, UserUpdateDTO userDTO) throws DataNotFoundException;

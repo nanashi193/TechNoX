@@ -73,7 +73,11 @@ public class UserController {
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }
     }
-
+    @DeleteMapping("/{id}")
+    public ResponseEntity<String> deleteUser(@Valid @PathVariable Long id) {
+        userService.deleteUser(id);
+        return ResponseEntity.ok("User has been deleted successfully");
+    }
     @PostMapping("/login")
     public ResponseEntity<Map<String, String>> login(
             @Valid @RequestBody UserLoginDTO userLoginDTO){

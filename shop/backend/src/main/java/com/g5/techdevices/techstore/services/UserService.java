@@ -109,6 +109,15 @@ public class UserService implements IUserService{
 
         return userRepository.save(existingUser);
     }
+    @Override
+    public void deleteUser(Long id){
+        User user = userRepository.findById(id).orElse(null);
+        if(user != null){
+            //Xoa mem
+            user.setIsActive(false);
+            userRepository.save(user);
+        }
+    }
 
     @Override
     public String login(String email, String password) throws Exception {
