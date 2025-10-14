@@ -181,7 +181,6 @@ public class UserController {
     private String getAppUrl(HttpServletRequest request) {
         return request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort() + request.getContextPath();
     }
-<<<<<<< HEAD
 //    @PostMapping("/resend-verification")
 //    public ResponseEntity<?> resendVerification(@RequestBody Map<String, String> body) {
 //        String email = body.get("email");
@@ -229,8 +228,6 @@ static class EmailDTO {
     @jakarta.validation.constraints.NotBlank
     @jakarta.validation.constraints.Email
     private String email;
-=======
->>>>>>> origin/develop
 }
 }
 
