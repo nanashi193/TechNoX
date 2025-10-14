@@ -1,0 +1,71 @@
+
+<section class="cart">
+    <h1 class="cart__title">Giỏ hàng</h1>
+
+    <div *ngIf="items.length; else empty" class="cart__grid">
+        <div class="cart__list">
+            <div class="cart__row cart__row--head">
+                <div>Sản phẩm</div>
+                <div class="center">Giá</div>
+                <div class="center">Số lượng</div>
+                <div class="right">Tạm tính</div>
+                <div></div>
+            </div>
+
+            <div *ngFor="let item of items; trackBy: trackById" class="cart__row">
+                <div class="cart__product">
+                    <img *ngIf="item.product.imageUrl" [src]="item.product.imageUrl" alt="" />
+                    <div>
+                        <div class="name">{{ item.product.name }}</div>
+                        <div class="sku" *ngIf="item.product.sku">SKU: {{ item.product.sku }}</div>
+                    </div>
+                </div>
+
+                <div class="center">{{ item.product.price | currency:'VND':'symbol':'1.0-0' }}</div>
+
+                <div class="qty">
+                    <button (click)="dec(item)" [disabled]="item.quantity <= 1">−</button>
+                    <input type="number"
+                           [value]="item.quantity"
+                           (change)="updateQty(item, $any($event.target).valueAsNumber)"
+                           min="1">
+                    <button (click)="inc(item)">+</button>
+                </div>
+
+                <div class="right strong">{{ item.subtotal | currency:'VND':'symbol':'1.0-0' }}</div>
+
+                <div class="right">
+                    <button class="link danger" (click)="remove(item)">Xóa</button>
+                </div>
+            </div>
+        </div>
+
+        <aside class="cart__summary">
+            <h2>Tóm tắt</h2>
+            <div class="sum-row">
+                <span>Tổng số lượng</span>
+                <span>{{ totalQuantity }}</span>
+            </div>
+            <div class="sum-row">
+                <span>Tổng tạm tính</span>
+                <span class="strong">{{ totalAmount | currency:'VND':'symbol':'1.0-0' }}</span>
+            </div>
+            <button class="btn-primary" [disabled]="!items.length">Thanh toán</button>
+            <button class="btn-ghost" (click)="clear()">Xóa toàn bộ</button>
+            <p class="note">Giá đã bao gồm VAT (nếu áp dụng).</p>
+        </aside>
+    </div>
+
+    <ng-template #empty>
+        <div class="empty">
+            <p>Giỏ hàng của bạn đang trống.</p>
+            <div class="quick-add">
+                <span>Thêm nhanh để test:</span>
+                <button *ngFor="let p of demoProducts" (click)="addQuick(p)">
+                    + {{ p.name }} ({{ p.price | currency:'VND':'symbol':'1.0-0' }})
+                </button>
+            </div>
+            <a routerLink="/home" class="btn-primary">Tiếp tục mua sắm</a>
+        </div>
+    </ng-template>
+</section>
