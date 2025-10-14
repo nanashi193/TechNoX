@@ -15,6 +15,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
+import org.springframework.context.NoSuchMessageException;
 import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -37,6 +38,7 @@ public class UserController {
     private final Environment env;
     private final JavaMailSender mailSender;
     private final MessageSource messages;
+    private final PasswordTokenRepository passwordTokenRepository;
     @Autowired
     private PasswordEncoder passwordEncoder;
 
@@ -117,18 +119,51 @@ public class UserController {
     @PostMapping("/resetPassword")
     public GenericResponse resetPassword(HttpServletRequest request,
                                          @RequestParam("email") String userEmail) throws DataNotFoundException {
-        User user = userService.findUserByEmail(userEmail);
-        if (user == null) {
-            throw new UsernameNotFoundException("Cannot find user with email " + userEmail);
+        try {
+            // 1️⃣ Lấy user
+            User user = userService.findUserByEmail(userEmail);
+            if (user == null) {
+                return new GenericResponse("Cannot find user with email " + userEmail);
+            }
+
+            // 2️⃣ Tạo token, đảm bảo chỉ 1 token tồn tại
+            List<PasswordResetToken> existingTokens = passwordTokenRepository
+                    .findByUserAndExpireDateAfter(user, new Date());
+            existingTokens.forEach(passwordTokenRepository::delete); // xóa token cũ
+
+            String token = UUID.randomUUID().toString();
+            PasswordResetToken myToken = new PasswordResetToken(token, user);
+            passwordTokenRepository.save(myToken);
+
+            // 3️⃣ Tạo mail
+            String url = "http://localhost:4200/reset-password?token=" + token;
+            String message;
+            try {
+                message = messages.getMessage("message.resetPassword", null, request.getLocale());
+            } catch (NoSuchMessageException e) {
+                message = "Please click the link below to reset your password:";
+            }
+
+            SimpleMailMessage email = new SimpleMailMessage();
+            email.setTo(user.getEmail());
+            email.setSubject("Reset Password");
+            email.setText(message + "\n" + url);
+            email.setFrom(env.getProperty("support.email", "noreply@example.com"));
+
+            try {
+                mailSender.send(email);
+            } catch (Exception e) {
+                e.printStackTrace();
+                return new GenericResponse("Mail send failed: " + e.getMessage());
+            }
+
+            // 4️⃣ Trả về JSON thành công
+            return new GenericResponse("Reset password email has been sent");
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new GenericResponse("Exception: " + e.getMessage());
         }
-//        String token = UUID.randomUUID().toString();
-//        userService.createPasswordResetTokenForUser(user, token);
-        String token = userService.generatePasswordResetToken(user);
-        mailSender.send(constructResetTokenEmail(getAppUrl(request),
-                request.getLocale(), token, user));
-        return new GenericResponse(
-                messages.getMessage("message.resetPasswordEmail", null,
-                        request.getLocale()));
     }
     private SimpleMailMessage constructResetTokenEmail(
             String contextPath, Locale locale, String token, User user) {
@@ -147,6 +182,7 @@ public class UserController {
         email.setFrom(env.getProperty("support.email"));
         return email;
     }
+
     private String getAppUrl(HttpServletRequest request) {
         return request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort() + request.getContextPath();
     }
