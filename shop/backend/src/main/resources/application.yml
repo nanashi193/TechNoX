@@ -11,17 +11,28 @@ spring:
     hibernate:
       naming:
         physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
-      ddl-auto: none
+    ddl-auto: none
     show-sql: true
     database-platform: org.hibernate.dialect.SQLServerDialect
 
   autoconfigure:
     exclude: org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration
 
-servlet:
-  multipart:
-    max-file-size: 10MB
-    max-request-size: 50MB
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 50MB
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: trungdinh.dev@gmail.com
+    password: xdjv muxb paqe zazz # <-- App password, không phải mật khẩu thật
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
 
 api:
   prefix: api/v1
@@ -29,18 +40,6 @@ api:
 jwt:
   secretKey: QFj6plpOzUysQzNFGQwdZRMpebEpCicqSknkcg2Kx0E=
   expiration: 86400000
-spring:
-  mail:
-    host: smtp.gmail.com
-    port: 587
-    username: trungdinh.dev@gmail.com
-    password: xdjv muxb paqe zazz //Password app, ko phai pass that
-    properties:
-      mail:
-        smtp:
-          auth: true
-          starttls:
-            enable: true
 
 support:
   email: no-reply@techstore.com
