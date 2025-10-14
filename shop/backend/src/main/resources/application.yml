@@ -29,3 +29,18 @@ api:
 jwt:
   secretKey: QFj6plpOzUysQzNFGQwdZRMpebEpCicqSknkcg2Kx0E=
   expiration: 86400000
+spring:
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: trungdinh.dev@gmail.com
+    password: xdjv muxb paqe zazz //Password app, ko phai pass that
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
+support:
+  email: no-reply@techstore.com

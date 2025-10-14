@@ -1,6 +1,7 @@
 package com.g5.techdevices.techstore.entity.products;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.g5.techdevices.techstore.entity.BaseEntity;
 import com.g5.techdevices.techstore.entity.Cart.CartItem;
 import com.g5.techdevices.techstore.entity.promotions.Promotion;
 import com.g5.techdevices.techstore.entity.Bills.BillDetail;
@@ -16,11 +17,10 @@ import java.util.List;
 
 @AllArgsConstructor
 @NoArgsConstructor
-@Data
 @Entity
 @Builder
 @Table(name = "Product")
-public class Product {
+public class Product extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "ProductId")

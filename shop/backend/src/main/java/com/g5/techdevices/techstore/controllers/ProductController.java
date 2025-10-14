@@ -19,7 +19,7 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("api/v1/products")
+@RequestMapping("${api.prefix}/products")
 
 public class ProductController {
 
@@ -27,6 +27,7 @@ public class ProductController {
             consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> createProduct(
             @Valid @ModelAttribute ProductDTO productDTO,
+//            @RequestPart("file") MultipartFile file,
             BindingResult result){
         try {
             if (result.hasErrors()){
@@ -37,25 +38,28 @@ public class ProductController {
                 return ResponseEntity.badRequest().body(errorMassage);
             }
             List<MultipartFile> files = productDTO.getFiles();
-              files = files ==null ? new ArrayList<MultipartFile>() : files;
+            files = files ==null ? new ArrayList<MultipartFile>() : files;
             for(MultipartFile file : files){
-                //ktra kich thuoc va dinh dang
+                if(file.getSize() == 0){
+                    continue;
+                }
+                    //ktra kich thuoc va dinh dang
                     if(file.getSize() >10 *1024 * 1024){ //10mb
                         return ResponseEntity.status(HttpStatus.PAYLOAD_TOO_LARGE)
-                                .body("File is too large");
+                                .body("File is too large! Max allowed size is 10MB");
                     }
                     String contentType = file.getContentType();
                     if (contentType == null || !contentType.startsWith("image/")) {
                         return ResponseEntity.status(HttpStatus.UNSUPPORTED_MEDIA_TYPE)
                                 .body("File must contain image");
                     }
-                    //luu file va update thumbnaild trong DTO
+                    //luu file va update thumbnail trong DTO
                     String fileName = storeFile(file); //thay the lai code ở đây
                     //luu vào đối tượng product trong DB => sẽ làm sau
             }
-            return ResponseEntity.ok("Product created successfully");
+                return ResponseEntity.ok("Product created successfully");
             }catch (Exception e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
+                return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
     private String storeFile(MultipartFile file) throws IOException {
@@ -65,7 +69,7 @@ public class ProductController {
         String uniqueFilename = UUID.randomUUID().toString() + "_" + fileName;
 
         // duong dan den thu muc muon luu file
-        java.nio.file.Path uploadDir = Paths.get("upload") ;
+        java.nio.file.Path uploadDir = Paths.get("uploads") ;
 
         //check và tạo thư mục nếu nó không tồn tại
         if(!Files.exists(uploadDir)){

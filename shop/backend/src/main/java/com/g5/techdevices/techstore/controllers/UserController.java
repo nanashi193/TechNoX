@@ -3,22 +3,30 @@ package com.g5.techdevices.techstore.controllers;
 import com.g5.techdevices.techstore.dto.UserUpdateDTO;
 import com.g5.techdevices.techstore.entity.products.Category;
 import com.g5.techdevices.techstore.exceptions.DataNotFoundException;
+import com.g5.techdevices.techstore.responses.GenericResponse;
 import com.g5.techdevices.techstore.services.IUserService;
 import com.g5.techdevices.techstore.dto.UserDTO;
 import com.g5.techdevices.techstore.dto.UserLoginDTO;
 import com.g5.techdevices.techstore.entity.users.User;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
+import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
-
+import org.springframework.mail.SimpleMailMessage;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.UUID;
 
 @CrossOrigin(origins = "http://localhost:4200")
 @RestController
@@ -26,6 +34,9 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class UserController {
     private final IUserService userService;
+    private final Environment env;
+    private final JavaMailSender mailSender;
+    private final MessageSource messages;
     @Autowired
     private PasswordEncoder passwordEncoder;
 
@@ -102,4 +113,41 @@ public class UserController {
                     .body(Map.of("error", e.getMessage()));
         }
     }
+
+    @PostMapping("/resetPassword")
+    public GenericResponse resetPassword(HttpServletRequest request,
+                                         @RequestParam("email") String userEmail) throws DataNotFoundException {
+        User user = userService.findUserByEmail(userEmail);
+        if (user == null) {
+            throw new UsernameNotFoundException("Cannot find user with email " + userEmail);
+        }
+        String token = UUID.randomUUID().toString();
+        userService.createPasswordResetTokenForUser(user, token);
+        mailSender.send(constructResetTokenEmail(getAppUrl(request),
+                request.getLocale(), token, user));
+        return new GenericResponse(
+                messages.getMessage("message.resetPasswordEmail", null,
+                        request.getLocale()));
+    }
+    private SimpleMailMessage constructResetTokenEmail(
+            String contextPath, Locale locale, String token, User user) {
+        String url = contextPath + "/user/changePassword?token=" + token;
+        String message = messages.getMessage("message.resetPassword",
+                null, locale);
+        return constructEmail("Reset Password", message + " \r\n" + url, user);
+    }
+
+    private SimpleMailMessage constructEmail(String subject, String body,
+                                             User user) {
+        SimpleMailMessage email = new SimpleMailMessage();
+        email.setSubject(subject);
+        email.setText(body);
+        email.setTo(user.getEmail());
+        email.setFrom(env.getProperty("support.email"));
+        return email;
+    }
+    private String getAppUrl(HttpServletRequest request) {
+        return request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort() + request.getContextPath();
+    }
+
 }

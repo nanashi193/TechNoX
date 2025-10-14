@@ -3,12 +3,14 @@ package com.g5.techdevices.techstore.services;
 import com.g5.techdevices.techstore.components.JwtTokenUtil;
 import com.g5.techdevices.techstore.dto.UserDTO;
 import com.g5.techdevices.techstore.dto.UserUpdateDTO;
+import com.g5.techdevices.techstore.entity.users.PasswordResetToken;
 import com.g5.techdevices.techstore.entity.users.Role;
 import com.g5.techdevices.techstore.entity.users.User;
 import com.g5.techdevices.techstore.exceptions.DataNotFoundException;
 import com.g5.techdevices.techstore.exceptions.PermissionDenyException;
 import com.g5.techdevices.techstore.repositories.RoleRepository;
 import com.g5.techdevices.techstore.repositories.UserRepository;
+import com.g5.techdevices.techstore.repositories.passwordTokenRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.access.AccessDeniedException;
@@ -32,6 +34,7 @@ public class UserService implements IUserService{
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
     private final JwtTokenUtil jwtTokenUtil;
+    private final passwordTokenRepository passwordTokenRepository;
 
     @Override
     public User createUser(UserDTO userDTO) throws DataNotFoundException {
@@ -150,5 +153,13 @@ public class UserService implements IUserService{
             throw new BadCredentialsException("Invalid email or password");
         }
         return jwtTokenUtil.generateToken(existingUser);
+    }
+    public User findUserByEmail(String email) throws DataNotFoundException {
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new DataNotFoundException("User with email " + email + " not found"));
+    }
+    public void createPasswordResetTokenForUser(User user, String token) {
+        PasswordResetToken myToken = new PasswordResetToken(token, user);
+        passwordTokenRepository.save(myToken);
     }
 }

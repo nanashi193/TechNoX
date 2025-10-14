@@ -18,23 +18,18 @@ import java.util.List;
 public class ProductDTO {
     @NotBlank(message = "Title is required!")
     @Size (min = 3, max = 200, message = "Title must be between 3 and 200 characters")
-    private String name;            // nvarchar(255)
-
-    @JsonProperty("product_id")
-    private int productId;// bigint
+    private String name;
 
     @JsonProperty("category_id")
-    private String categoryId;// int
-
-
+    private int categoryId;
 
     @Min(value = 0, message = "Price must be great than or equal to 0")
-    private Double price;       // decimal(18,2)
+    private Double price;
 
-    private String description;     // nvarchar(MAX)
+    @JsonProperty("thumbnail")
+    private String thumbnail;
 
-    private String imageUrl;// nvarchar(1000)
+    private String description;
 
-    private LocalDateTime createdAt; // datetime2(7)
     private List<MultipartFile> files;
 }

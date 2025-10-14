@@ -17,4 +17,7 @@ public interface IUserService {
     String login(String email, String password) throws Exception;
     List<User> getAllUsers() throws DataNotFoundException;
     User updateUser(Long id, UserUpdateDTO userDTO) throws DataNotFoundException;
+    User findUserByEmail(String email) throws DataNotFoundException;
+    void createPasswordResetTokenForUser(User user, String token);
+
 }
