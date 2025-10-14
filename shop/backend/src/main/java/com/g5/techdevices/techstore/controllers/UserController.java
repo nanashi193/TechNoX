@@ -120,13 +120,11 @@ public class UserController {
     public GenericResponse resetPassword(HttpServletRequest request,
                                          @RequestParam("email") String userEmail) throws DataNotFoundException {
         try {
-            // 1️⃣ Lấy user
             User user = userService.findUserByEmail(userEmail);
             if (user == null) {
                 return new GenericResponse("Cannot find user with email " + userEmail);
             }
 
-            // 2️⃣ Tạo token, đảm bảo chỉ 1 token tồn tại
             List<PasswordResetToken> existingTokens = passwordTokenRepository
                     .findByUserAndExpireDateAfter(user, new Date());
             existingTokens.forEach(passwordTokenRepository::delete); // xóa token cũ
@@ -135,7 +133,6 @@ public class UserController {
             PasswordResetToken myToken = new PasswordResetToken(token, user);
             passwordTokenRepository.save(myToken);
 
-            // 3️⃣ Tạo mail
             String url = "http://localhost:4200/reset-password?token=" + token;
             String message;
             try {
@@ -156,8 +153,6 @@ public class UserController {
                 e.printStackTrace();
                 return new GenericResponse("Mail send failed: " + e.getMessage());
             }
-
-            // 4️⃣ Trả về JSON thành công
             return new GenericResponse("Reset password email has been sent");
 
         } catch (Exception e) {
