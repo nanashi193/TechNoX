@@ -75,6 +75,14 @@ CREATE TABLE dbo.Tokens
     FOREIGN KEY (UserId) REFERENCES dbo.Users(UserId)
 )
 GO
+CREATE TABLE PasswordResetToken (
+    Id BIGINT IDENTITY(1,1) PRIMARY KEY,
+    Token NVARCHAR(255) NOT NULL,
+    UserId BIGINT NOT NULL,
+    ExpireDate DATETIME NOT NULL,
+    FOREIGN KEY (UserId) REFERENCES Users(UserId)
+);
+GO
 --Hỗ trợ đăng nhập từ Facebook hoặc Google
 CREATE TABLE SocialAccount
 (

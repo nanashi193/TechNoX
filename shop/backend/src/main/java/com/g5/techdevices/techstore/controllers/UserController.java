@@ -2,7 +2,9 @@ package com.g5.techdevices.techstore.controllers;
 
 import com.g5.techdevices.techstore.dto.UserUpdateDTO;
 import com.g5.techdevices.techstore.entity.products.Category;
+import com.g5.techdevices.techstore.entity.users.PasswordResetToken;
 import com.g5.techdevices.techstore.exceptions.DataNotFoundException;
+import com.g5.techdevices.techstore.repositories.PasswordTokenRepository;
 import com.g5.techdevices.techstore.responses.GenericResponse;
 import com.g5.techdevices.techstore.services.IUserService;
 import com.g5.techdevices.techstore.dto.UserDTO;
@@ -13,6 +15,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
+import org.springframework.context.NoSuchMessageException;
 import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,10 +26,8 @@ import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.mail.SimpleMailMessage;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.UUID;
+
+import java.util.*;
 
 @CrossOrigin(origins = "http://localhost:4200")
 @RestController
@@ -37,6 +38,7 @@ public class UserController {
     private final Environment env;
     private final JavaMailSender mailSender;
     private final MessageSource messages;
+    private final PasswordTokenRepository passwordTokenRepository;
     @Autowired
     private PasswordEncoder passwordEncoder;
 
@@ -117,21 +119,50 @@ public class UserController {
     @PostMapping("/resetPassword")
     public GenericResponse resetPassword(HttpServletRequest request,
                                          @RequestParam("email") String userEmail) throws DataNotFoundException {
-        User user = userService.findUserByEmail(userEmail);
-        if (user == null) {
-            throw new UsernameNotFoundException("Cannot find user with email " + userEmail);
+        try {
+            User user = userService.findUserByEmail(userEmail);
+            if (user == null) {
+                return new GenericResponse("Cannot find user with email " + userEmail);
+            }
+
+            List<PasswordResetToken> existingTokens = passwordTokenRepository
+                    .findByUserAndExpireDateAfter(user, new Date());
+            existingTokens.forEach(passwordTokenRepository::delete); // xóa token cũ
+
+            String token = UUID.randomUUID().toString();
+            PasswordResetToken myToken = new PasswordResetToken(token, user);
+            passwordTokenRepository.save(myToken);
+
+            String url = "http://localhost:4200/reset-password?token=" + token;
+            String message;
+            try {
+                message = messages.getMessage("message.resetPassword", null, request.getLocale());
+            } catch (NoSuchMessageException e) {
+                message = "Please click the link below to reset your password:";
+            }
+
+            SimpleMailMessage email = new SimpleMailMessage();
+            email.setTo(user.getEmail());
+            email.setSubject("Reset Password");
+            email.setText(message + "\n" + url);
+            email.setFrom(env.getProperty("support.email", "noreply@example.com"));
+
+            try {
+                mailSender.send(email);
+            } catch (Exception e) {
+                e.printStackTrace();
+                return new GenericResponse("Mail send failed: " + e.getMessage());
+            }
+            return new GenericResponse("Reset password email has been sent");
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new GenericResponse("Exception: " + e.getMessage());
         }
-        String token = UUID.randomUUID().toString();
-        userService.createPasswordResetTokenForUser(user, token);
-        mailSender.send(constructResetTokenEmail(getAppUrl(request),
-                request.getLocale(), token, user));
-        return new GenericResponse(
-                messages.getMessage("message.resetPasswordEmail", null,
-                        request.getLocale()));
     }
     private SimpleMailMessage constructResetTokenEmail(
             String contextPath, Locale locale, String token, User user) {
-        String url = contextPath + "http://localhost:4200/reset-password?token=" + token;
+        String url = "http://localhost:4200/reset-password?token=" + token;
         String message = messages.getMessage("message.resetPassword",
                 null, locale);
         return constructEmail("Reset Password", message + " \r\n" + url, user);
@@ -146,9 +177,11 @@ public class UserController {
         email.setFrom(env.getProperty("support.email"));
         return email;
     }
+
     private String getAppUrl(HttpServletRequest request) {
         return request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort() + request.getContextPath();
     }
+<<<<<<< HEAD
 //    @PostMapping("/resend-verification")
 //    public ResponseEntity<?> resendVerification(@RequestBody Map<String, String> body) {
 //        String email = body.get("email");
@@ -196,6 +229,8 @@ static class EmailDTO {
     @jakarta.validation.constraints.NotBlank
     @jakarta.validation.constraints.Email
     private String email;
+=======
+>>>>>>> origin/develop
 }
 }
 

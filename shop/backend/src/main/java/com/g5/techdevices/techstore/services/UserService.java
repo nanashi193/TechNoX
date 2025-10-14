@@ -10,7 +10,7 @@ import com.g5.techdevices.techstore.exceptions.DataNotFoundException;
 import com.g5.techdevices.techstore.exceptions.PermissionDenyException;
 import com.g5.techdevices.techstore.repositories.RoleRepository;
 import com.g5.techdevices.techstore.repositories.UserRepository;
-import com.g5.techdevices.techstore.repositories.passwordTokenRepository;
+import com.g5.techdevices.techstore.repositories.PasswordTokenRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.access.AccessDeniedException;
@@ -22,10 +22,14 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+<<<<<<< HEAD
 import java.util.UUID;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+=======
+import java.util.*;
+>>>>>>> origin/develop
 
 @Service
 @RequiredArgsConstructor
@@ -35,7 +39,7 @@ public class UserService implements IUserService{
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
     private final JwtTokenUtil jwtTokenUtil;
-    private final passwordTokenRepository passwordTokenRepository;
+    private final PasswordTokenRepository passwordTokenRepository;
 
     @Override
     public User createUser(UserDTO userDTO) throws DataNotFoundException {
@@ -155,10 +159,26 @@ public class UserService implements IUserService{
         }
         return jwtTokenUtil.generateToken(existingUser);
     }
+    @Override
     public User findUserByEmail(String email) throws DataNotFoundException {
         return userRepository.findByEmail(email)
                 .orElseThrow(() -> new DataNotFoundException("User with email " + email + " not found"));
     }
+
+    @Override
+    public String generatePasswordResetToken(User user) {
+        List<PasswordResetToken> existingToken = passwordTokenRepository
+                .findByUserAndExpireDateAfter(user, new Date());
+        String token;
+        if (!existingToken.isEmpty()) {
+            token = existingToken.get(0).getToken();
+        } else {
+            token = UUID.randomUUID().toString();
+            createPasswordResetTokenForUser(user, token);
+        }
+        return token;
+    }
+    @Override
     public void createPasswordResetTokenForUser(User user, String token) {
         PasswordResetToken myToken = new PasswordResetToken(token, user);
         passwordTokenRepository.save(myToken);

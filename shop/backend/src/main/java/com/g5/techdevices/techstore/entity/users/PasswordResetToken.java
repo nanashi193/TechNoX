@@ -16,7 +16,7 @@ public class PasswordResetToken {
     private static final int EXPIRATION = 60 * 24; // 24h
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     private String token;
@@ -25,12 +25,13 @@ public class PasswordResetToken {
     @JoinColumn(name = "UserId", nullable = false)
     private User user;
 
-    private Date expiryDate;
+    @Column(name = "ExpireDate")
+    private Date expireDate;
 
     public PasswordResetToken(String token, User user) {
         this.token = token;
         this.user = user;
-        this.expiryDate = calculateExpiryDate(EXPIRATION);
+        this.expireDate = calculateExpiryDate(EXPIRATION);
     }
 
     private Date calculateExpiryDate(int expiryTimeInMinutes) {

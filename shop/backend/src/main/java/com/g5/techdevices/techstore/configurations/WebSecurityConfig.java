@@ -12,7 +12,6 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.security.web.server.SecurityWebFilterChain;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -32,6 +31,7 @@ public class WebSecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(AbstractHttpConfigurer::disable)
                 .addFilterBefore(jwtTokenFilter, UsernamePasswordAuthenticationFilter.class)
+<<<<<<< HEAD
                 .authorizeHttpRequests(requests -> {
                     requests.
                             requestMatchers(
@@ -50,27 +50,31 @@ public class WebSecurityConfig {
                             .requestMatchers(GET,
                                     String.format("%s/products", apiPrefix))
                             .permitAll()
+=======
+                .authorizeHttpRequests(auth -> auth
+                        // Public POST endpoints
+                        .requestMatchers(POST, String.format("%s/users/register", apiPrefix)).permitAll()
+                        .requestMatchers(POST, String.format("%s/users/login", apiPrefix)).permitAll()
+                        .requestMatchers(POST, String.format("%s/users/resetPassword", apiPrefix)).permitAll()
+>>>>>>> origin/develop
 
+                        // Public GET endpoints
+                        .requestMatchers(GET, String.format("%s/categories", apiPrefix)).permitAll()
+                        .requestMatchers(GET, String.format("%s/products", apiPrefix)).permitAll()
 
-                            .requestMatchers(PUT,
-                                    String.format("%s/users/**", apiPrefix))
-                            .authenticated()
+                        // Protected endpoints
+                        .requestMatchers(PUT, String.format("%s/users/**", apiPrefix)).authenticated()
+                        .requestMatchers(GET, String.format("%s/users", apiPrefix)).hasAnyRole(Role.ADMIN, Role.OWNER)
+                        .requestMatchers(DELETE, String.format("%s/users/**", apiPrefix)).hasAnyRole(Role.ADMIN, Role.OWNER)
+                        .requestMatchers(PUT, String.format("%s/users/restore/**", apiPrefix)).hasAnyRole(Role.ADMIN, Role.OWNER)
+                        .requestMatchers(PUT, String.format("%s/categories/**", apiPrefix)).hasAnyRole(Role.ADMIN, Role.OWNER)
+                        .requestMatchers(POST, String.format("%s/categories", apiPrefix)).hasAnyRole(Role.ADMIN, Role.OWNER)
+                        .requestMatchers(DELETE, String.format("%s/categories/**", apiPrefix)).hasAnyRole(Role.ADMIN, Role.OWNER)
 
-                            .requestMatchers(GET,
-                                    String.format("%s/users", apiPrefix)).hasAnyRole(Role.ADMIN, Role.OWNER)
-                            .requestMatchers(DELETE,
-                                    String.format("%s/users/**", apiPrefix)).hasAnyRole(Role.ADMIN, Role.OWNER)
-                            .requestMatchers(PUT,
-                                    String.format("%s/users/restore/**", apiPrefix)).hasAnyRole(Role.ADMIN, Role.OWNER)
-                            .requestMatchers(PUT,
-                                    String.format("%s/categories/**", apiPrefix)).hasAnyRole(Role.ADMIN, Role.OWNER)
-                            .requestMatchers(POST,
-                                    String.format("%s/categories", apiPrefix)).hasAnyRole(Role.ADMIN, Role.OWNER)
-                            .requestMatchers(DELETE,
-                                    String.format("%s/categories/**", apiPrefix)).hasAnyRole(Role.ADMIN, Role.OWNER)
-                            .anyRequest().authenticated();
+                        // Default fallback
+                        .anyRequest().authenticated()
+                );
 
-                });
         return http.build();
     }
     @Bean
