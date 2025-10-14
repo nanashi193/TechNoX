@@ -35,13 +35,18 @@ public class WebSecurityConfig {
                 .authorizeHttpRequests(requests -> {
                     requests.
                             requestMatchers(
-                                String.format("%s/users/register", apiPrefix),
-                                String.format("%s/users/login", apiPrefix)
-                            )
-                            .permitAll()
+                                    String.format("%s/users/register", apiPrefix),
+                                    String.format("%s/users/login", apiPrefix)
+                            ).permitAll()
                             .requestMatchers(GET,
                                     String.format("%s/categories", apiPrefix))
                             .permitAll()
+                            // ✅ Cho preflight
+                            .requestMatchers(org.springframework.http.HttpMethod.OPTIONS, "/**").permitAll()
+
+                            .requestMatchers(POST, apiPrefix + "/users/resend-verification").permitAll()
+                            .requestMatchers(POST, apiPrefix + "/users/verify-email").permitAll()
+
                             .requestMatchers(GET,
                                     String.format("%s/products", apiPrefix))
                             .permitAll()

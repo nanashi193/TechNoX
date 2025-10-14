@@ -141,7 +141,7 @@ export class AuthService {
     resendVerification(email: string) {
         return this.http.post<{ token?: string; message?: string } | string>(
             `${this.baseUrl}/resend-verification`,
-            { email }
+            {email}
         );
     }
 
