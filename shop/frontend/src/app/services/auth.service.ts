@@ -130,5 +130,20 @@ export class AuthService {
             { responseType: 'text' as 'json' }
         );
     }
+    verifyEmail(token: string) {
+        return this.http.post(
+            `${this.baseUrl}/verify-email`,
+            { token },
+            { responseType: 'text' as 'json' }
+        );
+    }
+
+    resendVerification(email: string) {
+        return this.http.post<{ token?: string; message?: string } | string>(
+            `${this.baseUrl}/resend-verification`,
+            {email}
+        );
+    }
+
 }
 

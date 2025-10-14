@@ -181,4 +181,56 @@ public class UserController {
     private String getAppUrl(HttpServletRequest request) {
         return request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort() + request.getContextPath();
     }
+<<<<<<< HEAD
+//    @PostMapping("/resend-verification")
+//    public ResponseEntity<?> resendVerification(@RequestBody Map<String, String> body) {
+//        String email = body.get("email");
+//        // Gửi mail xác minh (hoặc phát hành lại token)
+//        // (Dev) Có thể trả về token để FE tự mở verify:
+//        String token = userService.resendVerification(email); // trả về token hoặc null
+//        if (token != null) {
+//            return ResponseEntity.ok(Map.of("message", "Sent", "token", token)); // FE sẽ tự /verify-email?token=...
+//        }
+//        return ResponseEntity.ok(Map.of("message", "Sent"));
+//    }
+//
+//    @PostMapping("/verify-email")
+//    public ResponseEntity<?> verifyEmail(@RequestBody Map<String, String> body) {
+//        String token = body.get("token");
+//        userService.verifyEmail(token); // set emailVerified=true
+//        return ResponseEntity.ok(Map.of("message", "Verified"));
+//    }
+
+    @PostMapping("/resend-verification")
+    public ResponseEntity<?> resend(@RequestBody EmailDTO body) throws DataNotFoundException {
+        String token = userService.resendVerification(body.getEmail());
+        if (token == null) {
+            // user đã verified rồi → trả message rõ ràng
+            return ResponseEntity.status(409).body(Map.of("message", "already-verified"));
+        }
+        return ResponseEntity.ok(Map.of("token", token)); // DEV: trả token để test
+    }
+//    @GetMapping("/verify-email")
+//    public ResponseEntity<?> verify(@RequestParam String token) throws DataNotFoundException {
+//        userService.verifyEmail(token);
+//        return ResponseEntity.ok(Map.of("status","verified"));
+//    }
+    @PostMapping("/verify-email")
+    public ResponseEntity<?> verifyByPost(@RequestBody Map<String,String> body)
+            throws DataNotFoundException {
+        String token = body.get("token");
+        userService.verifyEmail(token);
+        return ResponseEntity.ok(Map.of("status","verified"));
+    }
+
+// Có thể đặt DTO làm inner class để gọn
+@lombok.Data
+static class EmailDTO {
+    @jakarta.validation.constraints.NotBlank
+    @jakarta.validation.constraints.Email
+    private String email;
+=======
+>>>>>>> origin/develop
 }
+}
+
