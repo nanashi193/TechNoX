@@ -7,6 +7,7 @@ import jakarta.validation.constraints.Size;
 import lombok.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -21,20 +22,21 @@ public class ProductDTO {
     private String name;            // nvarchar(255)
 
     @JsonProperty("product_id")
-    private int productId;// bigint
+    private Long productId;// bigint
 
     @JsonProperty("category_id")
-    private String categoryId;// int
+    private Long categoryId;// int
 
 
 
     @Min(value = 0, message = "Price must be great than or equal to 0")
-    private Double price;       // decimal(18,2)
+    private BigDecimal price;       // decimal(18,2)
 
     private String description;     // nvarchar(MAX)
 
     private String imageUrl;// nvarchar(1000)
 
     private LocalDateTime createdAt; // datetime2(7)
-    private List<MultipartFile> files;
+
+    private String thumbnail;
 }

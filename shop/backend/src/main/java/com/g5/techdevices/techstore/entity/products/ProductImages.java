@@ -17,9 +17,11 @@ public class ProductImages {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
-    private String imgUrl;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "ProductId", nullable = false)
+    @ManyToOne
+    @JoinColumn(name= "ProductId")
     private Product product;
+
+    @Column(name = "ImageUrl", length = 300)
+    private String imageUrl;
 }

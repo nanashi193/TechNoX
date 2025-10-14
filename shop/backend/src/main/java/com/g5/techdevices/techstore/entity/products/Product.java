@@ -10,7 +10,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
 import java.math.BigDecimal;
 import java.util.List;
 
@@ -20,11 +19,11 @@ import java.util.List;
 @Entity
 @Builder
 @Table(name = "Product")
-public class Product {
+public class Product extends BaseEntity{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "ProductId")
-    private int id;
+    private Long id;
 
     @ManyToOne
     @JoinColumn(name = "CategoryId")

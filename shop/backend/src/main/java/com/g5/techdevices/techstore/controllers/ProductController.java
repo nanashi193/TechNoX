@@ -2,6 +2,15 @@ package com.g5.techdevices.techstore.controllers;
 
 
 import com.g5.techdevices.techstore.dto.ProductDTO;
+import com.g5.techdevices.techstore.dto.ProductImageDTO;
+import com.g5.techdevices.techstore.entity.products.Product;
+import com.g5.techdevices.techstore.entity.products.ProductImages;
+import com.g5.techdevices.techstore.services.ProductService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.querydsl.QPageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -20,14 +29,17 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("api/v1/products")
-
+@RequiredArgsConstructor
 public class ProductController {
+    private final ProductService productService;
 
-    @PostMapping(value = "",
-            consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping("")
+
     public ResponseEntity<?> createProduct(
-            @Valid @ModelAttribute ProductDTO productDTO,
-            BindingResult result){
+            @Valid @RequestBody ProductDTO productDTO,
+            //@ModelAttribute ProductDTO productDTO,
+            BindingResult result
+    ){
         try {
             if (result.hasErrors()){
                 List<String> errorMassage = result.getFieldErrors()
@@ -36,27 +48,52 @@ public class ProductController {
                         .toList();
                 return ResponseEntity.badRequest().body(errorMassage);
             }
-            List<MultipartFile> files = productDTO.getFiles();
-              files = files ==null ? new ArrayList<MultipartFile>() : files;
-            for(MultipartFile file : files){
-                //ktra kich thuoc va dinh dang
-                    if(file.getSize() >10 *1024 * 1024){ //10mb
-                        return ResponseEntity.status(HttpStatus.PAYLOAD_TOO_LARGE)
-                                .body("File is too large");
-                    }
-                    String contentType = file.getContentType();
-                    if (contentType == null || !contentType.startsWith("image/")) {
-                        return ResponseEntity.status(HttpStatus.UNSUPPORTED_MEDIA_TYPE)
-                                .body("File must contain image");
-                    }
-                    //luu file va update thumbnaild trong DTO
-                    String fileName = storeFile(file); //thay the lai code ở đây
-                    //luu vào đối tượng product trong DB => sẽ làm sau
-            }
-            return ResponseEntity.ok("Product created successfully");
+            Product newProduct = productService.createProduct(productDTO);
+            return ResponseEntity.ok(newProduct);
             }catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
+    }
+    @PostMapping(value = "uploads/{id}",
+            consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    //local host http://localhost:8088/v1/api/products
+    public ResponseEntity<?> uploadImage(
+            @PathVariable("id") Long productId,
+            @ModelAttribute("files") List<MultipartFile> files){
+        try {
+            Product existingProduct = productService.getProductById(productId);
+            files = files ==null ? new ArrayList<MultipartFile>() : files;
+            List<ProductImages> productImages = new ArrayList<>();
+            for(MultipartFile file : files){
+                if(file.getSize() == 0){
+                    continue;
+                }
+                //ktra kich thuoc va dinh dang
+                if(file.getSize() >10 *1024 * 1024){ //10mb
+                    return ResponseEntity.status(HttpStatus.PAYLOAD_TOO_LARGE)
+                            .body("File is too large! Maximum file size is 10MB");
+                }
+                String contentType = file.getContentType();
+                if (contentType == null || !contentType.startsWith("image/")) {
+                    return ResponseEntity.status(HttpStatus.UNSUPPORTED_MEDIA_TYPE)
+                            .body("File must contain image");
+                }
+                //luu file va update thumbnaild trong DTO
+                String fileName = storeFile(file); //thay the lai code ở đây
+                //luu vào đối tượng product trong DB => sẽ làm sau
+                ProductImages productImage = productService.createProductImages(
+                        existingProduct.getId()
+                        , ProductImageDTO.builder()
+                                .imageUrl(fileName)
+                                .build()
+                );
+                productImages.add(productImage);
+            }
+            return ResponseEntity.ok().body(productImages);
+        } catch (Exception e) {
+    return ResponseEntity.badRequest().body(e.getMessage());
+        }
+
     }
     private String storeFile(MultipartFile file) throws IOException {
         String fileName = StringUtils.cleanPath(file.getOriginalFilename());
@@ -91,10 +128,19 @@ public class ProductController {
 
 
     @GetMapping("/{id}")
-    public ResponseEntity <String> getProductById(
-            @PathVariable("id") String ProductId
+    public ResponseEntity <List<Product>> GetProducts(
+            @RequestParam("page") int page,
+            @RequestParam("limit") int limit
     ){
-        return ResponseEntity.ok("Product ID with ID: %d " + ProductId);
+        //tao Pageable tu thong tin trang va gioi han
+        PageRequest pageRequest = PageRequest.of(
+                page, limit,
+                Sort.by("createdAt").descending());
+        Page<Product> productPage = productService.getAllProducts(pageRequest);
+        //lay tong so trang
+        int totalPages = productPage.getTotalPages();
+        List<Product> products  = productPage.getContent();
+        return ResponseEntity.ok(products);
     }
 
 
