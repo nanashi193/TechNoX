@@ -131,7 +131,7 @@ public class UserController {
     }
     private SimpleMailMessage constructResetTokenEmail(
             String contextPath, Locale locale, String token, User user) {
-        String url = contextPath + "/user/changePassword?token=" + token;
+        String url = contextPath + "http://localhost:4200/reset-password?token=" + token;
         String message = messages.getMessage("message.resetPassword",
                 null, locale);
         return constructEmail("Reset Password", message + " \r\n" + url, user);
