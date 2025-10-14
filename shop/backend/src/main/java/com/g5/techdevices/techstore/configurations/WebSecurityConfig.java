@@ -31,11 +31,32 @@ public class WebSecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(AbstractHttpConfigurer::disable)
                 .addFilterBefore(jwtTokenFilter, UsernamePasswordAuthenticationFilter.class)
+<<<<<<< HEAD
+                .authorizeHttpRequests(requests -> {
+                    requests.
+                            requestMatchers(
+                                    String.format("%s/users/register", apiPrefix),
+                                    String.format("%s/users/login", apiPrefix)
+                            ).permitAll()
+                            .requestMatchers(GET,
+                                    String.format("%s/categories", apiPrefix))
+                            .permitAll()
+                            // ✅ Cho preflight
+                            .requestMatchers(org.springframework.http.HttpMethod.OPTIONS, "/**").permitAll()
+
+                            .requestMatchers(POST, apiPrefix + "/users/resend-verification").permitAll()
+                            .requestMatchers(POST, apiPrefix + "/users/verify-email").permitAll()
+
+                            .requestMatchers(GET,
+                                    String.format("%s/products", apiPrefix))
+                            .permitAll()
+=======
                 .authorizeHttpRequests(auth -> auth
                         // Public POST endpoints
                         .requestMatchers(POST, String.format("%s/users/register", apiPrefix)).permitAll()
                         .requestMatchers(POST, String.format("%s/users/login", apiPrefix)).permitAll()
                         .requestMatchers(POST, String.format("%s/users/resetPassword", apiPrefix)).permitAll()
+>>>>>>> origin/develop
 
                         // Public GET endpoints
                         .requestMatchers(GET, String.format("%s/categories", apiPrefix)).permitAll()

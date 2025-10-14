@@ -49,8 +49,6 @@ export class LoginComponent {
             .pipe(finalize(() => this.loading = false))
             .subscribe({
                 next: (res) => {
-                    localStorage.setItem('token', res.token);
-
                     if (remember)
                         localStorage.setItem('rememberUser', email);
                     else

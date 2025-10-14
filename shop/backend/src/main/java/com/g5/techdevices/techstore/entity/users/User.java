@@ -89,6 +89,15 @@ public class User implements UserDetails {
     @Column(name = "GoogleAccountId", length = 100)
     private String googleAccountId;
 
+    @Column(name = "EmailVerified", nullable = false)
+    private boolean emailVerified = false;
+    public boolean isEmailVerified() {
+        return emailVerified;
+    }
+    public void setEmailVerified(boolean emailVerified) {
+        this.emailVerified = emailVerified;
+    }
+
     @ManyToOne
     @JoinColumn(name = "RoleId", nullable = false)
     @ToString.Exclude
