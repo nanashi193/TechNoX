@@ -160,20 +160,6 @@ public class UserService implements IUserService{
 
     @Override
     public String generatePasswordResetToken(User user) {
-        List<PasswordResetToken> existingToken = passwordTokenRepository
-                .findByUserAndExpireDateAfter(user, new Date());
-        String token;
-        if (!existingToken.isEmpty()) {
-            token = existingToken.get(0).getToken();
-        } else {
-            token = UUID.randomUUID().toString();
-            createPasswordResetTokenForUser(user, token);
-        }
-        return token;
-    }
-    @Override
-    public void createPasswordResetTokenForUser(User user, String token) {
-        PasswordResetToken myToken = new PasswordResetToken(token, user);
-        passwordTokenRepository.save(myToken);
+        return "";
     }
 }
