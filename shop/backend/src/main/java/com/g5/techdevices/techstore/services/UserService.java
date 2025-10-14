@@ -22,7 +22,14 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+<<<<<<< HEAD
+import java.util.UUID;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+=======
 import java.util.*;
+>>>>>>> origin/develop
 
 @Service
 @RequiredArgsConstructor
@@ -161,5 +168,28 @@ public class UserService implements IUserService{
     @Override
     public String generatePasswordResetToken(User user) {
         return "";
+    }
+
+    @Override
+    public String resendVerification(String email) throws DataNotFoundException {
+        User user = findUserByEmail(email);
+        if (user.isEmailVerified()) {
+            return null; // Email đã được xác minh
+        }
+        
+        String token = UUID.randomUUID().toString();
+        // TODO: Gửi email với link xác minh
+        // Trong quá trình phát triển, trả về token để frontend tự xử lý
+        return token;
+    }
+
+    @Override
+    public void verifyEmail(String token) throws DataNotFoundException {
+        // TODO: Validate token từ email verification
+        // Trong quá trình phát triển, chấp nhận mọi token
+        // Trong production cần lưu và validate token, có thể dùng VerificationToken tương tự PasswordResetToken
+        User user = userRepository.findById(1L).orElseThrow(() -> new DataNotFoundException("User not found"));
+        user.setEmailVerified(true);
+        userRepository.save(user);
     }
 }

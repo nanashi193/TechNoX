@@ -29,6 +29,7 @@ export class SignupComponent implements OnDestroy {
     signupSuccess = false;
     countdown = 5;
     private timer?: any;
+    pendingEmail = '';
 
     constructor(
         private fb: FormBuilder,
@@ -71,10 +72,8 @@ export class SignupComponent implements OnDestroy {
         this.errorMsg = '';
         this.loading = true;
 
-        // 🔁 Chuyển gender string -> boolean cho backend
         const genderValue = this.form.value.gender === 'male';
 
-        // 🧩 Map dữ liệu sang DTO backend
         const dto = new RegisterDTO({
             FullName: this.form.value.fullname,
             Gender: genderValue,
@@ -90,44 +89,37 @@ export class SignupComponent implements OnDestroy {
             .register(dto)
             .pipe(finalize(() => (this.loading = false)))
             .subscribe({
-                next: () => this.handleSuccess(),
+                // truyền email sang handleSuccess
+                next: () => this.handleSuccess(this.form.value.email),
                 error: (err) => this.handleError(err?.error?.message)
             });
     }
 
-    // ✅ Xử lý sau khi đăng ký thành công
-    private handleSuccess() {
+    private handleSuccess(email: string) {
         this.form.disable();
         this.signupSuccess = true;
+        this.pendingEmail = email || '';
+        if (email) localStorage.setItem('pendingEmail', email);
+
+        // đếm ngược tự chuyển tới trang xác minh
         this.countdown = 7;
-
-        setTimeout(() => {
-            document.querySelector('.modal-card')?.scrollIntoView({
-                behavior: 'smooth',
-                block: 'center'
-            });
-            (document.querySelector('.modal-card .primary-btn') as HTMLButtonElement)
-                ?.focus?.();
-        });
-
         this.timer = setInterval(() => {
             this.countdown--;
-            if (this.countdown === 0) {
-                clearInterval(this.timer);
-                this.router.navigate(['/login']);
-            }
+            if (this.countdown === 0) this.goVerify();
         }, 1000);
+        setTimeout(() => {
+            (document.querySelector('.modal-card') as HTMLElement)?.focus?.();
+        });
     }
 
-    // ✅ Xử lý lỗi
+// ✅ Xử lý lỗi
     private handleError(msg?: string) {
         this.signupSuccess = false;
         this.errorMsg = msg || 'Đăng ký thất bại. Vui lòng thử lại.';
     }
-
-    goLoginNow() {
-        if (this.timer) clearInterval(this.timer);
-        this.router.navigate(['/login']);
+    goVerify() {
+        if (this.timer) { clearInterval(this.timer); this.timer = undefined; }
+        this.router.navigate(['/verify-email/pending'], { queryParams: { email: this.pendingEmail } });
     }
 
     ngOnDestroy() {
