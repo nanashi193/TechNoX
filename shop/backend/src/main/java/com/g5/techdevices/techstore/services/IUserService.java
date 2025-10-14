@@ -12,6 +12,8 @@ public interface IUserService {
 
     void deleteUser(Long id);
 
+    void restoreUser(Long id) throws DataNotFoundException;
+
     String login(String email, String password) throws Exception;
     List<User> getAllUsers() throws DataNotFoundException;
     User updateUser(Long id, UserUpdateDTO userDTO) throws DataNotFoundException;

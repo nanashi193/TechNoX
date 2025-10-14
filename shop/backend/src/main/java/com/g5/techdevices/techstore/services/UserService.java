@@ -118,6 +118,14 @@ public class UserService implements IUserService{
             userRepository.save(user);
         }
     }
+    @Override
+    public void restoreUser(Long id) throws DataNotFoundException {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new DataNotFoundException("User not found"));
+        user.setIsActive(true);
+        userRepository.save(user);
+    }
+
 
     @Override
     public String login(String email, String password) throws Exception {

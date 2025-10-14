@@ -78,6 +78,16 @@ public class UserController {
         userService.deleteUser(id);
         return ResponseEntity.ok("User has been deleted successfully");
     }
+    @PutMapping("/restore/{id}")
+    public ResponseEntity<?> restoreUser(@PathVariable Long id) {
+        try {
+            userService.restoreUser(id);
+            return ResponseEntity.ok(Map.of("message", "User restored successfully"));
+        } catch (DataNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", e.getMessage()));
+        }
+    }
+
     @PostMapping("/login")
     public ResponseEntity<Map<String, String>> login(
             @Valid @RequestBody UserLoginDTO userLoginDTO){
