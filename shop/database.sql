@@ -408,46 +408,13 @@ ALTER TABLE dbo.Category
 GO
 UPDATE Users
 SET Address = CASE UserId
-                  WHEN 1 THEN N'{
-        "line1": "123 Main St",
-        "line2": "Apt 4B",
-        "city": "Hanoi",
-        "district": "Cau Giay",
-        "province": "Ha Noi",
-        "zip": "100000"
-    }'
-                  WHEN 2 THEN N'{
-        "line1": "456 Le Loi",
-        "line2": "Floor 3",
-        "city": "Ho Chi Minh",
-        "district": "District 1",
-        "province": "TP HCM",
-        "zip": "700000"
-    }'
-                  WHEN 3 THEN N'{
-        "line1": "789 Tran Phu",
-        "line2": "",
-        "city": "Da Nang",
-        "district": "Hai Chau",
-        "province": "Da Nang",
-        "zip": "550000"
-    }'
-                  WHEN 4 THEN N'{
-        "line1": "12 Nguyen Trai",
-        "line2": "Unit 5",
-        "city": "Hai Phong",
-        "district": "Le Chan",
-        "province": "Hai Phong",
-        "zip": "180000"
-    }'
-                  WHEN 5 THEN N'{
-        "line1": "34 Le Duan",
-        "line2": "",
-        "city": "Can Tho",
-        "district": "Ninh Kieu",
-        "province": "Can Tho",
-        "zip": "900000"
-    }'
+                  WHEN 1 THEN N'123 Đường A, Quận 1, TP.HCM'
+                  WHEN 2 THEN N'456 Đường B, Quận 2, TP.HCM'
+                  WHEN 3 THEN N'789 Đường C, Quận 3, TP.HCM'
+                  WHEN 4 THEN N'101 Đường D, Quận 4, TP.HCM'
+                  WHEN 5 THEN N'202 Đường E, Quận 5, TP.HCM'
+                  ELSE Address
     END
 WHERE UserId IN (1,2,3,4,5);
+
 
