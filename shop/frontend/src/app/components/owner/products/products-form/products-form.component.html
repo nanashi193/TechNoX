@@ -1,0 +1,38 @@
+<div class="card">
+    <div class="card-header">
+        <h2>{{ isEdit ? 'Sửa sản phẩm' : 'Thêm sản phẩm' }}</h2>
+        <a routerLink="/owner/products" class="link">← Quay lại</a>
+    </div>
+
+    <form [formGroup]="form" (ngSubmit)="submit()" class="grid">
+        <div class="left">
+            <label class="field"><span>SKU *</span><input formControlName="sku"></label>
+            <label class="field"><span>Tên *</span><input formControlName="name"></label>
+
+            <div class="grid-2">
+                <label class="field"><span>Giá *</span><input type="number" formControlName="price"></label>
+                <label class="field"><span>Giá gốc</span><input type="number" formControlName="oldPrice"></label>
+            </div>
+
+            <div class="grid-2">
+                <label class="field"><span>Danh mục (ID) *</span><input type="number" formControlName="categoryId"></label>
+                <label class="field"><span>Tồn kho *</span><input type="number" formControlName="stockQty"></label>
+            </div>
+
+            <label class="checkbox"><input type="checkbox" formControlName="inStock"><span>Cho phép bán</span></label>
+            <label class="field"><span>Tags (phẩy)</span><input formControlName="tags"></label>
+            <label class="field"><span>Mô tả</span><textarea rows="6" formControlName="description"></textarea></label>
+
+            <button class="primary" type="submit">Lưu</button>
+        </div>
+
+        <div class="right">
+            <div class="preview">
+                <img *ngIf="preview(); else noimg" [src]="preview()" alt="">
+                <ng-template #noimg><div class="noimg">No image</div></ng-template>
+            </div>
+            <label class="field"><span>Ảnh (URL)</span><input formControlName="thumbnailUrl" (input)="onThumbInput($event)"></label>
+            <p class="hint">Sau này sẽ đổi sang upload file.</p>
+        </div>
+    </form>
+</div>

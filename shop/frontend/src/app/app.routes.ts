@@ -5,7 +5,8 @@ import { HomeComponent } from './components/home/home.component';
 import { ForgotPasswordComponent } from "./components/forgot-password/forgot-password.component";
 import { ProductPageComponent } from "./components/product/product-page.component";
 import { ownerGuard } from "./guards/owner.guard";
-import { CartComponent } from './components/cart/cart.component'; // <-- thêm
+import { CartComponent } from './components/cart/cart.component';
+import {ProductsListComponent} from "./components/owner/products/products-list/products-list.component"; // <-- thêm
 
 export const routes: Routes = [
     { path: '', redirectTo: 'home', pathMatch: 'full' },
@@ -46,11 +47,43 @@ export const routes: Routes = [
     },
     {
         path: 'owner',
-        loadComponent: () => import('./components/owner/layout/owner-layout.component').then(m => m.OwnerLayoutComponent),
+        // canActivate: [ownerGuard], code xong bat len cho de                // <-- bảo vệ toàn bộ khu vực owner
+        loadComponent: () =>
+            import('./components/owner/layout/owner-layout.component')
+                .then(m => m.OwnerLayoutComponent),
         children: [
             { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
-            { path: 'dashboard', loadComponent: () => import('./components/owner/dashboard/dashboard.component').then(m => m.DashboardComponent) },
+            {
+                path: 'dashboard',
+                loadComponent: () =>
+                    import('./components/owner/dashboard/dashboard.component')
+                        .then(m => m.DashboardComponent)
+            },
+
+            // ===== Products (Owner CRUD) =====
+            {
+                path: 'products',
+                loadComponent: () =>
+                    import('./components/owner/products/products-list/products-list.component')
+                        .then(m => m.ProductsListComponent),
+                title: 'Quản lý sản phẩm | Owner'
+            },
+            {
+                path: 'products/new',
+                loadComponent: () =>
+                    import('./components/owner/products/products-form/products-form.component')
+                        .then(m => m.ProductFormComponent),
+                title: 'Thêm sản phẩm | Owner'
+            },
+            {
+                path: 'products/:id',
+                loadComponent: () =>
+                    import('./components/owner/products/products-form/products-form.component')
+                        .then(m => m.ProductFormComponent),
+                title: 'Sửa sản phẩm | Owner'
+            },
         ]
     },
+
     { path: '**', redirectTo: 'home' },
 ];

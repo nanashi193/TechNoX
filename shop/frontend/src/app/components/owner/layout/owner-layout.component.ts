@@ -8,7 +8,7 @@ import {AuthService} from "../../../services/auth.service";
     standalone: true,
     imports: [CommonModule, RouterLink, RouterLinkActive, RouterOutlet],
     templateUrl: './owner-layout.component.html',
-    styleUrls: ['./owner-layout.component.css']
+    styleUrls: ['./owner-layout.component.css', '../../owner/owner-shared.css']
 })
 export class OwnerLayoutComponent {
     constructor(private auth: AuthService) {

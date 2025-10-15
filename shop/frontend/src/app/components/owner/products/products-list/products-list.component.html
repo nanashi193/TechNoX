@@ -1,0 +1,42 @@
+<div class="card">
+    <div class="card-header">
+        <h2>Sản phẩm</h2>
+        <div class="actions">
+            <input [(ngModel)]="q" (keyup.enter)="search()" placeholder="Tìm tên/sku…">
+            <button (click)="search()">Tìm</button>
+            <button class="primary" (click)="create()">+ Thêm sản phẩm</button>
+        </div>
+    </div>
+
+    <div *ngIf="!loading(); else loadingTpl">
+        <table class="table">
+            <thead>
+            <tr>
+                <th>Ảnh</th><th>Tên</th><th>SKU</th><th>Giá</th><th>Tồn</th><th>TT</th><th></th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr *ngFor="let p of rows()">
+                <td><img [src]="p.thumbnailUrl || 'assets/placeholder.png'" class="thumb"></td>
+                <td>{{p.name}}</td>
+                <td>{{p.sku}}</td>
+                <td>{{p.price | number}} đ</td>
+                <td>{{p.stockQty}}</td>
+                <td><span class="badge" [class.green]="p.inStock">{{p.inStock?'Còn bán':'Hết'}}</span></td>
+                <td class="right">
+                    <button (click)="edit(p)">Sửa</button>
+                    <button class="danger" (click)="remove(p)">Xoá</button>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+
+        <div class="pager">
+            <button (click)="prev()" [disabled]="page===0">← Trước</button>
+            <span>Trang {{page+1}} / {{ Math.max(1, Math.ceil(totalItems/size)) }}</span>
+            <button (click)="next()" [disabled]="(page+1)*size>=totalItems">Sau →</button>
+        </div>
+    </div>
+
+    <ng-template #loadingTpl><div class="loading">Đang tải…</div></ng-template>
+</div>
