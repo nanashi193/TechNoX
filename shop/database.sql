@@ -83,12 +83,6 @@ CREATE TABLE PasswordResetToken (
     FOREIGN KEY (UserId) REFERENCES Users(UserId)
 );
 GO
-IF NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID('dbo.Users') AND name = 'EmailVerified')
-    BEGIN
-        ALTER TABLE dbo.Users
-            ADD EmailVerified BIT NOT NULL DEFAULT 0;
-    END
-GO
 --Hỗ trợ đăng nhập từ Facebook hoặc Google
 CREATE TABLE SocialAccount
 (
@@ -110,9 +104,6 @@ CREATE TABLE dbo.Category
     Name NVARCHAR(150) NOT NULL,
     Description NVARCHAR(1000) NULL
 );
-GO
-ALTER TABLE dbo.Category
-DROP COLUMN Description;
 GO
 /***************************************
  * Bảng Product
@@ -141,8 +132,6 @@ CREATE TABLE ProductImages(
                               CONSTRAINT fk_ProductImages_ProductId
                                   FOREIGN KEY (ProductId) REFERENCES Product(ProductId) ON DELETE CASCADE
 );
-GO
-ALTER TABLE ProductImages ADD ImageUrl VARCHAR(MAX);
 GO
 /***************************************
  * Bảng ProductVariant
@@ -400,3 +389,65 @@ VALUES
     (N'Đỗ Thị Tâm', 'tdt9832@estore.com',
      N'$2a$10$ykF9xhomFn0uj.s1NeQS4u5xSXqKnR8mu71mrqs0k9Po17FPyjjcu',
      1, '0909000006', 3, 1);
+
+---UPDATE----
+GO
+ALTER TABLE ProductImages ADD ImageUrl VARCHAR(MAX);
+GO
+ALTER TABLE Users
+    ADD Address NVARCHAR(MAX);
+GO
+IF NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID('dbo.Users') AND name = 'EmailVerified')
+    BEGIN
+        ALTER TABLE dbo.Users
+            ADD EmailVerified BIT NOT NULL DEFAULT 0;
+    END
+GO
+ALTER TABLE dbo.Category
+    DROP COLUMN Description;
+GO
+UPDATE Users
+SET Address = CASE UserId
+                  WHEN 1 THEN N'{
+        "line1": "123 Main St",
+        "line2": "Apt 4B",
+        "city": "Hanoi",
+        "district": "Cau Giay",
+        "province": "Ha Noi",
+        "zip": "100000"
+    }'
+                  WHEN 2 THEN N'{
+        "line1": "456 Le Loi",
+        "line2": "Floor 3",
+        "city": "Ho Chi Minh",
+        "district": "District 1",
+        "province": "TP HCM",
+        "zip": "700000"
+    }'
+                  WHEN 3 THEN N'{
+        "line1": "789 Tran Phu",
+        "line2": "",
+        "city": "Da Nang",
+        "district": "Hai Chau",
+        "province": "Da Nang",
+        "zip": "550000"
+    }'
+                  WHEN 4 THEN N'{
+        "line1": "12 Nguyen Trai",
+        "line2": "Unit 5",
+        "city": "Hai Phong",
+        "district": "Le Chan",
+        "province": "Hai Phong",
+        "zip": "180000"
+    }'
+                  WHEN 5 THEN N'{
+        "line1": "34 Le Duan",
+        "line2": "",
+        "city": "Can Tho",
+        "district": "Ninh Kieu",
+        "province": "Can Tho",
+        "zip": "900000"
+    }'
+    END
+WHERE UserId IN (1,2,3,4,5);
+
