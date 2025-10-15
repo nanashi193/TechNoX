@@ -162,10 +162,6 @@ public class UserService implements IUserService{
                 .orElseThrow(() -> new DataNotFoundException("User with email " + email + " not found"));
     }
 
-    @Override
-    public String generatePasswordResetToken(User user) {
-        return "";
-    }
 
     @Override
     public String resendVerification(String email) throws DataNotFoundException {

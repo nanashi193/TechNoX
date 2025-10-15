@@ -16,6 +16,8 @@ import java.util.List;
 
 @Builder
 @Data
+@Getter
+@Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
@@ -91,12 +93,6 @@ public class User implements UserDetails {
 
     @Column(name = "EmailVerified", nullable = false)
     private boolean emailVerified = false;
-    public boolean isEmailVerified() {
-        return emailVerified;
-    }
-    public void setEmailVerified(boolean emailVerified) {
-        this.emailVerified = emailVerified;
-    }
 
     @ManyToOne
     @JoinColumn(name = "RoleId", nullable = false)
