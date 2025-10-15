@@ -1,0 +1,54 @@
+<h1 class="page-title">Tổng quan</h1>
+
+<section class="grid-3">
+    <div class="card stat">
+        <h3>Doanh thu hôm nay</h3>
+        <p class="value">{{ kpi.revenueToday | number }} ₫</p>
+        <a class="link" routerLink="/owner/orders">Xem báo cáo</a>
+    </div>
+    <div class="card stat">
+        <h3>Đơn hàng hôm nay</h3>
+        <p class="value">{{ kpi.ordersToday }}</p>
+        <a class="link" routerLink="/owner/orders">Xem báo cáo</a>
+    </div>
+    <div class="card stat">
+        <h3>Khách hàng mới</h3>
+        <p class="value">{{ kpi.newCustomersToday }}</p>
+        <a class="link" routerLink="/owner/users">Xem báo cáo</a>
+    </div>
+</section>
+
+<section class="charts">
+    <div class="card chart">
+        <div class="card-header">
+            <h3>Doanh thu – Tất cả kênh bán hàng</h3>
+            <div class="controls">
+                <select>
+                    <option>Hôm nay</option>
+                    <option>7 ngày</option>
+                    <option>30 ngày</option>
+                </select>
+            </div>
+        </div>
+        <div class="chart-wrap">
+            <canvas baseChart [data]="lineData" [options]="lineOpts" [type]="'line'"></canvas>
+        </div>
+    </div>
+
+    <div class="card orders">
+        <h3>Trạng thái đơn hàng</h3>
+        <ul>
+            <li *ngFor="let s of orderStats">
+                <span>{{ s.label }}</span>
+                <b>{{ s.value }}</b>
+            </li>
+        </ul>
+    </div>
+</section>
+
+<section class="grid-2-1">
+    <app-top-products [items]="topProducts"></app-top-products>
+    <app-new-products></app-new-products>
+</section>
+<!--[newProducts]="newProducts"-->
+

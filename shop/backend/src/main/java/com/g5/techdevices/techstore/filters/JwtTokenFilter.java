@@ -12,9 +12,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.util.Pair;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.web.authentication.WebAuthenticationDetails;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.web.filter.*;
 import org.springframework.stereotype.Component;
@@ -38,7 +36,6 @@ public class JwtTokenFilter extends OncePerRequestFilter {
             @NonNull HttpServletResponse response,
             @NonNull FilterChain filterChain
     ) throws ServletException, IOException {
-
         try {
             if(isBypassToken(request)) {
                 filterChain.doFilter(request, response);
@@ -46,7 +43,7 @@ public class JwtTokenFilter extends OncePerRequestFilter {
             }
             final String authHeader = request.getHeader("Authorization");
             if(authHeader == null || !authHeader.startsWith("Bearer ")) {
-                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized");
+                filterChain.doFilter(request, response);
                 return;
             }
             final String token = authHeader.substring(7);
@@ -64,7 +61,8 @@ public class JwtTokenFilter extends OncePerRequestFilter {
             }
             filterChain.doFilter(request, response);
         } catch (Exception e) {
-            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized");
+            //Đừng sendError ở đây, cho qua để không “giết” public endpoints
+            filterChain.doFilter(request, response);
         }
     }
     private boolean isBypassToken(@NonNull HttpServletRequest request) {
@@ -72,15 +70,53 @@ public class JwtTokenFilter extends OncePerRequestFilter {
                 Pair.of(String.format("%s/product", apiPrefix), "GET"),
                 Pair.of(String.format("%s/categories", apiPrefix), "GET"),
                 Pair.of(String.format("%s/users/register", apiPrefix), "POST"),
-                Pair.of(String.format("%s/users/login", apiPrefix), "POST")
+                Pair.of(String.format("%s/users/login", apiPrefix), "POST"),
+                Pair.of(String.format("%s/users/forgot-password", apiPrefix), "POST"),
+                Pair.of(String.format("%s/users/reset-password", apiPrefix), "POST"),
+                Pair.of(String.format("%s/users/verify-email", apiPrefix), "POST"),
+                Pair.of(String.format("%s/users/resend-verification", apiPrefix), "POST")
         );
 
+
+                Pair.of(String.format("%s/users/resetPassword", apiPrefix), "POST");
         for (Pair<String, String> bypassToken : bypassTokens) {
             if (request.getServletPath().contains(bypassToken.getFirst())
                     && request.getMethod().equalsIgnoreCase(bypassToken.getSecond())) {
+                System.out.println("apiPrefix=" + apiPrefix);
+                System.out.println("ServletPath=" + request.getServletPath());
                 return true;
             }
         }
         return false;
     }
+    @Override
+    protected boolean shouldNotFilter(@NonNull HttpServletRequest request) {
+        final String method = request.getMethod();
+        final String uri = request.getRequestURI();
+
+        // chuẩn hoá base: /api/v1/users
+        final String pfx = apiPrefix.startsWith("/") ? apiPrefix : "/" + apiPrefix;
+        final String base = pfx + "/users";
+
+        // Bỏ qua preflight
+        if ("OPTIONS".equalsIgnoreCase(method)) return true;
+
+        // helper check path == "/... " hoặc "/.../"
+        java.util.function.Predicate<String> is = path ->
+                uri.equals(path) || uri.equals(path + "/") || uri.startsWith(path + "?");
+
+        //  Bỏ qua các route public
+        if ("POST".equalsIgnoreCase(method) && (
+                is.test(base + "/register") ||
+                        is.test(base + "/login") ||
+                        is.test(base + "/forgot-password") ||
+                        is.test(base + "/reset-password") ||
+                        is.test(base + "/verify-email") ||
+                        is.test(base + "/resend-verification")
+        )) return true;
+
+
+        return false;
+    }
+
 }

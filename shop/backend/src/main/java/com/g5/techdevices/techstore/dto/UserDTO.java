@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.*;
-import org.apache.logging.log4j.message.Message;
+
 
 @Builder
 @Data
@@ -44,5 +44,5 @@ public class UserDTO {
     private String googleAccountId;
 
     @JsonProperty("RoleId")
-    private long roleId;
+    private long roleId =3L;
 }

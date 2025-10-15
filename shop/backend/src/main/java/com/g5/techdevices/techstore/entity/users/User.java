@@ -16,6 +16,8 @@ import java.util.List;
 
 @Builder
 @Data
+@Getter
+@Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
@@ -25,8 +27,8 @@ public class User implements UserDetails {
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         List<SimpleGrantedAuthority> authorities = new ArrayList<>();
-//        authorities.add(new SimpleGrantedAuthority("ROLE_"+getRole().getName()));
-        authorities.add(new SimpleGrantedAuthority("ROLE_USER"));
+        authorities.add(new SimpleGrantedAuthority("ROLE_"+getRole().getName().toUpperCase()));
+//        authorities.add(new SimpleGrantedAuthority("ROLE_USER"));
         return authorities;
     }
 
@@ -88,6 +90,9 @@ public class User implements UserDetails {
 
     @Column(name = "GoogleAccountId", length = 100)
     private String googleAccountId;
+
+    @Column(name = "EmailVerified", nullable = false)
+    private boolean emailVerified = false;
 
     @ManyToOne
     @JoinColumn(name = "RoleId", nullable = false)

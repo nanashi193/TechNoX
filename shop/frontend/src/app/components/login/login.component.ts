@@ -42,15 +42,18 @@ export class LoginComponent {
             return;
         }
 
-        const {username, password, remember} = this.form.value;
+        const { email, password, remember } = this.form.value;
         this.loading = true;
 
-        this.auth.login({username, password})
+        this.auth.login({ email, password })
             .pipe(finalize(() => this.loading = false))
             .subscribe({
                 next: (res) => {
-                    localStorage.setItem('token', res.token);
-                    if (remember) localStorage.setItem('rememberUser', username); else localStorage.removeItem('rememberUser');
+                    if (remember)
+                        localStorage.setItem('rememberUser', email);
+                    else
+                        localStorage.removeItem('rememberUser');
+
                     this.router.navigateByUrl('/home');
                 },
                 error: () => this.errorMsg = 'Sai email hoặc mật khẩu.'

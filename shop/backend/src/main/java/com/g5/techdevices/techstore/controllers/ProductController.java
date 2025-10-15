@@ -2,15 +2,6 @@ package com.g5.techdevices.techstore.controllers;
 
 
 import com.g5.techdevices.techstore.dto.ProductDTO;
-import com.g5.techdevices.techstore.dto.ProductImageDTO;
-import com.g5.techdevices.techstore.entity.products.Product;
-import com.g5.techdevices.techstore.entity.products.ProductImages;
-import com.g5.techdevices.techstore.services.ProductService;
-import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.querydsl.QPageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -28,13 +19,14 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("api/v1/products")
 @RequiredArgsConstructor
+@RequestMapping("${api.prefix}/products")
+
 public class ProductController {
     private final ProductService productService;
 
-    @PostMapping("")
-
+    @PostMapping(value = "",
+            consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> createProduct(
             @Valid @RequestBody ProductDTO productDTO,
             //@ModelAttribute ProductDTO productDTO,

@@ -1,6 +1,3 @@
-# ---------------------------
-# Java / Spring Boot
-# ---------------------------
 target/
 *.class
 *.jar
@@ -14,48 +11,56 @@ hs_err_pid*
 mvnw
 mvnw.cmd
 
-# IDE
+# IDE configs
 *.iml
 .idea/
 .vscode/
 
-# OS
+# OS files
 .DS_Store
 Thumbs.db
 
 # Logs
 *.log
 
-# ---------------------------
-# Angular / Node.js
-# ---------------------------
+# Node modules
 node_modules/
 **/node_modules/
+
+# Build outputs
 dist/
 build/
 tmp/
 temp/
+
 # Angular cache
 .angular/
 **/.angular/
+
+# Coverage reports
 coverage/
 **/coverage/
 
-# Env files
+# Environment files
 .env
 .env.local
 .env.*.local
 
-# npm / yarn / pnpm debug logs
+# Debug logs
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 
-# ---------------------------
-# Misc
-# ---------------------------
-# Generated lockfiles are kept, do not ignore:
-# package-lock.json
-# yarn.lock
-# pnpm-lock.yaml
+
+# Ignore all lockfiles globally
+**/package-lock.json
+**/yarn.lock
+**/pnpm-lock.yaml
+
+!shop/frontend/package-lock.json
+
+# Database or temp data
+*.db
+*.sqlite
+*.sql

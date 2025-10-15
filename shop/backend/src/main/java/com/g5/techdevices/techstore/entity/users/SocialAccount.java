@@ -33,5 +33,4 @@ public class SocialAccount {
     @JoinColumn(name = "UserId")
     private User user;
 
-    // getters & setters
 }

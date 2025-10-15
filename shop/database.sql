@@ -75,6 +75,20 @@ CREATE TABLE dbo.Tokens
     FOREIGN KEY (UserId) REFERENCES dbo.Users(UserId)
 )
 GO
+CREATE TABLE PasswordResetToken (
+    Id BIGINT IDENTITY(1,1) PRIMARY KEY,
+    Token NVARCHAR(255) NOT NULL,
+    UserId BIGINT NOT NULL,
+    ExpireDate DATETIME NOT NULL,
+    FOREIGN KEY (UserId) REFERENCES Users(UserId)
+);
+GO
+IF NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID('dbo.Users') AND name = 'EmailVerified')
+    BEGIN
+        ALTER TABLE dbo.Users
+            ADD EmailVerified BIT NOT NULL DEFAULT 0;
+    END
+GO
 --Hỗ trợ đăng nhập từ Facebook hoặc Google
 CREATE TABLE SocialAccount
 (
@@ -127,6 +141,8 @@ CREATE TABLE ProductImages(
                               CONSTRAINT fk_ProductImages_ProductId
                                   FOREIGN KEY (ProductId) REFERENCES Product(ProductId) ON DELETE CASCADE
 );
+GO
+ALTER TABLE ProductImages ADD ImageUrl VARCHAR(MAX);
 GO
 /***************************************
  * Bảng ProductVariant
@@ -192,6 +208,7 @@ CREATE TABLE dbo.Bill
     OrderDate DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME(),
     ShippingAddress NVARCHAR(MAX) NOT NULL,
     Phone VARCHAR(20) NOT NULL,
+    IsActive BIT NOT NULL DEFAULT 1,
     Status VARCHAR(30) NOT NULL DEFAULT 'Processing',
     CONSTRAINT CK_Bill_Status CHECK (Status IN ('Processing','Confirmed','Delivering','Succeed','Cancelled')),
     CONSTRAINT FK_Bill_User FOREIGN KEY (UserId) REFERENCES dbo.Users(UserId)
@@ -356,11 +373,30 @@ VALUES
 GO
 INSERT INTO dbo.Users (FullName, Email, Password, Gender, PhoneNumber, RoleId, IsActive)
 VALUES
-    (N'Trần Thanh Quân', 'quan111@estore.com', N'111111', 0, '0909000001', 4, 1),
+    (N'Châu Tuấn Kiệt', 'ctk9821@gmail.com',
+     '$2a$10$ykF9xhomFn0uj.s1NeQS4u5xSXqKnR8mu71mrqs0k9Po17FPyjjcu',
+     0, '0907776523',1, 1),
 
-    (N'Nguyễn Quốc Huy', 'huynq2@estore.com', N'1', 0, '0909000002', 1, 1),
-    (N'Châu Thanh Thanh', 'ctt321@estore.com', N'1', 1, '0909000003', 1, 1),
+    (N'Trần Thanh Quân', 'quan111@estore.com',
+     N'$2a$10$ykF9xhomFn0uj.s1NeQS4u5xSXqKnR8mu71mrqs0k9Po17FPyjjcu',
+     0, '0909000001', 4, 1),
 
-    (N'Phạm Thị Nhàn', 'npt3214@estore.com', N'111111', 1, '0909000004', 2, 1),
-    (N'Hoàng Văn Kiên', 'khv545213@estore.com', N'111111', 0, '0909000005', 2, 1),
-    (N'Đỗ Thị Tâm', 'tdt9832@estore.com', N'111111', 1, '0909000006', 3, 1);
+    (N'Nguyễn Quốc Huy', 'huynq2@estore.com',
+     N'$2a$10$ykF9xhomFn0uj.s1NeQS4u5xSXqKnR8mu71mrqs0k9Po17FPyjjcu',
+     0, '0909000002', 1, 1),
+
+    (N'Châu Thanh Thanh', 'ctt321@estore.com',
+     N'$2a$10$ykF9xhomFn0uj.s1NeQS4u5xSXqKnR8mu71mrqs0k9Po17FPyjjcu',
+     1, '0909000003', 1, 1),
+
+    (N'Phạm Thị Nhàn', 'npt3214@estore.com',
+     N'$2a$10$ykF9xhomFn0uj.s1NeQS4u5xSXqKnR8mu71mrqs0k9Po17FPyjjcu',
+     1, '0909000004', 2, 1),
+
+    (N'Hoàng Văn Kiên', 'khv545213@estore.com',
+     N'$2a$10$ykF9xhomFn0uj.s1NeQS4u5xSXqKnR8mu71mrqs0k9Po17FPyjjcu',
+     0, '0909000005', 2, 1),
+
+    (N'Đỗ Thị Tâm', 'tdt9832@estore.com',
+     N'$2a$10$ykF9xhomFn0uj.s1NeQS4u5xSXqKnR8mu71mrqs0k9Po17FPyjjcu',
+     1, '0909000006', 3, 1);
