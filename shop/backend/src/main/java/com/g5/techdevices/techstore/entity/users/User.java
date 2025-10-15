@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.g5.techdevices.techstore.entity.Bills.Bill;
 import com.g5.techdevices.techstore.entity.Cart.Cart;
 import com.g5.techdevices.techstore.entity.review.Review;
+import com.g5.techdevices.techstore.entity.tokens.Token;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.security.core.GrantedAuthority;

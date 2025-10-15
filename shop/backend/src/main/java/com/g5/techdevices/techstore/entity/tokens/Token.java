@@ -1,12 +1,15 @@
-package com.g5.techdevices.techstore.entity.users;
+package com.g5.techdevices.techstore.entity.tokens;
 
+import com.g5.techdevices.techstore.entity.users.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
+@Builder
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -22,7 +25,7 @@ public class Token {
     private String token;
 
     @Column(nullable = false, length = 50)
-    private String tokenType;
+    private TokenType tokenType;
 
     private LocalDateTime expirationDate;
 
@@ -32,6 +35,9 @@ public class Token {
     @Column(nullable = false)
     private boolean expire;
 
+    public boolean isExpired() {
+        return LocalDateTime.now().isAfter(expirationDate);
+    }
     @ManyToOne
     @JoinColumn(name = "UserId")
     private User user;

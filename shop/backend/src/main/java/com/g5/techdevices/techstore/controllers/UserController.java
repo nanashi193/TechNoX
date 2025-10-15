@@ -1,31 +1,27 @@
 package com.g5.techdevices.techstore.controllers;
 
 import com.g5.techdevices.techstore.dto.UserUpdateDTO;
-import com.g5.techdevices.techstore.entity.products.Category;
-import com.g5.techdevices.techstore.entity.users.PasswordResetToken;
+import com.g5.techdevices.techstore.entity.tokens.EmailType;
 import com.g5.techdevices.techstore.exceptions.DataNotFoundException;
 import com.g5.techdevices.techstore.repositories.PasswordTokenRepository;
-import com.g5.techdevices.techstore.responses.GenericResponse;
+import com.g5.techdevices.techstore.services.EmailService;
+import com.g5.techdevices.techstore.services.ITokenService;
 import com.g5.techdevices.techstore.services.IUserService;
 import com.g5.techdevices.techstore.dto.UserDTO;
 import com.g5.techdevices.techstore.dto.UserLoginDTO;
 import com.g5.techdevices.techstore.entity.users.User;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
-import org.springframework.context.NoSuchMessageException;
 import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.mail.SimpleMailMessage;
 
 import java.util.*;
 
@@ -35,10 +31,8 @@ import java.util.*;
 @RequiredArgsConstructor
 public class UserController {
     private final IUserService userService;
-    private final Environment env;
-    private final JavaMailSender mailSender;
-    private final MessageSource messages;
-    private final PasswordTokenRepository passwordTokenRepository;
+    private final ITokenService tokenService;
+    private final EmailService emailService;
     @Autowired
     private PasswordEncoder passwordEncoder;
 
@@ -57,6 +51,8 @@ public class UserController {
                 return ResponseEntity.badRequest().body("Passwords do not match");
             }
             User user = userService.createUser(userDTO);
+            String token = tokenService.createVeificationToken(user);
+            emailService.sendEmail(user.getEmail(), EmailType.VERIFY_ACCOUNT, token);
             return ResponseEntity.ok(user);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
