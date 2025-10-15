@@ -1,9 +1,27 @@
+package com.g5.techdevices.techstore.services;
+import com.g5.techdevices.techstore.dto.ProductDTO;
+import com.g5.techdevices.techstore.dto.ProductImageDTO;
 import com.g5.techdevices.techstore.entity.products.Product;
-import org.springframework.stereotype.Service;
+import com.g5.techdevices.techstore.entity.products.ProductImages;
+import com.g5.techdevices.techstore.exceptions.DataNotFoundException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 
 import java.util.List;
 
-@Service
 public interface IProductService {
-    public List<Product> getAllProducts();
+   Product createProduct(ProductDTO productDTO) throws Exception;
+
+    Product getProductById(Long id) throws Exception;
+
+
+    Page<Product> getAllProducts(PageRequest pageRequest);
+
+    Product updateProduct(Long id, ProductDTO  productDTO)throws Exception;
+
+    void deleteProduct(Long id);
+
+    boolean existsByName(String name);
+    ProductImages createProductImages(Long productId
+            , ProductImageDTO productImageDTO) throws Exception;
 }

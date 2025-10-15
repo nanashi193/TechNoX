@@ -7,6 +7,7 @@ import jakarta.validation.constraints.Size;
 import lombok.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -18,18 +19,24 @@ import java.util.List;
 public class ProductDTO {
     @NotBlank(message = "Title is required!")
     @Size (min = 3, max = 200, message = "Title must be between 3 and 200 characters")
-    private String name;
+    private String name;            // nvarchar(255)
+
+    @JsonProperty("product_id")
+    private Long productId;// bigint
 
     @JsonProperty("category_id")
-    private int categoryId;
+    private Long categoryId;// int
+
+
 
     @Min(value = 0, message = "Price must be great than or equal to 0")
-    private Double price;
+    private BigDecimal price;       // decimal(18,2)
 
-    @JsonProperty("thumbnail")
+    private String description;     // nvarchar(MAX)
+
+    private String imageUrl;// nvarchar(1000)
+
+    private LocalDateTime createdAt; // datetime2(7)
+
     private String thumbnail;
-
-    private String description;
-
-    private List<MultipartFile> files;
 }
