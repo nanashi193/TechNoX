@@ -13,11 +13,19 @@ export const routes: Routes = [
     { path: 'home', component: HomeComponent },
     { path: 'login', component: LoginComponent },
     { path: 'signup', component: SignupComponent },
-    { path: 'forgot-password', component: ForgotPasswordComponent },
-    { path: 'products', component: ProductPageComponent },
-
+    {
+        path: 'verify-email',
+        loadComponent: () => import('./components/verify-email/verify-email.component')
+            .then(m => m.VerifyEmailComponent)
+    },
+    {
+        path: 'verify-email/pending',
+        loadComponent: () => import('./components/verify-pending/verify-pending.component')
+            .then(m => m.VerifyPendingComponent)
+    },
+    {path: 'forgot-password', component: ForgotPasswordComponent},
+    {path: 'products', component: ProductPageComponent},
     { path: 'cart', component: CartComponent }, // <-- thêm route giỏ hàng
-
     {
         path: 'product/:id',
         loadComponent: () =>

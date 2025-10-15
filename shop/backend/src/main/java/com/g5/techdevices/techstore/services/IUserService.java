@@ -18,6 +18,6 @@ public interface IUserService {
     List<User> getAllUsers() throws DataNotFoundException;
     User updateUser(Long id, UserUpdateDTO userDTO) throws DataNotFoundException;
     User findUserByEmail(String email) throws DataNotFoundException;
-    void createPasswordResetTokenForUser(User user, String token);
-    String generatePasswordResetToken(User user);
+    String resendVerification(String email) throws DataNotFoundException;
+    void verifyEmail(String token) throws DataNotFoundException;
 }

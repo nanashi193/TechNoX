@@ -83,6 +83,12 @@ CREATE TABLE PasswordResetToken (
     FOREIGN KEY (UserId) REFERENCES Users(UserId)
 );
 GO
+IF NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID('dbo.Users') AND name = 'EmailVerified')
+    BEGIN
+        ALTER TABLE dbo.Users
+            ADD EmailVerified BIT NOT NULL DEFAULT 0;
+    END
+GO
 --Hỗ trợ đăng nhập từ Facebook hoặc Google
 CREATE TABLE SocialAccount
 (

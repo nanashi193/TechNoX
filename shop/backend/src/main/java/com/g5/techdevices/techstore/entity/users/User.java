@@ -16,6 +16,8 @@ import java.util.List;
 
 @Builder
 @Data
+@Getter
+@Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
@@ -88,6 +90,9 @@ public class User implements UserDetails {
 
     @Column(name = "GoogleAccountId", length = 100)
     private String googleAccountId;
+
+    @Column(name = "EmailVerified", nullable = false)
+    private boolean emailVerified = false;
 
     @ManyToOne
     @JoinColumn(name = "RoleId", nullable = false)

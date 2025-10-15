@@ -116,69 +116,36 @@ public class UserController {
         }
     }
 
-    @PostMapping("/resetPassword")
-    public GenericResponse resetPassword(HttpServletRequest request,
-                                         @RequestParam("email") String userEmail) throws DataNotFoundException {
-        try {
-            User user = userService.findUserByEmail(userEmail);
-            if (user == null) {
-                return new GenericResponse("Cannot find user with email " + userEmail);
-            }
-
-            List<PasswordResetToken> existingTokens = passwordTokenRepository
-                    .findByUserAndExpireDateAfter(user, new Date());
-            existingTokens.forEach(passwordTokenRepository::delete); // xóa token cũ
-
-            String token = UUID.randomUUID().toString();
-            PasswordResetToken myToken = new PasswordResetToken(token, user);
-            passwordTokenRepository.save(myToken);
-
-            String url = "http://localhost:4200/reset-password?token=" + token;
-            String message;
-            try {
-                message = messages.getMessage("message.resetPassword", null, request.getLocale());
-            } catch (NoSuchMessageException e) {
-                message = "Please click the link below to reset your password:";
-            }
-
-            SimpleMailMessage email = new SimpleMailMessage();
-            email.setTo(user.getEmail());
-            email.setSubject("Reset Password");
-            email.setText(message + "\n" + url);
-            email.setFrom(env.getProperty("support.email", "noreply@example.com"));
-
-            try {
-                mailSender.send(email);
-            } catch (Exception e) {
-                e.printStackTrace();
-                return new GenericResponse("Mail send failed: " + e.getMessage());
-            }
-            return new GenericResponse("Reset password email has been sent");
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            return new GenericResponse("Exception: " + e.getMessage());
-        }
-    }
-    private SimpleMailMessage constructResetTokenEmail(
-            String contextPath, Locale locale, String token, User user) {
-        String url = "http://localhost:4200/reset-password?token=" + token;
-        String message = messages.getMessage("message.resetPassword",
-                null, locale);
-        return constructEmail("Reset Password", message + " \r\n" + url, user);
-    }
-
-    private SimpleMailMessage constructEmail(String subject, String body,
-                                             User user) {
-        SimpleMailMessage email = new SimpleMailMessage();
-        email.setSubject(subject);
-        email.setText(body);
-        email.setTo(user.getEmail());
-        email.setFrom(env.getProperty("support.email"));
-        return email;
-    }
-
-    private String getAppUrl(HttpServletRequest request) {
-        return request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort() + request.getContextPath();
-    }
+//    @PostMapping("/resetPassword")
+//    public GenericResponse resetPassword(@RequestParam("email") String userEmail) {
+//        try {
+//            String token = userService.createPasswordResetToken(userEmail);
+//            mailSender.send(userService.buildResetPasswordEmail(token, userEmail, env));
+//            return new GenericResponse("Reset password email has been sent");
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//            return new GenericResponse("Exception: " + e.getMessage());
+//        }
+//    }
+//    private SimpleMailMessage constructResetTokenEmail(
+//            String contextPath, Locale locale, String token, User user) {
+//        String url = "http://localhost:4200/reset-password?token=" + token;
+//        String message = messages.getMessage("message.resetPassword",
+//                null, locale);
+//        return constructEmail("Reset Password", message + " \r\n" + url, user);
+//    }
+//
+//    private SimpleMailMessage constructEmail(String subject, String body,
+//                                             User user) {
+//        SimpleMailMessage email = new SimpleMailMessage();
+//        email.setSubject(subject);
+//        email.setText(body);
+//        email.setTo(user.getEmail());
+//        email.setFrom(env.getProperty("support.email"));
+//        return email;
+//    }
+//
+//    private String getAppUrl(HttpServletRequest request) {
+//        return request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort() + request.getContextPath();
+//    }
 }
