@@ -95,6 +95,9 @@ public class User implements UserDetails {
     @Column(name = "EmailVerified", nullable = false)
     private boolean emailVerified = false;
 
+    @Column(name = "Address", nullable = false)
+    private String address;
+
     @ManyToOne
     @JoinColumn(name = "RoleId", nullable = false)
     @ToString.Exclude

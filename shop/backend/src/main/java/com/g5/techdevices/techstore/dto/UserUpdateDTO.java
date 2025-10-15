@@ -17,6 +17,9 @@ public class UserUpdateDTO {
     @JsonProperty("PhoneNumber")
     private String phoneNumber;
 
+    @JsonProperty("Address")
+    private String address;
+
     @JsonProperty("isActive")
     private Boolean isActive;
 }

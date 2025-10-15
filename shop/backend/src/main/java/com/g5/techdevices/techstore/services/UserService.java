@@ -52,6 +52,7 @@ public class UserService implements IUserService{
                 .email(userDTO.getEmail())
                 .password(passwordEncoder.encode(userDTO.getPassword()))
                 .phoneNumber(userDTO.getPhoneNumber())
+                .address(userDTO.getAddress())
                 .gender(genderValue)
 
                 .isActive(true)
@@ -127,7 +128,6 @@ public class UserService implements IUserService{
         user.setIsActive(true);
         userRepository.save(user);
     }
-
 
     @Override
     public String login(String email, String password) throws Exception {

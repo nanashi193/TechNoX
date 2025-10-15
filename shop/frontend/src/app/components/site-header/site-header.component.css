@@ -35,6 +35,14 @@
 }
 .brand__name{ font-size: 20px; font-weight: 700; color: #fff; letter-spacing: .02em; }
 .header-actions{ justify-self: end; display: inline-flex; align-items: center; gap: 8px; }
+.welcome {
+    color: #fff;
+    text-decoration: none;
+    transition: opacity 0.2s ease-in-out;
+}
+.welcome:hover {
+    opacity: 0.8;
+}
 .link-auth{ color:#dcdcdc; text-decoration:none; font-size:13px; padding:4px 8px; border:1px solid transparent; }
 .link-auth:hover{ border-color:#333; }
 .btn-auth{ padding:6px 10px; font-size:13px; }

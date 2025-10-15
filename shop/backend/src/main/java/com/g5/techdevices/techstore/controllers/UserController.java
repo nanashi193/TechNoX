@@ -4,6 +4,7 @@ import com.g5.techdevices.techstore.dto.UserUpdateDTO;
 import com.g5.techdevices.techstore.entity.tokens.EmailType;
 import com.g5.techdevices.techstore.exceptions.DataNotFoundException;
 import com.g5.techdevices.techstore.repositories.PasswordTokenRepository;
+import com.g5.techdevices.techstore.repositories.UserRepository;
 import com.g5.techdevices.techstore.services.EmailService;
 import com.g5.techdevices.techstore.services.ITokenService;
 import com.g5.techdevices.techstore.services.IUserService;
@@ -18,10 +19,13 @@ import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.*;
 
@@ -33,6 +37,8 @@ public class UserController {
     private final IUserService userService;
     private final ITokenService tokenService;
     private final EmailService emailService;
+    private final UserRepository userRepository;
+
     @Autowired
     private PasswordEncoder passwordEncoder;
 
@@ -65,6 +71,25 @@ public class UserController {
     ) throws DataNotFoundException {
         List<User> users = userService.getAllUsers();
         return ResponseEntity.ok(users);
+    }
+    @GetMapping("/me")
+    public ResponseEntity<UserDTO> getCurrentUser() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String currentEmail = authentication.getName();
+
+        User currentUser = userRepository.findByEmail(currentEmail)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+
+        UserDTO userDTO = UserDTO.builder()
+                .id(currentUser.getId())
+                .fullName(currentUser.getFullName())
+                .email(currentUser.getEmail())
+                .phoneNumber(currentUser.getPhoneNumber())
+                .address(currentUser.getAddress())
+                .roleId(currentUser.getRole().getId())
+                .build();
+
+        return ResponseEntity.ok(userDTO);
     }
 
     @PutMapping("/{id}")
@@ -111,37 +136,4 @@ public class UserController {
                     .body(Map.of("error", e.getMessage()));
         }
     }
-
-//    @PostMapping("/resetPassword")
-//    public GenericResponse resetPassword(@RequestParam("email") String userEmail) {
-//        try {
-//            String token = userService.createPasswordResetToken(userEmail);
-//            mailSender.send(userService.buildResetPasswordEmail(token, userEmail, env));
-//            return new GenericResponse("Reset password email has been sent");
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//            return new GenericResponse("Exception: " + e.getMessage());
-//        }
-//    }
-//    private SimpleMailMessage constructResetTokenEmail(
-//            String contextPath, Locale locale, String token, User user) {
-//        String url = "http://localhost:4200/reset-password?token=" + token;
-//        String message = messages.getMessage("message.resetPassword",
-//                null, locale);
-//        return constructEmail("Reset Password", message + " \r\n" + url, user);
-//    }
-//
-//    private SimpleMailMessage constructEmail(String subject, String body,
-//                                             User user) {
-//        SimpleMailMessage email = new SimpleMailMessage();
-//        email.setSubject(subject);
-//        email.setText(body);
-//        email.setTo(user.getEmail());
-//        email.setFrom(env.getProperty("support.email"));
-//        return email;
-//    }
-//
-//    private String getAppUrl(HttpServletRequest request) {
-//        return request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort() + request.getContextPath();
-//    }
 }

@@ -33,7 +33,9 @@
 <!--        </div>-->
         <div class="header-actions">
             @if (currentUser$ | async; as user) {
-                <span class="welcome">Xin chào, {{ user.fullName || user.sub }}</span>
+                <a class="welcome" [routerLink]="['/user', user.id]">
+                    Xin chào, {{ user.fullName || user.sub }}
+                </a>
                 <button class="btn btn--accent btn-auth" (click)="logout()">Đăng xuất</button>
             } @else {
                 <a class="link-auth" routerLink="/login">Đăng nhập</a>

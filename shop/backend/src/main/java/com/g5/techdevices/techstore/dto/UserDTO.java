@@ -13,6 +13,9 @@ import lombok.*;
 @Getter
 @Setter
 public class UserDTO {
+
+    private int id;
+
     @NotBlank(message = "Name is required")
     @JsonProperty("FullName")
     private String fullName;
@@ -33,6 +36,9 @@ public class UserDTO {
     @NotBlank(message = "Phone number is required.")
     @JsonProperty("PhoneNumber")
     private String phoneNumber;
+
+    @JsonProperty("Address")
+    private String address;
 
     @JsonProperty("IsActive")
     private boolean active;
