@@ -6,24 +6,22 @@ import com.g5.techdevices.techstore.entity.promotions.Promotion;
 import com.g5.techdevices.techstore.entity.Bills.BillDetail;
 import com.g5.techdevices.techstore.entity.review.Review;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.math.BigDecimal;
 import java.util.List;
-
+@Getter
+@Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
 @Builder
 @Table(name = "Product")
-public class Product {
+public class Product extends BaseEntity{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "ProductId")
-    private int id;
+    private Long id;
 
     @ManyToOne
     @JoinColumn(name = "CategoryId")
