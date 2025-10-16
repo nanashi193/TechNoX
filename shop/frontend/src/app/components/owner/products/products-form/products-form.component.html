@@ -2,7 +2,7 @@
 
     <div class="form-grid">
         <!-- LEFT: Product information -->
-        <section class="card">
+        <section class="card info-card">
             <h3 class="card-title">Product information</h3>
 
             <label class="field">
@@ -59,7 +59,7 @@
             </div>
         </section>
 
-        <!-- RIGHT: Pricing + Organization -->
+        <!-- RIGHT: Pricing + Organization + Variants -->
         <div class="side">
             <section class="card">
                 <h3 class="card-title">Pricing</h3>
@@ -69,16 +69,11 @@
                     <div class="input-group">
                         <input type="number" min="0" step="0.01" formControlName="price">
                         <select formControlName="currency">
-                            <option value="USD">USD</option>
                             <option value="VND">VND</option>
+                            <option value="USD">USD</option>
                         </select>
                     </div>
                 </label>
-
-                <div class="links">
-                    <button type="button" class="link">★ Set "Compare to" price</button>
-                    <button type="button" class="link">★ Bulk discount pricing</button>
-                </div>
 
                 <div class="field inline">
                     <span>Availability</span>
@@ -107,22 +102,38 @@
                         <option>Accessories</option>
                     </select>
                 </label>
-
-                <label class="field">
-                    <span>Collections</span>
-                    <select multiple formControlName="collections">
-                        <option>Winter</option>
-                        <option>Spring</option>
-                        <option>Sale</option>
-                        <option>New Arrivals</option>
-                    </select>
-                </label>
             </section>
+            <!-- VARIANTS -->
+            <section class="card variants-card">
+                <h3 class="card-title">Variants</h3>
+                <div class="muted small" style="margin-bottom:8px">OPTIONS</div>
 
-            <div class="actions">
-                <button class="btn" type="submit">{{ id ? 'Update product' : 'Create product' }}</button>
-            </div>
+                <div class="variant-row" *ngFor="let opt of variants; index as i">
+                    <select class="v-name" [(ngModel)]="opt.name">
+                        <option *ngFor="let n of variantNames" [value]="n">{{ n }}</option>
+                    </select>
+
+                    <!-- chip input -->
+                    <div class="chip-input">
+                    <span class="chip" *ngFor="let v of opt.values">
+        {{ v }}
+                        <button type="button" (click)="removeTag(i, v)">×</button>
+                      </span>
+                        <input class="chip-editor" [placeholder]="i===0 ? 'Enter tags' : 'Add value'"
+                               [(ngModel)]="opt.input"
+                               (keydown)="onTagKeydown($event, i)">
+                    </div>
+
+                    <button type="button" class="icon-btn" aria-label="Remove option" (click)="removeOption(i)">🗑️
+                    </button>
+                </div>
+
+                <button type="button" class="link" (click)="addOption()" [disabled]="variants.length >= 3">
+                    + Add another option
+                </button>
+            </section>
         </div>
+
         <!-- MEDIA -->
         <section class="card media-card">
             <div class="card-head">
@@ -137,7 +148,7 @@
 
                 <ng-container *ngIf="media.length === 0; else gallery">
                     <div class="dz-empty">
-                        <div class="box-illus">📦</div>
+                        <div class="box-illus"></div>
                         <div class="dz-title">Drag and drop your file here</div>
                         <div class="muted">or</div>
                         <button type="button" class="btn" (click)="fileInput.click()">Browse files</button>
@@ -160,33 +171,19 @@
             </div>
         </section>
 
-        <!-- VARIANTS -->
-        <section class="card">
-            <h3 class="card-title">Variants</h3>
-            <div class="muted small" style="margin-bottom:8px">OPTIONS</div>
 
-            <div class="variant-row" *ngFor="let opt of variants; index as i">
-                <select class="v-name" [(ngModel)]="opt.name">
-                    <option *ngFor="let n of variantNames" [value]="n">{{ n }}</option>
-                </select>
+        <div class="actions">
+            <button class="btn" type="submit">{{ id ? 'Update product' : 'Create product' }}</button>
+        </div>
 
-                <!-- chip input -->
-                <div class="chip-input">
-      <span class="chip" *ngFor="let v of opt.values">
-        {{ v }} <button type="button" (click)="removeTag(i, v)">×</button>
-      </span>
-                    <input class="chip-editor" [placeholder]="i===0 ? 'Enter tags' : 'Add value'"
-                           [(ngModel)]="opt.input"
-                           (keydown)="onTagKeydown($event, i)">
-                </div>
-
-                <button type="button" class="icon-btn" aria-label="Remove option" (click)="removeOption(i)">🗑️</button>
+        <!-- Sticky action bar — chỉ hiện khi edit & dirty -->
+        <div class="sticky-actions" *ngIf="showStickyBar">
+            <div class="sa-left">
             </div>
-
-            <button type="button" class="link" (click)="addOption()" [disabled]="variants.length >= 3">
-                + Add another option
-            </button>
-        </section>
-
+            <div class="sa-right">
+                <button type="button" class="btn ghost light" (click)="discard()">Discard</button>
+                <button type="submit" class="btn primary" (click)="save()">Save</button>
+            </div>
+        </div>
     </div>
 </form>

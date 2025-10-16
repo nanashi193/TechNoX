@@ -1,3 +1,4 @@
+<h1>Danh sách sản phẩm</h1>
 <div class="toolbar">
     <div class="search">
         <input type="text" placeholder="Search products" [(ngModel)]="q" (input)="onSearch()">
@@ -56,7 +57,7 @@
         </div>
 
         <div class="cell col-sku">{{ p.sku }}</div>
-        <div class="cell col-price">{{ p.price | currency:'USD':'symbol' }}</div>
+        <div class="cell col-price">{{ p.price | currency:'VND':'symbol' }}</div>
         <div class="cell col-variants">{{ p.variants }}</div>
         <div class="cell col-qty">{{ p.stockQty ?? 0 }}</div>
 

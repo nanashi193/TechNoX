@@ -31,7 +31,7 @@ export class ProductsFormComponent implements OnInit {
         sku: this.fb.control('', { validators: [Validators.required] }),
         description: this.fb.control(''),
         price: this.fb.control(0, { validators: [Validators.required, Validators.min(0)] }),
-        currency: this.fb.control('USD'),
+        currency: this.fb.control('VND'),
         variants: this.fb.control(0, { validators: [Validators.min(0)] }),
         inStock: this.fb.control(true),
         stockQty: this.fb.control(0, { validators: [Validators.min(0)] }),
@@ -41,7 +41,6 @@ export class ProductsFormComponent implements OnInit {
         // Optional – organization/weight
         vendor: this.fb.control(''),
         category: this.fb.control(''),
-        collections: this.fb.control<string[]>([]),
         weight: this.fb.control(0),
         weightUnit: this.fb.control('kg'),
     });
@@ -54,13 +53,22 @@ export class ProductsFormComponent implements OnInit {
     variantNames = ['Size', 'Color', 'Material', 'Style', 'Capacity'];
     variants: VariantRow[] = [{ name: 'Size', values: [], input: '' }];
 
+    original?: {
+        name:string; type:string; sku:string; description:string;
+        price:number; currency:string; variants:number; inStock:boolean;
+        image:string; vendor:string; category:string;
+    };
+
+    get isEdit(){ return !!this.id; }
+    get showStickyBar(){ return this.isEdit && this.f.dirty; } // hiện banner khi có thay đổi
+
     ngOnInit(): void {
         const idParam = this.route.snapshot.paramMap.get('id');
         this.id = idParam ? +idParam : undefined;
 
         if (this.id) {
             this.svc.get(this.id).subscribe((p: Product) => {
-                this.f.patchValue({
+                const patch = {
                     name: p.name,
                     type: p.type ?? '',
                     sku: p.sku,
@@ -70,11 +78,19 @@ export class ProductsFormComponent implements OnInit {
                     image: p.image ?? '',
                     stockQty: p.stockQty ?? 0
                     // các field khác (vendor/category/collections/weight...) hiện chưa map từ model
-                });
+                };
+                this.f.patchValue(patch);
+                this.f.markAsPristine();
+                this.f.markAsUntouched();
             });
         }
     }
-
+    discard(){                       // khôi phục lại snapshot
+        if (!this.original) return;
+        this.f.reset(this.original);
+        this.f.markAsPristine();
+        this.f.markAsUntouched();
+    }
     // ===== Save
     save(): void {
         // chỉ gửi những trường có trong Product (giữ BE an toàn)
@@ -95,7 +111,7 @@ export class ProductsFormComponent implements OnInit {
         // const filesToUpload = this.media.filter(m => m.file).map(m => m.file);
         // const imageUrls = this.media.filter(m => m.isUrl).map(m => m.previewUrl);
 
-        const done = () => this.router.navigate(['/owner/products/list']);
+        const done = () => this.router.navigate(['/owner/products']);
         if (this.id) this.svc.update(this.id, dto).subscribe(done);
         else this.svc.create(dto).subscribe(done);
     }

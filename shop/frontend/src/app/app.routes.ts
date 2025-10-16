@@ -57,7 +57,8 @@ export const routes: Routes = [
                 path: 'dashboard',
                 loadComponent: () =>
                     import('./components/owner/dashboard/dashboard.component')
-                        .then(m => m.DashboardComponent)
+                        .then(m => m.DashboardComponent),
+                title: 'Tổng quan | Owner'
             },
 
             // ===== Products (Owner CRUD) =====
@@ -76,7 +77,7 @@ export const routes: Routes = [
                 title: 'Thêm sản phẩm | Owner'
             },
             {
-                path: 'products/:id',
+                path: 'products/:id/edit',
                 loadComponent: () =>
                     import('./components/owner/products/products-form/products-form.component')
                         .then(m => m.ProductsFormComponent),
