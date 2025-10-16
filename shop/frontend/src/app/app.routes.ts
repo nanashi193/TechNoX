@@ -72,14 +72,14 @@ export const routes: Routes = [
                 path: 'products/new',
                 loadComponent: () =>
                     import('./components/owner/products/products-form/products-form.component')
-                        .then(m => m.ProductFormComponent),
+                        .then(m => m.ProductsFormComponent),
                 title: 'Thêm sản phẩm | Owner'
             },
             {
                 path: 'products/:id',
                 loadComponent: () =>
                     import('./components/owner/products/products-form/products-form.component')
-                        .then(m => m.ProductFormComponent),
+                        .then(m => m.ProductsFormComponent),
                 title: 'Sửa sản phẩm | Owner'
             },
         ]
