@@ -15,7 +15,6 @@
 
     <div class="right">
         <button class="btn ghost">Filters</button>
-        <button class="btn ghost">Columns <span class="badge">{{visibleCols}}</span></button>
     </div>
 </div>
 
@@ -30,6 +29,7 @@
         <div class="cell col-sku">SKU</div>
         <div class="cell col-price">Price</div>
         <div class="cell col-variants">Variants</div>
+        <div class="cell col-qty">Quantity</div>
         <div class="cell col-actions">Actions</div>
     </div>
 
@@ -50,7 +50,7 @@
 
         <div class="cell col-stocks">
             <label class="switch">
-                <input type="checkbox" [(ngModel)]="p.inStock">
+                <input type="checkbox" [checked]="p.inStock" (change)="toggleStock(p)">
                 <span class="track"></span>
             </label>
         </div>
@@ -58,15 +58,29 @@
         <div class="cell col-sku">{{ p.sku }}</div>
         <div class="cell col-price">{{ p.price | currency:'USD':'symbol' }}</div>
         <div class="cell col-variants">{{ p.variants }}</div>
+        <div class="cell col-qty">{{ p.stockQty ?? 0 }}</div>
 
-        <label class="switch">
-            <input type="checkbox" [checked]="p.inStock" (change)="toggleStock(p)">
-            <span class="track"></span>
-        </label>
-
+        <!-- chỉ còn 8th cell: Actions -->
         <div class="cell col-actions">
             <button class="btn ghost sm" (click)="edit(p.id)">Edit</button>
-                <button class="btn ghost icon" aria-label="More">⋯</button>
+            <button class="btn ghost icon" aria-label="More">⋯</button>
         </div>
     </div>
+
 </div>
+
+<nav class="pagination" aria-label="Pagination">
+    <button class="pg prev" [disabled]="page === 1" (click)="prev()">Prev</button>
+
+    <ng-container *ngFor="let n of pages; let i = index">
+        <ng-container *ngIf="i === 0 || n - pages[i-1] === 1; else dots">
+            <button class="pg num" [class.active]="n===page" (click)="goto(n)">{{n}}</button>
+        </ng-container>
+        <ng-template #dots>
+            <span class="muted">…</span>
+            <button class="pg num" [class.active]="n===page" (click)="goto(n)">{{n}}</button>
+        </ng-template>
+    </ng-container>
+
+    <button class="pg next" [disabled]="page === totalPages" (click)="next()">Next</button>
+</nav>

@@ -66,6 +66,7 @@ export class ProductService {
             price: dto.price ?? 0,
             variants: dto.variants ?? 0,
             inStock: dto.inStock ?? true,
+            stockQty: dto.stockQty ?? 0,
             image: dto.image ?? '',
             createdAt: now,
             updatedAt: now,

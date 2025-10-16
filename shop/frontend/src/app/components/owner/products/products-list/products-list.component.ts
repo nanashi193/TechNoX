@@ -17,39 +17,75 @@ type ProductRow = {
     templateUrl: './products-list.component.html',
     styleUrls: ['./products-list.component.css']
 })
+
 export class ProductsListComponent implements OnInit {
     private svc = inject(ProductService);
     private router = inject(Router);
-
+    // ====== state ======
     q = '';
-    page = 1; size = 20; total = 0;
+    page = 1;                 // UI: 1-based
+    size = 8;
+    total = 0;
+    loading = false;
+
+    // Nếu BE dùng page 0-based => bật cờ này
+    private apiPageZeroBased = false;
+
     products: Product[] = [];
     filtered: Product[] = [];
     selected = new Set<number>();
     visibleCols = 6;
+// ====== derived ======
+    get totalPages(): number {
+        return Math.max(1, Math.ceil(this.total / this.size));
+    }
+    get pages(): number[] {
+        const total = this.totalPages;
+        if (total <= 7) return Array.from({length: total}, (_,i)=>i+1);
+        const p = this.page;
+        const s = new Set<number>([1,2,total-1,total,p-1,p,p+1].filter(n => n>=1 && n<=total));
+        return Array.from(s).sort((a,b)=>a-b);
+    }
+    get showPager() {
+        return !this.loading && (this.totalPages > 1 || (this.page > 1 && this.products.length > 0));
+    }
 
     ngOnInit(){ this.load(); }
 
     load(){
-        this.svc.search({ q: this.q, page: this.page, size: this.size }).subscribe(res => {
-            this.products = res.items;
-            this.total = res.total;
-            this.filtered = [...this.products];
+        this.loading = true;
+        const apiPage = this.apiPageZeroBased ? this.page - 1 : this.page;
+
+        this.svc.search({ q: this.q, page: apiPage, size: this.size }).subscribe((res: any) => {
+            const items: Product[] = (res.items ?? res.content ?? res) as Product[];
+            this.products = items;
+            this.filtered = [...items];
+
+            // nhận nhiều kiểu tên tổng
+            this.total = res.total ?? res.totalCount ?? res.totalElements ?? (Array.isArray(items) ? items.length : 0);
+
+            // nếu lỡ xóa làm page hiện tại vượt quá tổng trang -> lùi về trang cuối
+            const tp = this.totalPages;
+            if (this.page > tp) { this.page = tp; if (tp > 0) this.load(); else this.loading = false; return; }
+
+            // clear chọn của trang hiện tại
             this.selected.clear();
-        });
+            this.loading = false;
+        }, _ => this.loading = false);
     }
 
     onSearch(){ this.page = 1; this.load(); }
 
-    // Selection helpers
+    // Selection
     trackById = (_:number, p:Product)=>p.id;
     isSelected = (id:number) => this.selected.has(id);
     selectedCount(){ return this.selected.size; }
+
     toggle(id:number, e:Event){ (e.target as HTMLInputElement).checked ? this.selected.add(id) : this.selected.delete(id); }
     allSelected(){ return this.filtered.length>0 && this.filtered.every(p=>this.selected.has(p.id)); }
     toggleAll(e:Event){ const on=(e.target as HTMLInputElement).checked; (on?this.filtered:[]).forEach(p=>this.selected.add(p.id)); if(!on) this.filtered.forEach(p=>this.selected.delete(p.id)); }
 
-    // CRUD hooks
+    // CRUD
     edit(id:number){ this.router.navigate(['/owner/products', id, 'edit']); }
     create(){ this.router.navigate(['/owner/products', 'new']); }
 
@@ -75,4 +111,10 @@ export class ProductsListComponent implements OnInit {
             error: () => p.inStock = prev
         });
     }
+
+// pages
+    goto(n: number) { if (n >= 1 && n <= this.totalPages && n !== this.page){ this.page = n; this.load(); } }
+    prev() { if (this.page > 1){ this.page--; this.load(); } }
+    next() { if (this.page < this.totalPages){ this.page++; this.load(); } }
+
 }

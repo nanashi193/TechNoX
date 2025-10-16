@@ -1,44 +1,192 @@
-<form [formGroup]="f" (ngSubmit)="save()" class="card form">
-    <h2 class="title">{{ id ? 'Edit product' : 'Add product' }}</h2>
+<form [formGroup]="f" (ngSubmit)="save()" class="page">
 
-    <div class="grid">
-        <label>
-            <span>Name</span>
-            <input type="text" formControlName="name" placeholder="Product name">
-        </label>
+    <div class="form-grid">
+        <!-- LEFT: Product information -->
+        <section class="card">
+            <h3 class="card-title">Product information</h3>
 
-        <label>
-            <span>Type</span>
-            <input type="text" formControlName="type" placeholder="Electronics | Shoes...">
-        </label>
+            <label class="field">
+                <span>Name <em class="req">*</em></span>
+                <input type="text" formControlName="name" placeholder="Tiro track jacket">
+            </label>
 
-        <label>
-            <span>SKU</span>
-            <input type="text" formControlName="sku" placeholder="SKU code">
-        </label>
+            <div class="row-2">
+                <label class="field">
+                    <span>SKU</span>
+                    <input type="text" formControlName="sku" placeholder="eg. 348121032">
+                </label>
+                <label class="field">
+                    <span>Quantity</span>
+                    <input type="number" formControlName="stockQty" min="0" step="1">
+                </label>
 
-        <label>
-            <span>Price</span>
-            <input type="number" formControlName="price" min="0" step="0.01">
-        </label>
+                <label class="field">
+                    <span>Weight</span>
+                    <div class="input-group">
+                        <input type="number" min="0" step="0.01" formControlName="weight">
+                        <select formControlName="weightUnit">
+                            <option value="kg">kg</option>
+                            <option value="g">g</option>
+                            <option value="lb">lb</option>
+                            <option value="oz">oz</option>
+                        </select>
+                    </div>
+                    <small class="muted">
+                        Used to calculate shipping rates at checkout and label prices during fulfillment.
+                    </small>
+                </label>
+            </div>
 
-        <label>
-            <span>Variants</span>
-            <input type="number" formControlName="variants" min="0" step="1">
-        </label>
+            <div class="field">
+                <div class="label-row">
+                    <span>Description</span><span class="muted">(Optional)</span>
+                </div>
 
-        <label class="switch-line">
-            <span>In stock</span>
-            <input type="checkbox" formControlName="inStock">
-        </label>
+                <!-- mini editor toolbar (chỉ UI) -->
+                <div class="editor-toolbar">
+                    <button type="button"><b>B</b></button>
+                    <button type="button"><i>I</i></button>
+                    <button type="button"><u>U</u></button>
+                    <button type="button">S</button>
+                    <button type="button">🔗</button>
+                    <button type="button">🖼️</button>
+                    <button type="button">“”</button>
+                    <button type="button">&lt;/&gt;</button>
+                    <button type="button">•</button>
+                </div>
 
-        <label class="full">
-            <span>Image URL</span>
-            <input type="text" formControlName="image" placeholder="/assets/xxx.jpg">
-        </label>
-    </div>
+                <textarea rows="8" placeholder="Type your description..." formControlName="description"></textarea>
+            </div>
+        </section>
 
-    <div class="actions">
-        <button class="btn" type="submit">{{ id ? 'Update' : 'Create' }}</button>
+        <!-- RIGHT: Pricing + Organization -->
+        <div class="side">
+            <section class="card">
+                <h3 class="card-title">Pricing</h3>
+
+                <label class="field">
+                    <span>Price</span>
+                    <div class="input-group">
+                        <input type="number" min="0" step="0.01" formControlName="price">
+                        <select formControlName="currency">
+                            <option value="USD">USD</option>
+                            <option value="VND">VND</option>
+                        </select>
+                    </div>
+                </label>
+
+                <div class="links">
+                    <button type="button" class="link">★ Set "Compare to" price</button>
+                    <button type="button" class="link">★ Bulk discount pricing</button>
+                </div>
+
+                <div class="field inline">
+                    <span>Availability</span>
+                    <label class="switch">
+                        <input type="checkbox" formControlName="inStock">
+                        <span class="track"></span>
+                    </label>
+                </div>
+            </section>
+
+            <section class="card">
+                <h3 class="card-title">Organization</h3>
+
+                <label class="field">
+                    <span>Vendor</span>
+                    <input type="text" formControlName="vendor" placeholder="eg. Nike">
+                </label>
+
+                <label class="field">
+                    <span>Category</span>
+                    <select formControlName="category">
+                        <option value="">Select…</option>
+                        <option>Clothing</option>
+                        <option>Electronics</option>
+                        <option>Shoes</option>
+                        <option>Accessories</option>
+                    </select>
+                </label>
+
+                <label class="field">
+                    <span>Collections</span>
+                    <select multiple formControlName="collections">
+                        <option>Winter</option>
+                        <option>Spring</option>
+                        <option>Sale</option>
+                        <option>New Arrivals</option>
+                    </select>
+                </label>
+            </section>
+
+            <div class="actions">
+                <button class="btn" type="submit">{{ id ? 'Update product' : 'Create product' }}</button>
+            </div>
+        </div>
+        <!-- MEDIA -->
+        <section class="card media-card">
+            <div class="card-head">
+                <h3 class="card-title">Media</h3>
+                <div class="menu">
+                    <button type="button" class="link" (click)="addMediaFromUrl()">Add media from URL ▾</button>
+                </div>
+            </div>
+
+            <div class="dropzone" [class.dragover]="dragOver"
+                 (dragover)="onDragOver($event)" (dragleave)="onDragLeave($event)" (drop)="onDrop($event)">
+
+                <ng-container *ngIf="media.length === 0; else gallery">
+                    <div class="dz-empty">
+                        <div class="box-illus">📦</div>
+                        <div class="dz-title">Drag and drop your file here</div>
+                        <div class="muted">or</div>
+                        <button type="button" class="btn" (click)="fileInput.click()">Browse files</button>
+                        <input #fileInput type="file" accept="image/*" multiple hidden (change)="onFileSelect($event)">
+                    </div>
+                </ng-container>
+
+                <ng-template #gallery>
+                    <div class="media-grid">
+                        <div class="media-item" *ngFor="let m of media; index as i">
+                            <img [src]="m.previewUrl" alt="">
+                            <button type="button" class="remove" (click)="removeMedia(i)">✕</button>
+                        </div>
+                    </div>
+                    <div class="media-actions">
+                        <button type="button" class="btn" (click)="fileInput.click()">Add more</button>
+                        <input #fileInput type="file" accept="image/*" multiple hidden (change)="onFileSelect($event)">
+                    </div>
+                </ng-template>
+            </div>
+        </section>
+
+        <!-- VARIANTS -->
+        <section class="card">
+            <h3 class="card-title">Variants</h3>
+            <div class="muted small" style="margin-bottom:8px">OPTIONS</div>
+
+            <div class="variant-row" *ngFor="let opt of variants; index as i">
+                <select class="v-name" [(ngModel)]="opt.name">
+                    <option *ngFor="let n of variantNames" [value]="n">{{ n }}</option>
+                </select>
+
+                <!-- chip input -->
+                <div class="chip-input">
+      <span class="chip" *ngFor="let v of opt.values">
+        {{ v }} <button type="button" (click)="removeTag(i, v)">×</button>
+      </span>
+                    <input class="chip-editor" [placeholder]="i===0 ? 'Enter tags' : 'Add value'"
+                           [(ngModel)]="opt.input"
+                           (keydown)="onTagKeydown($event, i)">
+                </div>
+
+                <button type="button" class="icon-btn" aria-label="Remove option" (click)="removeOption(i)">🗑️</button>
+            </div>
+
+            <button type="button" class="link" (click)="addOption()" [disabled]="variants.length >= 3">
+                + Add another option
+            </button>
+        </section>
+
     </div>
 </form>

@@ -6,6 +6,7 @@ export interface Product {
     price: number;
     variants: number;
     inStock: boolean;
+    stockQty?: number;
     image: string;
     createdAt?: string;
     updatedAt?: string;
