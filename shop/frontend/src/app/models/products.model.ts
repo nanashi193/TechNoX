@@ -1,22 +1,19 @@
 export interface Product {
     id: number;
-    sku: string;
     name: string;
+    type: string;     // Electronics | Shoes | ...
+    sku: string;
     price: number;
-    oldPrice?: number | null;
-    categoryId: number;
-    categoryName?: string;
+    variants: number;
     inStock: boolean;
-    stockQty: number;
-    thumbnailUrl?: string | null;
-    tags?: string[];
-    description?: string;
+    image: string;
     createdAt?: string;
     updatedAt?: string;
 }
+
 export interface Page<T> {
     items: T[];
-    totalItems: number;
-    page: number;   // 0-based
+    total: number;
+    page: number;
     size: number;
 }

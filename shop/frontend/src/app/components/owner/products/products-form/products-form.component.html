@@ -1,10 +1,6 @@
 <div class="card">
-    <div class="card-header">
-        <h2>{{ isEdit ? 'Sửa sản phẩm' : 'Thêm sản phẩm' }}</h2>
-        <a routerLink="/owner/products" class="link">← Quay lại</a>
-    </div>
 
-    <form [formGroup]="form" (ngSubmit)="submit()" class="grid">
+    <form [formGroup]="f" (ngSubmit)="save()" class="card">
         <div class="left">
             <label class="field"><span>SKU *</span><input formControlName="sku"></label>
             <label class="field"><span>Tên *</span><input formControlName="name"></label>
@@ -23,16 +19,7 @@
             <label class="field"><span>Tags (phẩy)</span><input formControlName="tags"></label>
             <label class="field"><span>Mô tả</span><textarea rows="6" formControlName="description"></textarea></label>
 
-            <button class="primary" type="submit">Lưu</button>
-        </div>
-
-        <div class="right">
-            <div class="preview">
-                <img *ngIf="preview(); else noimg" [src]="preview()" alt="">
-                <ng-template #noimg><div class="noimg">No image</div></ng-template>
-            </div>
-            <label class="field"><span>Ảnh (URL)</span><input formControlName="thumbnailUrl" (input)="onThumbInput($event)"></label>
-            <p class="hint">Sau này sẽ đổi sang upload file.</p>
+            <button class="btn" type="submit">{{ id ? 'Update' : 'Create' }}</button>
         </div>
     </form>
 </div>

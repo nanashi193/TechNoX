@@ -1,42 +1,72 @@
-<div class="card">
-    <div class="card-header">
-        <h2>Sản phẩm</h2>
-        <div class="actions">
-            <input [(ngModel)]="q" (keyup.enter)="search()" placeholder="Tìm tên/sku…">
-            <button (click)="search()">Tìm</button>
-            <button class="primary" (click)="create()">+ Thêm sản phẩm</button>
-        </div>
+<div class="toolbar">
+    <div class="search">
+        <input type="text" placeholder="Search products" [(ngModel)]="q" (input)="onSearch()">
     </div>
 
-    <div *ngIf="!loading(); else loadingTpl">
-        <table class="table">
-            <thead>
-            <tr>
-                <th>Ảnh</th><th>Tên</th><th>SKU</th><th>Giá</th><th>Tồn</th><th>TT</th><th></th>
-            </tr>
-            </thead>
-            <tbody>
-            <tr *ngFor="let p of rows()">
-                <td><img [src]="p.thumbnailUrl || 'assets/placeholder.png'" class="thumb"></td>
-                <td>{{p.name}}</td>
-                <td>{{p.sku}}</td>
-                <td>{{p.price | number}} đ</td>
-                <td>{{p.stockQty}}</td>
-                <td><span class="badge" [class.green]="p.inStock">{{p.inStock?'Còn bán':'Hết'}}</span></td>
-                <td class="right">
-                    <button (click)="edit(p)">Sửa</button>
-                    <button class="danger" (click)="remove(p)">Xoá</button>
-                </td>
-            </tr>
-            </tbody>
-        </table>
+    <button class="btn" (click)="create()">+ Add product</button>
 
-        <div class="pager">
-            <button (click)="prev()" [disabled]="page===0">← Trước</button>
-            <span>Trang {{page+1}} / {{ Math.max(1, Math.ceil(totalItems/size)) }}</span>
-            <button (click)="next()" [disabled]="(page+1)*size>=totalItems">Sau →</button>
-        </div>
+    <div class="bulk" *ngIf="selectedCount()">
+        <span class="muted">{{ selectedCount() }} Selected</span>
+        <button class="btn danger" (click)="bulk('delete')">Delete</button>
+        <button class="btn" (click)="bulk('archive')">Archive</button>
+        <button class="btn" (click)="bulk('publish')">Publish</button>
+        <button class="btn" (click)="bulk('unpublish')">Unpublish</button>
     </div>
 
-    <ng-template #loadingTpl><div class="loading">Đang tải…</div></ng-template>
+    <div class="right">
+        <button class="btn ghost">Filters</button>
+        <button class="btn ghost">Columns <span class="badge">{{visibleCols}}</span></button>
+    </div>
+</div>
+
+<div class="table">
+    <div class="row thead">
+        <label class="cell check">
+            <input type="checkbox" [checked]="allSelected()" (change)="toggleAll($event)">
+        </label>
+        <div class="cell col-product">Product</div>
+        <div class="cell col-type">Type</div>
+        <div class="cell col-stocks">Stocks</div>
+        <div class="cell col-sku">SKU</div>
+        <div class="cell col-price">Price</div>
+        <div class="cell col-variants">Variants</div>
+        <div class="cell col-actions">Actions</div>
+    </div>
+
+    <div class="row" *ngFor="let p of filtered; trackBy: trackById">
+        <label class="cell check">
+            <input type="checkbox" [checked]="isSelected(p.id)" (change)="toggle(p.id,$event)">
+        </label>
+
+        <div class="cell col-product">
+            <img class="thumb" [src]="p.image" alt="">
+            <div class="info">
+                <div class="name">{{ p.name }}</div>
+                <div class="sku muted">#{{ p.sku }}</div>
+            </div>
+        </div>
+
+        <div class="cell col-type"><span class="muted">{{ p.type }}</span></div>
+
+        <div class="cell col-stocks">
+            <label class="switch">
+                <input type="checkbox" [(ngModel)]="p.inStock">
+                <span class="track"></span>
+            </label>
+        </div>
+
+        <div class="cell col-sku">{{ p.sku }}</div>
+        <div class="cell col-price">{{ p.price | currency:'USD':'symbol' }}</div>
+        <div class="cell col-variants">{{ p.variants }}</div>
+
+        <label class="switch">
+            <input type="checkbox" [checked]="p.inStock" (change)="toggleStock(p)">
+            <span class="track"></span>
+        </label>
+
+        <div class="cell col-actions">
+            <button class="btn ghost sm" (click)="edit(p.id)">Edit</button>
+                <button class="btn ghost icon" aria-label="More">⋯</button>
+        </div>
+    </div>
 </div>
