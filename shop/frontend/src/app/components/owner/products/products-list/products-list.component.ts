@@ -9,6 +9,7 @@ type ProductRow = {
     id:number; name:string; image:string; type:string;
     sku:string; price:number; variants:number; inStock:boolean;
 };
+type SortField = 'name'|'type'|'sku'|'price'|'variants'|'stockQty';
 
 @Component({
     selector: 'app-products-list',
@@ -49,14 +50,17 @@ export class ProductsListComponent implements OnInit {
     get showPager() {
         return !this.loading && (this.totalPages > 1 || (this.page > 1 && this.products.length > 0));
     }
+    sort: { field: SortField ; dir: 'asc'|'desc' } | null = null;
 
     ngOnInit(){ this.load(); }
 
     load(){
         this.loading = true;
         const apiPage = this.apiPageZeroBased ? this.page - 1 : this.page;
+        const params: any = { q: this.q, page: this.page, size: this.size };
 
-        this.svc.search({ q: this.q, page: apiPage, size: this.size }).subscribe((res: any) => {
+        if (this.sort) params.sort = `${this.sort.field},${this.sort.dir}`;
+        this.svc.search(params).subscribe((res: any) => {
             const items: Product[] = (res.items ?? res.content ?? res) as Product[];
             this.products = items;
             this.filtered = [...items];
@@ -73,6 +77,21 @@ export class ProductsListComponent implements OnInit {
             this.loading = false;
         }, _ => this.loading = false);
     }
+    sortBy(field: SortField){
+        if (!this.sort || this.sort.field !== field) {
+            this.sort = { field, dir: 'asc' };
+        } else if (this.sort.dir === 'asc') {
+            this.sort = { field, dir: 'desc' };
+        } else {
+            this.sort = null;
+        }
+        this.page = 1;
+        this.load();
+    }
+    isAsc  = (f: SortField) => this.sort?.field === f && this.sort?.dir === 'asc';
+    isDesc = (f: SortField) => this.sort?.field === f && this.sort?.dir === 'desc';
+    ariaSort(f: SortField){ return this.isAsc(f)?'ascending':this.isDesc(f)?'descending':'none'; }
+
 
     onSearch(){ this.page = 1; this.load(); }
 
@@ -117,4 +136,5 @@ export class ProductsListComponent implements OnInit {
     prev() { if (this.page > 1){ this.page--; this.load(); } }
     next() { if (this.page < this.totalPages){ this.page++; this.load(); } }
 
+    protected readonly name = name;
 }
