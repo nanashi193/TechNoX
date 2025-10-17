@@ -146,4 +146,248 @@ html, body {
 .owner-scope .owner-aside::-webkit-scrollbar-thumb{
     background:rgba(255,255,255,.18); border-radius:999px;
 }
+/*new*/
+
+/* ===== Fancy dark gradient sidebar (theo markup hiện tại) ===== */
+.owner-scope .owner-aside{
+    position: sticky; top: 0;
+    width: 280px; min-height: 100dvh;
+    padding: 16px 14px;
+    color:#fff;
+    background:
+            radial-gradient(120% 120% at 0% 0%, #ff7a59 0%, rgba(255,122,89,.12) 35%, transparent 60%),
+            radial-gradient(100% 120% at 100% 0%, #b14cff 0%, rgba(177,76,255,.10) 30%, transparent 60%),
+            linear-gradient(180deg, #1b0f0f 0%, #1a1320 60%, #140f18 100%);
+    box-shadow: inset 0 0 0 1px rgba(255,255,255,.05);
+    border-right: 1px solid rgba(255,255,255,.06);
+}
+
+/* Mini mode */
+.owner-scope .owner-aside.mini,
+.owner-scope .owner-aside[ng-reflect-ng-class*="mini"]{ width: 92px; }
+
+/* Head */
+.owner-scope .aside-head{ display:flex; align-items:center; gap:12px; margin-bottom:14px; }
+.owner-scope .avatar{ width:42px; height:42px; border-radius:12px; object-fit:cover; }
+.owner-scope .who .role{ font-size:10px; letter-spacing:.08em; opacity:.65; }
+.owner-scope .who .name{ font-weight:700; }
+.owner-scope .collapse{ margin-left:auto; border:0; background:rgba(255,255,255,.08); color:#fff; width:28px; height:28px; border-radius:999px; cursor:pointer; }
+
+/* Section */
+.owner-scope .aside-section{ margin:10px 0 18px; }
+.owner-scope .aside-title{ font-size:11px; letter-spacing:.12em; opacity:.6; margin:8px 10px 10px; }
+
+/* Item */
+.owner-scope .item{
+    display:flex; align-items:center; gap:10px;
+    padding:10px 12px; border-radius:14px; margin:6px 4px;
+    color:#eef2ff; text-decoration:none;
+    background: rgba(255,255,255,.04);
+    border:1px solid rgba(255,255,255,.05);
+    backdrop-filter: blur(6px);
+    transition: .15s;
+}
+.owner-scope .item:hover{ background:rgba(255,255,255,.08); }
+.owner-scope .item.active{ background:rgba(255,255,255,.12); border-color:rgba(255,255,255,.15); }
+.owner-scope .item .icon{ width:18px; text-align:center; opacity:.85; }
+
+/* Group + submenu */
+.owner-scope .menu-group .item.has-children{ position:relative; }
+.owner-scope .menu-group .item.has-children .chev{
+    margin-left:auto; width:10px; height:10px; border-right:2px solid #7da2ff; border-bottom:2px solid #7da2ff;
+    transform: rotate(-45deg); transition:.15s;
+}
+.owner-scope .menu-group.open .item.has-children .chev{ transform: rotate(45deg); }
+.owner-scope .menu-group .submenu{
+    margin:6px 0 0 12px; padding-left:12px; border-left:1.5px solid rgba(255,255,255,.16); display:none;
+}
+.owner-scope .menu-group.open .submenu{ display:block; }
+.owner-scope .submenu .sub{
+    display:block; padding:8px 10px; margin:4px 0; font-size:13px; color:#e8ecff; text-decoration:none;
+    border-radius:12px; background:transparent; transition:.15s;
+}
+.owner-scope .submenu .sub:hover{ background:rgba(255,255,255,.08); }
+
+/* Contacts */
+.owner-scope .contact{ display:flex; align-items:center; gap:10px; padding:8px 12px; margin:4px 4px; border-radius:12px; }
+.owner-scope .contact img{ width:24px; height:24px; border-radius:999px; }
+
+/* Promo card */
+.owner-scope .promo{
+    margin-top:auto; padding:16px; border-radius:22px;
+    background: linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.02));
+    box-shadow: inset 0 0 0 1px rgba(255,255,255,.06);
+}
+.owner-scope .promo .h{ font-weight:800; margin-bottom:6px; }
+.owner-scope .promo p{ opacity:.8; font-size:13px; line-height:1.3; }
+.owner-scope .promo .cta{
+    background: linear-gradient(180deg,#8459bc 0%,#6c32c1 60%,#5e2ca8 100%);
+    color:#2b1600; border:0; border-radius:12px; height:40px; width:100%;
+    box-shadow:0 6px 18px rgb(75, 57, 106);
+}
+
+/* Scrollbar sáng */
+.owner-scope .owner-aside::-webkit-scrollbar{ width:10px; }
+.owner-scope .owner-aside::-webkit-scrollbar-thumb{ background:rgba(255,255,255,.18); border-radius:999px; }
+
+/* Mini mode: ẩn text */
+.owner-scope .owner-aside.mini .who,
+.owner-scope .owner-aside.mini .item .text,
+.owner-scope .owner-aside.mini .aside-title,
+.owner-scope .owner-aside.mini .submenu,
+.owner-scope .owner-aside.mini .promo{ display:none; }
+.owner-scope .owner-aside.mini .item{ justify-content:center; }
+
+/* ===== Gradient tím–cam như ảnh ===== */
+.owner-scope .owner-aside{
+    color:#fff;
+    background:
+            radial-gradient(90% 70% at 6% 0%, rgba(255,173,102,.45) 0%, rgba(255,173,102,.10) 35%, transparent 65%),
+            radial-gradient(110% 80% at 100% 0%, rgba(124,58,237,.55) 0%, rgba(124,58,237,.10) 40%, transparent 70%),
+            linear-gradient(180deg, #0b0920 0%, #100b19 55%, #0c0b12 100%);
+    box-shadow: inset 0 0 0 1px rgba(255,255,255,.05);
+    border-right: 1px solid rgba(255,255,255,.06);
+}
+
+/* Thẻ menu bán trong suốt */
+.owner-scope .item{
+    display:flex; align-items:center; gap:10px;
+    padding:10px 12px; margin:6px 4px; border-radius:14px;
+    color:#eef2ff; text-decoration:none;
+    background: rgba(255,255,255,.06);
+    border:1px solid rgba(255,255,255,.08);
+    backdrop-filter: blur(6px);
+    transition:.15s;
+}
+.owner-scope .item:hover{ background: rgba(255,255,255,.10); }
+.owner-scope .item.active{
+    background: rgba(255,255,255,.14);
+    border-color: rgba(255,255,255,.18);
+}
+.owner-scope .item .icon{ width:18px; text-align:center; opacity:.9; }
+
+/* Tiêu đề nhóm */
+.owner-scope .aside-title{
+    font-size:11px; letter-spacing:.12em; opacity:.65;
+    margin:8px 10px 10px;
+}
+
+/* Card CTA dưới cùng giữ tông cam */
+.owner-scope .promo{
+    background: linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.03));
+    box-shadow: inset 0 0 0 1px rgba(255,255,255,.06);
+}
+
+
+/* Scrollbar sáng */
+.owner-scope .owner-aside::-webkit-scrollbar{ width:10px; }
+.owner-scope .owner-aside::-webkit-scrollbar-thumb{ background:rgba(255,255,255,.18); border-radius:999px; }
+/* ===== Inactive (default) giống ảnh trái: phẳng, mờ nhẹ ===== */
+.owner-scope .item{
+    background: transparent;                 /* bỏ nền mặc định */
+    border: 1px solid transparent;           /* bỏ viền mặc định */
+    color: rgba(255,255,255,.70);            /* chữ mờ nhạt */
+    padding: 10px 12px; margin: 6px 4px;
+    border-radius: 14px;
+    display:flex; align-items:center; gap:10px;
+    transition: background .15s, border-color .15s, color .15s, opacity .15s;
+}
+.owner-scope .item .text{ color: inherit; }
+
+/* icon mặc định mờ hơn một chút */
+.owner-scope .item .icon{ width:18px; text-align:center; opacity:.60; }
+
+/* Nếu icon là emoji → khử màu & làm mờ để giống line-icon */
+.owner-scope .item .icon.emoji{
+    filter: grayscale(1) brightness(.95) opacity(.60);
+}
+
+
+/* ===== Hover: chỉ hơi sáng lên, có nền bo góc rất nhẹ ===== */
+.owner-scope .item:hover{
+    background: rgba(255,255,255,.07);
+    border-color: rgba(255,255,255,.10);
+    color:#f5f7ff;
+}
+.owner-scope .item:hover .icon{ opacity:.85; }
+.owner-scope .item:hover .icon.emoji{
+    filter: grayscale(1) brightness(1.1) opacity(.85);
+}
+
+/* ===== Active (đang chọn): nền rõ hơn một nấc ===== */
+.owner-scope .item.active{
+    background: rgba(255,255,255,.14);
+    border-color: rgba(255,255,255,.18);
+    color:#ffffff;
+}
+.owner-scope .item.active .icon{ opacity:1; }
+.owner-scope .item.active .icon.emoji{
+    filter: grayscale(1) brightness(1.18) opacity(1);
+}
+
+/* vạch ngăn mờ giữa các nhóm (nếu muốn) */
+.owner-scope .aside-section + .aside-section{
+    border-top: 1px solid rgba(255,255,255,.06);
+    padding-top: 10px; margin-top: 10px;
+}
+/* kích thước icon */
+.owner-scope .item .icon{ width:18px; display:inline-flex; align-items:center; justify-content:center; }
+.owner-scope .item .icon img{ width:18px; height:18px; display:block; }
+
+/* giữ nguyên icon khi hover/active */
+.owner-scope .item:hover .icon img,
+.owner-scope .item.active .icon img{ filter:none; opacity:1; }
+
+/* nếu trước đó bạn có .icon.emoji dùng filter → vô hiệu hoá cho item này */
+.owner-scope .item .icon.emoji{ filter:none; }
+
+.owner-scope .ico-mask{
+    width:18px; height:18px; display:inline-block;
+    background:#fff; /* màu icon */
+    -webkit-mask: var(--ico) center/contain no-repeat;
+    mask: var(--ico) center/contain no-repeat;
+}
+:host {
+    --aside-w: 280px;           /* rộng sidebar bình thường */
+    --aside-w-mini: 92px;       /* rộng khi thu gọn */
+}
+
+/* 2 cột: sidebar | content */
+.owner-wrap{
+    display: grid;
+    grid-template-columns: var(--aside-w) 1fr;
+    min-height: 100dvh;
+}
+.owner-wrap.mini{
+    grid-template-columns: var(--aside-w-mini) 1fr;
+}
+
+/* Sidebar cố định theo trang (không đè lên content) */
+.owner-aside{
+    position: sticky;
+    top: 0;
+    height: 100dvh;
+    overflow: auto;
+    z-index: 2;             /* trên nền, nhưng KHÔNG đè vì đã có cột riêng */
+}
+
+/* Content cột phải */
+.owner-main{
+    min-width: 0;           /* tránh tràn lưới */
+    padding: 20px 24px;     /* tuỳ bạn */
+}
+
+/* Mobile: sidebar ẩn, content full width */
+@media (max-width: 980px){
+    .owner-wrap{ grid-template-columns: 1fr; }
+    .owner-aside{ position: fixed; left: 0; top: 0; width: var(--aside-w); transform: translateX(-100%); }
+    .owner-wrap.nav-open .owner-aside{ transform: translateX(0); }
+    .owner-main{ padding: 16px; }
+}
+.aside-top{ flex: 1 1 auto; min-height: 0; }
+
+
+.promo{ margin: 12px 14px; }
+.aside-foot{ margin: 8px 14px 12px; }
+
 
