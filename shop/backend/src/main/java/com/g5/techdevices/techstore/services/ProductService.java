@@ -10,6 +10,7 @@ import com.g5.techdevices.techstore.exceptions.InvalidParamException;
 import com.g5.techdevices.techstore.repositories.CategoryRepository;
 import com.g5.techdevices.techstore.repositories.ProductImageRepository;
 import com.g5.techdevices.techstore.repositories.ProductRepository;
+import com.g5.techdevices.techstore.responses.ProductResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -54,8 +55,10 @@ public class ProductService implements  IProductService {
 
 
     @Override
-    public Page<Product> getAllProducts(PageRequest pageRequest) {
-        return productRepository.findAll(pageRequest);
+    public Page<ProductResponse> getAllProducts(PageRequest pageRequest) {
+        return productRepository
+                .findAll(pageRequest)
+                .map(ProductResponse::fromProduct);
     }
 
     @Override
@@ -105,8 +108,9 @@ public class ProductService implements  IProductService {
                         .build();
                 //khong cho insert qua 5 anh cho 1 san pham
                 int size = productImageRepository.findByProductId(productId).size();
-                if(size >= 5){
-                    throw new InvalidParamException("Number update must be <= 5");
+                if(size >= ProductImages.MAXIMUM_IMAGES_PER_PRODUCT){
+                    throw new InvalidParamException("Number update must be <= "
+                    + ProductImages.MAXIMUM_IMAGES_PER_PRODUCT);
                 }
                 return productImageRepository.save(newProductImages);
     }

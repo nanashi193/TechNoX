@@ -51,8 +51,17 @@ public class WebSecurityConfig {
                         // Public GET endpoints
                         .requestMatchers(GET, String.format("%s/categories", apiPrefix))
                         .permitAll()
-                        .requestMatchers(GET, String.format("%s/products", apiPrefix))
+                        .requestMatchers(GET, String.format("%s/products/**", apiPrefix))
                         .permitAll()
+                        // ✅ Cho phép tạo sản phẩm (POST)
+                        .requestMatchers(POST, String.format("%s/products", apiPrefix))
+                        .permitAll()
+                        // ✅ Cho phép upload ảnh sản phẩm (nếu có)
+                        .requestMatchers(POST, String.format("%s/products/uploads/**", apiPrefix))
+                        .permitAll()
+                        .requestMatchers(PUT, apiPrefix + "/products/**")
+                        .hasAnyRole(Role.ADMIN, Role.OWNER)
+
 
                         // Protected endpoints
                         .requestMatchers(PUT, String.format("%s/users/**", apiPrefix))

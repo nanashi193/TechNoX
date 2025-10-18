@@ -22,7 +22,7 @@ public class CategoryService implements ICategoryService{
     }
 
     @Override
-    public Category getCategoryById(long id) {
+    public Category getCategoryById(Integer id) {
         return categoryRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Category Not Found") );
     }
@@ -33,14 +33,14 @@ public class CategoryService implements ICategoryService{
     }
 
     @Override
-    public Category updateCategory(long categoryId, CategoryDTO categoryDTO) {
+    public Category updateCategory(Integer categoryId, CategoryDTO categoryDTO) {
         Category existingCategory = getCategoryById(categoryId);
         existingCategory.setName(categoryDTO.getName());
         return categoryRepository.save(existingCategory);
     }
 
     @Override
-    public void deleteCategory(long categoryId) {
+    public void deleteCategory(Integer categoryId) {
         categoryRepository.deleteById(categoryId);
     }
 }
