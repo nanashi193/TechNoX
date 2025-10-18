@@ -4,40 +4,45 @@
     <input class="search" placeholder="Search users" [(ngModel)]="q" (ngModelChange)="onSearch()">
 </div>
 
-<div class="table">
+<div class="table users">
     <div class="row thead">
         <div class="cell col-name th sortable" (click)="sortBy('name')" [attr.aria-sort]="ariaSort('name')">
             Name <span class="sort-caret" [class.asc]="isAsc('name')" [class.desc]="isDesc('name')"
-                       [class.off]="!isAsc('name') && !isDesc('name')"></span>
+        ></span>
         </div>
+
         <div class="cell col-email th sortable" (click)="sortBy('email')" [attr.aria-sort]="ariaSort('email')">
             Email <span class="sort-caret" [class.asc]="isAsc('email')" [class.desc]="isDesc('email')"
-                        [class.off]="!isAsc('email') && !isDesc('email')"></span>
+        ></span>
         </div>
+
         <div class="cell col-phone th sortable" (click)="sortBy('phone')" [attr.aria-sort]="ariaSort('phone')">
             Phone <span class="sort-caret" [class.asc]="isAsc('phone')" [class.desc]="isDesc('phone')"
-                        [class.off]="!isAsc('phone') && !isDesc('phone')"></span>
+        ></span>
         </div>
+
         <div class="cell col-active th sortable" (click)="sortBy('isActive')" [attr.aria-sort]="ariaSort('isActive')">
             Active <span class="sort-caret" [class.asc]="isAsc('isActive')" [class.desc]="isDesc('isActive')"
-                         [class.off]="!isAsc('isActive') && !isDesc('isActive')"></span>
+        ></span>
         </div>
+
         <div class="cell col-orders th sortable" (click)="sortBy('ordersCount')"
              [attr.aria-sort]="ariaSort('ordersCount')">
             Orders <span class="sort-caret" [class.asc]="isAsc('ordersCount')" [class.desc]="isDesc('ordersCount')"
-                         [class.off]="!isAsc('ordersCount') && !isDesc('ordersCount')"></span>
+        ></span>
         </div>
+
         <div class="cell col-spent th sortable" (click)="sortBy('totalSpent')"
              [attr.aria-sort]="ariaSort('totalSpent')">
             Total spent <span class="sort-caret" [class.asc]="isAsc('totalSpent')" [class.desc]="isDesc('totalSpent')"
-                              [class.off]="!isAsc('totalSpent') && !isDesc('totalSpent')"></span>
+                 ></span>
         </div>
     </div>
 
     <div class="row" *ngFor="let u of users; trackBy: trackById">
         <div class="cell col-name">
             <div class="title">{{ u.name }}</div>
-            <div class="sub">{{ u.id | number:'1.0-0' | slice:0 }}</div>
+            <div class="sub">#{{ u.id }}</div>
         </div>
         <div class="cell col-email">{{ u.email }}</div>
         <div class="cell col-phone">{{ u.phone || '—' }}</div>
@@ -52,10 +57,18 @@
     </div>
 </div>
 
-<nav class="pagination" aria-label="Pagination" *ngIf="totalPages>1">
-    <button class="pg prev" [disabled]="page===1" (click)="prev()">Prev</button>
-    <ng-container *ngFor="let n of pages()">
-        <button class="pg num" [class.active]="n===page" (click)="goto(n)">{{ n }}</button>
+<nav class="pagination" aria-label="Pagination">
+    <button class="pg prev" [disabled]="page === 1" (click)="prev()">Prev</button>
+
+    <ng-container *ngFor="let n of pages; let i = index">
+        <ng-container *ngIf="i === 0 || n - pages[i-1] === 1; else dots">
+            <button class="pg num" [class.active]="n===page" (click)="goto(n)">{{ n }}</button>
+        </ng-container>
+        <ng-template #dots>
+            <span class="muted">…</span>
+            <button class="pg num" [class.active]="n===page" (click)="goto(n)">{{ n }}</button>
+        </ng-template>
     </ng-container>
-    <button class="pg next" [disabled]="page===totalPages" (click)="next()">Next</button>
+
+    <button class="pg next" [disabled]="page === totalPages" (click)="next()">Next</button>
 </nav>

@@ -51,11 +51,12 @@ export class UsersListComponent implements OnInit {
         return Math.max(1, Math.ceil(this.total / this.size));
     }
 
-    pages() {
-        const t = this.totalPages, p = this.page;
-        if (t <= 7) return Array.from({length: t}, (_, i) => i + 1);
-        const s = new Set([1, 2, t - 1, t, p - 1, p, p + 1].filter(n => n >= 1 && n <= t));
-        return [...s].sort((a, b) => a - b);
+    get pages(): number[] {
+        const total = this.totalPages;
+        if (total <= 7) return Array.from({length: total}, (_,i)=>i+1);
+        const p = this.page;
+        const s = new Set<number>([1,2,total-1,total,p-1,p,p+1].filter(n => n>=1 && n<=total));
+        return Array.from(s).sort((a,b)=>a-b);
     }
 
     goto(n: number) {

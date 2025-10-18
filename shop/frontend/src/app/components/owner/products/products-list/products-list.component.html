@@ -28,13 +28,13 @@
         <div class="cell col-product th sortable"
              (click)="sortBy('name')" [attr.aria-sort]="ariaSort('name')">Product
             <span class="sort-caret" [class.asc]="isAsc('name')" [class.desc]="isDesc('name')"
-                  [class.off]="!isAsc('name') && !isDesc('name')"></span>
+                ></span>
         </div>
 
         <div class="cell col-product th sortable"
              (click)="sortBy('type')" [attr.aria-sort]="ariaSort('type')">Type
             <span class="sort-caret" [class.asc]="isAsc('type')" [class.desc]="isDesc('type')"
-                  [class.off]="!isAsc('type') && !isDesc('type')"></span>
+                  ></span>
         </div>
 
         <div class="cell col-stocks">Stocks</div>
@@ -44,28 +44,28 @@
              (click)="sortBy('sku')" [attr.aria-sort]="ariaSort('sku')">
             Sku
             <span class="sort-caret" [class.asc]="isAsc('sku')" [class.desc]="isDesc('sku')"
-                  [class.off]="!isAsc('sku') && !isDesc('sku')"></span>
+                ></span>
         </div>
 
         <div class="cell col-price th sortable"
              (click)="sortBy('price')" [attr.aria-sort]="ariaSort('price')">
             Price
             <span class="sort-caret" [class.asc]="isAsc('price')" [class.desc]="isDesc('price')"
-                  [class.off]="!isAsc('price') && !isDesc('price')"></span>
+               ></span>
         </div>
 
         <div class="cell col-variants th sortable"
              (click)="sortBy('variants')" [attr.aria-sort]="ariaSort('variants')">
             Variants
             <span class="sort-caret" [class.asc]="isAsc('variants')" [class.desc]="isDesc('variants')"
-                  [class.off]="!isAsc('variants') && !isDesc('variants')"></span>
+                  ></span>
         </div>
 
         <div class="cell col-qty th sortable"
              (click)="sortBy('stockQty')" [attr.aria-sort]="ariaSort('stockQty')">
             Quantity
             <span class="sort-caret" [class.asc]="isAsc('stockQty')" [class.desc]="isDesc('stockQty')"
-                  [class.off]="!isAsc('stockQty') && !isDesc('stockQty')"></span>
+                 ></span>
         </div>
         <div class="cell col-actions">Actions</div>
     </div>

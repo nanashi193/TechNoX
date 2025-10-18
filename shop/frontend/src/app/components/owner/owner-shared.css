@@ -9,7 +9,6 @@
     --card-padding: 16px;
 }
 
-/* Scope để không rò sang site công khai */
 .owner-scope .card{
     background:#fff;
     border:1px solid var(--owner-border);
