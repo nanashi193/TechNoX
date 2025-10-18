@@ -416,5 +416,38 @@ SET Address = CASE UserId
                   ELSE Address
     END
 WHERE UserId IN (1,2,3,4,5);
+GO
+INSERT INTO dbo.ProductVariant (ProductId, Color, Size, Quantity, Price, SKU)
+VALUES
+    (1, N'Đỏ', N'6.67 inch', 20, 7500000, N'RMN-13'),
+    (2, N'Xanh', N'6.67 inch', 30, 9500000, N'RM-13C'),
+    (3, N'Trắng', N'6.67 inch', 30, 8000000, N'OP-A78'),
+    (4, N'Đen', N'6.7 inch', 25, 8000000, N'OPRN-10'),
+    (5, N'Nâu', N'6.7 inch', 40, 4500000, N'VV-Y36'),
+    (6, N'Đen', N'6.7 inch', 30, 7000000, N'VV-Y29E'),
+    (7, N'Xanh', N'6.7 inch', 36, 4000000, N'REM-11PRO');
+GO
+INSERT INTO dbo.Cart (UserId)
+VALUES (1), (2), (3), (4), (5);
+GO
+INSERT INTO dbo.CartItem (CartId, ProductId, VariantId, Quantity)
+VALUES
+    (1, 1, 1, 1),
+    (1, 2, 2, 2),
+    (1, 3, 3, 1),
+
+    (2, 4, 4, 1),
+    (2, 5, 5, 2),
+
+    (3, 6, 6, 3),
+    (3, 7, 7, 1),
+
+    (4, 1, 1, 2),
+    (4, 2, 2, 1),
+    (4, 4, 4, 1),
+
+    (5, 3, 3, 1),
+    (5, 6, 6, 2);
+
 
 
