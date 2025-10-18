@@ -1,5 +1,5 @@
 <section class="user-detail">
-    <div class="user-frame"><!-- KHUNG BAO TOÀN BỘ -->
+    <div *ngIf="user" class="user-frame"><!-- KHUNG BAO TOÀN BỘ -->
 
         <nav class="breadcrumbs">
             <a routerLink="/home">Trang chủ</a>
@@ -16,14 +16,13 @@
             </div>
 
             <div class="title">
-                <h1>{{ user?.name }}</h1>
+                <h1>{{ user?.FullName }}</h1>
                 <div class="meta">
-          <span class="badge"
-                [class.badge--green]="user?.status==='ACTIVE'"
-                [class.badge--gray]="user?.status==='INACTIVE'"
-                [class.badge--red]="user?.status==='BANNED'">
-            {{ user?.status }}
-          </span>
+                    <span class="badge"
+                          [class.badge--green]="user?.IsActive"
+                          [class.badge--gray]="!user?.IsActive">
+                      {{ user?.IsActive ? 'ACTIVE' : 'INACTIVE' }}
+                    </span>
                     <span class="dot">•</span>
                     <span class="muted">
             ID: {{ user?.id }}
@@ -54,24 +53,23 @@
                             <button class="link" (click)="copy(user.email)">copy</button>
             </span>
                     </div>
-                    <div class="row"><span>Điện thoại</span><span class="value">{{ user.phone || '—' }}</span></div>
-                    <div class="row"><span>Vai trò</span><span class="value">{{ user.roles.join(', ') }}</span></div>
-                    <div class="row"><span>Ngày tạo</span><span class="value">{{ user.createdAt | date:'dd/MM/yyyy' }}</span></div>
-                    <div class="row"><span>Đăng nhập gần nhất</span><span class="value">{{ user.lastLoginAt | date:'HH:mm dd/MM/yyyy' }}</span></div>
+                    <div class="row"><span>Điện thoại</span><span class="value">{{ user.PhoneNumber || '—' }}</span></div>
+                    <div class="row"><span>Vai trò</span><span class="value">{{ user.roleName }}</span></div>
+                    <div class="row"><span>Ngày tạo</span><span class="value">{{ user.CreateAt | date:'dd/MM/yyyy' }}</span></div>
                 </div>
 
                 <div *ngIf="edit" class="form">
                     <label>Họ tên
-                        <input [(ngModel)]="user.name" />
+                        <input [(ngModel)]="user.FullName" />
                     </label>
                     <label>Email
                         <input [(ngModel)]="user.email" />
                     </label>
                     <label>Điện thoại
-                        <input [(ngModel)]="user.phone" />
+                        <input [(ngModel)]="user.PhoneNumber" />
                     </label>
                     <label>Trạng thái
-                        <select [(ngModel)]="user.status">
+                        <select [(ngModel)]="user.IsActive">
                             <option value="ACTIVE">ACTIVE</option>
                             <option value="INACTIVE">INACTIVE</option>
                             <option value="BANNED">BANNED</option>

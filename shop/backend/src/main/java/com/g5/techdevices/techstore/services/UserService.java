@@ -1,8 +1,11 @@
 package com.g5.techdevices.techstore.services;
 
 import com.g5.techdevices.techstore.components.JwtTokenUtil;
-import com.g5.techdevices.techstore.dto.UserDTO;
-import com.g5.techdevices.techstore.dto.UserUpdateDTO;
+import com.g5.techdevices.techstore.dtos.AddressDTO;
+import com.g5.techdevices.techstore.dtos.UserDTO;
+import com.g5.techdevices.techstore.dtos.UserDetailDTO;
+import com.g5.techdevices.techstore.dtos.UserUpdateDTO;
+import com.g5.techdevices.techstore.entity.users.Address;
 import com.g5.techdevices.techstore.entity.users.Role;
 import com.g5.techdevices.techstore.entity.users.User;
 import com.g5.techdevices.techstore.exceptions.DataNotFoundException;
@@ -12,6 +15,7 @@ import com.g5.techdevices.techstore.repositories.UserRepository;
 import com.g5.techdevices.techstore.repositories.PasswordTokenRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -20,6 +24,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.Objects;
@@ -52,7 +57,6 @@ public class UserService implements IUserService{
                 .email(userDTO.getEmail())
                 .password(passwordEncoder.encode(userDTO.getPassword()))
                 .phoneNumber(userDTO.getPhoneNumber())
-                .address(userDTO.getAddress())
                 .gender(genderValue)
 
                 .isActive(true)
@@ -157,5 +161,37 @@ public class UserService implements IUserService{
     public User findUserByEmail(String email) throws DataNotFoundException {
         return userRepository.findByEmail(email)
                 .orElseThrow(() -> new DataNotFoundException("User with email " + email + " not found"));
+    }
+
+    @Override
+    public UserDetailDTO getUserDetailsByEmail(String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+        AddressDTO addressDTO = mapAddressToDTO(user.getAddress());
+
+        return UserDetailDTO.builder()
+                .id(user.getId())
+                .fullName(user.getFullName())
+                .email(user.getEmail())
+                .phoneNumber(user.getPhoneNumber())
+                .isActive(user.getIsActive())
+                .createAt(user.getCreateAt())
+                .roleName(user.getRole().getName())
+                .address(addressDTO)
+                .build();
+    }
+    private AddressDTO mapAddressToDTO(Address address) {
+        if (address == null) {
+            return null;
+        }
+        return AddressDTO.builder()
+                .addressId(address.getAddressId())
+                .line1(address.getLine1())
+                .line2(address.getLine2())
+                .district(address.getDistrict())
+                .city(address.getCity())
+                .province(address.getProvince())
+                .zipCode(address.getZipCode())
+                .build();
     }
 }

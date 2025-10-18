@@ -1,12 +1,12 @@
 package com.g5.techdevices.techstore.services;
 
-import com.g5.techdevices.techstore.dto.UserDTO;
-import com.g5.techdevices.techstore.dto.UserUpdateDTO;
+import com.g5.techdevices.techstore.dtos.UserDTO;
+import com.g5.techdevices.techstore.dtos.UserDetailDTO;
+import com.g5.techdevices.techstore.dtos.UserUpdateDTO;
 import com.g5.techdevices.techstore.entity.users.User;
 import com.g5.techdevices.techstore.exceptions.DataNotFoundException;
 
 import java.util.List;
-import java.util.Optional;
 
 public interface IUserService {
     User createUser(UserDTO userDTO) throws DataNotFoundException;
@@ -18,4 +18,5 @@ public interface IUserService {
     List<User> getAllUsers() throws DataNotFoundException;
     User updateUser(Long id, UserUpdateDTO userDTO) throws DataNotFoundException;
     User findUserByEmail(String email) throws DataNotFoundException;
+    UserDetailDTO getUserDetailsByEmail(String email);
 }

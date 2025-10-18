@@ -1,8 +1,8 @@
 package com.g5.techdevices.techstore.controllers;
 
 
-import com.g5.techdevices.techstore.dto.ProductDTO;
-import com.g5.techdevices.techstore.dto.ProductImageDTO;
+import com.g5.techdevices.techstore.dtos.ProductDTO;
+import com.g5.techdevices.techstore.dtos.ProductImageDTO;
 import com.g5.techdevices.techstore.entity.products.Product;
 import com.g5.techdevices.techstore.entity.products.ProductImages;
 import com.g5.techdevices.techstore.exceptions.DataNotFoundException;

@@ -448,7 +448,7 @@ CREATE TABLE Addresses (
 );
 GO
 ALTER TABLE Users
-    ADD AddressID INT NULL;
+    ADD AddressId INT NULL;
 GO
 ALTER TABLE Users
     ADD CONSTRAINT FK_Users_Addresses

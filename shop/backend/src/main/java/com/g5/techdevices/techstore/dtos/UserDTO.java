@@ -1,6 +1,7 @@
-package com.g5.techdevices.techstore.dto;
+package com.g5.techdevices.techstore.dtos;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.g5.techdevices.techstore.entity.users.Address;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.*;
@@ -37,9 +38,6 @@ public class UserDTO {
     @JsonProperty("PhoneNumber")
     private String phoneNumber;
 
-    @JsonProperty("Address")
-    private String address;
-
     @JsonProperty("IsActive")
     private boolean active;
 
@@ -51,4 +49,11 @@ public class UserDTO {
 
     @JsonProperty("RoleId")
     private long roleId =3L;
+
+    @JsonProperty("CreateAt")
+    private String createdAt;
+
+    @JsonProperty("AddressId")
+    private Address addressId;
+
 }

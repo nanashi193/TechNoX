@@ -1,6 +1,6 @@
 package com.g5.techdevices.techstore.services;
 
-import com.g5.techdevices.techstore.dto.CategoryDTO;
+import com.g5.techdevices.techstore.dtos.CategoryDTO;
 import com.g5.techdevices.techstore.entity.products.Category;
 
 import java.util.List;

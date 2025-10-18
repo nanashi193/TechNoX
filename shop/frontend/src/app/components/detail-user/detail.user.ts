@@ -11,21 +11,8 @@ interface Address {
     province: string;
     zip?: string;
 }
-type UserRole = 'USER' | 'STAFF' | 'ADMIN';
-
-interface User {
-    id: string;
-    name: string;
-    email: string;
-    phone?: string;
-    avatarUrl?: string;
-    roles: UserRole[];
-    status: 'ACTIVE' | 'INACTIVE' | 'BANNED';
-    address?: Address;
-    createdAt: string;     // ISO
-    lastLoginAt?: string;  // ISO
-    stats?: { orders: number; totalSpent: number };
-}
+import { User } from '../../models/user.model';
+import { UserService } from '../../services/user.service';
 
 @Component({
     selector: 'app-detail-user',
@@ -35,55 +22,71 @@ interface User {
     styleUrls: ['./detail.user.css']
 })
 export class DetailUserComponent implements OnInit {
-    user!: User;
+    user?: User;
     edit = false;
+    private originalUser?: User;
 
-    private userId = '1';
-    private get LS_KEY() { return `user_detail_${this.userId}`; }
-
-    constructor(private route: ActivatedRoute) {}
+    constructor(
+        private route: ActivatedRoute,
+        private userService: UserService
+    ) {}
 
     ngOnInit(): void {
-        // lấy id từ route nếu có: /user/:id
         const idFromRoute = this.route.snapshot.paramMap.get('id');
-        if (idFromRoute) this.userId = idFromRoute;
-
-        const cached = localStorage.getItem(this.LS_KEY);
-        this.user = cached ? JSON.parse(cached) : this.mockUser();
-        if (!cached) this.persist();
+        if (idFromRoute) {
+            // TRƯỜNG HỢP 1: CÓ ID (Admin xem người khác)
+            this.userService.getUserById(idFromRoute).subscribe({
+                next: (userData) => this.handleUserResponse(userData),
+                error: (err) => console.error('Lỗi khi tải dữ liệu người dùng bằng ID:', err)
+            });
+        } else {
+            // TRƯỜNG HỢP 2: KHÔNG CÓ ID (User xem chính mình qua /profile)
+            this.userService.getMe().subscribe({
+                next: (userData) => this.handleUserResponse(userData),
+                error: (err) => console.error('Lỗi khi tải dữ liệu cá nhân (getMe):', err)
+            });
+        }
     }
-
-    private mockUser(): User {
-        return {
-            id: this.userId,
-            name: 'Nguyễn Minh Quân',
-            email: 'quan.nguyen@example.com',
-            phone: '0901234567',
-            avatarUrl: '', // có thể thay bằng URL ảnh thật
-            roles: ['USER'],
-            status: 'ACTIVE',
-            address: {
-                line1: '12 Nguyễn Huệ',
-                district: 'Quận 1',
-                city: 'TP.HCM',
-                province: 'HCM',
-                zip: '700000',
-            },
-            createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 120).toISOString(),
-            lastLoginAt: new Date().toISOString(),
-            stats: { orders: 5, totalSpent: 12500000 }
-        };
+    private handleUserResponse(userData: User) {
+        this.user = userData;
+        this.originalUser = JSON.parse(JSON.stringify(userData));
     }
 
     get initials(): string {
-        return this.user?.name?.split(' ').map(w => w[0]).slice(-2).join('').toUpperCase() || 'U';
+        return this.user?.FullName?.split(' ').map(w => w[0]).slice(-2).join('').toUpperCase() || 'U';
     }
 
-    toggleEdit() { this.edit = !this.edit; }
-    save()       { this.persist(); this.edit = false; }
-    cancel()     { this.load(); this.edit = false; }
-    copy(text: string) { navigator.clipboard?.writeText(text); }
-
-    private persist() { localStorage.setItem(this.LS_KEY, JSON.stringify(this.user)); }
-    private load() { const c = localStorage.getItem(this.LS_KEY); if (c) this.user = JSON.parse(c); }
+    toggleEdit() {
+        this.edit = !this.edit;
+        // Nếu người dùng chưa có địa chỉ, hãy khởi tạo một object rỗng
+        // để [(ngModel)] có thể hoạt động mà không bị lỗi
+        if (this.edit && !this.user?.address) {
+            this.user!.address = {
+                addressID: 0,
+                line1: '',
+                city: '',
+                district: '',
+                province: ''
+            };
+        }
+    }
+    save() {
+        // Cập nhật lại bản sao sau khi lưu
+        if (this.user) {
+            this.originalUser = JSON.parse(JSON.stringify(this.user));
+        }
+        this.edit = false;
+    }
+    cancel() {
+        // Phục hồi từ bản sao gốc
+        if (this.originalUser) {
+            this.user = JSON.parse(JSON.stringify(this.originalUser));
+        }
+        this.edit = false;
+    }
+    copy(text: string | undefined) { // Thêm `| undefined` cho an toàn
+        if (text) {
+            navigator.clipboard?.writeText(text);
+        }
+    }
 }

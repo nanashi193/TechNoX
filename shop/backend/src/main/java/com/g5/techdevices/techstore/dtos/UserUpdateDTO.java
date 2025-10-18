@@ -1,4 +1,4 @@
-package com.g5.techdevices.techstore.dto;
+package com.g5.techdevices.techstore.dtos;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotEmpty;
@@ -16,9 +16,6 @@ public class UserUpdateDTO {
 
     @JsonProperty("PhoneNumber")
     private String phoneNumber;
-
-    @JsonProperty("Address")
-    private String address;
 
     @JsonProperty("isActive")
     private Boolean isActive;

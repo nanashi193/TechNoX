@@ -1,13 +1,13 @@
 import { Component } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import {AsyncPipe, NgOptimizedImage} from '@angular/common';
+import {AsyncPipe, JsonPipe, NgOptimizedImage} from '@angular/common';
 import { AuthService } from '../../services/auth.service';
 import { Observable } from 'rxjs';
 
 @Component({
     selector: 'app-site-header',
     standalone: true,
-    imports: [RouterLink, NgOptimizedImage, AsyncPipe],
+    imports: [RouterLink, NgOptimizedImage, AsyncPipe, JsonPipe],
     templateUrl: './site-header.component.html',
     styleUrls: ['./site-header.component.css']
 })

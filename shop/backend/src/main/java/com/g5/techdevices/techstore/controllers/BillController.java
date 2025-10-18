@@ -1,6 +1,6 @@
 package com.g5.techdevices.techstore.controllers;
 
-import com.g5.techdevices.techstore.dto.BillDTO;
+import com.g5.techdevices.techstore.dtos.BillDTO;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;

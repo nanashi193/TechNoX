@@ -95,8 +95,8 @@ public class User implements UserDetails {
     @Column(name = "EmailVerified", nullable = false)
     private boolean emailVerified = false;
 
-    @Column(name = "Address", nullable = false)
-    private String address;
+    @Column(name = "CreatedAt")
+    private String createAt;
 
     @ManyToOne
     @JoinColumn(name = "RoleId", nullable = false)
@@ -121,5 +121,11 @@ public class User implements UserDetails {
 
     @OneToMany(mappedBy = "user")
     private List<RecentView> recentViews;
+
+    @ManyToOne
+    @ToString.Exclude
+    @JsonIgnoreProperties("users")
+    @JoinColumn(name = "AddressId")
+    private Address address;
 }
 

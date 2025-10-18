@@ -27,8 +27,10 @@ export const routes: Routes = [
     { path: 'products', component: ProductPageComponent },
 
     // ----- thêm user detail (standalone) -----
+    //Ch admin
     { path: 'user/:id', loadComponent: () => import('./components/detail-user/detail.user').then(m => m.DetailUserComponent) },
-
+    //Chp user
+    { path: 'profile', loadComponent: () => import('./components/detail-user/detail.user').then(m => m.DetailUserComponent) },
     { path: 'cart', component: CartComponent }, // <-- giỏ hàng
 
     {

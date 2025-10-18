@@ -1,4 +1,4 @@
-package com.g5.techdevices.techstore.dto;
+package com.g5.techdevices.techstore.dtos;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.*;

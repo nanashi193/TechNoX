@@ -1,4 +1,4 @@
-package com.g5.techdevices.techstore.dto;
+package com.g5.techdevices.techstore.dtos;
 
 
 import com.fasterxml.jackson.annotation.JsonProperty;

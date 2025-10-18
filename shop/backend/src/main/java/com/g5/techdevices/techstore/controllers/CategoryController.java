@@ -1,7 +1,7 @@
 package com.g5.techdevices.techstore.controllers;
 
 import com.g5.techdevices.techstore.services.CategoryService;
-import com.g5.techdevices.techstore.dto.CategoryDTO;
+import com.g5.techdevices.techstore.dtos.CategoryDTO;
 import com.g5.techdevices.techstore.entity.products.Category;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

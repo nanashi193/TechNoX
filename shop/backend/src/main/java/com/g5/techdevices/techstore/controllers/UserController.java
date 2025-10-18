@@ -1,24 +1,21 @@
 package com.g5.techdevices.techstore.controllers;
 
-import com.g5.techdevices.techstore.dto.UserUpdateDTO;
+import com.g5.techdevices.techstore.dtos.UserDetailDTO;
+import com.g5.techdevices.techstore.dtos.UserUpdateDTO;
 import com.g5.techdevices.techstore.entity.tokens.EmailType;
 import com.g5.techdevices.techstore.exceptions.DataNotFoundException;
-import com.g5.techdevices.techstore.repositories.PasswordTokenRepository;
 import com.g5.techdevices.techstore.repositories.UserRepository;
 import com.g5.techdevices.techstore.services.EmailService;
 import com.g5.techdevices.techstore.services.ITokenService;
 import com.g5.techdevices.techstore.services.IUserService;
-import com.g5.techdevices.techstore.dto.UserDTO;
-import com.g5.techdevices.techstore.dto.UserLoginDTO;
+import com.g5.techdevices.techstore.dtos.UserDTO;
+import com.g5.techdevices.techstore.dtos.UserLoginDTO;
 import com.g5.techdevices.techstore.entity.users.User;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.MessageSource;
-import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -73,22 +70,15 @@ public class UserController {
         return ResponseEntity.ok(users);
     }
     @GetMapping("/me")
-    public ResponseEntity<UserDTO> getCurrentUser() {
+    public ResponseEntity<UserDetailDTO> getCurrentUser() {
+        // 1. Controller lấy bối cảnh xác thực
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String currentEmail = authentication.getName();
 
-        User currentUser = userRepository.findByEmail(currentEmail)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+        // 2. Controller gọi Service để thực hiện logic nghiệp vụ
+        UserDetailDTO userDTO = userService.getUserDetailsByEmail(currentEmail);
 
-        UserDTO userDTO = UserDTO.builder()
-                .id(currentUser.getId())
-                .fullName(currentUser.getFullName())
-                .email(currentUser.getEmail())
-                .phoneNumber(currentUser.getPhoneNumber())
-                .address(currentUser.getAddress())
-                .roleId(currentUser.getRole().getId())
-                .build();
-
+        // 3. Controller trả về kết quả
         return ResponseEntity.ok(userDTO);
     }
 

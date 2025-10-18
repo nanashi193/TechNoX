@@ -1,8 +1,6 @@
 package com.g5.techdevices.techstore.controllers;
 
-import com.g5.techdevices.techstore.dto.UserDTO;
 import com.g5.techdevices.techstore.entity.users.User;
-import com.g5.techdevices.techstore.exceptions.DataNotFoundException;
 import com.g5.techdevices.techstore.repositories.UserRepository;
 import com.g5.techdevices.techstore.responses.GenericResponse;
 import com.g5.techdevices.techstore.services.ITokenService;
