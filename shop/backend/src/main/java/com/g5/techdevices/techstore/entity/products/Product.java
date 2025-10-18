@@ -43,6 +43,9 @@ public class Product extends BaseEntity{
     @Column(name = "Thumbnail", length = 300)
     private String thumbnail;
 
+    @Column(name = "status", nullable = false)
+    private boolean status = true;  // NOTE: mặc định là true (còn hàng)
+
     @OneToMany(mappedBy = "product")
     private List<ProductVariant> variants;
 

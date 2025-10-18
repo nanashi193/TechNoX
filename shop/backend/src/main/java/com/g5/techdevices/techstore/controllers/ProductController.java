@@ -39,6 +39,8 @@ import java.util.UUID;
 public class ProductController {
     private final ProductService productService;
 
+    // ===================== CREATE =====================
+
     @PostMapping(value = "")
     public ResponseEntity<?> createProduct(
             @Valid @RequestBody ProductDTO productDTO,

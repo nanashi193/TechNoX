@@ -16,6 +16,7 @@ public class ProductResponse extends BaseResponse {
     private BigDecimal price;
     private String thumbnail;
     private String description;
+    private Boolean status;
 
     @JsonProperty("CategoryId")
     protected Integer categoryId;
@@ -26,6 +27,7 @@ public class ProductResponse extends BaseResponse {
                 .thumbnail(product.getThumbnail())
                 .description(product.getDescription())
                 .categoryId(product.getCategory().getId())
+                .status(product.isStatus())
                 .build();
         productRespones.setCreateAt(product.getCreatedAt());
         return productRespones;

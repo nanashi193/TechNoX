@@ -43,4 +43,7 @@ public class ProductDTO {
     private LocalDateTime createdAt; // datetime2(7)
 
     private String thumbnail;
+
+    private Boolean status; // Cho phép null khi update, vẫn mặc định true ở entity
+
 }

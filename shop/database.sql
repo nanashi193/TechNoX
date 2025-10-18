@@ -400,3 +400,5 @@ VALUES
     (N'Đỗ Thị Tâm', 'tdt9832@estore.com',
      N'$2a$10$ykF9xhomFn0uj.s1NeQS4u5xSXqKnR8mu71mrqs0k9Po17FPyjjcu',
      1, '0909000006', 3, 1);
+ALTER TABLE Product
+ADD status BIT NOT NULL CONSTRAINT DF_Product_Status DEFAULT 1;

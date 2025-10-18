@@ -17,13 +17,17 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
+import org.springframework.transaction.annotation.Transactional; //Them rollback
+
 
 @Service
+@Transactional(rollbackFor = Exception.class) // NOTE: thêm rollbackFor = Exception.class để rollback cả checked exception
 @RequiredArgsConstructor
 public class ProductService implements  IProductService {
     private final ProductRepository productRepository;
     private final CategoryRepository categoryRepository;
     private final ProductImageRepository productImageRepository;
+
 
     @Override
     public Product createProduct(ProductDTO productDTO) throws DataNotFoundException {
@@ -39,11 +43,13 @@ public class ProductService implements  IProductService {
                     .description(productDTO.getDescription())
                     .thumbnail(productDTO.getThumbnail())
                     .category(existingCategory)
+                    .status(true)
                     .build();
         return productRepository.save(newProduct);
     }
 
     @Override
+    @Transactional(readOnly = true) // NOTE: thêm readOnly để tăng hiệu năng
     public Product getProductById(Long productId) throws Exception {
         Optional<Product> optionalProduct = productRepository.findDetailById(productId);
         if(optionalProduct.isPresent()) {
@@ -55,6 +61,7 @@ public class ProductService implements  IProductService {
 
 
     @Override
+    @Transactional(readOnly = true) // NOTE: thêm readOnly
     public Page<ProductResponse> getAllProducts(PageRequest pageRequest) {
         return productRepository
                 .findAll(pageRequest)
@@ -78,10 +85,12 @@ public class ProductService implements  IProductService {
             existingProduct.setDescription(productDTO.getDescription());
             existingProduct.setThumbnail(productDTO.getThumbnail());
             existingProduct.setCategory(existingCategory);
-
+            // ✅ Cập nhật trạng thái (true = còn hàng, false = tạm ngừng)
+            existingProduct.setStatus(productDTO.getStatus());
         }
         return productRepository.save(existingProduct);
     }
+
 
     @Override
     public void deleteProduct(Long id) {
@@ -89,10 +98,14 @@ public class ProductService implements  IProductService {
         optionalProduct.ifPresent(productRepository::delete);
     }
 
+
     @Override
+    @Transactional(readOnly = true) // NOTE: chỉ đọc
     public boolean existsByName(String name) {
         return productRepository.existsByNameIgnoreCase(name);
     }
+
+
     @Override
     public ProductImages createProductImages(Long productId
             , ProductImageDTO productImageDTO) throws Exception {
@@ -100,7 +113,7 @@ public class ProductService implements  IProductService {
                 .findById(productId)
                 .orElseThrow(() ->
                         new DataNotFoundException(
-                                "Cannot find category with id: "+productImageDTO.getProductId()));
+                                "Cannot find prodcut with id: "+productImageDTO.getProductId()));
                 ProductImages newProductImages = ProductImages
                         .builder()
                         .product(existingProduct)
