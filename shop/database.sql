@@ -389,6 +389,7 @@ VALUES
     (N'Đỗ Thị Tâm', 'tdt9832@estore.com',
      N'$2a$10$ykF9xhomFn0uj.s1NeQS4u5xSXqKnR8mu71mrqs0k9Po17FPyjjcu',
      1, '0909000006', 3, 1);
+GO
 ALTER TABLE Product
 ADD status BIT NOT NULL CONSTRAINT DF_Product_Status DEFAULT 1;
 
@@ -436,6 +437,50 @@ VALUES
 
     (5, 3, 3, 1),
     (5, 6, 6, 2);
+CREATE TABLE Addresses (
+    AddressID INT IDENTITY(1,1) PRIMARY KEY,
+    Line1 NVARCHAR(255) NOT NULL,
+    Line2 NVARCHAR(255) NULL,
+    District NVARCHAR(100) NULL,
+    City NVARCHAR(100) NULL,
+    Province NVARCHAR(100) NULL,
+    ZipCode NVARCHAR(20) NULL
+);
+GO
+ALTER TABLE Users
+    ADD AddressID INT NULL;
+GO
+ALTER TABLE Users
+    ADD CONSTRAINT FK_Users_Addresses
+        FOREIGN KEY (AddressId) REFERENCES Addresses(AddressId);
+GO
+INSERT INTO Addresses (Line1, Line2, District, City, Province, ZipCode)
+VALUES
+    (N'123 Lý Thường Kiệt', N'34 Trường Chinh', N'Tân Bình', N'TP. Hồ Chí Minh', N'Hồ Chí Minh', N'700000'),
+    (N'45 Nguyễn Huệ', NULL, N'Quận 1', N'TP. Hồ Chí Minh', N'Hồ Chí Minh', N'700000'),
+    (N'78 Hoàng Diệu', NULL, N'Hải Châu', N'Đà Nẵng', N'Đà Nẵng', N'550000'),
+    (N'12 Trần Phú', NULL, N'Ba Đình', N'Hà Nội', N'Hà Nội', N'100000'),
+    (N'89 Lê Lợi', N'Căn hộ A2', N'Hồng Bàng', N'Hải Phòng', N'Hải Phòng', N'180000'),
+    (N'55 Nguyễn Trãi', NULL, N'Thanh Xuân', N'Hà Nội', N'Hà Nội', N'100000'),
+    (N'21 Phan Chu Trinh', N'Tầng 3', N'Hai Bà Trưng', N'Hà Nội', N'Hà Nội', N'100000'),
+    (N'34 Trường Chinh', N'Ngõ 12', N'Đống Đa', N'Hà Nội', N'Hà Nội', N'100000'),
+    (N'67 Pasteur', NULL, N'Quận 3', N'TP. Hồ Chí Minh', N'Hồ Chí Minh', N'700000'),
+    (N'9 Nguyễn Văn Linh', NULL, N'Ninh Kiều', N'Cần Thơ', N'Cần Thơ', N'900000');
+GO
+INSERT INTO dbo.Users
+(FullName, Email, Password, Gender, PhoneNumber, RoleId, IsActive, AddressId)
+VALUES
+    (N'Nguyễn Thành Trung', N'trung.nguyen@example.com', N'123456', 0, N'0912345678', 1, 1, 1),
+    (N'Lê Thị Hoa', N'hoa.le@example.com', N'$2a$10$ykF9xhomFn0uj.s1NeQS4u5xSXqKnR8mu71mrqs0k9Po17FPyjjcu', 1, N'0934567890', 2, 1, 2),
+    (N'Phạm Minh Tuấn', N'tuan.pham@example.com', N'$2a$10$ykF9xhomFn0uj.s1NeQS4u5xSXqKnR8mu71mrqs0k9Po17FPyjjcu', 0, N'0978123456', 2, 1, 3),
+    (N'Trần Bảo Ngọc', N'ngoc.tran@example.com', N'$2a$10$ykF9xhomFn0uj.s1NeQS4u5xSXqKnR8mu71mrqs0k9Po17FPyjjcu', 1, N'0901234567', 3, 1, 4),
+    (N'Võ Văn Hùng', N'hung.vo@example.com', N'$2a$10$ykF9xhomFn0uj.s1NeQS4u5xSXqKnR8mu71mrqs0k9Po17FPyjjcu', 0, N'0923344556', 2, 1, 5),
+    (N'Đặng Thu Trang', N'trang.dang@example.com', N'$2a$10$ykF9xhomFn0uj.s1NeQS4u5xSXqKnR8mu71mrqs0k9Po17FPyjjcu', 1, N'0967788990', 3, 1, 6),
+    (N'Ngô Đức Duy', N'duy.ngo@example.com', N'$2a$10$ykF9xhomFn0uj.s1NeQS4u5xSXqKnR8mu71mrqs0k9Po17FPyjjcu', 0, N'0911778899', 1, 1, 7),
+    (N'Hoàng Mỹ Linh', N'linh.hoang@example.com', N'$2a$10$ykF9xhomFn0uj.s1NeQS4u5xSXqKnR8mu71mrqs0k9Po17FPyjjcu', 1, N'0988997766', 2, 1, 8),
+    (N'Phan Quốc Bảo', N'bao.phan@example.com', N'$2a$10$ykF9xhomFn0uj.s1NeQS4u5xSXqKnR8mu71mrqs0k9Po17FPyjjcu', 0, N'0909988776', 3, 1, 9),
+    (N'Tạ Thị Hương', N'huong.ta@example.com', N'$2a$10$ykF9xhomFn0uj.s1NeQS4u5xSXqKnR8mu71mrqs0k9Po17FPyjjcu', 1, N'0933445566', 2, 1, 10);
+GO
 
 
 
