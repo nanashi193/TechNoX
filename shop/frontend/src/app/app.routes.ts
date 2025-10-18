@@ -52,7 +52,7 @@ export const routes: Routes = [
     },
     {
         path: 'owner',
-        // canActivate: [ownerGuard], code xong bat len cho de                // <-- bảo vệ toàn bộ khu vực owner
+        // canActivate: [ownerGuard], code xong bat len cho de
         loadComponent: () =>
             import('./components/owner/layout/owner-layout.component')
                 .then(m => m.OwnerLayoutComponent),
@@ -66,7 +66,7 @@ export const routes: Routes = [
                 title: 'Tổng quan | Owner'
             },
 
-            // ===== Products (Owner CRUD) =====
+            // ===== Products =====
             {
                 path: 'products',
                 loadComponent: () =>
@@ -88,6 +88,14 @@ export const routes: Routes = [
                         .then(m => m.ProductsFormComponent),
                 title: 'Sửa sản phẩm | Owner'
             },
+            {
+                path: 'users',
+                loadComponent: () =>
+                    import('./components/owner/users/users-list/users-list.component')
+                .then(m => m.UsersListComponent),
+                title: 'Người dùng của TechNoX'
+            }
+
         ]
     },
 

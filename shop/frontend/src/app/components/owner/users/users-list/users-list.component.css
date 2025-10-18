@@ -1,0 +1,6 @@
+.col-email{ flex: 2 1 220px; }
+.col-name{ flex: 2 1 220px; }
+.col-phone{ flex: 1 1 120px; }
+.col-active{ width:120px; justify-content:center; }
+.col-orders{ width:110px; text-align:right; }
+.col-spent{ width:150px; text-align:right; }

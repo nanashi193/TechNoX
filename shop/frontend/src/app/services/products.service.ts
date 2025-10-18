@@ -12,7 +12,6 @@ export class ProductService {
     private base = `${environment.apiBaseUrl}/products`;
     private useMock = !!(environment as any).useMock; // true => dùng mock
 
-    /** --------- SEARCH --------- */
     search(opts: { q?: string; page?: number; size?: number; sort?: string } = {})
         : Observable<Page<Product>> {
         if (!this.useMock) {
@@ -45,14 +44,12 @@ export class ProductService {
         return of({ items, total: filtered.length, page, size }).pipe(delay(200));
     }
 
-    /** --------- READ ONE --------- */
     get(id: number): Observable<Product> {
         if (!this.useMock) return this.http.get<Product>(`${this.base}/${id}`);
         const found = MOCK_PRODUCTS.find(p => p.id === id)!;
         return of(structuredClone(found)).pipe(delay(120));
     }
 
-    /** --------- CREATE --------- */
     create(dto: Partial<Product>): Observable<Product> {
         if (!this.useMock) return this.http.post<Product>(this.base, dto);
 
@@ -75,7 +72,6 @@ export class ProductService {
         return of(structuredClone(created)).pipe(delay(150));
     }
 
-    /** --------- UPDATE --------- */
     update(id: number, dto: Partial<Product>): Observable<Product> {
         if (!this.useMock) return this.http.put<Product>(`${this.base}/${id}`, dto);
 
@@ -85,7 +81,6 @@ export class ProductService {
         return of(structuredClone(updated)).pipe(delay(150));
     }
 
-    /** --------- DELETE --------- */
     delete(id: number): Observable<void> {
         if (!this.useMock) return this.http.delete<void>(`${this.base}/${id}`);
 
@@ -94,7 +89,6 @@ export class ProductService {
         return of(void 0).pipe(delay(120));
     }
 
-    /** --------- PATCH STOCK --------- */
     setStock(id: number, inStock: boolean): Observable<Product> {
         if (!this.useMock) {
             return this.http.patch<Product>(`${this.base}/${id}/stock`, { inStock });
@@ -104,7 +98,6 @@ export class ProductService {
         return of(structuredClone(MOCK_PRODUCTS[idx])).pipe(delay(120));
     }
 
-    /** --------- BULK --------- */
     bulkDelete(ids: number[]): Observable<void> {
         if (!this.useMock) return this.http.post<void>(`${this.base}/bulk-delete`, { ids });
 
@@ -118,14 +111,12 @@ export class ProductService {
     bulkPublish(ids: number[]): Observable<void> {
         if (!this.useMock) return this.http.post<void>(`${this.base}/bulk-publish`, { ids });
 
-        // mock: không có field published => không làm gì
         return of(void 0).pipe(delay(120));
     }
 
     bulkUnpublish(ids: number[]): Observable<void> {
         if (!this.useMock) return this.http.post<void>(`${this.base}/bulk-unpublish`, { ids });
 
-        // mock: không có field published => không làm gì
         return of(void 0).pipe(delay(120));
     }
 }
