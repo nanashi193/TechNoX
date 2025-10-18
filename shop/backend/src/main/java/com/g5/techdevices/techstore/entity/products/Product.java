@@ -1,6 +1,7 @@
 package com.g5.techdevices.techstore.entity.products;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.g5.techdevices.techstore.entity.Cart.CartItem;
 import com.g5.techdevices.techstore.entity.promotions.Promotion;
 import com.g5.techdevices.techstore.entity.Bills.BillDetail;
@@ -10,6 +11,8 @@ import lombok.*;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
+
 @Getter
 @Setter
 @AllArgsConstructor
@@ -40,6 +43,9 @@ public class Product extends BaseEntity{
     @Column(name = "Thumbnail", length = 300)
     private String thumbnail;
 
+    @Column(name = "status", nullable = false)
+    private boolean status = true;  // NOTE: mặc định là true (còn hàng)
+
     @OneToMany(mappedBy = "product")
     private List<ProductVariant> variants;
 
@@ -62,5 +68,13 @@ public class Product extends BaseEntity{
 
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ProductImages> images;
+    @JsonProperty("Category")
+    public Map<String, Object> getCategorySummary() {
+        if (category == null) return null;
+        return Map.of(
+                "CategoryId", category.getId(),
+                "Name", category.getName()
+        );
+    }
 }
 

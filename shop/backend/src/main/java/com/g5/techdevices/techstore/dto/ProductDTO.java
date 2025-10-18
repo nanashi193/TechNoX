@@ -1,8 +1,10 @@
 package com.g5.techdevices.techstore.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -16,16 +18,18 @@ import java.util.List;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 public class ProductDTO {
     @NotBlank(message = "Title is required!")
+
     @Size (min = 3, max = 200, message = "Title must be between 3 and 200 characters")
     private String name;            // nvarchar(255)
 
-    @JsonProperty("product_id")
     private Long productId;// bigint
 
-    @JsonProperty("category_id")
-    private Long categoryId;// int
+    @NotNull(message = "categoryId is required")
+    @JsonProperty("CategoryId")
+    private Integer categoryId;// int
 
 
 
@@ -39,4 +43,7 @@ public class ProductDTO {
     private LocalDateTime createdAt; // datetime2(7)
 
     private String thumbnail;
+
+    private Boolean status; // Cho phép null khi update, vẫn mặc định true ở entity
+
 }

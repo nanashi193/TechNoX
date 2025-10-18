@@ -38,7 +38,7 @@ spring:
           writetimeout: 5000
 
 api:
-  prefix: api/v1
+  prefix: /api/v1
 
 jwt:
   secretKey: QFj6plpOzUysQzNFGQwdZRMpebEpCicqSknkcg2Kx0E=

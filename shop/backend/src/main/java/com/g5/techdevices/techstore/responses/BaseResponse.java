@@ -12,10 +12,9 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 @MappedSuperclass
+
 public class BaseResponse {
-    @JsonProperty("created_at")
+    @JsonProperty("CreatedAt")
     private LocalDateTime createAt;
 
-    @JsonProperty("updated_at")
-    private LocalDateTime updatedAt;
 }
