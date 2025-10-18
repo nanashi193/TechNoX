@@ -131,18 +131,14 @@ export class AuthService {
         );
     }
     verifyEmail(token: string) {
-        return this.http.post(
-            `${this.baseUrl}/verify-email`,
-            { token },
-            { responseType: 'text' as 'json' }
+        return this.http.get<{ message: string; error: any }>(
+            `${this.baseUrl}/verify-email?token=${token}`
         );
     }
 
     resendVerification(email: string) {
-        return this.http.post<{ token?: string; message?: string } | string>(
-            `${this.baseUrl}/resend-verification`,
-            {email}
-        );
+        return this.http.post(`${this.baseUrl}/resend-verification`, { email });
+
     }
 
 }

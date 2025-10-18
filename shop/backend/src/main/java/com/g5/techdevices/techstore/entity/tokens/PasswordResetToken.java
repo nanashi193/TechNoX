@@ -1,6 +1,7 @@
-package com.g5.techdevices.techstore.entity.users;
+package com.g5.techdevices.techstore.entity.tokens;
 
 
+import com.g5.techdevices.techstore.entity.users.User;
 import jakarta.persistence.*;
 import lombok.*;
 

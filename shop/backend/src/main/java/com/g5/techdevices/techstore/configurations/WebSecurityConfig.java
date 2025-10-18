@@ -46,7 +46,7 @@ public class WebSecurityConfig {
                         .permitAll()
                         .requestMatchers(POST, apiPrefix + "/users/resend-verification")
                         .permitAll()
-                        .requestMatchers(POST, apiPrefix + "/users/verify-email").permitAll()
+                        .requestMatchers(GET, apiPrefix + "/users/verify-email").permitAll()
 
                         // Public GET endpoints
                         .requestMatchers(GET, String.format("%s/categories", apiPrefix))

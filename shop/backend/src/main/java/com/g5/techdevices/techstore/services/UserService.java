@@ -3,7 +3,6 @@ package com.g5.techdevices.techstore.services;
 import com.g5.techdevices.techstore.components.JwtTokenUtil;
 import com.g5.techdevices.techstore.dto.UserDTO;
 import com.g5.techdevices.techstore.dto.UserUpdateDTO;
-import com.g5.techdevices.techstore.entity.users.PasswordResetToken;
 import com.g5.techdevices.techstore.entity.users.Role;
 import com.g5.techdevices.techstore.entity.users.User;
 import com.g5.techdevices.techstore.exceptions.DataNotFoundException;
@@ -22,11 +21,9 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.UUID;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -55,6 +52,7 @@ public class UserService implements IUserService{
                 .email(userDTO.getEmail())
                 .password(passwordEncoder.encode(userDTO.getPassword()))
                 .phoneNumber(userDTO.getPhoneNumber())
+                .address(userDTO.getAddress())
                 .gender(genderValue)
 
                 .isActive(true)
@@ -131,7 +129,6 @@ public class UserService implements IUserService{
         userRepository.save(user);
     }
 
-
     @Override
     public String login(String email, String password) throws Exception {
         Optional<User> optionalUser =  userRepository.findByEmail(email);
@@ -160,29 +157,5 @@ public class UserService implements IUserService{
     public User findUserByEmail(String email) throws DataNotFoundException {
         return userRepository.findByEmail(email)
                 .orElseThrow(() -> new DataNotFoundException("User with email " + email + " not found"));
-    }
-
-
-    @Override
-    public String resendVerification(String email) throws DataNotFoundException {
-        User user = findUserByEmail(email);
-        if (user.isEmailVerified()) {
-            return null; // Email đã được xác minh
-        }
-        
-        String token = UUID.randomUUID().toString();
-        // TODO: Gửi email với link xác minh
-        // Trong quá trình phát triển, trả về token để frontend tự xử lý
-        return token;
-    }
-
-    @Override
-    public void verifyEmail(String token) throws DataNotFoundException {
-        // TODO: Validate token từ email verification
-        // Trong quá trình phát triển, chấp nhận mọi token
-        // Trong production cần lưu và validate token, có thể dùng VerificationToken tương tự PasswordResetToken
-        User user = userRepository.findById(1L).orElseThrow(() -> new DataNotFoundException("User not found"));
-        user.setEmailVerified(true);
-        userRepository.save(user);
     }
 }

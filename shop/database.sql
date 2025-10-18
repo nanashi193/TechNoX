@@ -83,12 +83,6 @@ CREATE TABLE PasswordResetToken (
     FOREIGN KEY (UserId) REFERENCES Users(UserId)
 );
 GO
-IF NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID('dbo.Users') AND name = 'EmailVerified')
-    BEGIN
-        ALTER TABLE dbo.Users
-            ADD EmailVerified BIT NOT NULL DEFAULT 0;
-    END
-GO
 --Hỗ trợ đăng nhập từ Facebook hoặc Google
 CREATE TABLE SocialAccount
 (
@@ -110,9 +104,6 @@ CREATE TABLE dbo.Category
     Name NVARCHAR(150) NOT NULL,
     Description NVARCHAR(1000) NULL
 );
-GO
-ALTER TABLE dbo.Category
-DROP COLUMN Description;
 GO
 /***************************************
  * Bảng Product
@@ -141,8 +132,6 @@ CREATE TABLE ProductImages(
                               CONSTRAINT fk_ProductImages_ProductId
                                   FOREIGN KEY (ProductId) REFERENCES Product(ProductId) ON DELETE CASCADE
 );
-GO
-ALTER TABLE ProductImages ADD ImageUrl VARCHAR(MAX);
 GO
 /***************************************
  * Bảng ProductVariant
@@ -400,3 +389,32 @@ VALUES
     (N'Đỗ Thị Tâm', 'tdt9832@estore.com',
      N'$2a$10$ykF9xhomFn0uj.s1NeQS4u5xSXqKnR8mu71mrqs0k9Po17FPyjjcu',
      1, '0909000006', 3, 1);
+
+---UPDATE----
+GO
+ALTER TABLE ProductImages ADD ImageUrl VARCHAR(MAX);
+GO
+ALTER TABLE Users
+    ADD Address NVARCHAR(MAX);
+GO
+IF NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID('dbo.Users') AND name = 'EmailVerified')
+    BEGIN
+        ALTER TABLE dbo.Users
+            ADD EmailVerified BIT NOT NULL DEFAULT 0;
+    END
+GO
+ALTER TABLE dbo.Category
+    DROP COLUMN Description;
+GO
+UPDATE Users
+SET Address = CASE UserId
+                  WHEN 1 THEN N'123 Đường A, Quận 1, TP.HCM'
+                  WHEN 2 THEN N'456 Đường B, Quận 2, TP.HCM'
+                  WHEN 3 THEN N'789 Đường C, Quận 3, TP.HCM'
+                  WHEN 4 THEN N'101 Đường D, Quận 4, TP.HCM'
+                  WHEN 5 THEN N'202 Đường E, Quận 5, TP.HCM'
+                  ELSE Address
+    END
+WHERE UserId IN (1,2,3,4,5);
+
+

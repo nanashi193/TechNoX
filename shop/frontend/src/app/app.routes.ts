@@ -24,9 +24,14 @@ export const routes: Routes = [
         loadComponent: () => import('./components/verify-pending/verify-pending.component')
             .then(m => m.VerifyPendingComponent)
     },
-    {path: 'forgot-password', component: ForgotPasswordComponent},
-    {path: 'products', component: ProductPageComponent},
-    { path: 'cart', component: CartComponent }, // <-- thêm route giỏ hàng
+    { path: 'forgot-password', component: ForgotPasswordComponent },
+    { path: 'products', component: ProductPageComponent },
+
+    // ----- thêm user detail (standalone) -----
+    { path: 'user/:id', loadComponent: () => import('./components/detail-user/detail.user').then(m => m.DetailUserComponent) },
+
+    { path: 'cart', component: CartComponent }, // <-- giỏ hàng
+
     {
         path: 'product/:id',
         loadComponent: () =>
