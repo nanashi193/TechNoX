@@ -79,7 +79,6 @@
             <img class="thumb" [src]="p.image" alt="">
             <div class="info">
                 <div class="name">{{ p.name }}</div>
-                <div class="sku muted">#{{ p.sku }}</div>
             </div>
         </div>
 
@@ -92,7 +91,7 @@
             </label>
         </div>
 
-        <div class="cell col-sku">{{ p.sku }}</div>
+        <div class="cell col-sku">#{{ p.sku }}</div>
         <div class="cell col-price">{{ p.price | number:'1.0-0' }}₫ </div>
         <div class="cell col-variants">{{ p.variants }}</div>
         <div class="cell col-qty">{{ p.stockQty ?? 0 }}</div>
