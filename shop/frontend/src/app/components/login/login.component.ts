@@ -54,30 +54,18 @@ export class LoginComponent {
             .pipe(finalize(() => this.loading = false))
             .subscribe({
                 next: (res: any) => {
-                    // Giả sử res.token là token.
-                    // Nếu AuthService tự lưu, hãy dùng:
-                    // const token = localStorage.getItem('token');
                     const token = res.token;
 
                     if (!token) {
                         this.errorMsg = 'Lỗi đăng nhập: Không nhận được token.';
                         return;
                     }
-
                     // Xử lý "Remember Me"
                     // ... (code 'remember' của bạn)
 
-                    // 1. THÊM CONSOLE.LOG ĐỂ DEBUG
                     try {
                         const decodedToken: any = jwtDecode(token);
-
-                        // HÃY NHÌN KỸ KẾT QUẢ NÀY TRONG CONSOLE (F12)
-                        console.log('TOKEN ĐÃ GIẢI MÃ:', decodedToken);
-
-                        // 2. LẤY VAI TRÒ (ROLE)
-                        // Thay 'roleName' bằng tên thuộc tính đúng bạn thấy trong console
                         const role = decodedToken.roleName;
-
                         // 3. KIỂM TRA VÀ ĐIỀU HƯỚNG
                         if (role && (role.toUpperCase() === 'ADMIN' || role.toUpperCase() === 'OWNER')) {
                             this.router.navigate(['/owner']);

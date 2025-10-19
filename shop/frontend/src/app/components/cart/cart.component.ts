@@ -1,123 +1,114 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule, CurrencyPipe } from '@angular/common';
-import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
-
-interface Product {
-    id: number | string;
-    name: string;
-    price: number;
-    imageUrl?: string;
-    sku?: string;
-}
-
-interface CartItem {
-    product: Product;
-    quantity: number;
-    get subtotal(): number;
-}
-
-const LS_KEY = 'cart_demo_v1';
+import { FormsModule } from '@angular/forms';
+import { CartService } from '../../services/cart.service';
+import { Cart, CartItem } from '../../models/cart.model';
 
 @Component({
     selector: 'app-cart',
-    standalone: true,                         // <-- bật standalone
-    imports: [CommonModule, FormsModule, RouterModule, CurrencyPipe], // <-- import pipe & modules
+    standalone: true,
+    imports: [CommonModule, FormsModule, RouterModule, CurrencyPipe],
     templateUrl: './cart.component.html',
     styleUrls: ['./cart.component.css']
 })
 export class CartComponent implements OnInit {
 
-    // mock products để demo "Thêm nhanh" khi cart trống
-    demoProducts: Product[] = [
-        { id: 1, name: 'Tai nghe Bluetooth', price: 450000, imageUrl: 'https://picsum.photos/seed/ear/200' },
-        { id: 2, name: 'Bàn phím cơ',       price: 1250000, imageUrl: 'https://picsum.photos/seed/kb/200' },
-        { id: 3, name: 'Chuột gaming',      price: 390000, imageUrl: 'https://picsum.photos/seed/m/200' }
-    ];
+    private cartService = inject(CartService);
 
-    items: CartItem[] = [];
+    cart: Cart | null = null;
+    loading = true; // Thêm trạng thái loading
+    error: string | null = null;
 
     ngOnInit(): void {
-        this.loadFromStorage();
+        this.loadCart();
     }
 
-    // ==== helpers ====
-    private saveToStorage() {
-        localStorage.setItem(LS_KEY, JSON.stringify(
-            this.items.map(i => ({ product: i.product, quantity: i.quantity }))
-        ));
+    // ==== Tải dữ liệu ====
+    loadCart(): void {
+        this.loading = true;
+        this.error = null;
+
+        this.cartService.getCart().subscribe({
+            next: (data) => {
+                this.cart = data;
+                this.loading = false;
+            },
+            error: (err) => {
+                console.error('Lỗi khi tải giỏ hàng:', err);
+                this.error = 'Không thể tải giỏ hàng. Vui lòng thử lại.';
+                this.loading = false;
+            }
+        });
     }
 
-    private loadFromStorage() {
-        const raw = localStorage.getItem(LS_KEY);
-        if (!raw) return;
-        try {
-            const parsed: Array<{product: Product; quantity: number}> = JSON.parse(raw);
-            this.items = parsed.map(({product, quantity}) => this.makeItem(product, quantity));
-        } catch { /* ignore */ }
-    }
-
-    private makeItem(product: Product, quantity: number): CartItem {
-        return {
-            product,
-            quantity,
-            get subtotal() { return product.price * quantity; }
-        };
-    }
-
-    // ==== computed ====
+    // ==== Computed (Tính toán) ====
     get totalQuantity(): number {
-        return this.items.reduce((s, it) => s + it.quantity, 0);
+        if (!this.cart) return 0;
+        return this.cart.items.reduce((sum, item) => sum + item.quantity, 0);
     }
+
     get totalAmount(): number {
-        return this.items.reduce((s, it) => s + (it.product.price * it.quantity), 0);
+        return this.cart?.totalPrice || 0;
     }
 
-    // ==== actions ====
-    addQuick(p: Product, q = 1) {
-        const idx = this.items.findIndex(i => i.product.id === p.id);
-        if (idx >= 0) {
-            this.items[idx].quantity += q;
-            this.items[idx] = this.makeItem(this.items[idx].product, this.items[idx].quantity);
-        } else {
-            this.items = [...this.items, this.makeItem(p, q)];
-        }
-        this.saveToStorage();
-    }
-
+    /**
+     * Tăng số lượng
+     */
     inc(item: CartItem) {
-        item.quantity += 1;
-        this.rebind(item.product.id);
+        // Gọi hàm update với số lượng mới
+        this.updateQuantity(item.variantId, item.quantity + 1);
     }
-
+    /**
+     * Giảm số lượng
+     */
     dec(item: CartItem) {
-        if (item.quantity <= 1) return;
-        item.quantity -= 1;
-        this.rebind(item.product.id);
+        // Backend sẽ tự xóa nếu số lượng <= 0
+        if (item.quantity <= 0) return;
+        this.updateQuantity(item.variantId, item.quantity - 1);
     }
-
-    updateQty(item: CartItem, v: number) {
-        const q = Number.isFinite(v) && v > 0 ? Math.floor(v) : 1;
-        item.quantity = q;
-        this.rebind(item.product.id);
+    /**
+     * Cập nhật số lượng từ input
+     */
+    updateQuantityFromInput(item: CartItem, event: any) {
+        const newQuantity = (event.target as HTMLInputElement).valueAsNumber;
+        if (newQuantity < 0 || isNaN(newQuantity)) {
+            // Nếu số lượng không hợp lệ, quay về số lượng cũ
+            (event.target as HTMLInputElement).value = String(item.quantity);
+            return;
+        }
+        this.updateQuantity(item.variantId, newQuantity);
     }
-
+    /**
+     * Hàm gọi API cập nhật số lượng
+     */
+    updateQuantity(variantId: number, quantity: number) {
+        this.cartService.updateQuantity(variantId, quantity).subscribe({
+            next: (updatedCart) => {
+                // 9. Gán lại giỏ hàng mới từ phản hồi của server
+                this.cart = updatedCart;
+            },
+            error: (err) => {
+                console.error('Lỗi khi cập nhật số lượng:', err);
+                // Tùy chọn: Tải lại giỏ hàng để đồng bộ
+                this.loadCart();
+            }
+        });
+    }
+    /**
+     * Xóa một món hàng
+     */
     remove(item: CartItem) {
-        this.items = this.items.filter(i => i.product.id !== item.product.id);
-        this.saveToStorage();
-    }
+        if (!confirm(`Bạn có chắc muốn xóa "${item.productName}" khỏi giỏ hàng?`)) {
+            return;
+        }
 
-    clear() {
-        this.items = [];
-        localStorage.removeItem(LS_KEY);
+        this.cartService.removeItem(item.variantId).subscribe({
+            next: (updatedCart) => {
+                this.cart = updatedCart;
+            },
+            error: (err) => console.error('Lỗi khi xóa:', err)
+        });
     }
-
-    trackById = (_: number, it: CartItem) => it.product.id;
-
-    private rebind(productId: number | string) {
-        const i = this.items.findIndex(x => x.product.id === productId);
-        if (i >= 0) this.items[i] = this.makeItem(this.items[i].product, this.items[i].quantity);
-        this.items = [...this.items]; // trigger change detection
-        this.saveToStorage();
-    }
+    trackByItem = (_: number, it: CartItem) => it.variantId;
 }

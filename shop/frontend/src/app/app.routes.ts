@@ -6,14 +6,15 @@ import { ForgotPasswordComponent } from "./components/forgot-password/forgot-pas
 import { ProductPageComponent } from "./components/product/product-page.component";
 import { ownerGuard } from "./guards/owner.guard";
 import { CartComponent } from './components/cart/cart.component';
-import {ProductsListComponent} from "./components/owner/products/products-list/products-list.component"; // <-- thêm
+import {ProductsListComponent} from "./components/owner/products/products-list/products-list.component";
+import {loginGuard} from "./guards/login.guard"; // <-- thêm
 
 export const routes: Routes = [
     { path: '', redirectTo: 'home', pathMatch: 'full' },
 
     { path: 'home', component: HomeComponent },
-    { path: 'login', component: LoginComponent },
-    { path: 'signup', component: SignupComponent },
+    { path: 'login', component: LoginComponent, canActivate: [loginGuard] },
+    { path: 'signup', component: SignupComponent, canActivate: [loginGuard] },
     {
         path: 'verify-email',
         loadComponent: () => import('./components/verify-email/verify-email.component')
@@ -28,9 +29,9 @@ export const routes: Routes = [
     { path: 'products', component: ProductPageComponent },
 
     // ----- thêm user detail (standalone) -----
-    //Ch admin
+    //Cho admin
     { path: 'user/:id', loadComponent: () => import('./components/detail-user/detail.user').then(m => m.DetailUserComponent) },
-    //Chp user
+    //Cho user
     { path: 'profile', loadComponent: () => import('./components/detail-user/detail.user').then(m => m.DetailUserComponent) },
     { path: 'cart', component: CartComponent }, // <-- giỏ hàng
 
@@ -54,7 +55,7 @@ export const routes: Routes = [
     },
     {
         path: 'owner',
-        // canActivate: [ownerGuard], code xong bat len cho de
+        // canActivate: [ownerGuard], //code xong bat len cho de
         loadComponent: () =>
             import('./components/owner/layout/owner-layout.component')
                 .then(m => m.OwnerLayoutComponent),
