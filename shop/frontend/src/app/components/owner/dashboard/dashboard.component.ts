@@ -14,7 +14,7 @@ import { ChartConfiguration, ChartOptions } from 'chart.js';
     standalone: true,
     imports: [CommonModule, TopProductsComponent, NewProductsComponent, BaseChartDirective, RouterLink],
     templateUrl: './dashboard.component.html',
-    styleUrls: ['./dashboard.component.css']
+    styleUrls: ['./dashboard.component.css','../../owner/owner-shared.css']
 })
 export class DashboardComponent implements OnInit {
     kpi!: Kpi;
