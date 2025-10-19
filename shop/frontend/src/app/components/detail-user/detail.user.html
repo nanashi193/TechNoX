@@ -26,7 +26,7 @@
                     <span class="dot">•</span>
                     <span class="muted">
             ID: {{ user?.id }}
-                        <button class="link" (click)="copy(user.id)">copy</button>
+                        <button class="link" (click)="copy(user.id.toString())">copy</button>
           </span>
                 </div>
             </div>
@@ -62,18 +62,8 @@
                     <label>Họ tên
                         <input [(ngModel)]="user.FullName" />
                     </label>
-                    <label>Email
-                        <input [(ngModel)]="user.email" />
-                    </label>
                     <label>Điện thoại
                         <input [(ngModel)]="user.PhoneNumber" />
-                    </label>
-                    <label>Trạng thái
-                        <select [(ngModel)]="user.IsActive">
-                            <option value="ACTIVE">ACTIVE</option>
-                            <option value="INACTIVE">INACTIVE</option>
-                            <option value="BANNED">BANNED</option>
-                        </select>
                     </label>
                 </div>
             </section>

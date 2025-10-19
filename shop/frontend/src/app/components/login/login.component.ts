@@ -4,6 +4,11 @@ import {FormBuilder, FormGroup, FormControl, Validators, ReactiveFormsModule} fr
 import {Router, RouterModule} from '@angular/router';
 import {AuthService} from '../../services/auth.service';
 import {finalize} from 'rxjs/operators';
+import { jwtDecode } from 'jwt-decode';
+
+interface TokenPayload {
+    roleName: string;
+}
 
 @Component({
     selector: 'app-login',
@@ -48,13 +53,42 @@ export class LoginComponent {
         this.auth.login({ email, password })
             .pipe(finalize(() => this.loading = false))
             .subscribe({
-                next: (res) => {
-                    if (remember)
-                        localStorage.setItem('rememberUser', email);
-                    else
-                        localStorage.removeItem('rememberUser');
+                next: (res: any) => {
+                    // Giả sử res.token là token.
+                    // Nếu AuthService tự lưu, hãy dùng:
+                    // const token = localStorage.getItem('token');
+                    const token = res.token;
 
-                    this.router.navigateByUrl('/home');
+                    if (!token) {
+                        this.errorMsg = 'Lỗi đăng nhập: Không nhận được token.';
+                        return;
+                    }
+
+                    // Xử lý "Remember Me"
+                    // ... (code 'remember' của bạn)
+
+                    // 1. THÊM CONSOLE.LOG ĐỂ DEBUG
+                    try {
+                        const decodedToken: any = jwtDecode(token);
+
+                        // HÃY NHÌN KỸ KẾT QUẢ NÀY TRONG CONSOLE (F12)
+                        console.log('TOKEN ĐÃ GIẢI MÃ:', decodedToken);
+
+                        // 2. LẤY VAI TRÒ (ROLE)
+                        // Thay 'roleName' bằng tên thuộc tính đúng bạn thấy trong console
+                        const role = decodedToken.roleName;
+
+                        // 3. KIỂM TRA VÀ ĐIỀU HƯỚNG
+                        if (role && (role.toUpperCase() === 'ADMIN' || role.toUpperCase() === 'OWNER')) {
+                            this.router.navigate(['/owner']);
+                        } else {
+                            this.router.navigate(['/home']);
+                        }
+                    } catch (e) {
+                        console.error("Token không hợp lệ hoặc lỗi giải mã:", e);
+                        this.errorMsg = 'Lỗi đăng nhập: Token không hợp lệ.';
+                        this.router.navigate(['/home']);
+                    }
                 },
                 error: () => this.errorMsg = 'Sai email hoặc mật khẩu.'
             });

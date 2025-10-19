@@ -87,7 +87,7 @@
     display: grid; grid-template-columns: auto 1fr auto;
     align-items: center; gap: var(--gap); margin-bottom: 16px;
 }
-.title h1 { font-size: clamp(20px, 2.2vw, 28px); margin: 0; color: var(--text); }
+.title h1 { font-size: clamp(20px, 2.2vw, 28px); margin: 0; color: var(--muted); }
 .meta { color: var(--muted); display:flex; gap:8px; align-items:center; flex-wrap: wrap; }
 .muted { color: var(--muted); }
 .dot { opacity:.5; }

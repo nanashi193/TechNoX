@@ -19,4 +19,5 @@ public interface IUserService {
     User updateUser(Long id, UserUpdateDTO userDTO) throws DataNotFoundException;
     User findUserByEmail(String email) throws DataNotFoundException;
     UserDetailDTO getUserDetailsByEmail(String email);
+    UserDetailDTO updateUserDetails(String email, UserDetailDTO userUpdateDTO) throws DataNotFoundException;
 }

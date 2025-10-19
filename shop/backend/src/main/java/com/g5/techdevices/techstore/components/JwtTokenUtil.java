@@ -28,6 +28,7 @@ public class JwtTokenUtil {
         Map<String, Object> claims = new HashMap<>();
 //        this.generateSecretKey();
         claims.put("email", user.getEmail());
+        claims.put("roleName", user.getRole().getName());
         try {
             String token = Jwts.builder()
                     .setClaims(claims)

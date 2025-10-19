@@ -1,6 +1,7 @@
 package com.g5.techdevices.techstore.services;
 
 import com.g5.techdevices.techstore.components.JwtTokenUtil;
+import com.g5.techdevices.techstore.components.UserMapper;
 import com.g5.techdevices.techstore.dtos.AddressDTO;
 import com.g5.techdevices.techstore.dtos.UserDTO;
 import com.g5.techdevices.techstore.dtos.UserDetailDTO;
@@ -12,7 +13,7 @@ import com.g5.techdevices.techstore.exceptions.DataNotFoundException;
 import com.g5.techdevices.techstore.exceptions.PermissionDenyException;
 import com.g5.techdevices.techstore.repositories.RoleRepository;
 import com.g5.techdevices.techstore.repositories.UserRepository;
-import com.g5.techdevices.techstore.repositories.PasswordTokenRepository;
+import com.g5.techdevices.techstore.repositories.AddressRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
@@ -24,6 +25,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
@@ -35,10 +37,11 @@ import java.util.Optional;
 public class UserService implements IUserService{
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
+    private final AddressRepository addressRepository;
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
     private final JwtTokenUtil jwtTokenUtil;
-    private final PasswordTokenRepository passwordTokenRepository;
+    private final UserMapper userMapper;
 
     @Override
     public User createUser(UserDTO userDTO) throws DataNotFoundException {
@@ -167,31 +170,44 @@ public class UserService implements IUserService{
     public UserDetailDTO getUserDetailsByEmail(String email) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
-        AddressDTO addressDTO = mapAddressToDTO(user.getAddress());
-
-        return UserDetailDTO.builder()
-                .id(user.getId())
-                .fullName(user.getFullName())
-                .email(user.getEmail())
-                .phoneNumber(user.getPhoneNumber())
-                .isActive(user.getIsActive())
-                .createAt(user.getCreateAt())
-                .roleName(user.getRole().getName())
-                .address(addressDTO)
-                .build();
+        return userMapper.toUserDetailDTO(user);
     }
-    private AddressDTO mapAddressToDTO(Address address) {
-        if (address == null) {
-            return null;
+
+    @Override
+    @Transactional
+    public UserDetailDTO updateUserDetails(String email, UserDetailDTO userUpdateDTO) throws DataNotFoundException {
+        User user = findUserByEmail(email);
+        user.setFullName(userUpdateDTO.getFullName());
+        user.setPhoneNumber(userUpdateDTO.getPhoneNumber());
+//        user.setIsActive(userUpdateDTO.getIsActive());
+        if (userUpdateDTO.getAddress() != null) {
+            AddressDTO addressDTO = userUpdateDTO.getAddress();
+            Address addressEntity;
+            if (user.getAddress() != null) {
+                addressEntity = user.getAddress();
+            } else {
+                addressEntity = new Address();
+            }
+            addressEntity.setLine1(addressDTO.getLine1());
+            addressEntity.setLine2(addressDTO.getLine2());
+            addressEntity.setDistrict(addressDTO.getDistrict());
+            addressEntity.setCity(addressDTO.getCity());
+            addressEntity.setProvince(addressDTO.getProvince());
+            addressEntity.setZipCode(addressDTO.getZipCode());
+
+            Address savedAddress = addressRepository.save(addressEntity);
+            user.setAddress(savedAddress);
+
+        } else {
+            if (user.getAddress() != null) {
+                Address oldAddress = user.getAddress();
+                user.setAddress(null);
+                // addressRepository.delete(oldAddress);
+            }
         }
-        return AddressDTO.builder()
-                .addressId(address.getAddressId())
-                .line1(address.getLine1())
-                .line2(address.getLine2())
-                .district(address.getDistrict())
-                .city(address.getCity())
-                .province(address.getProvince())
-                .zipCode(address.getZipCode())
-                .build();
+
+        User updatedUser = userRepository.save(user);
+        return userMapper.toUserDetailDTO(updatedUser);
     }
 }
+

@@ -6,8 +6,8 @@
 
 <div class="table users">
     <div class="row thead">
-        <div class="cell col-name th sortable" (click)="sortBy('name')" [attr.aria-sort]="ariaSort('name')">
-            Name <span class="sort-caret" [class.asc]="isAsc('name')" [class.desc]="isDesc('name')"
+        <div class="cell col-name th sortable" (click)="sortBy('FullName')" [attr.aria-sort]="ariaSort('FullName')">
+            Name <span class="sort-caret" [class.asc]="isAsc('FullName')" [class.desc]="isDesc('FullName')"
         ></span>
         </div>
 
@@ -16,13 +16,13 @@
         ></span>
         </div>
 
-        <div class="cell col-phone th sortable" (click)="sortBy('phone')" [attr.aria-sort]="ariaSort('phone')">
-            Phone <span class="sort-caret" [class.asc]="isAsc('phone')" [class.desc]="isDesc('phone')"
+        <div class="cell col-phone th sortable" (click)="sortBy('PhoneNumber')" [attr.aria-sort]="ariaSort('PhoneNumber')">
+            Phone <span class="sort-caret" [class.asc]="isAsc('PhoneNumber')" [class.desc]="isDesc('PhoneNumber')"
         ></span>
         </div>
 
-        <div class="cell col-active th sortable" (click)="sortBy('isActive')" [attr.aria-sort]="ariaSort('isActive')">
-            Active <span class="sort-caret" [class.asc]="isAsc('isActive')" [class.desc]="isDesc('isActive')"
+        <div class="cell col-active th sortable" (click)="sortBy('IsActive')" [attr.aria-sort]="ariaSort('IsActive')">
+            Active <span class="sort-caret" [class.asc]="isAsc('IsActive')" [class.desc]="isDesc('IsActive')"
         ></span>
         </div>
 
@@ -41,19 +41,19 @@
 
     <div class="row" *ngFor="let u of users; trackBy: trackById">
         <div class="cell col-name">
-            <div class="title">{{ u.name }}</div>
+            <div class="title">{{ u.FullName }}</div>
             <div class="sub">#{{ u.id }}</div>
         </div>
         <div class="cell col-email">{{ u.email }}</div>
-        <div class="cell col-phone">{{ u.phone || '—' }}</div>
+        <div class="cell col-phone">{{ u.PhoneNumber || '—' }}</div>
         <div class="cell col-active">
             <label class="switch">
-                <input type="checkbox" [checked]="u.isActive" (change)="toggleActive(u)">
+                <input type="checkbox" [checked]="u.IsActive" (change)="toggleActive(u)">
                 <span class="slider"></span>
             </label>
         </div>
-        <div class="cell col-orders">{{ u.ordersCount }}</div>
-        <div class="cell col-spent">{{ u.totalSpent | number:'1.0-0' }} ₫</div>
+        <div class="cell col-orders">{{ u.stats }}</div>
+<!--        <div class="cell col-spent">{{ u.totalSpent | number:'1.0-0' }} ₫</div>-->
     </div>
 </div>
 

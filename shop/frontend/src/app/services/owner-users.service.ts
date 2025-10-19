@@ -20,14 +20,16 @@ export class OwnerUsersService {
     // ------ MOCK ------
     private users: User[] = Array.from({length: 53}, (_,i)=>({
         id: i+1,
-        name: ['An','Bình','Chi','Duy','Giang','Hà','Khánh','Lam','Minh','Ngân'][i%10] + ' ' + (100+i),
+        FullName: ['An','Bình','Chi','Duy','Giang','Hà','Khánh','Lam','Minh','Ngân'][i%10] + ' ' + (100+i),
         email: `user${i+1}@mail.com`,
-        phone: '09' + String(10000000 + i),
-        isActive: i%4 !== 0,
-        ordersCount: (i*7)%25,
-        totalSpent: ((i*73521)%5_000_000),
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
+        PhoneNumber: '09' + String(10000000 + i),
+        IsActive: i%4 !== 0, // Đổi 'isActive' thành 'IsActive'
+        roleName: (i%3 === 0) ? 'Admin' : (i%3 === 1) ? 'Staff' : 'User',
+        CreateAt: new Date(Date.now() - i * 100000000).toISOString(),
+        stats: { // Thêm stats để khớp model
+            orders: (i*7)%25,
+            totalSpent: ((i*73521)%5_000_000)
+        }
     }));
 
     // ------MOCK ------
@@ -37,13 +39,13 @@ export class OwnerUsersService {
         const q = (opts.q ?? '').trim().toLowerCase();
         if (q) {
             list = list.filter(u =>
-                u.name.toLowerCase().includes(q) ||
+                u.FullName.toLowerCase().includes(q) ||
                 u.email.toLowerCase().includes(q) ||
-                (u.phone ?? '').toLowerCase().includes(q)
+                (u.PhoneNumber ?? '').toLowerCase().includes(q)
             );
         }
         if (opts.isActive !== undefined) {
-            list = list.filter(u => u.isActive === opts.isActive);
+            list = list.filter(u => u.IsActive === opts.isActive);
         }
         if (opts.sort) {
             const [field, dir] = opts.sort.split(',') as [keyof User, 'asc' | 'desc'];
@@ -83,8 +85,13 @@ export class OwnerUsersService {
         if (this.useMock) {
             const id = (this.users.at(-1)?.id ?? 0) + 1;
             const u: User = {
-                id, name: '', email: '', isActive: true, ordersCount: 0, totalSpent: 0,
-                createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(),
+                id, FullName: '',
+                email: '',
+                IsActive: true,
+                roleName: 'User',
+                ordersCount: 0,
+                totalSpent: 0,
+                CreateAt: new Date().toISOString(), updatedAt: new Date().toISOString(),
                 ...dto
             } as User;
             this.users.unshift(u);
@@ -96,7 +103,6 @@ export class OwnerUsersService {
     update(id: number, dto: Partial<User>) {
         if (this.useMock) {
             const i = this.users.findIndex(u => u.id === id);
-            this.users[i] = { ...this.users[i], ...dto, updatedAt: new Date().toISOString() };
             return of(this.users[i]).pipe(delay(80));
         }
         return this.http.put<User>(`${this.base}/${id}`, dto, { headers: this.headers() });
@@ -110,10 +116,10 @@ export class OwnerUsersService {
         return this.http.delete<void>(`${this.base}/${id}`, { headers: this.headers() });
     }
 
-    toggleActive(id: number, isActive: boolean) {
+    toggleActive(id: number, IsActive: boolean) {
         if (this.useMock) {
-            return this.update(id, { isActive });
+            return this.update(id, { IsActive });
         }
-        return this.http.patch<User>(`${this.base}/${id}/active`, { isActive }, { headers: this.headers() });
+        return this.http.patch<User>(`${this.base}/${id}/active`, { IsActive }, { headers: this.headers() });
     }
 }

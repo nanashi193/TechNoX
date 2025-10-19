@@ -16,6 +16,7 @@ export class UserService {
     private apiResendEmail = `${environment.apiBaseUrl}/users/resend-verification`;
     private apiUserDetails = `${environment.apiBaseUrl}/users`;
     private apiGetMe = `${environment.apiBaseUrl}/users/me`;
+    private apiUpdateMe = `${environment.apiBaseUrl}/users/me`;
 
     private apiConfig = {
         headers: this.createHeaders(),
@@ -39,5 +40,8 @@ export class UserService {
     //Lay thong tin user dang dang nhap
     getMe(): Observable<User> {
         return this.http.get<User>(this.apiGetMe);
+    }
+    updateMe(userObject: User): Observable<User> {
+        return this.http.put<User>(this.apiUpdateMe, userObject);
     }
 }

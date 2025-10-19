@@ -8,13 +8,13 @@ export interface Address {
     zip?: string;
 }
 export interface User {
-    id: string;
+    id: number;
     FullName: string;
     email: string;
     PhoneNumber?: string;
     avatarUrl?: string;
     roleName: string;
-    IsActive: 'ACTIVE' | 'INACTIVE' | 'BANNED';
+    IsActive: boolean;
     address?: Address;
     CreateAt: string;
     stats?: { orders: number; totalSpent: number };

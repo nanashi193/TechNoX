@@ -4,7 +4,8 @@ import {FormsModule} from '@angular/forms';
 import {OwnerUsersService} from "../../../../services/owner-users.service";
 import {User} from '../../../../models/user.model';
 
-type SortField = 'name' | 'email' | 'phone' | 'isActive' | 'ordersCount' | 'totalSpent';
+
+type SortField = 'FullName' | 'email' | 'PhoneNumber' | 'IsActive' | 'ordersCount' | 'totalSpent';
 type SortDir = 'asc' | 'desc';
 
 @Component({
@@ -96,8 +97,8 @@ export class UsersListComponent implements OnInit {
     }
 
     toggleActive(u: User) {
-        const prev = u.isActive;
-        u.isActive = !prev;
-        this.svc.toggleActive(u.id, u.isActive).subscribe({error: () => u.isActive = prev});
+        const prev = u.IsActive;
+        u.IsActive = !prev;
+        this.svc.toggleActive(+u.id, u.IsActive).subscribe({error: () => u.IsActive = prev});
     }
 }

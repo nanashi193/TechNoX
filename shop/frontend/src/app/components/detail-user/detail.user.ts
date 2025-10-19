@@ -71,11 +71,20 @@ export class DetailUserComponent implements OnInit {
         }
     }
     save() {
-        // Cập nhật lại bản sao sau khi lưu
-        if (this.user) {
-            this.originalUser = JSON.parse(JSON.stringify(this.user));
-        }
-        this.edit = false;
+        if (!this.user) return;
+        this.userService.updateMe(this.user).subscribe({
+            next: (updatedUser: User) => {
+                this.user = updatedUser;
+                this.originalUser = JSON.parse(JSON.stringify(updatedUser));
+                this.edit = false;
+
+                console.log('Cập nhật thông tin thành công!', updatedUser);
+            },
+            error: (err) => {
+                // Đã xóa alert() theo yêu cầu của bạn
+                console.error('Có lỗi xảy ra khi cập nhật:', err);
+            }
+        });
     }
     cancel() {
         // Phục hồi từ bản sao gốc

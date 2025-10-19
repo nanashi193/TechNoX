@@ -71,17 +71,12 @@ public class UserController {
     }
     @GetMapping("/me")
     public ResponseEntity<UserDetailDTO> getCurrentUser() {
-        // 1. Controller lấy bối cảnh xác thực
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String currentEmail = authentication.getName();
-
-        // 2. Controller gọi Service để thực hiện logic nghiệp vụ
         UserDetailDTO userDTO = userService.getUserDetailsByEmail(currentEmail);
-
-        // 3. Controller trả về kết quả
         return ResponseEntity.ok(userDTO);
     }
-
+    //Cap nhat quyen admin
     @PutMapping("/{id}")
     public ResponseEntity<?> updateUser(@PathVariable Long id,
                                         @Valid @RequestBody UserUpdateDTO userUpdateDTO) {
@@ -96,6 +91,16 @@ public class UserController {
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }
+    }
+    //Cap nhat quyen User
+    @PutMapping("/me")
+    public ResponseEntity<UserDetailDTO> updateCurrentUser(
+            @RequestBody UserDetailDTO userUpdateDTO, // Nhận DTO từ frontend
+            Authentication authentication) throws DataNotFoundException {
+
+        String currentEmail = authentication.getName();
+        UserDetailDTO updatedUser = userService.updateUserDetails(currentEmail, userUpdateDTO);
+        return ResponseEntity.ok(updatedUser);
     }
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteUser(@Valid @PathVariable Long id) {

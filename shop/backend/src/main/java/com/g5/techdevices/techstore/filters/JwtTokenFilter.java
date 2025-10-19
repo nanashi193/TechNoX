@@ -61,7 +61,6 @@ public class JwtTokenFilter extends OncePerRequestFilter {
             }
             filterChain.doFilter(request, response);
         } catch (Exception e) {
-            //Đừng sendError ở đây, cho qua để không “giết” public endpoints
             filterChain.doFilter(request, response);
         }
     }
