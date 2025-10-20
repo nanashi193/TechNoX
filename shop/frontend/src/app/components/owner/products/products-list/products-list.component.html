@@ -9,9 +9,6 @@
     <div class="bulk" *ngIf="selectedCount()">
         <span class="muted">{{ selectedCount() }} Selected</span>
         <button class="btn danger" (click)="bulk('delete')">Delete</button>
-        <button class="btn" (click)="bulk('archive')">Archive</button>
-        <button class="btn" (click)="bulk('publish')">Publish</button>
-        <button class="btn" (click)="bulk('unpublish')">Unpublish</button>
     </div>
 
     <div class="right">

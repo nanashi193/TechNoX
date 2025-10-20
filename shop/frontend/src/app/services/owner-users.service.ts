@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams, HttpHeaders } from '@angular/common/http';
-import { Observable, of, delay } from 'rxjs';
+import {Observable, of, delay, throwError} from 'rxjs';
 import { environment } from '../environments/environment';
-import { User } from '../models/user.model';
+import { User, UserDetail, Address } from '../models/user.model';
 
 export type Page<T> = { items: T[]; total: number; };
 
@@ -10,6 +10,20 @@ export type Page<T> = { items: T[]; total: number; };
 export class OwnerUsersService {
     private base = `${environment.apiBaseUrl}/users`;
     private useMock = true;  //noi BE, doi thanh false.
+
+    private detailCache = new Map<number, UserDetail>();
+
+    private fakeAddress(seed: number): Address {
+        const cities = ['London', 'Paris', 'Berlin', 'Madrid', 'Rome'];
+        const city = cities[seed % cities.length];
+        return {
+            line1: `${45 + (seed % 40)} Roker Terrace`,
+            line2: 'Latheronwheel',
+            city,
+            postalCode: `KW5 ${800 + (seed % 100)}W`,
+            country: 'UK'
+        };
+    }
 
     constructor(private http: HttpClient) {}
 
@@ -78,6 +92,22 @@ export class OwnerUsersService {
         }
         return this.http.get<User>(`${this.base}/${id}`, { headers: this.headers() });
     }
+    getDetail(id: number): Observable<UserDetail> {
+        if (this.useMock) {
+            const base = this.users.find(u => u.id === id);
+            if (!base) return throwError(() => new Error('Not found'));
+
+            const detail: UserDetail = {
+                ...base,
+                shippingAddress: this.fakeAddress(id),
+                billingAddress: this.fakeAddress(id + 1),
+                maskedCard: `************${(4200 + id).toString().slice(-4)}`
+            };
+            return of(detail).pipe(delay(80));
+        }
+        return this.http.get<UserDetail>(`${this.base}/${id}`, { headers: this.headers() });
+    }
+
 
     create(dto: Partial<User>) {
         if (this.useMock) {

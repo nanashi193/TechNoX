@@ -6,7 +6,7 @@ import { ForgotPasswordComponent } from "./components/forgot-password/forgot-pas
 import { ProductPageComponent } from "./components/product/product-page.component";
 import { ownerGuard } from "./guards/owner.guard";
 import { CartComponent } from './components/cart/cart.component';
-import {ProductsListComponent} from "./components/owner/products/products-list/products-list.component"; // <-- thêm
+import {ProductsListComponent} from "./components/owner/products/products-list/products-list.component";
 
 export const routes: Routes = [
     { path: '', redirectTo: 'home', pathMatch: 'full' },
@@ -94,7 +94,10 @@ export const routes: Routes = [
                     import('./components/owner/users/users-list/users-list.component')
                 .then(m => m.UsersListComponent),
                 title: 'Người dùng của TechNoX'
-            }
+            },
+            {path: 'users/:id', loadComponent: () =>
+                    import('./components/owner/users/users-detail/users-detail.component')
+                    .then(m => m.UserDetailComponent),}
 
         ]
     },

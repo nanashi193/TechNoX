@@ -5,35 +5,10 @@
 }
 /* wrapper & hàng */
 .table.users{ border:1px solid var(--b); border-radius:12px; overflow:hidden; background:#fff; } /* như Products */
-.table.users .row{
-    display:grid;
-    grid-template-columns: 48px 1.6fr 1.4fr 1.2fr 120px 110px 150px 120px; /* checkbox/name/email/phone/… */
-    column-gap:12px; align-items:center; padding:12px 16px; border-top:1px solid rgba(0,0,0,.06); /* như Products */
-}
 .table.users .row:first-child{ border-top:none; }
 .table.users .row.thead{ background:#fafafa; color:var(--muted); font-weight:600; } /* như Products */
 
-.table.users{
-    border:1px solid var(--b); border-radius:12px; overflow:hidden; background:#fff;
-    /* template cột dùng chung cho header + body */
-    --col-name:   2fr;
-    --col-email:  2fr;
-    --col-phone:  1.4fr;
-    --col-active: 120px;
-    --col-orders: 110px;
-    --col-spent:  150px;
-}
-
 /* dùng GRID cho header + body với cùng template */
-.table.users .row{
-    display:grid;
-    grid-template-columns:
-    var(--col-name) var(--col-email) var(--col-phone)
-    var(--col-active) var(--col-orders) var(--col-spent);
-    align-items:center;
-    column-gap:12px;
-    padding:12px 16px;
-}
 .table.users .row:not(.thead){ border-top:1px solid #f1f3f6; }
 .table.users .thead{ background:#f7f8fb; font-weight:600; color:#6b7280; }
 
@@ -190,3 +165,88 @@
 .table.users .sort-caret.asc::before{  border-bottom-color:#3b82f6; }  /* ASC */
 .table.users .sort-caret.desc::after{  border-top-color:#3b82f6; }     /* DESC */
 
+.name-link{ color:#2563eb; font-weight:700; text-decoration:none; }
+.name-link:hover{ text-decoration:underline; }
+.avatar.sm{ width:36px; height:36px; border-radius:50%; background:#e5e7eb; color:#374151;
+    display:inline-flex; align-items:center; justify-content:center; margin-right:10px; font-weight:700;}
+/* 1) Dùng duy nhất 1 template 7 cột cho cả header & body */
+.table.users .row,
+.table.users .row.thead{
+    display: grid;
+    grid-template-columns:
+    36px                    /* checkbox */
+    minmax(220px,1.6fr)     /* name */
+    1.4fr                   /* email */
+    1.2fr                   /* phone */
+    120px                   /* active */
+    110px                   /* orders */
+    150px;                  /* spent */
+    gap: 12px;
+    align-items: center;
+    padding: 12px 16px;
+}
+
+/* 2) Header style thống nhất */
+.table.users .row.thead{
+    background:#f7f8fb;
+    color:#667085;
+    font-weight:600;
+    border-bottom:1px solid #eef1f5;
+}
+
+/* 3) Cột checkbox: luôn chiếm đúng 36px, căn giữa */
+.table.users .cell.check{ display:flex; justify-content:center; align-items:center; }
+
+/* 4) Style checkbox riêng cho Users (không “lây” từ Product) */
+.table.users .cell.check input[type="checkbox"]{
+    appearance:none; -webkit-appearance:none;
+    width:16px; height:16px; border:1.5px solid #e2e8f0; border-radius:4px; background:#fff;
+    display:inline-grid; place-content:center; cursor:pointer; transition:.15s;
+    position:static; margin:0;
+}
+.table.users .cell.check input[type="checkbox"]:hover{ border-color:#cbd5e1; }
+.table.users .cell.check input[type="checkbox"]:checked{
+    background:#5b5ce2; border-color:#5b5ce2;
+}
+.table.users .cell.check input[type="checkbox"]:checked::after{
+    content:""; width:8px; height:8px; transform:rotate(45deg);
+    border-right:2px solid #fff; border-bottom:2px solid #fff; margin-top:-1px;
+}
+.table.users .cell.check input[type="checkbox"]:indeterminate{
+    background:#5b5ce2; border-color:#5b5ce2;
+}
+.table.users .cell.check input[type="checkbox"]:indeterminate::after{
+    content:""; width:10px; height:2px; background:#fff;
+}
+
+/* 5) Căn phải các cột số cho thẳng */
+.table.users .col-orders, .table.users .col-spent{ text-align:right; }
+/* đặt biến cột để dễ chỉnh */
+.table.users{
+    --col-check: 36px;
+    --col-name: minmax(220px,1.6fr);
+    --col-email: 1.4fr;
+    --col-phone: 1.2fr;
+    --col-active: max-content;                 /* switch nhỏ, để auto là đủ */
+    --col-orders: minmax(130px, max-content);  /* ⬅️ nở theo chữ "Số đơn hàng" */
+    --col-spent:  minmax(140px, max-content);  /* ⬅️ nở theo "Tổng chi tiêu" */
+}
+
+.table.users .row,
+.table.users .row.thead{
+    display:grid;
+    grid-template-columns:
+    var(--col-check) var(--col-name) var(--col-email) var(--col-phone)
+    var(--col-active) var(--col-orders) var(--col-spent);
+    gap:12px; align-items:center; padding:12px 16px;
+}
+
+/* header của 2 cột số: để nội dung nằm gọn, không ép sát phải */
+.table.users .row.thead .col-orders,
+.table.users .row.thead .col-spent{
+    justify-content:flex-start;     /* chỉ header; body vẫn căn phải */
+}
+
+/* body hai cột số vẫn căn phải như cũ */
+.table.users .col-orders,
+.table.users .col-spent{ text-align:right; justify-content:flex-end; }
