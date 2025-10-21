@@ -65,14 +65,11 @@ export class ProductsListComponent implements OnInit {
             this.products = items;
             this.filtered = [...items];
 
-            // nhận nhiều kiểu tên tổng
             this.total = res.total ?? res.totalCount ?? res.totalElements ?? (Array.isArray(items) ? items.length : 0);
 
-            // nếu lỡ xóa làm page hiện tại vượt quá tổng trang -> lùi về trang cuối
             const tp = this.totalPages;
             if (this.page > tp) { this.page = tp; if (tp > 0) this.load(); else this.loading = false; return; }
 
-            // clear chọn của trang hiện tại
             this.selected.clear();
             this.loading = false;
         }, _ => this.loading = false);

@@ -9,9 +9,6 @@
     <div class="bulk" *ngIf="selectedCount()">
         <span class="muted">{{ selectedCount() }} Selected</span>
         <button class="btn danger" (click)="bulk('delete')">Delete</button>
-        <button class="btn" (click)="bulk('archive')">Archive</button>
-        <button class="btn" (click)="bulk('publish')">Publish</button>
-        <button class="btn" (click)="bulk('unpublish')">Unpublish</button>
     </div>
 
     <div class="right">
@@ -79,7 +76,6 @@
             <img class="thumb" [src]="p.image" alt="">
             <div class="info">
                 <div class="name">{{ p.name }}</div>
-                <div class="sku muted">#{{ p.sku }}</div>
             </div>
         </div>
 
@@ -92,7 +88,7 @@
             </label>
         </div>
 
-        <div class="cell col-sku">{{ p.sku }}</div>
+        <div class="cell col-sku">#{{ p.sku }}</div>
         <div class="cell col-price">{{ p.price | number:'1.0-0' }}₫ </div>
         <div class="cell col-variants">{{ p.variants }}</div>
         <div class="cell col-qty">{{ p.stockQty ?? 0 }}</div>

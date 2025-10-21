@@ -9,6 +9,11 @@ import { Product } from '../../../../models/products.model';
 type MediaItem = { id: string; previewUrl: string; file?: File; isUrl?: boolean };
 type VariantRow = { name: string; values: string[]; input: string };
 
+type ProductFormValue = {
+    name: string; type: string; sku: string; price: number;
+    variants: number; inStock: boolean; image: string; stockQty: number;
+};
+
 @Component({
     standalone: true,
     selector: 'owner-product-form',
@@ -37,7 +42,6 @@ export class ProductsFormComponent implements OnInit {
         stockQty: this.fb.control(0, { validators: [Validators.min(0)] }),
         image: this.fb.control(''),
 
-
         // Optional – organization/weight
         vendor: this.fb.control(''),
         category: this.fb.control(''),
@@ -53,11 +57,7 @@ export class ProductsFormComponent implements OnInit {
     variantNames = ['Size', 'Color', 'Material', 'Style', 'Capacity'];
     variants: VariantRow[] = [{ name: 'Size', values: [], input: '' }];
 
-    original?: {
-        name:string; type:string; sku:string; description:string;
-        price:number; currency:string; variants:number; inStock:boolean;
-        image:string; vendor:string; category:string;
-    };
+    private original!: ProductFormValue;
 
     get isEdit(){ return !!this.id; }
     get showStickyBar(){ return this.isEdit && this.f.dirty; } // hiện banner khi có thay đổi
@@ -68,7 +68,7 @@ export class ProductsFormComponent implements OnInit {
 
         if (this.id) {
             this.svc.get(this.id).subscribe((p: Product) => {
-                const patch = {
+                const patch: ProductFormValue = {
                     name: p.name,
                     type: p.type ?? '',
                     sku: p.sku,
@@ -80,13 +80,14 @@ export class ProductsFormComponent implements OnInit {
                     // các field khác (vendor/category/collections/weight...) hiện chưa map từ model
                 };
                 this.f.patchValue(patch);
+                this.original = structuredClone(this.f.getRawValue());
                 this.f.markAsPristine();
                 this.f.markAsUntouched();
             });
         }
     }
     discard(){                       // khôi phục lại snapshot
-        if (!this.original) return;
+        if (this.f.dirty && !confirm('Discard all unsaved changes?')) return;
         this.f.reset(this.original);
         this.f.markAsPristine();
         this.f.markAsUntouched();

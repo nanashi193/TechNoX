@@ -1,0 +1,161 @@
+<div class="user-detail" *ngIf="!loading && user; else loadingTpl">
+    <form [formGroup]="f">
+
+    <div class="header">
+        <a routerLink="/owner/users" class="back">← Quay lại danh sách</a>
+    </div>
+
+    <div class="hero">
+        <div class="avatar lg">{{ initial() }}</div>
+        <div class="info">
+            <div class="name" *ngIf="!editMode; else nameEdit">{{ user!.name }}</div>
+            <ng-template #nameEdit>
+                <input class="input title" formControlName="name" maxlength="120" placeholder="Full name"/>
+            </ng-template>
+
+            <div class="meta">
+                <span>#{{ user!.id }}</span><span>•</span>
+                <span>{{ user!.email }}</span><span>•</span>
+                <span *ngIf="!editMode">{{ user!.phone || '—' }}</span>
+                <input *ngIf="editMode" class="input sm" formControlName="phone" placeholder="0912345678"/>
+            </div>
+        </div>
+
+        <div class="actions">
+            <button class="btn ghost" (click)="toggleEdit()">{{ editMode ? 'Cancel' : 'Edit' }}</button>
+            <button *ngIf="editMode" class="btn primary" type="button"
+                    [disabled]="f.invalid || f.pristine" (click)="save()">Save</button>
+            <button class="btn danger" (click)="delete()">Delete</button>
+        </div>
+    </div>
+
+    <div class="grid">
+        <!-- Left: Overview / Status -->
+        <section class="card">
+            <div class="card-head"><h3 class="card-title">Account</h3></div>
+
+            <div class="row-line">
+                <div class="label">Active</div>
+
+                <label class="switch" *ngIf="!editMode; else activeEdit">
+                    <input type="checkbox" [checked]="user!.isActive" (change)="toggleActive($event)">
+                    <span class="slider"></span>
+                </label>
+
+                <ng-template #activeEdit>
+                    <label class="switch">
+                        <input type="checkbox" formControlName="isActive">
+                        <span class="slider"></span>
+                    </label>
+                </ng-template>
+            </div>
+
+            <div class="row-line">
+                <div class="label">Orders</div>
+                <div class="value">{{ user!.ordersCount ?? 0 }}</div>
+            </div>
+
+            <div class="row-line">
+                <div class="label">Total spent</div>
+                <div class="value">{{ user!.totalSpent | number:'1.0-0' }} đ</div>
+            </div>
+
+            <div class="row-line">
+                <div class="label">Created</div>
+                <div class="value">{{ user!.createdAt | date:'medium' }}</div>
+            </div>
+
+            <div class="row-line">
+                <div class="label">Updated</div>
+                <div class="value">{{ user!.updatedAt | date:'medium' }}</div>
+            </div>
+        </section>
+
+        <!-- Right: Edit inline -->
+        <section class="card ud-card">
+            <!-- CONTACT INFO -->
+            <div class="ud-section">
+                <header class="ud-head"><h3>Contact info</h3></header>
+
+                <div class="ud-list" *ngIf="!editMode; else contactEdit">
+                    <div class="ud-row"><span class="ud-ico">email</span>
+                        <a [href]="'mailto:'+user!.email">{{ user!.email }}</a>
+                    </div>
+                    <div class="ud-row"><span class="ud-ico">📱</span>
+                        <a [href]="'tel:'+ (user!.phone||'')">{{ user!.phone || '—' }}</a>
+                    </div>
+                </div>
+
+                <ng-template #contactEdit>
+                    <div class="grid2">
+                        <label>Email
+                            <input formControlName="email" type="email" [disabled]="!editMode" > <!-- email cố định -->
+                        </label>
+                        <label>Phone
+                            <input formControlName="phone" placeholder="0912345678">
+                        </label>
+                    </div>
+                </ng-template>
+            </div>
+
+            <hr>
+
+            <!-- SHIPPING ADDRESS -->
+            <div class="ud-section">
+                <header class="ud-head">
+                    <h3>Shipping address</h3>
+                </header>
+
+                <!-- map placeholder (không tích hợp thật) -->
+                <div class="ud-map">
+                    <div class="ud-zoom">
+                        <button type="button">+</button>
+                        <button type="button">−</button>
+                    </div>
+                    <div class="ud-pin"></div>
+                    <div class="ud-badge">Leaflet</div>
+                </div>
+
+                <address class="ud-address">
+                    {{ user?.shippingAddress?.line1 || '45 Roker Terrace' }}<br>
+                    {{ user?.shippingAddress?.line2 || 'Latheronwheel' }}<br>
+                    {{ user?.shippingAddress?.postalCode || 'KW5 8NW' }}, {{ user?.shippingAddress?.city || 'London' }}<br>
+                    {{ user?.shippingAddress?.country || 'UK' }} <span class="ud-flag">🇬🇧</span>
+                </address>
+            </div>
+
+            <hr>
+
+            <!-- BILLING ADDRESS -->
+            <div class="ud-section">
+                <header class="ud-head">
+                    <h3>Billing address</h3>
+                </header>
+
+                <address class="ud-address">
+                    {{ user?.billingAddress?.line1 || '45 Roker Terrace' }}<br>
+                    {{ user?.billingAddress?.line2 || 'Latheronwheel' }}<br>
+                    {{ user?.billingAddress?.postalCode || 'KW5 8NW' }}, {{ user?.billingAddress?.city || 'London' }}<br>
+                    {{ user?.billingAddress?.country || 'UK' }} <span class="ud-flag">🇬🇧</span>
+                </address>
+            </div>
+
+            <hr>
+
+            <!-- PAYMENT -->
+            <div class="ud-section">
+                <h3>Mastercard</h3>
+                <div class="ud-muted">
+                    Card Number: {{ user?.maskedCard || '************4291' }}
+                </div>
+            </div>
+        </section>
+
+    </div>
+    </form>
+</div>
+
+<ng-template #loadingTpl>
+    <div class="card" *ngIf="loading">Đang tải…</div>
+    <div class="card" *ngIf="!loading && !user">Không tìm thấy người dùng.</div>
+</ng-template>

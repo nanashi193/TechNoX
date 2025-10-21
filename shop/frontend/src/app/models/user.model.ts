@@ -19,3 +19,8 @@ export interface User {
     CreateAt: string;
     stats?: { orders: number; totalSpent: number };
 }
+export interface UserDetail extends User {
+    shippingAddress?: Address;
+    billingAddress?: Address;
+    maskedCard?: string;
+}

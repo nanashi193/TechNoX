@@ -97,7 +97,10 @@ export const routes: Routes = [
                     import('./components/owner/users/users-list/users-list.component')
                 .then(m => m.UsersListComponent),
                 title: 'Người dùng của TechNoX'
-            }
+            },
+            {path: 'users/:id', loadComponent: () =>
+                    import('./components/owner/users/users-detail/users-detail.component')
+                    .then(m => m.UserDetailComponent),}
 
         ]
     },
