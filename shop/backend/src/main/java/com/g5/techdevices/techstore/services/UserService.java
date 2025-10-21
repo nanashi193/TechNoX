@@ -16,6 +16,8 @@ import com.g5.techdevices.techstore.repositories.UserRepository;
 import com.g5.techdevices.techstore.repositories.AddressRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -28,7 +30,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -42,6 +43,18 @@ public class UserService implements IUserService{
     private final AuthenticationManager authenticationManager;
     private final JwtTokenUtil jwtTokenUtil;
     private final UserMapper userMapper;
+
+    /**
+     * Helper method: Lấy thông tin User đang đăng nhập từ SecurityContext.
+     * @return User entity của người dùng hiện tại
+     * @throws DataNotFoundException nếu không tìm thấy user
+     */
+    private User getCurrentAuthenticatedUser() throws DataNotFoundException {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String currentEmail = authentication.getName();
+        return userRepository.findByEmail(currentEmail)
+                .orElseThrow(() -> new DataNotFoundException("Current authenticated user not found."));
+    }
 
     @Override
     public User createUser(UserDTO userDTO) throws DataNotFoundException {
@@ -81,12 +94,9 @@ public class UserService implements IUserService{
     }
 
     @Override
-    public List<User> getAllUsers() throws DataNotFoundException {
+    public Page<User> getAllUsers(Pageable pageable) throws DataNotFoundException {
         // Lấy user đang đăng nhập hiện tại
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String currentEmail = authentication.getName();
-        User currentUser = userRepository.findByEmail(currentEmail)
-                .orElseThrow(() -> new DataNotFoundException("Current user not found."));
+        User currentUser = getCurrentAuthenticatedUser();
 
         boolean isAdmin = currentUser.getRole().getName().equalsIgnoreCase(Role.ADMIN);
         boolean isOwner = currentUser.getRole().getName().equalsIgnoreCase(Role.OWNER);
@@ -94,18 +104,29 @@ public class UserService implements IUserService{
         if (!(isAdmin || isOwner)) {
             throw new AccessDeniedException("You don't have permission to get list user.");
         }
-        return userRepository.findAll();
+        return userRepository.findAll(pageable);
     }
+    @Override
+    public User getUserById(Long id) throws DataNotFoundException {
+        User currentUser = getCurrentAuthenticatedUser();
 
+        boolean isAdmin = currentUser.getRole().getName().equalsIgnoreCase(Role.ADMIN);
+        boolean isOwner = currentUser.getRole().getName().equalsIgnoreCase(Role.OWNER);
+        boolean isSelf = currentUser.getId() == (id);
+
+        if (!(isAdmin || isOwner || isSelf)) {
+            throw new AccessDeniedException("You don't have permission to view this user.");
+        }
+
+        return userRepository.findById(id)
+                .orElseThrow(() -> new DataNotFoundException("Cannot find user with id: " + id));
+    }
     @Override
     public User updateUser(Long id, UserUpdateDTO userDTO) throws DataNotFoundException {
         User existingUser = userRepository.findById(id).orElseThrow(() ->
                 new DataNotFoundException("Can not find User with id:" +id));
         // Lấy user đang đăng nhập hiện tại
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String currentEmail = authentication.getName();
-        User currentUser = userRepository.findByEmail(currentEmail)
-                .orElseThrow(() -> new DataNotFoundException("Current user not found."));
+        User currentUser = getCurrentAuthenticatedUser();
 
         boolean isAdmin = currentUser.getRole().getName().equalsIgnoreCase(Role.ADMIN);
         boolean isOwner = currentUser.getRole().getName().equalsIgnoreCase(Role.OWNER);

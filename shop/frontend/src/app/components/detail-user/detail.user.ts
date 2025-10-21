@@ -9,7 +9,7 @@ interface Address {
     city: string;
     district?: string;
     province: string;
-    zip?: string;
+    zipCode?: string;
 }
 import { User } from '../../models/user.model';
 import { UserService } from '../../services/user.service';
@@ -62,11 +62,12 @@ export class DetailUserComponent implements OnInit {
         // để [(ngModel)] có thể hoạt động mà không bị lỗi
         if (this.edit && !this.user?.address) {
             this.user!.address = {
-                addressID: 0,
+                addressId: 0,
                 line1: '',
                 city: '',
                 district: '',
-                province: ''
+                province: '',
+                zipCode:''
             };
         }
     }

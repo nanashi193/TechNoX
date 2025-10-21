@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -69,6 +70,8 @@ public class WebSecurityConfig {
                         .requestMatchers(GET, String.format("%s/users", apiPrefix))
                         .hasAnyRole(Role.ADMIN, Role.OWNER)
                         .requestMatchers(DELETE, String.format("%s/users/**", apiPrefix))
+                        .hasAnyRole(Role.ADMIN, Role.OWNER)
+                        .requestMatchers(HttpMethod.DELETE, String.format("%s/users/**", apiPrefix))
                         .hasAnyRole(Role.ADMIN, Role.OWNER)
                         .requestMatchers(PUT, String.format("%s/users/restore/**", apiPrefix))
                         .hasAnyRole(Role.ADMIN, Role.OWNER)

@@ -25,7 +25,7 @@ export class UserDetailComponent implements OnInit {
             name: u.FullName ?? '',
             email: u.email ?? '',
             phone: u.PhoneNumber ?? '',
-            isActive: !u.IsActive,
+            isActive: u.IsActive,
         } as any);
         this.snapshot = structuredClone(this.f.getRawValue());
         this.f.markAsPristine();

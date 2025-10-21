@@ -9,7 +9,7 @@ export type Page<T> = { items: T[]; total: number; };
 @Injectable({ providedIn: 'root' })
 export class OwnerUsersService {
     private base = `${environment.apiBaseUrl}/users`;
-    private useMock = true;  //noi BE, doi thanh false.
+    private useMock = false;  //noi BE, doi thanh false.
 
     private detailCache = new Map<number, UserDetail>();
 
@@ -17,12 +17,12 @@ export class OwnerUsersService {
         const cities = ['London', 'Paris', 'Berlin', 'Madrid', 'Rome'];
         const city = cities[seed % cities.length];
         return {
-            addressID: seed,
+            addressId: seed,
             line1: `${45 + (seed % 40)} Roker Terrace`,
             line2: 'Latheronwheel',
             city,
             province: 'Caithness',
-            zip: `KW5 ${800 + (seed % 100)}W`,
+            zipCode: `KW5 ${800 + (seed % 100)}W`,
         };
     }
 
@@ -99,18 +99,22 @@ export class OwnerUsersService {
         if (this.useMock) {
             const base = this.users.find(u => u.id === id);
             if (!base) return throwError(() => new Error('Not found'));
-
             const detail: UserDetail = {
-                ...base,
+                id: base.id,
+                FullName: base.FullName,
+                email: base.email,
+                roleName: base.roleName,
+                IsActive: base.IsActive,
+                CreateAt: base.CreateAt,
+
+                PhoneNumber: base.PhoneNumber ?? '',
+                stats: base.stats ?? { orders: 0, totalSpent: 0 },
                 shippingAddress: this.fakeAddress(id),
-                billingAddress: this.fakeAddress(id + 1),
-                maskedCard: `************${(4200 + id).toString().slice(-4)}`
             };
             return of(detail).pipe(delay(80));
         }
         return this.http.get<UserDetail>(`${this.base}/${id}`, { headers: this.headers() });
     }
-
 
     create(dto: Partial<User>) {
         if (this.useMock) {

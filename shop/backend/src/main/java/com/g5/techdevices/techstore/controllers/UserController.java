@@ -4,7 +4,11 @@ import com.g5.techdevices.techstore.dtos.UserDetailDTO;
 import com.g5.techdevices.techstore.dtos.UserUpdateDTO;
 import com.g5.techdevices.techstore.entity.tokens.EmailType;
 import com.g5.techdevices.techstore.exceptions.DataNotFoundException;
+import com.g5.techdevices.techstore.repositories.BillRepository;
 import com.g5.techdevices.techstore.repositories.UserRepository;
+import com.g5.techdevices.techstore.responses.UserResponse.UserDetailResponse;
+import com.g5.techdevices.techstore.responses.UserResponse.UserListResponse;
+import com.g5.techdevices.techstore.responses.UserResponse.UserPageResponse;
 import com.g5.techdevices.techstore.services.EmailService;
 import com.g5.techdevices.techstore.services.ITokenService;
 import com.g5.techdevices.techstore.services.IUserService;
@@ -14,6 +18,9 @@ import com.g5.techdevices.techstore.entity.users.User;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -22,19 +29,22 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @CrossOrigin(origins = "http://localhost:4200")
 @RestController
 @RequestMapping("${api.prefix}/users")
 @RequiredArgsConstructor
 public class UserController {
+
     private final IUserService userService;
     private final ITokenService tokenService;
     private final EmailService emailService;
     private final UserRepository userRepository;
+    @Autowired
+    private BillRepository billRepository;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
@@ -62,12 +72,23 @@ public class UserController {
         }
     }
     @GetMapping("")
-    public ResponseEntity<List<User>> getAllUsers(
-            @RequestParam("page") int page,
-            @RequestParam("limit") int limit
+    public ResponseEntity<UserPageResponse<UserListResponse>> getAllUsers(
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "10") int limit
     ) throws DataNotFoundException {
-        List<User> users = userService.getAllUsers();
-        return ResponseEntity.ok(users);
+
+        Pageable pageable = PageRequest.of(page - 1, limit);
+        Page<User> userPage = userService.getAllUsers(pageable); // (Hàm này phải nhận Pageable)
+
+        List<UserListResponse> userResponses = userPage.getContent().stream()
+                .map(UserListResponse::new) // Gọi constructor UserListResponse(user)
+                .collect(Collectors.toList());
+
+        UserPageResponse<UserListResponse> response = new UserPageResponse<>();
+        response.setItems(userResponses);
+        response.setTotal(userPage.getTotalElements());
+
+        return ResponseEntity.ok(response);
     }
     @GetMapping("/me")
     public ResponseEntity<UserDetailDTO> getCurrentUser() {
@@ -102,10 +123,29 @@ public class UserController {
         UserDetailDTO updatedUser = userService.updateUserDetails(currentEmail, userUpdateDTO);
         return ResponseEntity.ok(updatedUser);
     }
+    //Lay user bang id
+    @GetMapping("/{id}")
+    public ResponseEntity<UserDetailResponse> getUserById(
+            @PathVariable("id") Long id
+    ) throws DataNotFoundException {
+
+        User existingUser = userService.getUserById(id);
+
+        int orders = billRepository.countOrdersByUserId(existingUser.getId());
+        Double total = billRepository.sumTotalSpentByUserId(existingUser.getId());
+        UserDetailResponse userDetailResponse = new UserDetailResponse(
+                existingUser,
+                orders,
+                (total != null) ? total : 0.0
+        );
+
+        return ResponseEntity.ok(userDetailResponse);
+    }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteUser(@Valid @PathVariable Long id) {
         userService.deleteUser(id);
-        return ResponseEntity.ok("User has been deleted successfully");
+        return ResponseEntity.noContent().build();
     }
     @PutMapping("/restore/{id}")
     public ResponseEntity<?> restoreUser(@PathVariable Long id) {

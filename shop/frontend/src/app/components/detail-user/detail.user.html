@@ -75,7 +75,7 @@
                 <div *ngIf="!edit" class="address">
                     <div>{{ user.address?.line1 }}{{ user.address?.line2 ? ', ' + user.address?.line2 : '' }}</div>
                     <div>{{ user.address?.district ? user.address?.district + ', ' : '' }}{{ user.address?.city }}</div>
-                    <div>{{ user.address?.province }}{{ user.address?.zip ? ' ' + user.address?.zip : '' }}</div>
+                    <div>{{ user.address?.province }}{{ user.address?.zipCode ? ' ' + user.address?.zipCode : '' }}</div>
                 </div>
 
                 <div *ngIf="edit" class="form form-grid">
@@ -95,7 +95,7 @@
                         <input [(ngModel)]="user.address!.province" />
                     </label>
                     <label>Mã bưu chính
-                        <input [(ngModel)]="user.address!.zip" />
+                        <input [(ngModel)]="user.address!.zipCode" />
                     </label>
                 </div>
             </section>
