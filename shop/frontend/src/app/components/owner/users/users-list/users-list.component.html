@@ -11,28 +11,33 @@
 
         <button class="btn ghost" (click)="toggleFilters($event)">Filters</button>
     </div>
-    <div class="filters-backdrop" *ngIf="showFilters" (click)="showFilters=false"></div>
-    <div class="filters-pop" *ngIf="showFilters">
-        <div class="fp-head">Filters</div>
+    <div class="sheet-backdrop" *ngIf="showFilters" (click)="closeFilters()"></div>
 
-        <div class="fp-group">
-            <div class="fp-label">Active</div>
-            <label class="fp-row">
-                <input type="radio" name="act" [value]="null" [(ngModel)]="flt.active"> All
-            </label>
-            <label class="fp-row">
-                <input type="radio" name="act" [value]="true" [(ngModel)]="flt.active"> Active
-            </label>
-            <label class="fp-row">
-                <input type="radio" name="act" [value]="false" [(ngModel)]="flt.active"> Inactive
-            </label>
+    <aside class="filters-sheet" [class.open]="showFilters" (click)="$event.stopPropagation()">
+        <div class="sheet-header">
+            <h3>Filters</h3>
+            <button class="icon-btn" aria-label="Close" (click)="closeFilters()">×</button>
         </div>
 
-        <div class="fp-actions">
-            <button class="btn ghost" (click)="clearFilters()">Clear</button>
-            <button class="btn primary" (click)="applyFilters()">Apply</button>
+        <div class="sheet-body">
+            <div class="fp-group">
+                <div class="fp-label">Active</div>
+                <label class="fp-row"><input type="radio" name="act" [(ngModel)]="flt.activeFilter" value="all">
+                    All</label>
+                <label class="fp-row"><input type="radio" name="act" [(ngModel)]="flt.activeFilter" value="active">
+                    Active</label>
+                <label class="fp-row"><input type="radio" name="act" [(ngModel)]="flt.activeFilter" value="inactive">
+                    Inactive</label>
+            </div>
+
+            <!-- chỗ này sau bạn thêm các nhóm filter khác -->
         </div>
-    </div>
+
+        <div class="sheet-footer">
+            <button class="btn ghost" (click)="clearFilters()">Clear all filters</button>
+            <button class="btn primary" (click)="applyFilters()">Save</button>
+        </div>
+    </aside>
 </div>
 
 <div class="table users">
