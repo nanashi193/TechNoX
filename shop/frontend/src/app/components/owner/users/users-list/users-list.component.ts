@@ -58,6 +58,7 @@ export class UsersListComponent implements OnInit {
         this.loading = true;
         const params: any = {q: this.q, page: this.page, size: this.size};
         if (this.sort) params.sort = `${this.sort.field},${this.sort.dir}`;
+        if (this.flt.active !== null) params.isActive = this.flt.active;
 
         this.svc.search(params).subscribe({
             next: (res) => {
@@ -156,6 +157,25 @@ export class UsersListComponent implements OnInit {
             });
         }
     }
+    showFilters = false;
+    flt: { active: boolean | null } = { active: null };
+
+    toggleFilters(e: Event) {
+        e.stopPropagation();
+        this.showFilters = !this.showFilters;
+    }
+
+    applyFilters() {
+        this.page = 1;
+        this.load();          // load() sẽ đọc this.flt.active
+        this.showFilters = false;
+    }
+
+    clearFilters() {
+        this.flt.active = null;
+        this.applyFilters();
+    }
+
 
     goto(n: number) {
         if (n >= 1 && n <= this.totalPages && n !== this.page) {

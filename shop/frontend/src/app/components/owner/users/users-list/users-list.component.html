@@ -3,9 +3,35 @@
 <div class="toolbar">
     <input class="search" placeholder="Search users" [(ngModel)]="q" (ngModelChange)="onSearch()">
 
-    <div class="bulk" *ngIf="selectedCount()">
-        <span class="muted">{{ selectedCount() }} Selected</span>
-        <button class="btn danger" (click)="bulk('delete')">Delete</button>
+    <div class="right">
+        <div class="bulk" *ngIf="selectedCount()">
+            <span class="muted">{{ selectedCount() }} Selected</span>
+            <button class="btn danger" (click)="bulk('delete')">Delete</button>
+        </div>
+
+        <button class="btn ghost" (click)="toggleFilters($event)">Filters</button>
+    </div>
+    <div class="filters-backdrop" *ngIf="showFilters" (click)="showFilters=false"></div>
+    <div class="filters-pop" *ngIf="showFilters">
+        <div class="fp-head">Filters</div>
+
+        <div class="fp-group">
+            <div class="fp-label">Active</div>
+            <label class="fp-row">
+                <input type="radio" name="act" [value]="null" [(ngModel)]="flt.active"> All
+            </label>
+            <label class="fp-row">
+                <input type="radio" name="act" [value]="true" [(ngModel)]="flt.active"> Active
+            </label>
+            <label class="fp-row">
+                <input type="radio" name="act" [value]="false" [(ngModel)]="flt.active"> Inactive
+            </label>
+        </div>
+
+        <div class="fp-actions">
+            <button class="btn ghost" (click)="clearFilters()">Clear</button>
+            <button class="btn primary" (click)="applyFilters()">Apply</button>
+        </div>
     </div>
 </div>
 

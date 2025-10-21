@@ -1,4 +1,4 @@
-import {Component, inject, OnInit} from '@angular/core';
+import {Component, HostListener, inject, OnInit} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import {Product} from "../../../../models/products.model";
@@ -54,19 +54,36 @@ export class ProductsListComponent implements OnInit {
 
     ngOnInit(){ this.load(); }
 
-    load(){
+    load(extra?: { active?: boolean | null }){
         this.loading = true;
+
+        // 0/1-based page
         const apiPage = this.apiPageZeroBased ? this.page - 1 : this.page;
-        const params: any = { q: this.q, page: this.page, size: this.size };
+
+        // nếu extra.active không truyền vào, map từ radio
+        const active =
+            extra?.active !== undefined ? extra.active :
+                this.flt.activeFilter === 'active'   ? true  :
+                    this.flt.activeFilter === 'inactive' ? false : null;
+
+        const params: any = {
+            q: this.q || undefined,
+            page: apiPage,              // <-- dùng apiPage
+            size: this.size,
+        };
+
+        // chỉ gửi khi có filter thật (true/false). null = all => không gửi
+        if (active !== null) params.active = active;
 
         if (this.sort) params.sort = `${this.sort.field},${this.sort.dir}`;
+
         this.svc.search(params).subscribe((res: any) => {
             const items: Product[] = (res.items ?? res.content ?? res) as Product[];
             this.products = items;
             this.filtered = [...items];
+            this.total = res.total ?? res.totalCount ?? res.totalElements ?? items.length;
 
-            this.total = res.total ?? res.totalCount ?? res.totalElements ?? (Array.isArray(items) ? items.length : 0);
-
+            // giữ lại phần kiểm tra trang
             const tp = this.totalPages;
             if (this.page > tp) { this.page = tp; if (tp > 0) this.load(); else this.loading = false; return; }
 
@@ -74,6 +91,7 @@ export class ProductsListComponent implements OnInit {
             this.loading = false;
         }, _ => this.loading = false);
     }
+
     sortBy(field: SortField){
         if (!this.sort || this.sort.field !== field) {
             this.sort = { field, dir: 'asc' };
@@ -127,6 +145,41 @@ export class ProductsListComponent implements OnInit {
             error: () => p.inStock = prev
         });
     }
+
+    showFilters = false;
+    private _bodyOverflow?: string;
+    flt = {
+        activeFilter: 'all' as 'all' | 'active' | 'inactive'
+    };
+
+    toggleFilters(e: Event) {
+        e.stopPropagation();
+        this._bodyOverflow = document.body.style.overflow;
+        document.body.style.overflow = 'hidden';     // khoá scroll nền
+        this.showFilters = true;
+    }
+
+    applyFilters(){
+        // map radio thành boolean | null
+        const active =
+            this.flt.activeFilter === 'active'   ? true  :
+                this.flt.activeFilter === 'inactive' ? false : null;
+
+        this.page = 1;           // reset về trang đầu
+        this.load({ active });   // gọi API với filter
+        this.closeFilters();     // đóng drawer
+    }
+
+    clearFilters() {
+        this.flt.activeFilter = 'all';
+    }
+    closeFilters(){
+        this.showFilters = false;
+        document.body.style.overflow = this._bodyOverflow || '';
+    }
+    @HostListener('document:keydown.escape')
+    onEsc(){ if (this.showFilters) this.closeFilters(); }
+
 
 // pages
     goto(n: number) { if (n >= 1 && n <= this.totalPages && n !== this.page){ this.page = n; this.load(); } }
