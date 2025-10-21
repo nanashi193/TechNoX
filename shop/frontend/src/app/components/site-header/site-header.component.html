@@ -42,7 +42,9 @@
                 <a class="btn btn--accent btn-auth" routerLink="/signup">Đăng ký</a>
             }
 
-            <a class="cart" routerLink="/cart" aria-label="Giỏ hàng">Giỏ hàng (0)</a>
+            <a routerLink="/cart" routerLinkActive="active" class="cart">
+                <i class="fas fa-shopping-cart" style="font-size: 16px;"></i>
+                <span style="margin-left: 6px;">({{ itemCount$ | async }})</span> </a>
         </div>
 
     </div>
