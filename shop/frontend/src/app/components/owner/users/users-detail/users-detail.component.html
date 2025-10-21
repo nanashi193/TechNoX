@@ -8,7 +8,7 @@
     <div class="hero">
         <div class="avatar lg">{{ initial() }}</div>
         <div class="info">
-            <div class="name" *ngIf="!editMode; else nameEdit">{{ user!.name }}</div>
+            <div class="name" *ngIf="!editMode; else nameEdit">{{ user!.FullName }}</div>
             <ng-template #nameEdit>
                 <input class="input title" formControlName="name" maxlength="120" placeholder="Full name"/>
             </ng-template>
@@ -16,7 +16,7 @@
             <div class="meta">
                 <span>#{{ user!.id }}</span><span>•</span>
                 <span>{{ user!.email }}</span><span>•</span>
-                <span *ngIf="!editMode">{{ user!.phone || '—' }}</span>
+                <span *ngIf="!editMode">{{ user!.PhoneNumber || '—' }}</span>
                 <input *ngIf="editMode" class="input sm" formControlName="phone" placeholder="0912345678"/>
             </div>
         </div>
@@ -38,7 +38,7 @@
                 <div class="label">Active</div>
 
                 <label class="switch" *ngIf="!editMode; else activeEdit">
-                    <input type="checkbox" [checked]="user!.isActive" (change)="toggleActive($event)">
+                    <input type="checkbox" [checked]="user!.IsActive" (change)="toggleActive($event)">
                     <span class="slider"></span>
                 </label>
 
@@ -50,25 +50,25 @@
                 </ng-template>
             </div>
 
-            <div class="row-line">
-                <div class="label">Orders</div>
-                <div class="value">{{ user!.ordersCount ?? 0 }}</div>
-            </div>
+<!--            <div class="row-line">-->
+<!--                <div class="label">Orders</div>-->
+<!--                <div class="value">{{ user!.ordersCount ?? 0 }}</div>-->
+<!--            </div>-->
 
-            <div class="row-line">
-                <div class="label">Total spent</div>
-                <div class="value">{{ user!.totalSpent | number:'1.0-0' }} đ</div>
-            </div>
+<!--            <div class="row-line">-->
+<!--                <div class="label">Total spent</div>-->
+<!--                <div class="value">{{ user!.totalSpent | number:'1.0-0' }} đ</div>-->
+<!--            </div>-->
 
             <div class="row-line">
                 <div class="label">Created</div>
-                <div class="value">{{ user!.createdAt | date:'medium' }}</div>
+                <div class="value">{{ user!.CreateAt | date:'medium' }}</div>
             </div>
 
-            <div class="row-line">
-                <div class="label">Updated</div>
-                <div class="value">{{ user!.updatedAt | date:'medium' }}</div>
-            </div>
+<!--            <div class="row-line">-->
+<!--                <div class="label">Updated</div>-->
+<!--                <div class="value">{{ user!.updatedAt | date:'medium' }}</div>-->
+<!--            </div>-->
         </section>
 
         <!-- Right: Edit inline -->
@@ -82,7 +82,7 @@
                         <a [href]="'mailto:'+user!.email">{{ user!.email }}</a>
                     </div>
                     <div class="ud-row"><span class="ud-ico">📱</span>
-                        <a [href]="'tel:'+ (user!.phone||'')">{{ user!.phone || '—' }}</a>
+                        <a [href]="'tel:'+ (user!.PhoneNumber||'')">{{ user!.PhoneNumber || '—' }}</a>
                     </div>
                 </div>
 
@@ -119,29 +119,29 @@
                 <address class="ud-address">
                     {{ user?.shippingAddress?.line1 || '45 Roker Terrace' }}<br>
                     {{ user?.shippingAddress?.line2 || 'Latheronwheel' }}<br>
-                    {{ user?.shippingAddress?.postalCode || 'KW5 8NW' }}, {{ user?.shippingAddress?.city || 'London' }}<br>
-                    {{ user?.shippingAddress?.country || 'UK' }} <span class="ud-flag">🇬🇧</span>
+
+                    {{ user?.shippingAddress?.zip || 'KW5 8NW' }}, {{ user?.shippingAddress?.city || 'London' }}<br>
+
+                    {{ user?.shippingAddress?.province || 'Caithness' }} <span class="ud-flag">🇬🇧</span>
                 </address>
             </div>
-
             <hr>
-
             <!-- BILLING ADDRESS -->
             <div class="ud-section">
                 <header class="ud-head">
                     <h3>Billing address</h3>
                 </header>
-
                 <address class="ud-address">
-                    {{ user?.billingAddress?.line1 || '45 Roker Terrace' }}<br>
-                    {{ user?.billingAddress?.line2 || 'Latheronwheel' }}<br>
-                    {{ user?.billingAddress?.postalCode || 'KW5 8NW' }}, {{ user?.billingAddress?.city || 'London' }}<br>
-                    {{ user?.billingAddress?.country || 'UK' }} <span class="ud-flag">🇬🇧</span>
+                    {{ user?.shippingAddress?.line1 || '45 Roker Terrace' }}<br>
+                    {{ user?.shippingAddress?.line2 || 'Latheronwheel' }}<br>
+
+                    {{ user?.shippingAddress?.zip || 'KW5 8NW' }}, {{ user?.shippingAddress?.city || 'London' }}<br>
+
+                    {{ user?.shippingAddress?.province || 'Caithness' }} <span class="ud-flag">🇬🇧</span>
                 </address>
             </div>
 
             <hr>
-
             <!-- PAYMENT -->
             <div class="ud-section">
                 <h3>Mastercard</h3>

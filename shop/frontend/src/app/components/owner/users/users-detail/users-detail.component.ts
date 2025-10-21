@@ -22,10 +22,10 @@ export class UserDetailComponent implements OnInit {
 
     private patchFrom(u: UserDetail) {
         this.f.reset({
-            name: u.name ?? '',
+            name: u.FullName ?? '',
             email: u.email ?? '',
-            phone: u.phone ?? '',
-            isActive: !!u.isActive,
+            phone: u.PhoneNumber ?? '',
+            isActive: !u.IsActive,
         } as any);
         this.snapshot = structuredClone(this.f.getRawValue());
         this.f.markAsPristine();
@@ -83,9 +83,9 @@ export class UserDetailComponent implements OnInit {
         }
         const v = this.f.getRawValue();
         const dto: Partial<User> = {
-            name: v.name!.trim(),
-            phone: (v.phone ?? '').trim(),
-            isActive: v.isActive ?? true
+            FullName: v.name!.trim(),
+            PhoneNumber: (v.phone ?? '').trim(),
+            IsActive: v.isActive ?? true
         };
         this.svc.update(this.id, dto).subscribe(() => {
             Object.assign(this.user!, dto, { updatedAt: new Date().toISOString() });
@@ -97,9 +97,9 @@ export class UserDetailComponent implements OnInit {
     toggleActive(e: Event) {
         const on = (e.target as HTMLInputElement).checked;
         if (!this.user) return;
-        const prev = this.user.isActive;
-        this.user.isActive = on; // optimistic
-        this.svc.toggleActive(this.id, on).subscribe({error: () => this.user!.isActive = prev});
+        const prev = this.user.IsActive;
+        this.user.IsActive = on; // optimistic
+        this.svc.toggleActive(this.id, on).subscribe({error: () => this.user!.IsActive = prev});
     }
 
     delete() {
@@ -111,6 +111,6 @@ export class UserDetailComponent implements OnInit {
     }
 
     initial(): string {
-        return (this.user?.name?.[0] || '?').toUpperCase();
+        return (this.user?.FullName?.[0] || '?').toUpperCase();
     }
 }
