@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 
+import java.time.LocalDateTime;
+
 @Getter
 @Setter
 @Data
@@ -23,7 +25,7 @@ public class UserDetailDTO {
     @JsonProperty("IsActive")
     private Boolean isActive;
     @JsonProperty("CreateAt")
-    private String createAt;
+    private LocalDateTime createAt;
 
     private String roleName;
 

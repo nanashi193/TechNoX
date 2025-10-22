@@ -26,6 +26,12 @@ export const routes: Routes = [
             .then(m => m.VerifyPendingComponent)
     },
     { path: 'forgot-password', component: ForgotPasswordComponent },
+    {
+        path: 'reset-password',
+        loadComponent: () => import('./components/reset-password/reset-password.component')
+            .then(m => m.ResetPasswordComponent),
+        title: 'Đặt lại mật khẩu | TechNoX'
+    },
     { path: 'products', component: ProductPageComponent },
 
     // admin/user detail

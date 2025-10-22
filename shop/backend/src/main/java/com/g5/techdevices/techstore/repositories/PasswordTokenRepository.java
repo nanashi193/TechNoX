@@ -7,8 +7,10 @@ import org.springframework.stereotype.Repository;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface PasswordTokenRepository extends JpaRepository<PasswordResetToken, Long> {
     List<PasswordResetToken> findByUserAndExpireDateAfter(User user, Date now);
+    Optional<PasswordResetToken> findByToken(String token);
 }

@@ -23,7 +23,7 @@ public class UserMapper {
                 .email(user.getEmail())
                 .phoneNumber(user.getPhoneNumber())
                 .isActive(user.getIsActive())
-                .createAt(user.getCreateAt())
+                .createAt(user.getCreatedAt())
                 .roleName(user.getRole().getName())
                 .address(toAddressDTO(user.getAddress()))
                 .build();

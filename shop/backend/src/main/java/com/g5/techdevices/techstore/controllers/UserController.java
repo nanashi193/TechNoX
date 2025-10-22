@@ -1,8 +1,11 @@
 package com.g5.techdevices.techstore.controllers;
 
 import com.g5.techdevices.techstore.dtos.*;
+import com.g5.techdevices.techstore.dtos.resetPassword.ForgotPasswordDTO;
+import com.g5.techdevices.techstore.dtos.resetPassword.ResetPasswordDTO;
 import com.g5.techdevices.techstore.entity.tokens.EmailType;
 import com.g5.techdevices.techstore.exceptions.DataNotFoundException;
+import com.g5.techdevices.techstore.exceptions.InvalidTokenException;
 import com.g5.techdevices.techstore.repositories.BillRepository;
 import com.g5.techdevices.techstore.repositories.UserRepository;
 import com.g5.techdevices.techstore.responses.UserResponse.UserDetailResponse;
@@ -185,6 +188,38 @@ public class UserController {
             return ResponseEntity
                     .badRequest()
                     .body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    @PostMapping("/forgot-password")
+    public ResponseEntity<String> forgotPassword(
+            @Valid @RequestBody ForgotPasswordDTO dto
+    ) {
+        try {
+            String userEmail = dto.getEmail();
+            userService.createPasswordResetToken(userEmail);
+            return ResponseEntity.ok("Reset password email has been sent to " + userEmail);
+        } catch (DataNotFoundException e) {
+            return ResponseEntity.ok("If your email exists in our system, a password reset link has been sent.");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error: " + e.getMessage());
+        }
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<String> resetPassword(@Valid @RequestBody ResetPasswordDTO resetPasswordDTO) {
+        try {
+            userService.resetPassword(resetPasswordDTO.getToken(), resetPasswordDTO.getNewPassword());
+            return ResponseEntity.ok("Password has been reset successfully.");
+        } catch (InvalidTokenException e) { //
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (DataNotFoundException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("An error occurred while resetting the password.");
         }
     }
 }
