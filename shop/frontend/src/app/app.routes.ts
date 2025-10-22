@@ -6,8 +6,8 @@ import { ForgotPasswordComponent } from "./components/forgot-password/forgot-pas
 import { ProductPageComponent } from "./components/product/product-page.component";
 import { ownerGuard } from "./guards/owner.guard";
 import { CartComponent } from './components/cart/cart.component';
-import {ProductsListComponent} from "./components/owner/products/products-list/products-list.component";
-import {loginGuard} from "./guards/login.guard"; // <-- thêm
+import { ProductsListComponent } from "./components/owner/products/products-list/products-list.component";
+import { loginGuard } from "./guards/login.guard";
 
 export const routes: Routes = [
     { path: '', redirectTo: 'home', pathMatch: 'full' },
@@ -28,12 +28,16 @@ export const routes: Routes = [
     { path: 'forgot-password', component: ForgotPasswordComponent },
     { path: 'products', component: ProductPageComponent },
 
-    // ----- thêm user detail (standalone) -----
-    //Cho admin
+    // admin/user detail
     { path: 'user/:id', loadComponent: () => import('./components/detail-user/detail.user').then(m => m.DetailUserComponent) },
-    //Cho user
     { path: 'profile', loadComponent: () => import('./components/detail-user/detail.user').then(m => m.DetailUserComponent) },
-    { path: 'cart', component: CartComponent }, // <-- giỏ hàng
+
+    { path: 'cart', component: CartComponent },
+
+    // ===== PAYMENT (mới) =====
+    { path: 'payment', loadComponent: () => import('./components/payment/payment-component')
+            .then(m => m.PaymentComponent), title: 'Thanh toán | TechNoX' },
+    { path: 'checkout', redirectTo: 'payment', pathMatch: 'full' },
 
     {
         path: 'product/:id',
@@ -53,9 +57,10 @@ export const routes: Routes = [
             { path: '', redirectTo: 'about', pathMatch: 'full' }
         ]
     },
+
     {
         path: 'owner',
-        // canActivate: [ownerGuard], //code xong bat len cho de
+        // canActivate: [ownerGuard],
         loadComponent: () =>
             import('./components/owner/layout/owner-layout.component')
                 .then(m => m.OwnerLayoutComponent),
@@ -68,8 +73,6 @@ export const routes: Routes = [
                         .then(m => m.DashboardComponent),
                 title: 'Tổng quan | Owner'
             },
-
-            // ===== Products =====
             {
                 path: 'products',
                 loadComponent: () =>
@@ -95,13 +98,15 @@ export const routes: Routes = [
                 path: 'users',
                 loadComponent: () =>
                     import('./components/owner/users/users-list/users-list.component')
-                .then(m => m.UsersListComponent),
+                        .then(m => m.UsersListComponent),
                 title: 'Người dùng của TechNoX'
             },
-            {path: 'users/:id', loadComponent: () =>
+            {
+                path: 'users/:id',
+                loadComponent: () =>
                     import('./components/owner/users/users-detail/users-detail.component')
-                    .then(m => m.UserDetailComponent),}
-
+                        .then(m => m.UserDetailComponent),
+            }
         ]
     },
 
