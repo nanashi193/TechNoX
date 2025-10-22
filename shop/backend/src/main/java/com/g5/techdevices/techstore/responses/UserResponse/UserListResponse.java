@@ -28,16 +28,14 @@ public class UserListResponse {
 
     @JsonProperty("stats")
     private UserStatsResponse stats;
-    public UserListResponse(User user) {
+    public UserListResponse(User user, int ordersCount, double totalSpent) {
         this.id = user.getId();
         this.fullName = user.getFullName();
         this.email = user.getEmail();
         this.phoneNumber = user.getPhoneNumber();
         this.isActive = user.getIsActive();
-        // ---- LOGIC TẠM THỜI ----
-        int ordersCount = 0; // Tạm thời = 0
-        double totalSpent = 0.0; // Tạm thời = 0
 
+        // Gán stats thật nhận từ Controller
         this.stats = new UserStatsResponse(ordersCount, totalSpent);
     }
 }

@@ -17,7 +17,7 @@ public interface IUserService {
 
     void restoreUser(Long id) throws DataNotFoundException;
     String login(String email, String password) throws Exception;
-
+    User toggleActive(Long id, boolean isActive) throws DataNotFoundException;
     Page<User> getAllUsers(Pageable pageable) throws DataNotFoundException;
 
     User getUserById(Long id) throws DataNotFoundException;

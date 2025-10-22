@@ -17,7 +17,7 @@ export interface User {
     IsActive: boolean;
     address?: Address;
     CreateAt: string;
-    stats?: { orders: number; totalSpent: number };
+    stats: { orders: number; totalSpent: number };
 }
 export interface UserStats {
     orders: number;

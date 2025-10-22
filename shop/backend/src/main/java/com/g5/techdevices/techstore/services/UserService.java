@@ -140,6 +140,23 @@ public class UserService implements IUserService{
 
         return userRepository.save(existingUser);
     }
+    //Nut gat xoa mem user
+    @Override
+    public User toggleActive(Long id, boolean isActive) throws DataNotFoundException {
+        User currentUser = getCurrentAuthenticatedUser();
+        boolean isAdmin = currentUser.getRole().getName().equalsIgnoreCase(Role.ADMIN);
+        boolean isOwner = currentUser.getRole().getName().equalsIgnoreCase(Role.OWNER);
+
+        if (!(isAdmin || isOwner)) {
+            throw new AccessDeniedException("You don't have permission to update this user.");
+        }
+        User existingUser = userRepository.findById(id)
+                .orElseThrow(() -> new DataNotFoundException("Cannot find user with id: " + id));
+
+        existingUser.setIsActive(isActive);
+        return userRepository.save(existingUser);
+    }
+
     @Override
     public void deleteUser(Long id){
         User user = userRepository.findById(id).orElse(null);

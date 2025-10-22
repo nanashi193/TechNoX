@@ -1,7 +1,6 @@
 package com.g5.techdevices.techstore.controllers;
 
-import com.g5.techdevices.techstore.dtos.UserDetailDTO;
-import com.g5.techdevices.techstore.dtos.UserUpdateDTO;
+import com.g5.techdevices.techstore.dtos.*;
 import com.g5.techdevices.techstore.entity.tokens.EmailType;
 import com.g5.techdevices.techstore.exceptions.DataNotFoundException;
 import com.g5.techdevices.techstore.repositories.BillRepository;
@@ -12,8 +11,6 @@ import com.g5.techdevices.techstore.responses.UserResponse.UserPageResponse;
 import com.g5.techdevices.techstore.services.EmailService;
 import com.g5.techdevices.techstore.services.ITokenService;
 import com.g5.techdevices.techstore.services.IUserService;
-import com.g5.techdevices.techstore.dtos.UserDTO;
-import com.g5.techdevices.techstore.dtos.UserLoginDTO;
 import com.g5.techdevices.techstore.entity.users.User;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -76,19 +73,20 @@ public class UserController {
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int limit
     ) throws DataNotFoundException {
-
         Pageable pageable = PageRequest.of(page - 1, limit);
-        Page<User> userPage = userService.getAllUsers(pageable); // (Hàm này phải nhận Pageable)
-
+        Page<User> userPage = userService.getAllUsers(pageable);
         List<UserListResponse> userResponses = userPage.getContent().stream()
-                .map(UserListResponse::new) // Gọi constructor UserListResponse(user)
+                .map(user -> {
+                    int orders = billRepository.countOrdersByUserId(user.getId());
+                    Double total = billRepository.sumTotalSpentByUserId(user.getId());
+                    return new UserListResponse(user, orders, (total != null) ? total : 0.0);
+                })
                 .collect(Collectors.toList());
-
         UserPageResponse<UserListResponse> response = new UserPageResponse<>();
         response.setItems(userResponses);
         response.setTotal(userPage.getTotalElements());
-
         return ResponseEntity.ok(response);
+
     }
     @GetMapping("/me")
     public ResponseEntity<UserDetailDTO> getCurrentUser() {
@@ -141,9 +139,27 @@ public class UserController {
 
         return ResponseEntity.ok(userDetailResponse);
     }
+    //Nut gat xoa mem
+    @PatchMapping("/{id}/active")
+    public ResponseEntity<UserListResponse> toggleUserActive(
+            @PathVariable("id") Long id,
+            @RequestBody ActiveToggleDTO dto
+    ) throws DataNotFoundException {
+        User updatedUser = userService.toggleActive(id, dto.isActive());
+
+        int orders = billRepository.countOrdersByUserId(updatedUser.getId());
+        Double total = billRepository.sumTotalSpentByUserId(updatedUser.getId());
+        UserListResponse responseDTO = new UserListResponse(
+                updatedUser,
+                orders,
+                (total != null) ? total : 0.0
+        );
+
+        return ResponseEntity.ok(responseDTO);
+    }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteUser(@Valid @PathVariable Long id) {
+    public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
         userService.deleteUser(id);
         return ResponseEntity.noContent().build();
     }
