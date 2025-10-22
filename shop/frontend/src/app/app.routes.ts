@@ -7,6 +7,7 @@ import { ProductPageComponent } from "./components/product/product-page.componen
 import { ownerGuard } from "./guards/owner.guard";
 import { CartComponent } from './components/cart/cart.component';
 import {ProductsListComponent} from "./components/owner/products/products-list/products-list.component";
+import {ProductsDetailComponent} from "./components/owner/products/products-detail/products-detail.component";
 
 export const routes: Routes = [
     { path: '', redirectTo: 'home', pathMatch: 'full' },
@@ -77,15 +78,15 @@ export const routes: Routes = [
             {
                 path: 'products/new',
                 loadComponent: () =>
-                    import('./components/owner/products/products-form/products-form.component')
-                        .then(m => m.ProductsFormComponent),
+                    import('./components/owner/products/products-detail/products-detail.component')
+                        .then(m => m.ProductsDetailComponent),
                 title: 'Thêm sản phẩm | Owner'
             },
             {
-                path: 'products/:id/edit',
+                path: 'products/:id',
                 loadComponent: () =>
-                    import('./components/owner/products/products-form/products-form.component')
-                        .then(m => m.ProductsFormComponent),
+                    import('./components/owner/products/products-detail/products-detail.component')
+                        .then(m => m.ProductsDetailComponent),
                 title: 'Sửa sản phẩm | Owner'
             },
             {

@@ -19,7 +19,7 @@ export class ProductService {
             Object.entries(opts).forEach(([k, v]) => {
                 if (v !== undefined && v !== null) params = params.set(k, String(v));
             });
-            return this.http.get<Page<Product>>(this.base, { params });
+            return this.http.get<Page<Product>>(this.base, {params});
         }
 
         // MOCK search + paginate
@@ -28,7 +28,7 @@ export class ProductService {
         const sort = opts.sort ?? ''; // ví dụ: 'price,asc' | 'price,desc'
 
         let filtered = q
-            ? MOCK_PRODUCTS.filter(p => (p.name + p.sku + p.type).toLowerCase().includes(q))
+            ? MOCK_PRODUCTS.filter(p => (p.name + p.sku + p.type + (p.description ?? '')).toLowerCase().includes(q))
             : [...MOCK_PRODUCTS];
 
         if (sort) {
@@ -41,7 +41,7 @@ export class ProductService {
 
         const start = (page - 1) * size;
         const items = filtered.slice(start, start + size);
-        return of({ items, total: filtered.length, page, size }).pipe(delay(200));
+        return of({items, total: filtered.length, page, size}).pipe(delay(200));
     }
 
     get(id: number): Observable<Product> {
@@ -59,6 +59,7 @@ export class ProductService {
             id,
             name: dto.name ?? '',
             type: dto.type ?? '',
+            description: dto.description ?? '',
             sku: dto.sku ?? String(id),
             price: dto.price ?? 0,
             variants: dto.variants ?? 0,
@@ -76,7 +77,7 @@ export class ProductService {
         if (!this.useMock) return this.http.put<Product>(`${this.base}/${id}`, dto);
 
         const idx = MOCK_PRODUCTS.findIndex(p => p.id === id);
-        const updated = { ...MOCK_PRODUCTS[idx], ...dto, updatedAt: new Date().toISOString() } as Product;
+        const updated = {...MOCK_PRODUCTS[idx], ...dto, updatedAt: new Date().toISOString()} as Product;
         MOCK_PRODUCTS[idx] = updated;
         return of(structuredClone(updated)).pipe(delay(150));
     }
@@ -91,32 +92,20 @@ export class ProductService {
 
     setStock(id: number, inStock: boolean): Observable<Product> {
         if (!this.useMock) {
-            return this.http.patch<Product>(`${this.base}/${id}/stock`, { inStock });
+            return this.http.patch<Product>(`${this.base}/${id}/stock`, {inStock});
         }
         const idx = MOCK_PRODUCTS.findIndex(p => p.id === id);
-        MOCK_PRODUCTS[idx] = { ...MOCK_PRODUCTS[idx], inStock, updatedAt: new Date().toISOString() };
+        MOCK_PRODUCTS[idx] = {...MOCK_PRODUCTS[idx], inStock, updatedAt: new Date().toISOString()};
         return of(structuredClone(MOCK_PRODUCTS[idx])).pipe(delay(120));
     }
 
     bulkDelete(ids: number[]): Observable<void> {
-        if (!this.useMock) return this.http.post<void>(`${this.base}/bulk-delete`, { ids });
+        if (!this.useMock) return this.http.post<void>(`${this.base}/bulk-delete`, {ids});
 
         for (const id of ids) {
             const i = MOCK_PRODUCTS.findIndex(p => p.id === id);
             if (i > -1) MOCK_PRODUCTS.splice(i, 1);
         }
         return of(void 0).pipe(delay(150));
-    }
-
-    bulkPublish(ids: number[]): Observable<void> {
-        if (!this.useMock) return this.http.post<void>(`${this.base}/bulk-publish`, { ids });
-
-        return of(void 0).pipe(delay(120));
-    }
-
-    bulkUnpublish(ids: number[]): Observable<void> {
-        if (!this.useMock) return this.http.post<void>(`${this.base}/bulk-unpublish`, { ids });
-
-        return of(void 0).pipe(delay(120));
     }
 }

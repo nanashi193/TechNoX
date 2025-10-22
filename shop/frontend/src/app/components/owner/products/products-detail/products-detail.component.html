@@ -1,0 +1,177 @@
+<form [formGroup]="f" (ngSubmit)="save()" class="page">
+    <!-- HEADER -->
+    <div class="page-header">
+        <a class="link" routerLink="/owner/products">← Quay lại danh sách</a>
+
+        <div class="actions">
+            <ng-container *ngIf="!editing; else editingBtns">
+                <button type="button" class="btn" (click)="edit()">Edit</button>
+            </ng-container>
+            <ng-template #editingBtns>
+                <button type="button" class="btn ghost" (click)="cancel()">Cancel</button>
+                <button type="submit" class="btn primary" [disabled]="f.invalid || !f.dirty">Save</button>
+            </ng-template>
+        </div>
+    </div>
+
+    <div class="form-grid">
+        <!-- LEFT: Product information -->
+        <section class="card info-card">
+            <h3 class="card-title">Thông tin sản phẩm</h3>
+
+            <label class="field">
+                <span>Tên <em class="req">*</em></span>
+                <input type="text" formControlName="name" placeholder="iPhone" [readOnly]="!editing">
+            </label>
+
+            <div class="row-2">
+                <label class="field">
+                    <span>Mã sản phẩm</span>
+                    <input type="text" formControlName="sku" placeholder="eg. 348121032" [readOnly]="!editing">
+                </label>
+
+                <label class="field">
+                    <span>Số lượng</span>
+                    <input type="number" formControlName="stockQty" min="0" step="1" [readOnly]="!editing">
+                </label>
+            </div>
+
+            <div class="field">
+                <div class="label-row">
+                    <span>Mô tả sản phẩm</span><span class="muted">(Tùy chọn)</span>
+                </div>
+
+                <!-- mini editor toolbar (UI) -->
+                <div class="editor-toolbar" [class.disabled]="!editing">
+                    <button type="button" [disabled]="!editing"><b>B</b></button>
+                    <button type="button" [disabled]="!editing"><i>I</i></button>
+                    <button type="button" [disabled]="!editing"><u>U</u></button>
+                    <button type="button" [disabled]="!editing">S</button>
+                    <button type="button" [disabled]="!editing">🔗</button>
+                    <button type="button" [disabled]="!editing">🖼️</button>
+                    <button type="button" [disabled]="!editing">“”</button>
+                    <button type="button" [disabled]="!editing">&lt;/&gt;</button>
+                    <button type="button" [disabled]="!editing">•</button>
+                </div>
+
+                <textarea rows="8" placeholder="Type your description..."
+                          formControlName="description" [readOnly]="!editing"></textarea>
+            </div>
+        </section>
+
+        <!-- RIGHT: Pricing + Organization + Variants -->
+        <div class="side">
+            <section class="card">
+                <h3 class="card-title">Giá (VND)</h3>
+
+                <label class="field">
+                    <span>Giá</span>
+                    <ng-container *ngIf="!editing; else priceEdit">
+                        {{ f.value.price | currency:'VND':'symbol-narrow':'1.0-0' }}
+                    </ng-container>
+                    <ng-template #priceEdit>
+                        <input type="number" min="0" step="1" formControlName="price">
+                    </ng-template>
+                </label>
+
+                <div class="field inline">
+                    <span>Còn hàng</span>
+                    <label class="switch">
+                        <input type="checkbox" formControlName="inStock" [disabled]="!editing">
+                        <span class="track"></span>
+                    </label>
+                </div>
+            </section>
+
+            <section class="card">
+                <h3 class="card-title">Phân loại</h3>
+                <label class="field">
+                    <span>Loại</span>
+                    <input type="text" formControlName="type" placeholder="Electronics / Shoes / ..." [readOnly]="!editing">
+                </label>
+            </section>
+
+            <!-- VARIANTS -->
+            <section class="card variants-card">
+                <h3 class="card-title">Biến thể</h3>
+                <div class="muted small" style="margin-bottom:8px">OPTIONS</div>
+
+                <div class="variant-row" *ngFor="let opt of variants; index as i">
+                    <select class="v-name" [(ngModel)]="opt.name" [disabled]="variantsDisabled">
+                        <option *ngFor="let n of variantNames" [value]="n">{{ n }}</option>
+                    </select>
+
+                    <!-- chip input -->
+                    <div class="chip-input" [class.readonly]="variantsDisabled">
+            <span class="chip" *ngFor="let v of opt.values">
+              {{ v }}
+                <button type="button" (click)="removeTag(i, v)" *ngIf="!variantsDisabled">×</button>
+            </span>
+                        <input class="chip-editor"
+                               [placeholder]="i===0 ? 'Enter tags' : 'Add value'"
+                               [(ngModel)]="opt.input"
+                               (keydown)="onTagKeydown($event, i)"
+                               [disabled]="variantsDisabled">
+                    </div>
+
+                    <button type="button" class="icon-btn" aria-label="Remove option"
+                            (click)="removeOption(i)" *ngIf="!variantsDisabled">🗑️</button>
+                </div>
+
+                <button type="button" class="link"
+                        (click)="addOption()"
+                        [disabled]="variantsDisabled || variants.length >= 3">
+                    + Thêm biến thể
+                </button>
+            </section>
+        </div>
+
+        <!-- MEDIA -->
+        <section class="card media-card">
+            <div class="card-head">
+                <h3 class="card-title">Hình ảnh sản phẩm</h3>
+                <div class="menu">
+                    <button type="button" class="link" (click)="addMediaFromUrl()" *ngIf="editing">Thêm bằng URL ▾</button>
+                </div>
+            </div>
+
+            <div class="dropzone" [class.dragover]="dragOver" [class.readonly]="!editing"
+                 (dragover)="editing && onDragOver($event)"
+                 (dragleave)="editing && onDragLeave($event)"
+                 (drop)="editing && onDrop($event)">
+
+                <ng-container *ngIf="media.length === 0; else gallery">
+                    <div class="dz-empty" *ngIf="editing">
+                        <div class="box-illus"></div>
+                        <div class="dz-title">Kéo và thả file ở đây</div>
+                        <div class="muted">hoặc</div>
+                        <button type="button" class="btn" (click)="fileInput.click()">Tải file lên</button>
+                        <input #fileInput type="file" accept="image/*" multiple hidden (change)="onFileSelect($event)">
+                    </div>
+                    <div class="muted" *ngIf="!editing">Chưa có hình ảnh.</div>
+                </ng-container>
+
+                <ng-template #gallery>
+                    <div class="media-grid">
+                        <div class="media-item" *ngFor="let m of media; index as i">
+                            <img [src]="m.previewUrl" alt="">
+                            <button type="button" class="remove" (click)="removeMedia(i)" *ngIf="editing">✕</button>
+                        </div>
+                    </div>
+                    <div class="media-actions" *ngIf="editing">
+                        <button type="button" class="btn" (click)="fileInput.click()">Add more</button>
+                        <input #fileInput type="file" accept="image/*" multiple hidden (change)="onFileSelect($event)">
+                    </div>
+                </ng-template>
+            </div>
+        </section>
+    </div>
+
+    <!-- Sticky action bar -->
+    <div class="sticky-actions" *ngIf="showStickyBar">
+        <div class="sa-right">
+            <button type="button" class="btn ghost light" (click)="cancel()">Hủy</button>
+            <button type="submit" class="btn primary" [disabled]="f.invalid">Lưu</button>
+        </div>
+    </div>
+</form>

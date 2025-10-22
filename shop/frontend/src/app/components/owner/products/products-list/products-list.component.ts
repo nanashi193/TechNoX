@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import {Product} from "../../../../models/products.model";
 import {ProductService} from "../../../../services/products.service";
-import {Router} from "@angular/router";
+import {Router, RouterLink} from "@angular/router";
 
 type ProductRow = {
     id:number; name:string; image:string; type:string;
@@ -14,7 +14,7 @@ type SortField = 'name'|'type'|'sku'|'price'|'variants'|'stockQty';
 @Component({
     selector: 'app-products-list',
     standalone: true,
-    imports: [CommonModule, FormsModule],
+    imports: [CommonModule, FormsModule, RouterLink],
     templateUrl: './products-list.component.html',
     styleUrls: ['./products-list.component.css']
 })
@@ -60,7 +60,6 @@ export class ProductsListComponent implements OnInit {
         // 0/1-based page
         const apiPage = this.apiPageZeroBased ? this.page - 1 : this.page;
 
-        // nếu extra.active không truyền vào, map từ radio
         const active =
             extra?.active !== undefined ? extra.active :
                 this.flt.activeFilter === 'active'   ? true  :
@@ -72,7 +71,6 @@ export class ProductsListComponent implements OnInit {
             size: this.size,
         };
 
-        // chỉ gửi khi có filter thật (true/false). null = all => không gửi
         if (active !== null) params.active = active;
 
         if (this.sort) params.sort = `${this.sort.field},${this.sort.dir}`;
@@ -132,8 +130,6 @@ export class ProductsListComponent implements OnInit {
         const ids = [...this.selected];
         if (ids.length === 0) return;
         if (action==='delete') this.svc.bulkDelete(ids).subscribe(()=>this.load());
-        if (action==='publish') this.svc.bulkPublish(ids).subscribe(()=>this.load());
-        if (action==='unpublish') this.svc.bulkUnpublish(ids).subscribe(()=>this.load());
         // 'archive' tuỳ BE: có thể reuse bulkUnpublish hoặc tạo endpoint riêng
     }
 

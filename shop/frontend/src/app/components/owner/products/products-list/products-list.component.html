@@ -1,13 +1,13 @@
 <h1>Danh sách sản phẩm</h1>
 <div class="toolbar">
-    <input class="search" placeholder="Search products" [(ngModel)]="q" (input)="onSearch()">
+    <input class="search" placeholder="Tìm kiếm sản phẩm" [(ngModel)]="q" (input)="onSearch()">
 
     <div class="right">
-        <button class="btn" (click)="create()">+ Add product</button>
+        <button class="btn" (click)="create()">+ Thêm sản phẩm</button>
 
         <div class="bulk" *ngIf="selectedCount()">
-            <span class="muted">{{ selectedCount() }} Selected</span>
-            <button class="btn danger" (click)="bulk('delete')">Delete</button>
+            <span class="muted">{{ selectedCount() }} đã chọn</span>
+            <button class="btn danger" (click)="bulk('delete')">Xóa</button>
         </div>
         <button class="btn ghost" (click)="toggleFilters($event)">Filters</button>
     </div>
@@ -15,7 +15,7 @@
 
     <aside class="filters-sheet" [class.open]="showFilters" (click)="$event.stopPropagation()">
         <div class="sheet-header">
-            <h3>Filters</h3>
+            <h3>Bộ lọc</h3>
             <button class="icon-btn" aria-label="Close" (click)="closeFilters()">×</button>
         </div>
 
@@ -47,48 +47,48 @@
         </label>
 
         <div class="cell col-product th sortable"
-             (click)="sortBy('name')" [attr.aria-sort]="ariaSort('name')">Product
+             (click)="sortBy('name')" [attr.aria-sort]="ariaSort('name')">Tên sản phẩm
             <span class="sort-caret" [class.asc]="isAsc('name')" [class.desc]="isDesc('name')"
             ></span>
         </div>
 
         <div class="cell col-product th sortable"
-             (click)="sortBy('type')" [attr.aria-sort]="ariaSort('type')">Type
+             (click)="sortBy('type')" [attr.aria-sort]="ariaSort('type')">
+            Loại
             <span class="sort-caret" [class.asc]="isAsc('type')" [class.desc]="isDesc('type')"
             ></span>
         </div>
 
-        <div class="cell col-stocks">Stocks</div>
+        <div class="cell col-stocks">Tồn kho</div>
 
 
         <div class="cell col-sku th sortable"
              (click)="sortBy('sku')" [attr.aria-sort]="ariaSort('sku')">
-            Sku
+            Mã sản phẩm
             <span class="sort-caret" [class.asc]="isAsc('sku')" [class.desc]="isDesc('sku')"
             ></span>
         </div>
 
         <div class="cell col-price th sortable"
              (click)="sortBy('price')" [attr.aria-sort]="ariaSort('price')">
-            Price
+            Giá
             <span class="sort-caret" [class.asc]="isAsc('price')" [class.desc]="isDesc('price')"
             ></span>
         </div>
 
         <div class="cell col-variants th sortable"
              (click)="sortBy('variants')" [attr.aria-sort]="ariaSort('variants')">
-            Variants
+            Biến thể
             <span class="sort-caret" [class.asc]="isAsc('variants')" [class.desc]="isDesc('variants')"
             ></span>
         </div>
 
         <div class="cell col-qty th sortable"
              (click)="sortBy('stockQty')" [attr.aria-sort]="ariaSort('stockQty')">
-            Quantity
+            Số lượng
             <span class="sort-caret" [class.asc]="isAsc('stockQty')" [class.desc]="isDesc('stockQty')"
             ></span>
         </div>
-        <div class="cell col-actions">Actions</div>
     </div>
 
     <div class="row" *ngFor="let p of filtered; trackBy: trackById">
@@ -97,10 +97,12 @@
         </label>
 
         <div class="cell col-product">
+            <a class="name-link" [routerLink]="['/owner/products', p.id]">
             <img class="thumb" [src]="p.image" alt="">
             <div class="info">
                 <div class="name">{{ p.name }}</div>
             </div>
+            </a>
         </div>
 
         <div class="cell col-type"><span class="muted">{{ p.type }}</span></div>
@@ -116,12 +118,6 @@
         <div class="cell col-price">{{ p.price | number:'1.0-0' }}₫</div>
         <div class="cell col-variants">{{ p.variants }}</div>
         <div class="cell col-qty">{{ p.stockQty ?? 0 }}</div>
-
-        <!-- chỉ còn 8th cell: Actions -->
-        <div class="cell col-actions">
-            <button class="btn ghost sm" (click)="edit(p.id)">Edit</button>
-            <button class="btn ghost icon" aria-label="More">⋯</button>
-        </div>
     </div>
 
 </div>
