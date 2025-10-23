@@ -41,19 +41,6 @@
                     <span>Mô tả sản phẩm</span><span class="muted">(Tùy chọn)</span>
                 </div>
 
-                <!-- mini editor toolbar (UI) -->
-                <div class="editor-toolbar" [class.disabled]="!editing">
-                    <button type="button" [disabled]="!editing"><b>B</b></button>
-                    <button type="button" [disabled]="!editing"><i>I</i></button>
-                    <button type="button" [disabled]="!editing"><u>U</u></button>
-                    <button type="button" [disabled]="!editing">S</button>
-                    <button type="button" [disabled]="!editing">🔗</button>
-                    <button type="button" [disabled]="!editing">🖼️</button>
-                    <button type="button" [disabled]="!editing">“”</button>
-                    <button type="button" [disabled]="!editing">&lt;/&gt;</button>
-                    <button type="button" [disabled]="!editing">•</button>
-                </div>
-
                 <textarea rows="8" placeholder="Type your description..."
                           formControlName="description" [readOnly]="!editing"></textarea>
             </div>

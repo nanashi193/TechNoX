@@ -47,12 +47,13 @@
         </label>
 
         <div class="cell col-product th sortable"
-             (click)="sortBy('name')" [attr.aria-sort]="ariaSort('name')">Tên sản phẩm
+             (click)="sortBy('name')" [attr.aria-sort]="ariaSort('name')">
+            Tên sản phẩm
             <span class="sort-caret" [class.asc]="isAsc('name')" [class.desc]="isDesc('name')"
             ></span>
         </div>
 
-        <div class="cell col-product th sortable"
+        <div class="cell col-type th sortable"
              (click)="sortBy('type')" [attr.aria-sort]="ariaSort('type')">
             Loại
             <span class="sort-caret" [class.asc]="isAsc('type')" [class.desc]="isDesc('type')"
