@@ -8,6 +8,7 @@ import com.g5.techdevices.techstore.responses.ProductResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 public interface IProductService {
@@ -17,6 +18,15 @@ public interface IProductService {
 
 
     Page<ProductResponse> getAllProducts(PageRequest pageRequest);
+
+    Page<ProductResponse> getAllProducts(
+            String keyword,
+            String sku,
+            Long categoryId,
+            BigDecimal minPrice,
+            BigDecimal maxPrice,
+            PageRequest pageRequest
+    );
 
     Product updateProduct(Long id, ProductDTO  productDTO)throws Exception;
 

@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
@@ -23,18 +24,62 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
 
     // NOTE: sửa tên cột/field theo entity Product (name, description, category.id)
     //       dùng LOWER + CONCAT cho tìm kiếm an toàn
-    @Query("""
-           SELECT p FROM Product p
-           WHERE (:categoryId IS NULL OR :categoryId = 0 OR p.category.id = :categoryId)
-             AND (
-                  :keyword IS NULL OR :keyword = '' OR
-                  LOWER(p.name) LIKE LOWER(CONCAT('%', :keyword, '%')) OR
-                  LOWER(p.description) LIKE LOWER(CONCAT('%', :keyword, '%'))
-             )
-           """)
-    Page<Product> searchProducts(@Param("categoryId") Long categoryId,
-                                 @Param("keyword") String keyword,
-                                 Pageable pageable);
+    @Query(value = """
+        SELECT DISTINCT p
+        FROM Product p
+        LEFT JOIN p.variants v
+        WHERE (:categoryId = 0 OR p.category.id = :categoryId)
+          AND (
+                :keyword = '' 
+             OR LOWER(p.name)        LIKE LOWER(CONCAT('%', :keyword, '%'))
+             OR LOWER(p.description) LIKE LOWER(CONCAT('%', :keyword, '%'))
+          )
+          AND (
+                :sku = '' 
+             OR LOWER(v.sku) LIKE LOWER(CONCAT('%', :sku, '%'))
+          )
+          AND (
+                :minPrice IS NULL 
+             OR COALESCE(v.price, p.price) >= :minPrice
+          )
+          AND (
+                :maxPrice IS NULL 
+             OR COALESCE(v.price, p.price) <= :maxPrice
+          )
+        """,
+            countQuery = """
+        SELECT COUNT(DISTINCT p)
+        FROM Product p
+        LEFT JOIN p.variants v
+        WHERE (:categoryId = 0 OR p.category.id = :categoryId)
+          AND (
+                :keyword = '' 
+             OR LOWER(p.name)        LIKE LOWER(CONCAT('%', :keyword, '%'))
+             OR LOWER(p.description) LIKE LOWER(CONCAT('%', :keyword, '%'))
+          )
+          AND (
+                :sku = '' 
+             OR LOWER(v.sku) LIKE LOWER(CONCAT('%', :sku, '%'))
+          )
+          AND (
+                :minPrice IS NULL 
+             OR COALESCE(v.price, p.price) >= :minPrice
+          )
+          AND (
+                :maxPrice IS NULL 
+             OR COALESCE(v.price, p.price) <= :maxPrice
+          )
+        """
+    )
+    Page<Product> search(
+            @Param("keyword") String keyword,
+            @Param("sku") String sku,
+            @Param("categoryId") Long categoryId,
+            @Param("minPrice") BigDecimal minPrice,
+            @Param("maxPrice") BigDecimal maxPrice,
+            Pageable pageable
+    );
+
 
     // NOTE: đổi tên quan hệ từ productImages -> images (đúng với entity của bạn)
     // NOTE: đổi tên method thành findDetailById để khớp service ProductService.getProductById()
