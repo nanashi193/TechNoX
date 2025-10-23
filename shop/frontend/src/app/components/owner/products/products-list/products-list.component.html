@@ -19,19 +19,29 @@
             <button class="icon-btn" aria-label="Close" (click)="closeFilters()">×</button>
         </div>
 
-        <div class="sheet-body">
-            <div class="fp-group">
-                <div class="fp-label">Active</div>
-                <label class="fp-row"><input type="radio" name="act" [(ngModel)]="flt.activeFilter" value="all">
-                    All</label>
-                <label class="fp-row"><input type="radio" name="act" [(ngModel)]="flt.activeFilter" value="active">
-                    Active</label>
-                <label class="fp-row"><input type="radio" name="act" [(ngModel)]="flt.activeFilter" value="inactive">
-                    Inactive</label>
-            </div>
-
-            <!-- chỗ này sau bạn thêm các nhóm filter khác -->
+        <!-- TỒN KHO -->
+        <div class="fp-group">
+            <div class="fp-label">Tồn kho</div>
+            <label class="fp-row"><input type="radio" name="stk" [(ngModel)]="flt.stock" value="all"> All</label>
+            <label class="fp-row"><input type="radio" name="stk" [(ngModel)]="flt.stock" value="in"> In stock</label>
+            <label class="fp-row"><input type="radio" name="stk" [(ngModel)]="flt.stock" value="out"> Out of stock</label>
         </div>
+
+        <!-- SKU -->
+        <div class="fp-group">
+            <div class="fp-label">Mã SKU</div>
+            <input class="toolbar-input" [(ngModel)]="flt.sku" placeholder="VD: ABC-001">
+        </div>
+
+        <!-- TYPE -->
+        <div class="fp-group">
+            <div class="fp-label">Loại</div>
+            <select [(ngModel)]="flt.type" class="toolbar-select">
+                <option [ngValue]="null">All</option>
+                <option *ngFor="let t of types" [ngValue]="t">{{ t }}</option>
+            </select>
+        </div>
+
 
         <div class="sheet-footer">
             <button class="btn ghost" (click)="clearFilters()">Clear all filters</button>

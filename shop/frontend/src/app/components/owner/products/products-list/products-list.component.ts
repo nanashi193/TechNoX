@@ -54,40 +54,44 @@ export class ProductsListComponent implements OnInit {
 
     ngOnInit(){ this.load(); }
 
-    load(extra?: { active?: boolean | null }){
+    load(){
         this.loading = true;
 
-        // 0/1-based page
-        const apiPage = this.apiPageZeroBased ? this.page - 1 : this.page;
-
-        const active =
-            extra?.active !== undefined ? extra.active :
-                this.flt.activeFilter === 'active'   ? true  :
-                    this.flt.activeFilter === 'inactive' ? false : null;
-
         const params: any = {
-            q: this.q || undefined,
-            page: apiPage,              // <-- dùng apiPage
-            size: this.size,
+            q: this.q || undefined,   // nếu bạn vẫn muốn giữ ô search
+            page: this.page,
+            size: this.size
         };
 
-        if (active !== null) params.active = active;
+        // tồn kho
+        if (this.flt.stock !== 'all') params.inStock = (this.flt.stock === 'in');
+        // SKU
+        const sku = this.flt.sku.trim();
+        if (sku) params.sku = sku;
+        // type (nếu BE dùng categoryId, đổi key & kiểu)
+        if (this.flt.type) params.type = this.flt.type;
 
         if (this.sort) params.sort = `${this.sort.field},${this.sort.dir}`;
 
-        this.svc.search(params).subscribe((res: any) => {
-            const items: Product[] = (res.items ?? res.content ?? res) as Product[];
-            this.products = items;
-            this.filtered = [...items];
-            this.total = res.total ?? res.totalCount ?? res.totalElements ?? items.length;
+        this.svc.search(params).subscribe({
+            next: (res: any) => {
+                const items: Product[] = (res.items ?? res.content ?? res) as Product[];
+                this.products = items;
+                this.filtered = [...items];
 
-            // giữ lại phần kiểm tra trang
-            const tp = this.totalPages;
-            if (this.page > tp) { this.page = tp; if (tp > 0) this.load(); else this.loading = false; return; }
+                // gom các type có trong trang hiện tại để show select (tuỳ chọn)
+                const moreTypes = Array.from(new Set(items.map(p => p.type).filter(Boolean) as string[]));
+                this.types = Array.from(new Set([...(this.types ?? []), ...moreTypes]));
 
-            this.selected.clear();
-            this.loading = false;
-        }, _ => this.loading = false);
+                this.total = res.total ?? res.totalCount ?? res.totalElements ?? items.length;
+                const tp = this.totalPages;
+                if (this.page > tp) { this.page = tp; if (tp > 0) this.load(); else this.loading = false; return; }
+
+                this.selected.clear();
+                this.loading = false;
+            },
+            error: () => this.loading = false
+        });
     }
 
     sortBy(field: SortField){
@@ -145,8 +149,12 @@ export class ProductsListComponent implements OnInit {
     showFilters = false;
     private _bodyOverflow?: string;
     flt = {
-        activeFilter: 'all' as 'all' | 'active' | 'inactive'
+        stock: 'all' as 'all' | 'in' | 'out', // tồn kho
+        sku: '',                              // mã SKU
+        type: null as string | null           // loại (type). Nếu BE dùng categoryId: đổi sang number|null
     };
+    types: string[] = [];
+
 
     toggleFilters(e: Event) {
         e.stopPropagation();
@@ -154,21 +162,18 @@ export class ProductsListComponent implements OnInit {
         document.body.style.overflow = 'hidden';     // khoá scroll nền
         this.showFilters = true;
     }
-
     applyFilters(){
-        // map radio thành boolean | null
-        const active =
-            this.flt.activeFilter === 'active'   ? true  :
-                this.flt.activeFilter === 'inactive' ? false : null;
-
-        this.page = 1;           // reset về trang đầu
-        this.load({ active });   // gọi API với filter
-        this.closeFilters();     // đóng drawer
+        this.page = 1;
+        this.load();
+        this.closeFilters();
     }
 
-    clearFilters() {
-        this.flt.activeFilter = 'all';
+    clearFilters(){
+        this.flt = { stock: 'all', sku: '', type: null };
+        this.page = 1;
+        this.load();
     }
+
     closeFilters(){
         this.showFilters = false;
         document.body.style.overflow = this._bodyOverflow || '';

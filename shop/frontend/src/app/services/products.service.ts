@@ -6,6 +6,13 @@ import { Page, Product } from '../models/products.model';
 import {MOCK_PRODUCTS} from "../components/owner/products/products.mock";
 import { of } from 'rxjs';
 import { delay } from 'rxjs/operators';
+import {map} from 'rxjs/operators';
+
+export interface ProductListResponse {
+    products: Product[];
+    totalPages: number; // từ BE
+}
+
 @Injectable({ providedIn: 'root' })
 export class ProductService {
     private http = inject(HttpClient);
@@ -15,11 +22,25 @@ export class ProductService {
     search(opts: { q?: string; page?: number; size?: number; sort?: string } = {})
         : Observable<Page<Product>> {
         if (!this.useMock) {
-            let params = new HttpParams();
-            Object.entries(opts).forEach(([k, v]) => {
-                if (v !== undefined && v !== null) params = params.set(k, String(v));
-            });
-            return this.http.get<Page<Product>>(this.base, {params});
+            const page1 = opts.page ?? 1;              // FE 1-based
+            const size  = opts.size ?? 20;
+            const page0 = Math.max(0, page1 - 1);      // BE 0-based
+
+            let params = new HttpParams()
+                .set('page', String(page0))
+                .set('limit', String(size));
+            // gọi BE: /products?page=<0-based>&limit=<size>
+            return this.http.get<ProductListResponse>(this.base, { params }).pipe(
+                map(res => {
+                    const items = res?.products ?? [];
+                    // BE không trả total elements, chỉ totalPages -> ước lượng total để UI cũ không gãy.
+                    const totalPages = Math.max(0, res?.totalPages ?? 0);
+                    const total = totalPages * size;
+
+                    const pageData: Page<Product> = { items, total, page: page1, size };
+                    return pageData;
+                })
+            );
         }
 
         // MOCK search + paginate
