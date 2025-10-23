@@ -3,8 +3,10 @@ package com.g5.techdevices.techstore.controllers;
 
 import com.g5.techdevices.techstore.dto.ProductDTO;
 import com.g5.techdevices.techstore.dto.ProductImageDTO;
+import com.g5.techdevices.techstore.dto.ProductVariantDTO;
 import com.g5.techdevices.techstore.entity.products.Product;
 import com.g5.techdevices.techstore.entity.products.ProductImages;
+import com.g5.techdevices.techstore.entity.products.ProductVariant;
 import com.g5.techdevices.techstore.exceptions.DataNotFoundException;
 import com.g5.techdevices.techstore.responses.ProductListResponse;
 import com.g5.techdevices.techstore.responses.ProductResponse;
@@ -196,6 +198,18 @@ public class ProductController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
     }
+    @PostMapping("/{productId}/variants")
+    public ResponseEntity<?> upsertVariant(
+            @PathVariable Long productId,
+            @Valid @RequestBody ProductVariantDTO dto
+    ) {
+        try {
+            ProductVariant savedVariant = productService.upsertVariant(productId, dto);
+            return ResponseEntity.ok(savedVariant);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
 
     //@PostMapping("/generateFakeProduct")
     public ResponseEntity<String> generateFakeProduct(){
@@ -220,4 +234,5 @@ public class ProductController {
         }
         return ResponseEntity.status(HttpStatus.OK).body("Product generated successfully");
     }
+
 }

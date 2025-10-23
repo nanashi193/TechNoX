@@ -46,4 +46,6 @@ public class ProductDTO {
 
     private Boolean status; // Cho phép null khi update, vẫn mặc định true ở entity
 
+    private List<ProductVariantDTO> variants; // ✅ thêm dòng này
+
 }
