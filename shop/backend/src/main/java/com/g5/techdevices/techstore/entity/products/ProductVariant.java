@@ -1,12 +1,11 @@
 package com.g5.techdevices.techstore.entity.products;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.g5.techdevices.techstore.entity.Bills.BillDetail;
 import com.g5.techdevices.techstore.entity.Cart.CartItem;
 import jakarta.persistence.Entity;
-import lombok.Data;
+import lombok.*;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -15,15 +14,18 @@ import java.util.List;
 @NoArgsConstructor
 @Data
 @Entity
+@Builder
 @Table(name = "ProductVariant")
+@Getter @Setter
 public class ProductVariant {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "VariantId")
-    private int id;
+    private Long id;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ProductId", nullable = false)
+    @JsonBackReference("product-variants")
     private Product product;
 
     @Column(name = "Color", length = 100)
@@ -46,4 +48,5 @@ public class ProductVariant {
 
     @OneToMany(mappedBy = "variant")
     private List<BillDetail> billDetails;
+
 }
