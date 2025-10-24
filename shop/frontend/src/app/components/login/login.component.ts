@@ -1,7 +1,7 @@
 import {Component} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {FormBuilder, FormGroup, FormControl, Validators, ReactiveFormsModule} from '@angular/forms';
-import {Router, RouterModule} from '@angular/router';
+import {ActivatedRoute, Router, RouterModule} from '@angular/router';
 import {AuthService} from '../../services/auth.service';
 import {finalize} from 'rxjs/operators';
 
@@ -25,7 +25,7 @@ export class LoginComponent {
         return this.form.get('password') as FormControl;
     }
 
-    constructor(private fb: FormBuilder, private router: Router, private auth: AuthService) {
+    constructor(private fb: FormBuilder, private router: Router,private route :ActivatedRoute,private auth: AuthService) {
         this.form = this.fb.group({
             email: ['', [
                 Validators.required, Validators.email,
@@ -53,8 +53,19 @@ export class LoginComponent {
                         localStorage.setItem('rememberUser', email);
                     else
                         localStorage.removeItem('rememberUser');
+                    // 1) Nếu có redirect từ guard -> quay lại đúng trang
+                    const redirect =
+                        this.route.snapshot.queryParamMap.get('redirectTo') ??
+                        this.route.snapshot.queryParamMap.get('returnUrl'); // hỗ trợ cả 2 tên
 
-                    this.router.navigateByUrl('/home');
+                    if (redirect) { this.router.navigateByUrl(redirect); return; }
+
+                    // 2) Nếu không có redirect: ADMIN/OWNER vào thẳng owner
+                    if (this.auth.hasRole('ADMIN') || this.auth.hasRole('OWNER')) {
+                        this.router.navigate(['/owner/dashboard']); // chọn route owner bạn muốn
+                    } else {
+                        this.router.navigate(['/home']);           // user thường
+                    }
                 },
                 error: () => this.errorMsg = 'Sai email hoặc mật khẩu.'
             });
