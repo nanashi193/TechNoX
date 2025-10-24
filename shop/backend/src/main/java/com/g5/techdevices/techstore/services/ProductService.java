@@ -21,7 +21,10 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import org.springframework.transaction.annotation.Transactional; //Them rollback
+import org.springframework.transaction.annotation.Transactional;
+import java.math.BigDecimal; // ADD
+import org.springframework.data.domain.Page; // nếu chưa có
+//Them rollback
 
 
 @Service
@@ -82,11 +85,22 @@ public class ProductService implements  IProductService {
 
 
     @Override
-    @Transactional(readOnly = true) // NOTE: thêm readOnly
-    public Page<ProductResponse> getAllProducts(PageRequest pageRequest) {
-        return productRepository
-                .findAll(pageRequest)
-                .map(ProductResponse::fromProduct);
+    @Transactional(readOnly = true)
+    public Page<ProductResponse> getAllProducts(
+            String keyword,
+            String sku,
+            Long categoryId,
+            BigDecimal minPrice,
+            BigDecimal maxPrice,
+            PageRequest pageRequest
+    ) {
+        keyword = (keyword == null) ? "" : keyword.trim();
+        sku     = (sku == null) ? "" : sku.trim();
+
+        Page<Product> page = productRepository.search(
+                keyword, sku, categoryId, minPrice, maxPrice, pageRequest
+        );
+        return page.map(ProductResponse::fromProduct);
     }
 
     @Override
@@ -224,5 +238,12 @@ public class ProductService implements  IProductService {
         return variant;
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public Page<ProductResponse> getAllProducts(PageRequest pageRequest) {
+        return productRepository
+                .findAll(pageRequest)
+                .map(ProductResponse::fromProduct);
+    }
 
 }
