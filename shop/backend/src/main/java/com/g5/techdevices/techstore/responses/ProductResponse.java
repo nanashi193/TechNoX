@@ -5,6 +5,8 @@ import com.g5.techdevices.techstore.entity.products.Product;
 import lombok.*;
 
 import java.math.BigDecimal;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Getter
 @Setter
@@ -18,10 +20,12 @@ public class ProductResponse extends BaseResponse {
     private String description;
     private Boolean status;
 
+    private List<ProductVariantResponse> variants;
+
     @JsonProperty("CategoryId")
     protected Integer categoryId;
     public static ProductResponse fromProduct(Product product) {
-        ProductResponse productRespones =  ProductResponse.builder()
+        ProductResponse productResponse =  ProductResponse.builder()
                 .name(product.getName())
                 .price(product.getPrice())
                 .thumbnail(product.getThumbnail())
@@ -29,8 +33,21 @@ public class ProductResponse extends BaseResponse {
                 .categoryId(product.getCategory().getId())
                 .status(product.isStatus())
                 .build();
-        productRespones.setCreateAt(product.getCreatedAt());
-        return productRespones;
+        productResponse.setCreateAt(product.getCreatedAt());
+        if (product.getVariants() != null) {
+            productResponse.setVariants(
+                    product.getVariants().stream()
+                            .map(v -> ProductVariantResponse.builder()
+                                    .id(v.getId())
+                                    .color(v.getColor())
+                                    .size(v.getSize())
+                                    .quantity(v.getQuantity())
+                                    .price(v.getPrice())
+                                    .sku(v.getSku())
+                                    .build())
+                            .collect(Collectors.toList())
+            ); }
+        return productResponse;
     }
 
 }
