@@ -1,6 +1,6 @@
 package com.g5.techdevices.techstore.services;
 
-import com.g5.techdevices.techstore.dto.BillDTO;
+import com.g5.techdevices.techstore.dtos.BillDTO;
 import com.g5.techdevices.techstore.exceptions.DataNotFoundException;
 import com.g5.techdevices.techstore.responses.BillResponse;
 

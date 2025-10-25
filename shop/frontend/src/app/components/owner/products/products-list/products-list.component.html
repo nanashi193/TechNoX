@@ -1,0 +1,119 @@
+<h1>Danh sách sản phẩm</h1>
+<div class="toolbar">
+    <div class="search">
+        <input type="text" placeholder="Search products" [(ngModel)]="q" (input)="onSearch()">
+    </div>
+
+    <button class="btn" (click)="create()">+ Add product</button>
+
+    <div class="bulk" *ngIf="selectedCount()">
+        <span class="muted">{{ selectedCount() }} Selected</span>
+        <button class="btn danger" (click)="bulk('delete')">Delete</button>
+    </div>
+
+    <div class="right">
+        <button class="btn ghost">Filters</button>
+    </div>
+</div>
+
+<div class="table">
+    <div class="row thead">
+        <label class="cell check">
+            <input type="checkbox" [checked]="allSelected()" (change)="toggleAll($event)">
+        </label>
+
+        <div class="cell col-product th sortable"
+             (click)="sortBy('name')" [attr.aria-sort]="ariaSort('name')">Product
+            <span class="sort-caret" [class.asc]="isAsc('name')" [class.desc]="isDesc('name')"
+                ></span>
+        </div>
+
+        <div class="cell col-product th sortable"
+             (click)="sortBy('type')" [attr.aria-sort]="ariaSort('type')">Type
+            <span class="sort-caret" [class.asc]="isAsc('type')" [class.desc]="isDesc('type')"
+                  ></span>
+        </div>
+
+        <div class="cell col-stocks">Stocks</div>
+
+
+        <div class="cell col-sku th sortable"
+             (click)="sortBy('sku')" [attr.aria-sort]="ariaSort('sku')">
+            Sku
+            <span class="sort-caret" [class.asc]="isAsc('sku')" [class.desc]="isDesc('sku')"
+                ></span>
+        </div>
+
+        <div class="cell col-price th sortable"
+             (click)="sortBy('price')" [attr.aria-sort]="ariaSort('price')">
+            Price
+            <span class="sort-caret" [class.asc]="isAsc('price')" [class.desc]="isDesc('price')"
+               ></span>
+        </div>
+
+        <div class="cell col-variants th sortable"
+             (click)="sortBy('variants')" [attr.aria-sort]="ariaSort('variants')">
+            Variants
+            <span class="sort-caret" [class.asc]="isAsc('variants')" [class.desc]="isDesc('variants')"
+                  ></span>
+        </div>
+
+        <div class="cell col-qty th sortable"
+             (click)="sortBy('stockQty')" [attr.aria-sort]="ariaSort('stockQty')">
+            Quantity
+            <span class="sort-caret" [class.asc]="isAsc('stockQty')" [class.desc]="isDesc('stockQty')"
+                 ></span>
+        </div>
+        <div class="cell col-actions">Actions</div>
+    </div>
+
+    <div class="row" *ngFor="let p of filtered; trackBy: trackById">
+        <label class="cell check">
+            <input type="checkbox" [checked]="isSelected(p.id)" (change)="toggle(p.id,$event)">
+        </label>
+
+        <div class="cell col-product">
+            <img class="thumb" [src]="p.image" alt="">
+            <div class="info">
+                <div class="name">{{ p.name }}</div>
+            </div>
+        </div>
+
+        <div class="cell col-type"><span class="muted">{{ p.type }}</span></div>
+
+        <div class="cell col-stocks">
+            <label class="switch">
+                <input type="checkbox" [checked]="p.inStock" (change)="toggleStock(p)">
+                <span class="track"></span>
+            </label>
+        </div>
+
+        <div class="cell col-sku">#{{ p.sku }}</div>
+        <div class="cell col-price">{{ p.price | number:'1.0-0' }}₫ </div>
+        <div class="cell col-variants">{{ p.variants }}</div>
+        <div class="cell col-qty">{{ p.stockQty ?? 0 }}</div>
+
+        <!-- chỉ còn 8th cell: Actions -->
+        <div class="cell col-actions">
+            <button class="btn ghost sm" (click)="edit(p.id)">Edit</button>
+            <button class="btn ghost icon" aria-label="More">⋯</button>
+        </div>
+    </div>
+
+</div>
+
+<nav class="pagination" aria-label="Pagination">
+    <button class="pg prev" [disabled]="page === 1" (click)="prev()">Prev</button>
+
+    <ng-container *ngFor="let n of pages; let i = index">
+        <ng-container *ngIf="i === 0 || n - pages[i-1] === 1; else dots">
+            <button class="pg num" [class.active]="n===page" (click)="goto(n)">{{n}}</button>
+        </ng-container>
+        <ng-template #dots>
+            <span class="muted">…</span>
+            <button class="pg num" [class.active]="n===page" (click)="goto(n)">{{n}}</button>
+        </ng-template>
+    </ng-container>
+
+    <button class="pg next" [disabled]="page === totalPages" (click)="next()">Next</button>
+</nav>

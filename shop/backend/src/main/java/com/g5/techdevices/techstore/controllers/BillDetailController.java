@@ -1,9 +1,8 @@
 package com.g5.techdevices.techstore.controllers;
 
-import com.g5.techdevices.techstore.dto.BillDetailDTO;
+import com.g5.techdevices.techstore.dtos.BillDetailDTO;
 import com.g5.techdevices.techstore.entity.Bills.BillDetail;
 import jakarta.validation.Valid;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 

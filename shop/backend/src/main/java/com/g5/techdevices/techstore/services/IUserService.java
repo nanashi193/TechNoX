@@ -1,9 +1,13 @@
 package com.g5.techdevices.techstore.services;
 
-import com.g5.techdevices.techstore.dto.UserDTO;
-import com.g5.techdevices.techstore.dto.UserUpdateDTO;
+import com.g5.techdevices.techstore.dtos.UserDTO;
+import com.g5.techdevices.techstore.dtos.UserDetailDTO;
+import com.g5.techdevices.techstore.dtos.UserUpdateDTO;
 import com.g5.techdevices.techstore.entity.users.User;
 import com.g5.techdevices.techstore.exceptions.DataNotFoundException;
+import com.g5.techdevices.techstore.exceptions.InvalidTokenException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 
@@ -13,11 +17,16 @@ public interface IUserService {
     void deleteUser(Long id);
 
     void restoreUser(Long id) throws DataNotFoundException;
-
     String login(String email, String password) throws Exception;
-    List<User> getAllUsers() throws DataNotFoundException;
+    User toggleActive(Long id, boolean isActive) throws DataNotFoundException;
+    Page<User> getAllUsers(Pageable pageable) throws DataNotFoundException;
+
+    User getUserById(Long id) throws DataNotFoundException;
+
     User updateUser(Long id, UserUpdateDTO userDTO) throws DataNotFoundException;
     User findUserByEmail(String email) throws DataNotFoundException;
-    String resendVerification(String email) throws DataNotFoundException;
-    void verifyEmail(String token) throws DataNotFoundException;
+    UserDetailDTO getUserDetailsByEmail(String email);
+    UserDetailDTO updateUserDetails(String email, UserDetailDTO userUpdateDTO) throws DataNotFoundException;
+    void resetPassword(String token, String newPassword) throws DataNotFoundException, InvalidTokenException;
+    String createPasswordResetToken(String email) throws DataNotFoundException;
 }

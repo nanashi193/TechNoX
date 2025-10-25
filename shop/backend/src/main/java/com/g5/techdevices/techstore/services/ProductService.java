@@ -38,8 +38,6 @@ public class ProductService implements  IProductService {
 
     @Override
     public Product createProduct(ProductDTO productDTO) throws DataNotFoundException {
-
-
         Category existingCategory = categoryRepository
                 .findById(productDTO.getCategoryId())
                 .orElseThrow(() ->

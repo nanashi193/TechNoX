@@ -1,0 +1,85 @@
+
+<div class="frame" [attr.aria-busy]="qLoading ? 'true' : null">
+    <div class="header">
+        <h2>Thanh toán</h2>
+        <button class="link" (click)="refresh()" [disabled]="qLoading">↻ Tải lại giỏ hàng</button>
+    </div>
+
+    <!-- Giỏ hàng -->
+    <div *ngIf="items.length; else empty" class="cart">
+        <div class="row head">
+            <div class="col name">Sản phẩm</div>
+            <div class="col center">SL</div>
+            <div class="col right">Giá</div>
+            <div class="col right">Thành tiền</div>
+        </div>
+
+        <div class="row" *ngFor="let it of items; trackBy: trackByCartItem">
+            <div class="col name">
+                <div class="title">{{ it.name }}</div>
+                <div class="sub">ID: {{ it.id }}</div>
+            </div>
+            <div class="col center">x{{ it.qty }}</div>
+            <div class="col right">{{ it.price | currency:'VND':'symbol':'1.0-0':'vi-VN' }}</div>
+            <div class="col right">{{ (it.price * it.qty) | currency:'VND':'symbol':'1.0-0':'vi-VN' }}</div>
+        </div>
+
+        <div class="sep"></div>
+
+        <div class="summary">
+            <div class="left">
+                <div class="order">Mã đơn hàng: <b>{{ orderId }}</b></div>
+            </div>
+            <div class="right">
+                <div class="total">
+                    Tổng cộng: <b>{{ subtotal | currency:'VND':'symbol':'1.0-0':'vi-VN' }}</b>
+                </div>
+            </div>
+        </div>
+
+        <!-- QR -->
+        <div class="qrbox" [attr.aria-busy]="qLoading ? 'true' : null">
+            <ng-container *ngIf="!qLoading && qrSrc; else qrState">
+                <img
+                        [src]="qrSrc"
+                        [attr.alt]="'VietQR chuyển khoản ngân hàng cho đơn ' + orderId"
+                        loading="lazy"
+                        decoding="async"
+                />
+
+                <div class="meta">
+                    <span><b>{{ merchant.accountName }}</b></span>
+                    <span>MB • {{ merchant.accountNumber }}</span>
+                </div>
+
+                <div class="actions">
+                    <a class="btn secondary" [href]="qrSrc" [attr.download]="'vietqr-' + orderId + '.png'">Tải ảnh</a>
+                    <button class="btn secondary" (click)="printQR()">In QR</button>
+                    <button class="btn secondary" (click)="copyAddInfo()">Sao chép nội dung</button>
+
+                </div>
+
+                <p class="hint">Nội dung chuyển khoản: <code>Thanh toan {{ orderId }}</code></p>
+                <p class="hint">Quét QR bằng app ngân hàng. Nội dung đã kèm mã đơn <b>{{ orderId }}</b>.</p>
+            </ng-container>
+
+            <ng-template #qrState>
+                <div *ngIf="qLoading" class="qr-loading">
+                    <div class="skeleton qr"></div>
+                    <div class="hint" role="status">Đang tạo QR…</div>
+                </div>
+
+                <div *ngIf="!qLoading && !qrSrc" class="empty">
+                    {{ qError || 'Không tải được QR.' }}
+                    <div class="actions">
+                        <button class="btn secondary" (click)="refresh()">Thử lại</button>
+                    </div>
+                </div>
+            </ng-template>
+        </div>
+    </div>
+
+    <ng-template #empty>
+        <div class="empty">Giỏ hàng đang trống.</div>
+    </ng-template>
+</div>

@@ -1,0 +1,121 @@
+<section class="user-detail">
+    <div *ngIf="user" class="user-frame"><!-- KHUNG BAO TOÀN BỘ -->
+
+        <nav class="breadcrumbs">
+            <a routerLink="/home">Trang chủ</a>
+            <span>/</span>
+            <a routerLink="/owner">Tài khoản</a>
+            <span>/</span>
+            <strong>Chi tiết người dùng</strong>
+        </nav>
+
+        <div class="header">
+            <div class="avatar">
+                <img *ngIf="user?.avatarUrl; else initials" [src]="user.avatarUrl" alt="avatar">
+                <ng-template #initials><div class="avatar-fallback">{{ initials }}</div></ng-template>
+            </div>
+
+            <div class="title">
+                <h1>{{ user?.FullName }}</h1>
+                <div class="meta">
+                    <span class="badge"
+                          [class.badge--green]="user?.IsActive"
+                          [class.badge--gray]="!user?.IsActive">
+                      {{ user?.IsActive ? 'ACTIVE' : 'INACTIVE' }}
+                    </span>
+                    <span class="dot">•</span>
+                    <span class="muted">
+            ID: {{ user?.id }}
+                        <button class="link" (click)="copy(user.id.toString())">copy</button>
+          </span>
+                </div>
+            </div>
+
+            <div class="actions">
+                <button *ngIf="!edit" class="btn" (click)="toggleEdit()">Sửa</button>
+                <div *ngIf="edit" class="edit-actions">
+                    <button class="btn btn-primary" (click)="save()">Lưu</button>
+                    <button class="btn btn-ghost" (click)="cancel()">Huỷ</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid">
+            <!-- Thông tin cơ bản -->
+            <section class="card">
+                <h2>Thông tin</h2>
+
+                <div *ngIf="!edit" class="info">
+                    <div class="row">
+                        <span>Email</span>
+                        <span class="value">
+              {{ user.email }}
+                            <button class="link" (click)="copy(user.email)">copy</button>
+            </span>
+                    </div>
+                    <div class="row"><span>Điện thoại</span><span class="value">{{ user.PhoneNumber || '—' }}</span></div>
+                    <div class="row"><span>Vai trò</span><span class="value">{{ user.roleName }}</span></div>
+                    <div class="row"><span>Ngày tạo</span><span class="value">{{ user.CreateAt | date:'dd/MM/yyyy' }}</span></div>
+                </div>
+
+                <div *ngIf="edit" class="form">
+                    <label>Họ tên
+                        <input [(ngModel)]="user.FullName" />
+                    </label>
+                    <label>Điện thoại
+                        <input [(ngModel)]="user.PhoneNumber" />
+                    </label>
+                </div>
+            </section>
+
+            <!-- Địa chỉ -->
+            <section class="card">
+                <h2>Địa chỉ giao hàng</h2>
+
+                <div *ngIf="!edit" class="address">
+                    <div>{{ user.address?.line1 }}{{ user.address?.line2 ? ', ' + user.address?.line2 : '' }}</div>
+                    <div>{{ user.address?.district ? user.address?.district + ', ' : '' }}{{ user.address?.city }}</div>
+                    <div>{{ user.address?.province }}{{ user.address?.zipCode ? ' ' + user.address?.zipCode : '' }}</div>
+                </div>
+
+                <div *ngIf="edit" class="form form-grid">
+                    <label>Địa chỉ 1
+                        <input [(ngModel)]="user.address!.line1" />
+                    </label>
+                    <label>Địa chỉ 2
+                        <input [(ngModel)]="user.address!.line2" />
+                    </label>
+                    <label>Quận/Huyện
+                        <input [(ngModel)]="user.address!.district" />
+                    </label>
+                    <label>Thành phố
+                        <input [(ngModel)]="user.address!.city" />
+                    </label>
+                    <label>Tỉnh/TP
+                        <input [(ngModel)]="user.address!.province" />
+                    </label>
+                    <label>Mã bưu chính
+                        <input [(ngModel)]="user.address!.zipCode" />
+                    </label>
+                </div>
+            </section>
+
+            <!-- Thống kê -->
+            <section class="card">
+                <h2>Thống kê</h2>
+                <div class="stats">
+                    <div class="stat">
+                        <div class="stat-value">{{ user.stats?.orders || 0 }}</div>
+                        <div class="stat-label">Đơn đã mua</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-value">{{ (user.stats?.totalSpent || 0) | currency:'VND':'symbol':'1.0-0' }}</div>
+                        <div class="stat-label">Tổng chi tiêu</div>
+                    </div>
+                </div>
+                <a routerLink="/products" class="btn btn-ghost w-full">Xem sản phẩm</a>
+            </section>
+        </div>
+
+    </div><!-- /user-frame -->
+</section>

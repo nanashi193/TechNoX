@@ -4,12 +4,15 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.g5.techdevices.techstore.entity.Bills.Bill;
 import com.g5.techdevices.techstore.entity.Cart.Cart;
 import com.g5.techdevices.techstore.entity.review.Review;
+import com.g5.techdevices.techstore.entity.tokens.Token;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -94,6 +97,10 @@ public class User implements UserDetails {
     @Column(name = "EmailVerified", nullable = false)
     private boolean emailVerified = false;
 
+    @Column(name = "CreatedAt", nullable = false, updatable = false)
+    @CreationTimestamp
+    private LocalDateTime createdAt;
+
     @ManyToOne
     @JoinColumn(name = "RoleId", nullable = false)
     @ToString.Exclude
@@ -117,5 +124,11 @@ public class User implements UserDetails {
 
     @OneToMany(mappedBy = "user")
     private List<RecentView> recentViews;
+
+    @ManyToOne
+    @ToString.Exclude
+    @JsonIgnoreProperties("users")
+    @JoinColumn(name = "AddressId")
+    private Address address;
 }
 

@@ -1,18 +1,28 @@
 package com.g5.techdevices.techstore.services;
 
 import com.g5.techdevices.techstore.components.JwtTokenUtil;
-import com.g5.techdevices.techstore.dto.UserDTO;
-import com.g5.techdevices.techstore.dto.UserUpdateDTO;
-import com.g5.techdevices.techstore.entity.users.PasswordResetToken;
+import com.g5.techdevices.techstore.components.UserMapper;
+import com.g5.techdevices.techstore.dtos.AddressDTO;
+import com.g5.techdevices.techstore.dtos.UserDTO;
+import com.g5.techdevices.techstore.dtos.UserDetailDTO;
+import com.g5.techdevices.techstore.dtos.UserUpdateDTO;
+import com.g5.techdevices.techstore.entity.tokens.EmailType;
+import com.g5.techdevices.techstore.entity.tokens.PasswordResetToken;
+import com.g5.techdevices.techstore.entity.users.Address;
 import com.g5.techdevices.techstore.entity.users.Role;
 import com.g5.techdevices.techstore.entity.users.User;
 import com.g5.techdevices.techstore.exceptions.DataNotFoundException;
+import com.g5.techdevices.techstore.exceptions.InvalidTokenException;
 import com.g5.techdevices.techstore.exceptions.PermissionDenyException;
+import com.g5.techdevices.techstore.repositories.PasswordTokenRepository;
 import com.g5.techdevices.techstore.repositories.RoleRepository;
 import com.g5.techdevices.techstore.repositories.UserRepository;
-import com.g5.techdevices.techstore.repositories.PasswordTokenRepository;
+import com.g5.techdevices.techstore.repositories.AddressRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -21,11 +31,9 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
-import java.util.UUID;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
 import java.util.*;
 
 @Service
@@ -33,10 +41,25 @@ import java.util.*;
 public class UserService implements IUserService{
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
+    private final AddressRepository addressRepository;
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
     private final JwtTokenUtil jwtTokenUtil;
-    private final PasswordTokenRepository passwordTokenRepository;
+    private final UserMapper userMapper;
+    private final PasswordTokenRepository  passwordTokenRepository;
+    private final EmailService emailService;
+
+    /**
+     * Helper method: Lấy thông tin User đang đăng nhập từ SecurityContext.
+     * @return User entity của người dùng hiện tại
+     * @throws DataNotFoundException nếu không tìm thấy user
+     */
+    private User getCurrentAuthenticatedUser() throws DataNotFoundException {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String currentEmail = authentication.getName();
+        return userRepository.findByEmail(currentEmail)
+                .orElseThrow(() -> new DataNotFoundException("Current authenticated user not found."));
+    }
 
     @Override
     public User createUser(UserDTO userDTO) throws DataNotFoundException {
@@ -76,12 +99,9 @@ public class UserService implements IUserService{
     }
 
     @Override
-    public List<User> getAllUsers() throws DataNotFoundException {
+    public Page<User> getAllUsers(Pageable pageable) throws DataNotFoundException {
         // Lấy user đang đăng nhập hiện tại
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String currentEmail = authentication.getName();
-        User currentUser = userRepository.findByEmail(currentEmail)
-                .orElseThrow(() -> new DataNotFoundException("Current user not found."));
+        User currentUser = getCurrentAuthenticatedUser();
 
         boolean isAdmin = currentUser.getRole().getName().equalsIgnoreCase(Role.ADMIN);
         boolean isOwner = currentUser.getRole().getName().equalsIgnoreCase(Role.OWNER);
@@ -89,18 +109,29 @@ public class UserService implements IUserService{
         if (!(isAdmin || isOwner)) {
             throw new AccessDeniedException("You don't have permission to get list user.");
         }
-        return userRepository.findAll();
+        return userRepository.findAll(pageable);
     }
+    @Override
+    public User getUserById(Long id) throws DataNotFoundException {
+        User currentUser = getCurrentAuthenticatedUser();
 
+        boolean isAdmin = currentUser.getRole().getName().equalsIgnoreCase(Role.ADMIN);
+        boolean isOwner = currentUser.getRole().getName().equalsIgnoreCase(Role.OWNER);
+        boolean isSelf = currentUser.getId() == (id);
+
+        if (!(isAdmin || isOwner || isSelf)) {
+            throw new AccessDeniedException("You don't have permission to view this user.");
+        }
+
+        return userRepository.findById(id)
+                .orElseThrow(() -> new DataNotFoundException("Cannot find user with id: " + id));
+    }
     @Override
     public User updateUser(Long id, UserUpdateDTO userDTO) throws DataNotFoundException {
         User existingUser = userRepository.findById(id).orElseThrow(() ->
                 new DataNotFoundException("Can not find User with id:" +id));
         // Lấy user đang đăng nhập hiện tại
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String currentEmail = authentication.getName();
-        User currentUser = userRepository.findByEmail(currentEmail)
-                .orElseThrow(() -> new DataNotFoundException("Current user not found."));
+        User currentUser = getCurrentAuthenticatedUser();
 
         boolean isAdmin = currentUser.getRole().getName().equalsIgnoreCase(Role.ADMIN);
         boolean isOwner = currentUser.getRole().getName().equalsIgnoreCase(Role.OWNER);
@@ -114,6 +145,23 @@ public class UserService implements IUserService{
 
         return userRepository.save(existingUser);
     }
+    //Nut gat xoa mem user
+    @Override
+    public User toggleActive(Long id, boolean isActive) throws DataNotFoundException {
+        User currentUser = getCurrentAuthenticatedUser();
+        boolean isAdmin = currentUser.getRole().getName().equalsIgnoreCase(Role.ADMIN);
+        boolean isOwner = currentUser.getRole().getName().equalsIgnoreCase(Role.OWNER);
+
+        if (!(isAdmin || isOwner)) {
+            throw new AccessDeniedException("You don't have permission to update this user.");
+        }
+        User existingUser = userRepository.findById(id)
+                .orElseThrow(() -> new DataNotFoundException("Cannot find user with id: " + id));
+
+        existingUser.setIsActive(isActive);
+        return userRepository.save(existingUser);
+    }
+
     @Override
     public void deleteUser(Long id){
         User user = userRepository.findById(id).orElse(null);
@@ -130,7 +178,6 @@ public class UserService implements IUserService{
         user.setIsActive(true);
         userRepository.save(user);
     }
-
 
     @Override
     public String login(String email, String password) throws Exception {
@@ -162,27 +209,89 @@ public class UserService implements IUserService{
                 .orElseThrow(() -> new DataNotFoundException("User with email " + email + " not found"));
     }
 
+    @Override
+    public UserDetailDTO getUserDetailsByEmail(String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+        return userMapper.toUserDetailDTO(user);
+    }
 
     @Override
-    public String resendVerification(String email) throws DataNotFoundException {
+    @Transactional
+    public UserDetailDTO updateUserDetails(String email, UserDetailDTO userUpdateDTO) throws DataNotFoundException {
         User user = findUserByEmail(email);
-        if (user.isEmailVerified()) {
-            return null; // Email đã được xác minh
+        user.setFullName(userUpdateDTO.getFullName());
+        user.setPhoneNumber(userUpdateDTO.getPhoneNumber());
+//        user.setIsActive(userUpdateDTO.getIsActive());
+        if (userUpdateDTO.getAddress() != null) {
+            AddressDTO addressDTO = userUpdateDTO.getAddress();
+            Address addressEntity;
+            if (user.getAddress() != null) {
+                addressEntity = user.getAddress();
+            } else {
+                addressEntity = new Address();
+            }
+            addressEntity.setLine1(addressDTO.getLine1());
+            addressEntity.setLine2(addressDTO.getLine2());
+            addressEntity.setDistrict(addressDTO.getDistrict());
+            addressEntity.setCity(addressDTO.getCity());
+            addressEntity.setProvince(addressDTO.getProvince());
+            addressEntity.setZipCode(addressDTO.getZipCode());
+
+            Address savedAddress = addressRepository.save(addressEntity);
+            user.setAddress(savedAddress);
+
+        } else {
+            if (user.getAddress() != null) {
+                Address oldAddress = user.getAddress();
+                user.setAddress(null);
+                // addressRepository.delete(oldAddress);
+            }
         }
-        
+
+        User updatedUser = userRepository.save(user);
+        return userMapper.toUserDetailDTO(updatedUser);
+    }
+
+    @Override
+    public String createPasswordResetToken(String email) throws DataNotFoundException {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new DataNotFoundException("User not found"));
+
+        List<PasswordResetToken> oldTokens = passwordTokenRepository.findByUserAndExpireDateAfter(user, new Date());
+        oldTokens.forEach(passwordTokenRepository::delete);
+
         String token = UUID.randomUUID().toString();
-        // TODO: Gửi email với link xác minh
-        // Trong quá trình phát triển, trả về token để frontend tự xử lý
+        PasswordResetToken newToken = new PasswordResetToken(token, user);
+        passwordTokenRepository.save(newToken);
+        emailService.sendEmail(user.getEmail(), EmailType.RESET_PASSWORD, token);
         return token;
     }
 
     @Override
-    public void verifyEmail(String token) throws DataNotFoundException {
-        // TODO: Validate token từ email verification
-        // Trong quá trình phát triển, chấp nhận mọi token
-        // Trong production cần lưu và validate token, có thể dùng VerificationToken tương tự PasswordResetToken
-        User user = userRepository.findById(1L).orElseThrow(() -> new DataNotFoundException("User not found"));
-        user.setEmailVerified(true);
+    @Transactional
+    public void resetPassword(String token, String newPassword)
+            throws DataNotFoundException, InvalidTokenException {
+        //Tìm token trong DB
+        PasswordResetToken resetToken = passwordTokenRepository.findByToken(token)
+                .orElseThrow(() -> new InvalidTokenException("Invalid or expired password reset token."));
+        //Kiểm tra token còn hạn
+        if (resetToken.getExpireDate().before(new Date())) {
+            passwordTokenRepository.delete(resetToken); //Xóa token hết hạn
+            throw new InvalidTokenException("Password reset token has expired.");
+        }
+        //Lấy User từ token
+        User user = resetToken.getUser();
+        if (user == null) {
+            throw new DataNotFoundException("User associated with the token not found.");
+        }
+        //Hash mật khẩu mới
+        String password = passwordEncoder.encode(newPassword);
+        //Cập nhật mật khẩu cho User
+        user.setPassword(password);
         userRepository.save(user);
+        //Xóa token đã sử dụng
+        passwordTokenRepository.delete(resetToken);
     }
 }
+

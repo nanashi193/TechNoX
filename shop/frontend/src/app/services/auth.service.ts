@@ -1,5 +1,6 @@
-import { Injectable } from '@angular/core';
+import {inject, Injectable} from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { Router } from '@angular/router';
 import { BehaviorSubject, Observable, tap } from 'rxjs';
 import { jwtDecode } from 'jwt-decode';
 
@@ -22,6 +23,7 @@ export class AuthService {
 
     private currentUserSubject = new BehaviorSubject<JwtPayload | null>(this.getUserFromToken());
     currentUser$ = this.currentUserSubject.asObservable();
+    private router = inject(Router);
 
     constructor(private http: HttpClient) {}
 
@@ -58,6 +60,7 @@ export class AuthService {
     // Đăng xuất (xoá token)
     logout() {
         this.clearToken();
+        this.router.navigate(['/home']);
     }
 
     // ====== 🟢 Trạng thái & Quyền ======
@@ -113,36 +116,31 @@ export class AuthService {
     }
     // ===== Forgot Password =====
     /** Gửi yêu cầu quên mật khẩu (BE sẽ gửi email có link đặt lại mật khẩu) */
-    forgotPassword(email: string): Observable<any> {
-        // Nhiều BE trả về text/empty -> dùng responseType 'text' để tránh lỗi JSON parse
+    forgotPassword(email: string): Observable<string> {
         return this.http.post(
             `${this.baseUrl}/forgot-password`,
             { email },
-            { responseType: 'text' as 'json' }
+            { responseType: 'text' }
         );
     }
 
     /** (Tuỳ chọn) Đặt lại mật khẩu khi người dùng click link từ email và có token */
-    resetPassword(token: string, newPassword: string): Observable<any> {
+    resetPassword(token: string, newPassword: string): Observable<string> {
         return this.http.post(
             `${this.baseUrl}/reset-password`,
             { token, newPassword },
-            { responseType: 'text' as 'json' }
+            { responseType: 'text' }
         );
     }
     verifyEmail(token: string) {
-        return this.http.post(
-            `${this.baseUrl}/verify-email`,
-            { token },
-            { responseType: 'text' as 'json' }
+        return this.http.get<{ message: string; error: any }>(
+            `${this.baseUrl}/verify-email?token=${token}`
         );
     }
 
     resendVerification(email: string) {
-        return this.http.post<{ token?: string; message?: string } | string>(
-            `${this.baseUrl}/resend-verification`,
-            {email}
-        );
+        return this.http.post(`${this.baseUrl}/resend-verification`, { email });
+
     }
 
 }

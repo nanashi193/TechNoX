@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -38,15 +39,16 @@ public class WebSecurityConfig {
                         .permitAll()
                         .requestMatchers(POST, String.format("%s/users/login", apiPrefix))
                         .permitAll()
-                        .requestMatchers(POST,
-                                String.format("%s/users/resetPassword", apiPrefix))
+                        .requestMatchers(POST, String.format("%s/users/forgot-password", apiPrefix))
+                        .permitAll()
+                        .requestMatchers(POST, String.format("%s/users/reset-password", apiPrefix))
                         .permitAll()
                         // ✅ Cho preflight
                         .requestMatchers(org.springframework.http.HttpMethod.OPTIONS, "/**")
                         .permitAll()
                         .requestMatchers(POST, apiPrefix + "/users/resend-verification")
                         .permitAll()
-                        .requestMatchers(POST, apiPrefix + "/users/verify-email").permitAll()
+                        .requestMatchers(GET, apiPrefix + "/users/verify-email").permitAll()
 
                         // Public GET endpoints
                         .requestMatchers(GET, String.format("%s/categories", apiPrefix))
@@ -69,6 +71,8 @@ public class WebSecurityConfig {
                         .requestMatchers(GET, String.format("%s/users", apiPrefix))
                         .hasAnyRole(Role.ADMIN, Role.OWNER)
                         .requestMatchers(DELETE, String.format("%s/users/**", apiPrefix))
+                        .hasAnyRole(Role.ADMIN, Role.OWNER)
+                        .requestMatchers(PATCH, String.format("%s/users/**", apiPrefix))
                         .hasAnyRole(Role.ADMIN, Role.OWNER)
                         .requestMatchers(PUT, String.format("%s/users/restore/**", apiPrefix))
                         .hasAnyRole(Role.ADMIN, Role.OWNER)

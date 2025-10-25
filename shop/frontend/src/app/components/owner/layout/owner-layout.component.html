@@ -1,22 +1,50 @@
-<div class="owner-wrap">
+<div class="owner-wrap owner-scope" [class.mini]="mini">
     <!-- Sidebar -->
-    <aside class="owner-aside">
-        <a class="brand" routerLink="/owner/dashboard">TechNoX owner</a>
+    <aside class="owner-aside" [class.mini]="mini">
+        <!-- TOP: profile + collapse -->
+        <div class="aside-head">
+            <img class="avatar" src="assets/icon-modified.png" alt="">
+            <div class="who">
+                <div class="role">SHOP OWNER</div>
+                <div class="name">nanashi</div>
+            </div>
+            <button class="collapse" (click)="mini = !mini" aria-label="Toggle sidebar">⟨⟩</button>
+        </div>
 
-        <nav class="menu">
-            <a routerLink="/owner/dashboard" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
-                <span class="dot"></span> Tổng quan
+        <!-- MAIN -->
+        <div class="aside-section">
+            <a class="item" routerLink="/owner/dashboard" routerLinkActive="active">
+                <span class="icon ico-mask" style="--ico:url('assets/icons/overview.svg')">
+                </span><span class="text">Tổng quan</span>
             </a>
-            <a routerLink="/owner/products" routerLinkActive="active">
-                <span class="dot"></span> Sản phẩm
+
+            <a class="item" routerLink="/owner/products" routerLinkActive="active">
+                <span class="icon ico-mask" style="--ico:url('assets/icons/product.svg')">
+                </span><span class="text">Sản phẩm</span>
             </a>
-            <a routerLink="/owner/orders" routerLinkActive="active">
-                <span class="dot"></span> Đơn hàng
+
+            <a class="item" routerLink="/owner/catalogys" routerLinkActive="active">
+                <span class="icon ico-mask" style="--ico:url('assets/icons/catalogy.png')">
+                </span><span class="text">Danh mục sản phẩm</span>
             </a>
-            <a routerLink="/owner/users" routerLinkActive="active">
-                <span class="dot"></span> Người dùng
+
+            <a class="item" routerLink="/owner/orders" routerLinkActive="active">
+                <span class="icon ico-mask" style="--ico:url('assets/icons/order.svg')">
+                </span><span class="text">Đơn hàng</span>
             </a>
-        </nav>
+
+            <a class="item" routerLink="/owner/users" routerLinkActive="active">
+                <span class="icon ico-mask" style="--ico:url('assets/icons/user-key.svg')">
+                </span><span class="text">Người dùng</span>
+            </a>
+        </div>
+
+        <!-- CTA -->
+        <div class="promo">
+            <div class="h">Welcome back Sir!</div>
+            <p>Creating or adding new product couldn’t be easier</p>
+            <button class="cta" (click)="create()">+ Add Product</button>
+        </div>
 
         <div class="aside-foot">
             <a routerLink="/" class="back-site">← Về trang chủ</a>

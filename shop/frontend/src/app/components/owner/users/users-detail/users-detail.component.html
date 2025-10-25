@@ -1,0 +1,132 @@
+<div class="user-detail" *ngIf="!loading && user; else loadingTpl">
+    <form [formGroup]="f">
+
+        <div class="header">
+            <a routerLink="/owner/users" class="back">← Quay lại danh sách</a>
+        </div>
+
+        <div class="hero">
+            <div class="avatar lg">{{ initial() }}</div>
+            <div class="info">
+                <div class="name" *ngIf="!editMode; else nameEdit">{{ user!.FullName }}</div>
+                <ng-template #nameEdit>
+                    <input class="input title" formControlName="name" maxlength="120" placeholder="Full name"/>
+                </ng-template>
+
+                <div class="meta">
+                    <span>#{{ user!.id }}</span><span>•</span>
+                    <span>{{ user!.email }}</span><span>•</span>
+                    <span *ngIf="!editMode">{{ user!.PhoneNumber || '—' }}</span>
+                    <input *ngIf="editMode" class="input sm" formControlName="phone" placeholder="0912345678"/>
+                </div>
+            </div>
+
+            <div class="actions">
+                <button class="btn ghost" (click)="toggleEdit()">{{ editMode ? 'Cancel' : 'Edit' }}</button>
+                <button *ngIf="editMode" class="btn primary" type="button"
+                        [disabled]="f.invalid || f.pristine" (click)="save()">Save</button>
+                <button class="btn danger" (click)="delete()">Delete</button>
+            </div>
+        </div>
+
+        <div class="grid">
+            <section class="card">
+                <div class="card-head"><h3 class="card-title">Account</h3></div>
+
+                <div class="row-line">
+                    <div class="label">Active</div>
+
+                    <label class="switch" *ngIf="!editMode; else activeEdit">
+                        <input type="checkbox" [checked]="user!.IsActive" (change)="toggleActive($event)">
+                        <span class="slider"></span>
+                    </label>
+
+                    <ng-template #activeEdit>
+                        <label class="switch">
+                            <input type="checkbox" formControlName="isActive">
+                            <span class="slider"></span>
+                        </label>
+                    </ng-template>
+                </div>
+
+                <div class="row-line">
+                    <div class="label">Orders</div>
+                    <div class="value">{{ user!.stats.orders ?? 0 }}</div>
+                </div>
+
+                <div class="row-line">
+                    <div class="label">Total spent</div>
+                    <div class="value">{{ user!.stats.totalSpent | number:'1.0-0' }} đ</div>
+                </div>
+
+                <div class="row-line">
+                    <div class="label">Created</div>
+                    <div class="value">{{ user!.CreateAt | date:'medium' }}</div>
+                </div>
+            </section>
+
+            <section class="card ud-card">
+                <div class="ud-section">
+                    <header class="ud-head"><h3>Contact info</h3></header>
+
+                    <div class="ud-list" *ngIf="!editMode; else contactEdit">
+                        <div class="ud-row"><span class="ud-ico">email</span>
+                            <a [href]="'mailto:'+user!.email">{{ user!.email }}</a>
+                        </div>
+                        <div class="ud-row"><span class="ud-ico">📱</span>
+                            <a [href]="'tel:'+ (user!.PhoneNumber||'')">{{ user!.PhoneNumber || '—' }}</a>
+                        </div>
+                    </div>
+
+                    <ng-template #contactEdit>
+                        <div class="grid2">
+                            <label>Email
+                                <input formControlName="email" type="email" [disabled]="!editMode" > </label>
+                            <label>Phone
+                                <input formControlName="phone" placeholder="0912345678">
+                            </label>
+                        </div>
+                    </ng-template>
+                </div>
+
+                <hr>
+
+                <div class="ud-section">
+                    <header class="ud-head">
+                        <h3>Shipping address</h3>
+                    </header>
+
+                    <div class="ud-map">
+                        <div class="ud-zoom">
+                            <button type="button">+</button>
+                            <button type="button">−</button>
+                        </div>
+                        <div class="ud-pin"></div>
+                        <div class="ud-badge">Leaflet</div>
+                    </div>
+
+                    <address class="ud-address" *ngIf="user.shippingAddress; else noAddress">
+                        {{ user.shippingAddress.line1 }}<br>
+                        <ng-container *ngIf="user.shippingAddress.line2">
+                            {{ user.shippingAddress.line2 }}<br>
+                        </ng-container>
+
+                        {{ user.shippingAddress.city }}, {{ user.shippingAddress.province }}<br>
+                        {{ user.shippingAddress.zipCode || '' }}
+                    </address>
+
+                    <ng-template #noAddress>
+                        <p class="ud-text-muted">User has not provided a shipping address.</p>
+                    </ng-template>
+                </div>
+
+            </section>
+
+        </div>
+    </form>
+</div>
+
+<ng-template #loadingTpl>
+    <div class="card" *ngIf="loading">Đang tải…</div>
+    <div class="card" *ngIf="!loading && !user">Không tìm thấy người dùng.</div>
+</ng-template>

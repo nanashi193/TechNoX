@@ -5,14 +5,16 @@ import { HomeComponent } from './components/home/home.component';
 import { ForgotPasswordComponent } from "./components/forgot-password/forgot-password.component";
 import { ProductPageComponent } from "./components/product/product-page.component";
 import { ownerGuard } from "./guards/owner.guard";
-import { CartComponent } from './components/cart/cart.component'; // <-- thêm
+import { CartComponent } from './components/cart/cart.component';
+import { ProductsListComponent } from "./components/owner/products/products-list/products-list.component";
+import { loginGuard } from "./guards/login.guard";
 
 export const routes: Routes = [
     { path: '', redirectTo: 'home', pathMatch: 'full' },
 
     { path: 'home', component: HomeComponent },
-    { path: 'login', component: LoginComponent },
-    { path: 'signup', component: SignupComponent },
+    { path: 'login', component: LoginComponent, canActivate: [loginGuard] },
+    { path: 'signup', component: SignupComponent, canActivate: [loginGuard] },
     {
         path: 'verify-email',
         loadComponent: () => import('./components/verify-email/verify-email.component')
@@ -23,9 +25,26 @@ export const routes: Routes = [
         loadComponent: () => import('./components/verify-pending/verify-pending.component')
             .then(m => m.VerifyPendingComponent)
     },
-    {path: 'forgot-password', component: ForgotPasswordComponent},
-    {path: 'products', component: ProductPageComponent},
-    { path: 'cart', component: CartComponent }, // <-- thêm route giỏ hàng
+    { path: 'forgot-password', component: ForgotPasswordComponent },
+    {
+        path: 'reset-password',
+        loadComponent: () => import('./components/reset-password/reset-password.component')
+            .then(m => m.ResetPasswordComponent),
+        title: 'Đặt lại mật khẩu | TechNoX'
+    },
+    { path: 'products', component: ProductPageComponent },
+
+    // admin/user detail
+    { path: 'user/:id', loadComponent: () => import('./components/detail-user/detail.user').then(m => m.DetailUserComponent) },
+    { path: 'profile', loadComponent: () => import('./components/detail-user/detail.user').then(m => m.DetailUserComponent) },
+
+    { path: 'cart', component: CartComponent },
+
+    // ===== PAYMENT (mới) =====
+    { path: 'payment', loadComponent: () => import('./components/payment/payment-component')
+            .then(m => m.PaymentComponent), title: 'Thanh toán | TechNoX' },
+    { path: 'checkout', redirectTo: 'payment', pathMatch: 'full' },
+
     {
         path: 'product/:id',
         loadComponent: () =>
@@ -44,13 +63,58 @@ export const routes: Routes = [
             { path: '', redirectTo: 'about', pathMatch: 'full' }
         ]
     },
+
     {
         path: 'owner',
-        loadComponent: () => import('./components/owner/layout/owner-layout.component').then(m => m.OwnerLayoutComponent),
+        // canActivate: [ownerGuard],
+        loadComponent: () =>
+            import('./components/owner/layout/owner-layout.component')
+                .then(m => m.OwnerLayoutComponent),
         children: [
             { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
-            { path: 'dashboard', loadComponent: () => import('./components/owner/dashboard/dashboard.component').then(m => m.DashboardComponent) },
+            {
+                path: 'dashboard',
+                loadComponent: () =>
+                    import('./components/owner/dashboard/dashboard.component')
+                        .then(m => m.DashboardComponent),
+                title: 'Tổng quan | Owner'
+            },
+            {
+                path: 'products',
+                loadComponent: () =>
+                    import('./components/owner/products/products-list/products-list.component')
+                        .then(m => m.ProductsListComponent),
+                title: 'Quản lý sản phẩm | Owner'
+            },
+            {
+                path: 'products/new',
+                loadComponent: () =>
+                    import('./components/owner/products/products-form/products-form.component')
+                        .then(m => m.ProductsFormComponent),
+                title: 'Thêm sản phẩm | Owner'
+            },
+            {
+                path: 'products/:id/edit',
+                loadComponent: () =>
+                    import('./components/owner/products/products-form/products-form.component')
+                        .then(m => m.ProductsFormComponent),
+                title: 'Sửa sản phẩm | Owner'
+            },
+            {
+                path: 'users',
+                loadComponent: () =>
+                    import('./components/owner/users/users-list/users-list.component')
+                        .then(m => m.UsersListComponent),
+                title: 'Người dùng của TechNoX'
+            },
+            {
+                path: 'users/:id',
+                loadComponent: () =>
+                    import('./components/owner/users/users-detail/users-detail.component')
+                        .then(m => m.UserDetailComponent),
+            }
         ]
     },
+
     { path: '**', redirectTo: 'home' },
 ];

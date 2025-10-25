@@ -1,0 +1,252 @@
+:host{
+    --b: var(--owner-border, rgba(0,0,0,.08));
+    --muted: var(--owner-muted, #6b7280);
+    --accent: var(--owner-accent, #1a73e8);
+}
+/* wrapper & hàng */
+.table.users{ border:1px solid var(--b); border-radius:12px; overflow:hidden; background:#fff; } /* như Products */
+.table.users .row:first-child{ border-top:none; }
+.table.users .row.thead{ background:#fafafa; color:var(--muted); font-weight:600; } /* như Products */
+
+/* dùng GRID cho header + body với cùng template */
+.table.users .row:not(.thead){ border-top:1px solid #f1f3f6; }
+.table.users .thead{ background:#f7f8fb; font-weight:600; color:#6b7280; }
+
+/* cell chung */
+.table.users .cell{ min-width:0; display:flex; align-items:center; }
+.table.users .cell .title{
+    font-weight:600; color:#111827; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+}
+.table.users .cell .sub{ font-size:12px; color:#9ca3af; margin-left:8px; }
+
+/* căn giữa / phải cho các cột đặc biệt */
+.table.users .col-active{ justify-content:center; }
+.table.users .col-orders,
+.table.users .col-spent{ justify-content:flex-end; text-align:right; }
+
+/* switch */
+.table.users .switch{ position:relative; display:inline-block; width:42px; height:24px; }
+.table.users .switch input{ opacity:0; width:0; height:0; }
+.table.users .switch .slider{
+    position:absolute; inset:0; background:#e5e7eb; border-radius:999px; cursor:pointer;
+}
+.table.users .switch .slider::before{
+    content:""; position:absolute; top:3px; left:3px; width:18px; height:18px; background:#fff;
+    border-radius:50%; transition:transform .2s; box-shadow:0 1px 3px rgba(0,0,0,.2);
+}
+.table.users .switch input:checked + .slider{ background:#4f46e5; }
+.table.users .switch input:checked + .slider::before{ transform:translateX(18px); }
+
+/* header clickable */
+.table.users .th.sortable{ cursor:pointer; user-select:none; display:inline-flex; gap:6px; align-items:center; }
+.table.users .th.sortable:focus{ outline: none; }
+
+.table.users .sort-caret{ position:relative; width:10px; height:12px; display:inline-block; }
+.table.users .sort-caret::before,
+.table.users .sort-caret::after{
+    content:""; position:absolute; left:50%; transform:translateX(-50%);
+    border-left:4px solid transparent; border-right:4px solid transparent;
+}
+.table.users .sort-caret::before{ top:0;  border-bottom:6px solid #cbd5e1; }  /* lên (xám) */
+.table.users .sort-caret::after { bottom:0; border-top:6px solid #cbd5e1; }  /* xuống (xám) */
+
+.table.users .sort-caret.asc::before{  border-bottom-color:#3b82f6; }  /* mũi trên xanh */
+.table.users .sort-caret.desc::after{  border-top-color:#3b82f6; }     /* mũi dưới xanh */
+
+.table.users .sort-caret.off::before{ border-bottom-color:transparent; }
+.table.users .sort-caret.off::after{  border-top-color:transparent; }
+
+.pagination{
+    display:flex; align-items:center; justify-content:flex-end;
+    gap:12px; padding:16px 4px 8px;
+}
+.pg{
+    display:inline-flex; align-items:center; justify-content:center;
+    min-width:36px; height:36px; padding:0 12px;
+    border:1px solid var(--b); border-radius:10px;
+    background:#fff; color:var(--muted); cursor:pointer; line-height:1;
+}
+.pg.num.active{
+    background: var(--accent); color:#fff; border-color: transparent;
+}
+.pg:disabled{ opacity:.45; cursor:not-allowed; }
+
+/* responsive: co cột số trước */
+@media (max-width: 1100px){
+    .table.users{ min-width: 980px; } /* cho phép cuộn ngang nếu hẹp */
+}
+/* Nền xám nhẹ như trang Products */
+.page { padding: 16px; background: #f6f7f9; }
+
+/* Khung card giống Products (nếu đã có .card chung thì bỏ đoạn này) */
+.card {
+    background: #fff;
+    border: 1px solid rgba(0,0,0,.08);
+    border-radius: 12px;
+    box-shadow: 0 1px 3px rgba(0,0,0,.04);
+}
+.table-card { overflow: hidden; }
+
+/* Header của card */
+.card-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 14px 16px; border-bottom: 1px solid rgba(0,0,0,.06);
+}
+.card-header h2 { margin: 0; font-size: 18px; font-weight: 700; }
+.card-header .search {
+    height: 36px; padding: 0 12px; border-radius: 8px; border: 1px solid #e5e7eb;
+    outline: none;
+}
+
+/* Bảng dạng grid: giống Products */
+.table { width: 100%; }
+.tr {
+    display: grid;
+    grid-template-columns:
+    36px          /* checkbox */
+    minmax(220px, 1.2fr)  /* name */
+    1fr           /* email */
+    1fr           /* phone */
+    120px         /* active */
+    100px         /* orders */
+    140px         /* spent */
+    120px;        /* actions */
+    align-items: center;
+    gap: 16px;
+    padding: 14px 16px;
+}
+
+/* Header dính + nền nhạt */
+.tr.thead {
+    position: sticky; top: 0; z-index: 1;
+    background: #f8f9fb;
+    color: #667085; font-weight: 600;
+    border-bottom: 1px solid rgba(0,0,0,.06);
+}
+
+/* Dòng dữ liệu */
+.table .tr:not(.thead) { border-top: 1px solid rgba(0,0,0,.06); }
+.table .tr:not(.thead):hover { background: rgba(0,0,0,.02); }
+
+/* Ô & căn lề */
+.th, .td { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.td.name .title { font-weight: 600; }
+.td.name small { margin-left: 6px; }
+.td.spent, .td.orders { text-align: right; }
+.th.actions, .td.actions { text-align: right; }
+
+/* Checkbox cột đầu */
+.chk { display: flex; justify-content: center; }
+
+/* Nút & icon nhỏ */
+.btn.ghost.sm { height: 30px; padding: 0 10px; border-radius: 8px; border: 1px solid #e5e7eb; background: #fff; }
+.btn.icon.sm { height: 30px; width: 34px; border-radius: 8px; border: 1px solid #e5e7eb; background: #fff; }
+
+/* Xóa mọi pseudo cũ gây ra dấu tròn ở header (an toàn vì caret ở phần tử con) */
+.table.users .th::before,
+.table.users .th::after { content: none !important; }
+
+/* Header có caret sort */
+.table.users .th.sortable{
+    display:inline-flex; align-items:center; gap:6px; cursor:pointer; user-select:none;
+}
+
+/* 2 mũi tên xám mặc định */
+.table.users .sort-caret{ position:relative; width:10px; height:12px; display:inline-block; }
+.table.users .sort-caret::before,
+.table.users .sort-caret::after{
+    content:""; position:absolute; left:50%; transform:translateX(-50%);
+    border-left:4px solid transparent; border-right:4px solid transparent;
+}
+.table.users .sort-caret::before{ top:0;  border-bottom:6px solid #cbd5e1; } /* mũi lên (xám)   */
+.table.users .sort-caret::after { bottom:0; border-top:6px solid #cbd5e1; } /* mũi xuống (xám) */
+
+/* Trạng thái đã sort: tô màu mũi tương ứng */
+.table.users .sort-caret.asc::before{  border-bottom-color:#3b82f6; }  /* ASC */
+.table.users .sort-caret.desc::after{  border-top-color:#3b82f6; }     /* DESC */
+
+.name-link{ color:#2563eb; font-weight:700; text-decoration:none; }
+.name-link:hover{ text-decoration:underline; }
+.avatar.sm{ width:36px; height:36px; border-radius:50%; background:#e5e7eb; color:#374151;
+    display:inline-flex; align-items:center; justify-content:center; margin-right:10px; font-weight:700;}
+/* 1) Dùng duy nhất 1 template 7 cột cho cả header & body */
+.table.users .row,
+.table.users .row.thead{
+    display: grid;
+    grid-template-columns:
+    36px                    /* checkbox */
+    minmax(220px,1.6fr)     /* name */
+    1.4fr                   /* email */
+    1.2fr                   /* phone */
+    120px                   /* active */
+    110px                   /* orders */
+    150px;                  /* spent */
+    gap: 12px;
+    align-items: center;
+    padding: 12px 16px;
+}
+
+/* 2) Header style thống nhất */
+.table.users .row.thead{
+    background:#f7f8fb;
+    color:#667085;
+    font-weight:600;
+    border-bottom:1px solid #eef1f5;
+}
+
+/* 3) Cột checkbox: luôn chiếm đúng 36px, căn giữa */
+.table.users .cell.check{ display:flex; justify-content:center; align-items:center; }
+
+/* 4) Style checkbox riêng cho Users (không “lây” từ Product) */
+.table.users .cell.check input[type="checkbox"]{
+    appearance:none; -webkit-appearance:none;
+    width:16px; height:16px; border:1.5px solid #e2e8f0; border-radius:4px; background:#fff;
+    display:inline-grid; place-content:center; cursor:pointer; transition:.15s;
+    position:static; margin:0;
+}
+.table.users .cell.check input[type="checkbox"]:hover{ border-color:#cbd5e1; }
+.table.users .cell.check input[type="checkbox"]:checked{
+    background:#5b5ce2; border-color:#5b5ce2;
+}
+.table.users .cell.check input[type="checkbox"]:checked::after{
+    content:""; width:8px; height:8px; transform:rotate(45deg);
+    border-right:2px solid #fff; border-bottom:2px solid #fff; margin-top:-1px;
+}
+.table.users .cell.check input[type="checkbox"]:indeterminate{
+    background:#5b5ce2; border-color:#5b5ce2;
+}
+.table.users .cell.check input[type="checkbox"]:indeterminate::after{
+    content:""; width:10px; height:2px; background:#fff;
+}
+
+/* 5) Căn phải các cột số cho thẳng */
+.table.users .col-orders, .table.users .col-spent{ text-align:right; }
+/* đặt biến cột để dễ chỉnh */
+.table.users{
+    --col-check: 36px;
+    --col-name: minmax(220px,1.6fr);
+    --col-email: 1.4fr;
+    --col-phone: 1.2fr;
+    --col-active: max-content;                 /* switch nhỏ, để auto là đủ */
+    --col-orders: minmax(130px, max-content);  /* ⬅️ nở theo chữ "Số đơn hàng" */
+    --col-spent:  minmax(140px, max-content);  /* ⬅️ nở theo "Tổng chi tiêu" */
+}
+
+.table.users .row,
+.table.users .row.thead{
+    display:grid;
+    grid-template-columns:
+    var(--col-check) var(--col-name) var(--col-email) var(--col-phone)
+    var(--col-active) var(--col-orders) var(--col-spent);
+    gap:12px; align-items:center; padding:12px 16px;
+}
+
+/* header của 2 cột số: để nội dung nằm gọn, không ép sát phải */
+.table.users .row.thead .col-orders,
+.table.users .row.thead .col-spent{
+    justify-content:flex-start;     /* chỉ header; body vẫn căn phải */
+}
+
+/* body hai cột số vẫn căn phải như cũ */
+.table.users .col-orders,
+.table.users .col-spent{ text-align:right; justify-content:flex-end; }
