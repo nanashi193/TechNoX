@@ -1,10 +1,13 @@
 package com.g5.techdevices.techstore.controllers;
 
 
-import com.g5.techdevices.techstore.dtos.ProductDTO;
-import com.g5.techdevices.techstore.dtos.ProductImageDTO;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.g5.techdevices.techstore.dto.ProductDTO;
+import com.g5.techdevices.techstore.dto.ProductImageDTO;
+import com.g5.techdevices.techstore.dto.ProductVariantDTO;
 import com.g5.techdevices.techstore.entity.products.Product;
 import com.g5.techdevices.techstore.entity.products.ProductImages;
+import com.g5.techdevices.techstore.entity.products.ProductVariant;
 import com.g5.techdevices.techstore.exceptions.DataNotFoundException;
 import com.g5.techdevices.techstore.responses.ProductListResponse;
 import com.g5.techdevices.techstore.responses.ProductResponse;
@@ -136,23 +139,35 @@ public class ProductController {
     }
 
     @GetMapping("")
-    public ResponseEntity <ProductListResponse> GetProducts(
-            @RequestParam("page") int page,
-            @RequestParam("limit") int limit
-    ){
-        //tao Pageable tu thong tin trang va gioi han
-        PageRequest pageRequest = PageRequest.of(
-                page, limit,
-                Sort.by("createdAt").descending());
-        Page<ProductResponse> productPage = productService.getAllProducts(pageRequest);
-        //lay tong so trang
-        int totalPages = productPage.getTotalPages();
-        List<ProductResponse> products  = productPage.getContent();
-        return ResponseEntity.ok(ProductListResponse
-                .builder()
-                        .products(products)
-                        .totalPages(totalPages)
-                .build());
+    public ResponseEntity<ProductListResponse> getProducts(
+            @RequestParam(defaultValue = "") String keyword,
+            @RequestParam(defaultValue = "", name = "sku") String sku,
+            @RequestParam(defaultValue = "0", name = "category_id") Long categoryId,
+            @RequestParam(required = false, name = "min_price") BigDecimal minPrice,
+            @RequestParam(required = false, name = "max_price") BigDecimal maxPrice,
+            @RequestParam(defaultValue = "id_desc", name = "sort") String sort,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int limit
+    ) {
+        Sort sortSpec = switch (sort.toLowerCase()) {
+            case "name_asc" -> Sort.by("name").ascending();
+            case "name_desc"-> Sort.by("name").descending();
+            case "price_asc"-> Sort.by("price").ascending();
+            case "price_desc"-> Sort.by("price").descending();
+            case "id_asc"   -> Sort.by("id").ascending();
+            default         -> Sort.by("id").descending();
+        };
+        PageRequest pr = PageRequest.of(page, limit, sortSpec);
+
+        Page<ProductResponse> productPage =
+                productService.getAllProducts(keyword, sku, categoryId, minPrice, maxPrice, pr);
+
+        ProductListResponse body = ProductListResponse.builder()
+                .products(productPage.getContent())
+                .totalPages(productPage.getTotalPages())
+                .build();
+
+        return ResponseEntity.ok(body);
     }
 
     //search with id
@@ -196,6 +211,18 @@ public class ProductController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
     }
+    @PostMapping("/{productId}/variants")
+    public ResponseEntity<?> upsertVariant(
+            @PathVariable Long productId,
+            @Valid @RequestBody ProductVariantDTO dto
+    ) {
+        try {
+            ProductVariant savedVariant = productService.upsertVariant(productId, dto);
+            return ResponseEntity.ok(savedVariant);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
 
     //@PostMapping("/generateFakeProduct")
     public ResponseEntity<String> generateFakeProduct(){
@@ -220,4 +247,5 @@ public class ProductController {
         }
         return ResponseEntity.status(HttpStatus.OK).body("Product generated successfully");
     }
+
 }
