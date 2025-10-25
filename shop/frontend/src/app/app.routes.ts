@@ -6,7 +6,8 @@ import { ForgotPasswordComponent } from "./components/forgot-password/forgot-pas
 import { ProductPageComponent } from "./components/product/product-page.component";
 import { ownerGuard } from "./guards/owner.guard";
 import { CartComponent } from './components/cart/cart.component';
-import { ProductsListComponent } from "./components/owner/products/products-list/products-list.component";
+import {ProductsListComponent} from "./components/owner/products/products-list/products-list.component";
+import {ProductsDetailComponent} from "./components/owner/products/products-detail/products-detail.component";
 import { loginGuard } from "./guards/login.guard";
 
 export const routes: Routes = [
@@ -66,7 +67,7 @@ export const routes: Routes = [
 
     {
         path: 'owner',
-        // canActivate: [ownerGuard],
+        // canActivate: [ownerGuard], code xong bat len cho de
         loadComponent: () =>
             import('./components/owner/layout/owner-layout.component')
                 .then(m => m.OwnerLayoutComponent),
@@ -79,6 +80,8 @@ export const routes: Routes = [
                         .then(m => m.DashboardComponent),
                 title: 'Tổng quan | Owner'
             },
+
+            // ===== Products =====
             {
                 path: 'products',
                 loadComponent: () =>
@@ -89,30 +92,28 @@ export const routes: Routes = [
             {
                 path: 'products/new',
                 loadComponent: () =>
-                    import('./components/owner/products/products-form/products-form.component')
-                        .then(m => m.ProductsFormComponent),
+                    import('./components/owner/products/products-detail/products-detail.component')
+                        .then(m => m.ProductsDetailComponent),
                 title: 'Thêm sản phẩm | Owner'
             },
             {
-                path: 'products/:id/edit',
+                path: 'products/:id',
                 loadComponent: () =>
-                    import('./components/owner/products/products-form/products-form.component')
-                        .then(m => m.ProductsFormComponent),
+                    import('./components/owner/products/products-detail/products-detail.component')
+                        .then(m => m.ProductsDetailComponent),
                 title: 'Sửa sản phẩm | Owner'
             },
             {
                 path: 'users',
                 loadComponent: () =>
                     import('./components/owner/users/users-list/users-list.component')
-                        .then(m => m.UsersListComponent),
+                .then(m => m.UsersListComponent),
                 title: 'Người dùng của TechNoX'
             },
-            {
-                path: 'users/:id',
-                loadComponent: () =>
+            {path: 'users/:id', loadComponent: () =>
                     import('./components/owner/users/users-detail/users-detail.component')
-                        .then(m => m.UserDetailComponent),
-            }
+                    .then(m => m.UserDetailComponent),}
+
         ]
     },
 

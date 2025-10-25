@@ -3,10 +3,41 @@
 <div class="toolbar">
     <input class="search" placeholder="Search users" [(ngModel)]="q" (ngModelChange)="onSearch()">
 
-    <div class="bulk" *ngIf="selectedCount()">
-        <span class="muted">{{ selectedCount() }} Selected</span>
-        <button class="btn danger" (click)="bulk('delete')">Delete</button>
+    <div class="right">
+        <div class="bulk" *ngIf="selectedCount()">
+            <span class="muted">{{ selectedCount() }} Selected</span>
+            <button class="btn danger" (click)="bulk('delete')">Delete</button>
+        </div>
+
+        <button class="btn ghost" (click)="toggleFilters($event)">Filters</button>
     </div>
+    <div class="sheet-backdrop" *ngIf="showFilters" (click)="closeFilters()"></div>
+
+    <aside class="filters-sheet" [class.open]="showFilters" (click)="$event.stopPropagation()">
+        <div class="sheet-header">
+            <h3>Filters</h3>
+            <button class="icon-btn" aria-label="Close" (click)="closeFilters()">×</button>
+        </div>
+
+        <div class="sheet-body">
+            <div class="fp-group">
+                <div class="fp-label">Active</div>
+                <label class="fp-row"><input type="radio" name="act" [(ngModel)]="flt.activeFilter" value="all">
+                    All</label>
+                <label class="fp-row"><input type="radio" name="act" [(ngModel)]="flt.activeFilter" value="active">
+                    Active</label>
+                <label class="fp-row"><input type="radio" name="act" [(ngModel)]="flt.activeFilter" value="inactive">
+                    Inactive</label>
+            </div>
+
+            <!-- chỗ này sau bạn thêm các nhóm filter khác -->
+        </div>
+
+        <div class="sheet-footer">
+            <button class="btn ghost" (click)="clearFilters()">Clear all filters</button>
+            <button class="btn primary" (click)="applyFilters()">Save</button>
+        </div>
+    </aside>
 </div>
 
 <div class="table users">

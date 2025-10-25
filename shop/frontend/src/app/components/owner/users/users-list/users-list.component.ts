@@ -1,4 +1,4 @@
-import {Component, OnInit, inject} from '@angular/core';
+import {Component, OnInit, inject, HostListener} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {FormsModule} from '@angular/forms';
 import {Router, RouterLink} from '@angular/router';
@@ -18,6 +18,7 @@ type SortField = 'name' | 'email' | 'phone'|'isActive' | 'ordersCount' | 'totalS
 export class UsersListComponent implements OnInit {
     private svc = inject(OwnerUsersService);
     private router = inject(Router);
+    private apiPageZeroBased = false;
 
     // ===== state =====
     q = '';
@@ -57,7 +58,9 @@ export class UsersListComponent implements OnInit {
     load() {
         this.loading = true;
         const params: any = {q: this.q, page: this.page, size: this.size};
+        const apiPage = this.apiPageZeroBased ? this.page - 1 : this.page;
         if (this.sort) params.sort = `${this.sort.field},${this.sort.dir}`;
+        if (this.currentFilters.active !== null) params.active = this.currentFilters.active;
 
         this.svc.search(params).subscribe({
             next: (res) => {
@@ -156,6 +159,41 @@ export class UsersListComponent implements OnInit {
             });
         }
     }
+    showFilters = false;
+    private _bodyOverflow?: string;
+    flt = {
+        activeFilter: 'all' as 'all' | 'active' | 'inactive'
+    };
+
+    toggleFilters(e: Event) {
+        e.stopPropagation();
+        this._bodyOverflow = document.body.style.overflow;
+        document.body.style.overflow = 'hidden';     // khoá scroll nền
+        this.showFilters = true;
+    }
+    currentFilters = { active: null as boolean | null };
+
+    applyFilters(){
+        this.currentFilters.active =
+            this.flt.activeFilter === 'active'   ? true  :
+                this.flt.activeFilter === 'inactive' ? false : null;
+
+        this.page = 1;
+        this.load();            // không truyền gì
+        this.closeFilters();
+    }
+
+    clearFilters() {
+        this.flt.activeFilter = 'all';
+    }
+    closeFilters(){
+        this.showFilters = false;
+        document.body.style.overflow = this._bodyOverflow || '';
+    }
+    @HostListener('document:keydown.escape')
+    onEsc(){ if (this.showFilters) this.closeFilters(); }
+
+
 
     goto(n: number) {
         if (n >= 1 && n <= this.totalPages && n !== this.page) {
