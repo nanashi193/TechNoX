@@ -1,9 +1,14 @@
 import {Component} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {FormBuilder, FormGroup, FormControl, Validators, ReactiveFormsModule} from '@angular/forms';
-import {ActivatedRoute, Router, RouterModule} from '@angular/router';
+import {Router, RouterModule} from '@angular/router';
 import {AuthService} from '../../services/auth.service';
 import {finalize} from 'rxjs/operators';
+import { jwtDecode } from 'jwt-decode';
+
+interface TokenPayload {
+    roleName: string;
+}
 
 @Component({
     selector: 'app-login',
@@ -25,7 +30,7 @@ export class LoginComponent {
         return this.form.get('password') as FormControl;
     }
 
-    constructor(private fb: FormBuilder, private router: Router,private route :ActivatedRoute,private auth: AuthService) {
+    constructor(private fb: FormBuilder, private router: Router, private auth: AuthService) {
         this.form = this.fb.group({
             email: ['', [
                 Validators.required, Validators.email,
@@ -48,23 +53,29 @@ export class LoginComponent {
         this.auth.login({ email, password })
             .pipe(finalize(() => this.loading = false))
             .subscribe({
-                next: (res) => {
-                    if (remember)
-                        localStorage.setItem('rememberUser', email);
-                    else
-                        localStorage.removeItem('rememberUser');
-                    // 1) Nếu có redirect từ guard -> quay lại đúng trang
-                    const redirect =
-                        this.route.snapshot.queryParamMap.get('redirectTo') ??
-                        this.route.snapshot.queryParamMap.get('returnUrl'); // hỗ trợ cả 2 tên
+                next: (res: any) => {
+                    const token = res.token;
 
-                    if (redirect) { this.router.navigateByUrl(redirect); return; }
+                    if (!token) {
+                        this.errorMsg = 'Lỗi đăng nhập: Không nhận được token.';
+                        return;
+                    }
+                    // Xử lý "Remember Me"
+                    // ... (code 'remember' của bạn)
 
-                    // 2) Nếu không có redirect: ADMIN/OWNER vào thẳng owner
-                    if (this.auth.hasRole('ADMIN') || this.auth.hasRole('OWNER')) {
-                        this.router.navigate(['/owner/dashboard']); // chọn route owner bạn muốn
-                    } else {
-                        this.router.navigate(['/home']);           // user thường
+                    try {
+                        const decodedToken: any = jwtDecode(token);
+                        const role = decodedToken.roleName;
+                        // 3. KIỂM TRA VÀ ĐIỀU HƯỚNG
+                        if (role && (role.toUpperCase() === 'ADMIN' || role.toUpperCase() === 'OWNER')) {
+                            this.router.navigate(['/owner']);
+                        } else {
+                            this.router.navigate(['/home']);
+                        }
+                    } catch (e) {
+                        console.error("Token không hợp lệ hoặc lỗi giải mã:", e);
+                        this.errorMsg = 'Lỗi đăng nhập: Token không hợp lệ.';
+                        this.router.navigate(['/home']);
                     }
                 },
                 error: () => this.errorMsg = 'Sai email hoặc mật khẩu.'

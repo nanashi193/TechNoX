@@ -13,7 +13,7 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CartItemDTO {
-    private Integer variantId;
+    private Long variantId;
     private Long productId;
     private String productName;
     private String color;

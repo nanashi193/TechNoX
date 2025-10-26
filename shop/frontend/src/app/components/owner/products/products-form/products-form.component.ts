@@ -1,13 +1,10 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, Validators, NonNullableFormBuilder } from '@angular/forms';
-import { FormsModule } from '@angular/forms';
+import { FormsModule } from '@angular/forms';                // <= cần cho ngModel
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import {ProductService} from "../../../../services/products.service";
+import { ProductService } from '../../../../services/products.service';
 import { Product } from '../../../../models/products.model';
-import { take } from 'rxjs/operators';
-import { firstValueFrom } from 'rxjs';
-
 
 type MediaItem = { id: string; previewUrl: string; file?: File; isUrl?: boolean };
 type VariantRow = { name: string; values: string[]; input: string };
@@ -21,19 +18,16 @@ type ProductFormValue = {
     standalone: true,
     selector: 'owner-product-form',
     imports: [CommonModule, ReactiveFormsModule, FormsModule, RouterLink], // <= FormsModule
-    templateUrl: './products-detail.component.html',
-    styleUrls: ['./products-detail.component.css', '../../owner-shared.css'],
+    templateUrl: './products-form.component.html',
+    styleUrls: ['./products-form.component.css', '../../owner-shared.css'],
 })
-export class ProductsDetailComponent implements OnInit {
+export class ProductsFormComponent implements OnInit {
     private fb = inject(NonNullableFormBuilder);
-    private productService = inject(ProductService);
+    private svc = inject(ProductService);
     private route = inject(ActivatedRoute);
     private router = inject(Router);
 
     id?: number;
-    editing = false;
-    originalValue: any;
-    variantsDisabled = false;
 
     // ===== Reactive form (không null)
     f = this.fb.group({
@@ -42,10 +36,17 @@ export class ProductsDetailComponent implements OnInit {
         sku: this.fb.control('', { validators: [Validators.required] }),
         description: this.fb.control(''),
         price: this.fb.control(0, { validators: [Validators.required, Validators.min(0)] }),
+        currency: this.fb.control('VND'),
         variants: this.fb.control(0, { validators: [Validators.min(0)] }),
         inStock: this.fb.control(true),
         stockQty: this.fb.control(0, { validators: [Validators.min(0)] }),
-        image: this.fb.control('')
+        image: this.fb.control(''),
+
+        // Optional – organization/weight
+        vendor: this.fb.control(''),
+        category: this.fb.control(''),
+        weight: this.fb.control(0),
+        weightUnit: this.fb.control('kg'),
     });
 
     // ===== Media state
@@ -59,48 +60,31 @@ export class ProductsDetailComponent implements OnInit {
     private original!: ProductFormValue;
 
     get isEdit(){ return !!this.id; }
+    get showStickyBar(){ return this.isEdit && this.f.dirty; } // hiện banner khi có thay đổi
+
     ngOnInit(): void {
-        const raw = this.route.snapshot.paramMap.get('id');
-        this.id = raw && raw !== 'new' ? Number(raw) : undefined;
+        const idParam = this.route.snapshot.paramMap.get('id');
+        this.id = idParam ? +idParam : undefined;
 
         if (this.id) {
-            // DETAIL: load và khóa form (view-only). Bấm Edit mới enable.
-            this.productService.get(this.id).pipe(take(1)).subscribe(p => {
-                this.f.reset({
+            this.svc.get(this.id).subscribe((p: Product) => {
+                const patch: ProductFormValue = {
                     name: p.name,
-                    sku: p.sku ?? p.sku ?? '',
-                    stockQty: p.stockQty ?? 0,
-                    description: p.description ?? '',
-                    price: p.price ?? 0,
+                    type: p.type ?? '',
+                    sku: p.sku,
+                    price: p.price,
+                    variants: p.variants ?? 0,
                     inStock: !!p.inStock,
                     image: p.image ?? '',
-                }, { emitEvent: false });
-
-                this.originalValue = this.f.getRawValue();
-                this.setEditMode(false); // view-only
+                    stockQty: p.stockQty ?? 0
+                    // các field khác (vendor/category/collections/weight...) hiện chưa map từ model
+                };
+                this.f.patchValue(patch);
+                this.original = structuredClone(this.f.getRawValue());
+                this.f.markAsPristine();
+                this.f.markAsUntouched();
             });
-        } else {
-            this.setEditMode(true);
         }
-    }
-    setEditMode(on: boolean) {
-        this.editing = on;
-        on ? this.f.enable({ emitEvent: false }) : this.f.disable({ emitEvent: false });
-        this.variantsDisabled = !on; // nếu không có Variants, giữ cũng không sao
-    }
-
-    edit()  { this.setEditMode(true); }
-
-    cancel() {
-        if (this.originalValue) {
-            this.f.reset(this.originalValue, { emitEvent: false });
-            this.f.markAsPristine();
-        }
-        this.setEditMode(!!this.id ? false : true);
-    }
-
-    get showStickyBar() {         // nếu HTML đang dùng thanh sticky khi có thay đổi
-        return this.editing && this.f.dirty;
     }
     discard(){                       // khôi phục lại snapshot
         if (this.f.dirty && !confirm('Discard all unsaved changes?')) return;
@@ -109,34 +93,29 @@ export class ProductsDetailComponent implements OnInit {
         this.f.markAsUntouched();
     }
     // ===== Save
-    async save() {
-        if (this.f.invalid) return;
-
-        const body = {
-            ...this.f.getRawValue(),
-            // nếu bạn có biến thể/ảnh, thêm vào đây:
-            // variants: this.variants,
-            // images: this.images,
+    save(): void {
+        // chỉ gửi những trường có trong Product (giữ BE an toàn)
+        const v = this.f.getRawValue();
+        const dto: Partial<Product> = {
+            name: v.name,
+            type: v.type || v.category || '',
+            sku: v.sku,
+            price: v.price,
+            variants: v.variants,
+            inStock: v.inStock,
+            image: v.image,
+            stockQty: v.stockQty,
         };
 
-        if (this.id) {
-            // UPDATE
-            await firstValueFrom(this.productService.update(this.id, body));
-            this.originalValue = this.f.getRawValue();
-            this.f.markAsPristine();
-            this.setEditMode(false); // quay về view-only
-        } else {
-            // CREATE
-            const created: any = await firstValueFrom(this.productService.create(body));
-            // điều hướng sang trang detail vừa tạo (nếu service trả id)
-            if (created?.id) {
-                this.router.navigate(['/owner/products', created.id]);
-            } else {
-                this.setEditMode(false);
-            }
-        }
-    }
+        // Nếu sau này cần: map thêm payload cho media/variants:
+        // const variantPayload = this.variants.map(o => ({ name: o.name, values: o.values }));
+        // const filesToUpload = this.media.filter(m => m.file).map(m => m.file);
+        // const imageUrls = this.media.filter(m => m.isUrl).map(m => m.previewUrl);
 
+        const done = () => this.router.navigate(['/owner/products']);
+        if (this.id) this.svc.update(this.id, dto).subscribe(done);
+        else this.svc.create(dto).subscribe(done);
+    }
 
     // ===== Media handlers
     onDragOver(e: DragEvent){ e.preventDefault(); this.dragOver = true; }

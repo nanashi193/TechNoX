@@ -1,9 +1,9 @@
-import {Component, HostListener, inject, OnInit} from '@angular/core';
+import {Component, inject, OnInit} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import {Product} from "../../../../models/products.model";
 import {ProductService} from "../../../../services/products.service";
-import {Router, RouterLink} from "@angular/router";
+import {Router} from "@angular/router";
 
 type ProductRow = {
     id:number; name:string; image:string; type:string;
@@ -14,7 +14,7 @@ type SortField = 'name'|'type'|'sku'|'price'|'variants'|'stockQty';
 @Component({
     selector: 'app-products-list',
     standalone: true,
-    imports: [CommonModule, FormsModule, RouterLink],
+    imports: [CommonModule, FormsModule],
     templateUrl: './products-list.component.html',
     styleUrls: ['./products-list.component.css']
 })
@@ -56,44 +56,24 @@ export class ProductsListComponent implements OnInit {
 
     load(){
         this.loading = true;
-
-        const params: any = {
-            q: this.q || undefined,   // nếu bạn vẫn muốn giữ ô search
-            page: this.page,
-            size: this.size
-        };
-
-        // tồn kho
-        if (this.flt.stock !== 'all') params.inStock = (this.flt.stock === 'in');
-        // SKU
-        const sku = this.flt.sku.trim();
-        if (sku) params.sku = sku;
-        // type (nếu BE dùng categoryId, đổi key & kiểu)
-        if (this.flt.type) params.type = this.flt.type;
+        const apiPage = this.apiPageZeroBased ? this.page - 1 : this.page;
+        const params: any = { q: this.q, page: this.page, size: this.size };
 
         if (this.sort) params.sort = `${this.sort.field},${this.sort.dir}`;
+        this.svc.search(params).subscribe((res: any) => {
+            const items: Product[] = (res.items ?? res.content ?? res) as Product[];
+            this.products = items;
+            this.filtered = [...items];
 
-        this.svc.search(params).subscribe({
-            next: (res: any) => {
-                const items: Product[] = (res.items ?? res.content ?? res) as Product[];
-                this.products = items;
-                this.filtered = [...items];
+            this.total = res.total ?? res.totalCount ?? res.totalElements ?? (Array.isArray(items) ? items.length : 0);
 
-                // gom các type có trong trang hiện tại để show select (tuỳ chọn)
-                const moreTypes = Array.from(new Set(items.map(p => p.type).filter(Boolean) as string[]));
-                this.types = Array.from(new Set([...(this.types ?? []), ...moreTypes]));
+            const tp = this.totalPages;
+            if (this.page > tp) { this.page = tp; if (tp > 0) this.load(); else this.loading = false; return; }
 
-                this.total = res.total ?? res.totalCount ?? res.totalElements ?? items.length;
-                const tp = this.totalPages;
-                if (this.page > tp) { this.page = tp; if (tp > 0) this.load(); else this.loading = false; return; }
-
-                this.selected.clear();
-                this.loading = false;
-            },
-            error: () => this.loading = false
-        });
+            this.selected.clear();
+            this.loading = false;
+        }, _ => this.loading = false);
     }
-
     sortBy(field: SortField){
         if (!this.sort || this.sort.field !== field) {
             this.sort = { field, dir: 'asc' };
@@ -134,6 +114,8 @@ export class ProductsListComponent implements OnInit {
         const ids = [...this.selected];
         if (ids.length === 0) return;
         if (action==='delete') this.svc.bulkDelete(ids).subscribe(()=>this.load());
+        if (action==='publish') this.svc.bulkPublish(ids).subscribe(()=>this.load());
+        if (action==='unpublish') this.svc.bulkUnpublish(ids).subscribe(()=>this.load());
         // 'archive' tuỳ BE: có thể reuse bulkUnpublish hoặc tạo endpoint riêng
     }
 
@@ -145,42 +127,6 @@ export class ProductsListComponent implements OnInit {
             error: () => p.inStock = prev
         });
     }
-
-    showFilters = false;
-    private _bodyOverflow?: string;
-    flt = {
-        stock: 'all' as 'all' | 'in' | 'out', // tồn kho
-        sku: '',                              // mã SKU
-        type: null as string | null           // loại (type). Nếu BE dùng categoryId: đổi sang number|null
-    };
-    types: string[] = [];
-
-
-    toggleFilters(e: Event) {
-        e.stopPropagation();
-        this._bodyOverflow = document.body.style.overflow;
-        document.body.style.overflow = 'hidden';     // khoá scroll nền
-        this.showFilters = true;
-    }
-    applyFilters(){
-        this.page = 1;
-        this.load();
-        this.closeFilters();
-    }
-
-    clearFilters(){
-        this.flt = { stock: 'all', sku: '', type: null };
-        this.page = 1;
-        this.load();
-    }
-
-    closeFilters(){
-        this.showFilters = false;
-        document.body.style.overflow = this._bodyOverflow || '';
-    }
-    @HostListener('document:keydown.escape')
-    onEsc(){ if (this.showFilters) this.closeFilters(); }
-
 
 // pages
     goto(n: number) { if (n >= 1 && n <= this.totalPages && n !== this.page){ this.page = n; this.load(); } }

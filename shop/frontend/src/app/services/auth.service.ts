@@ -28,24 +28,19 @@ export class AuthService {
     constructor(private http: HttpClient) {}
 
     // ======  Token helpers ======
-    private storageKey = 'access_token';
-
     get token(): string | null {
-        return localStorage.getItem(this.storageKey) || localStorage.getItem('token'); // fallback
+        return localStorage.getItem('token');
     }
-    setToken(token: string | null) {
-        if (token) {
-            localStorage.setItem(this.storageKey, token);
-            localStorage.removeItem('token'); // dọn key cũ
-            this.currentUserSubject.next(this.decodeToken(token));
-        } else {
-            localStorage.removeItem(this.storageKey);
-            localStorage.removeItem('token');
-            this.currentUserSubject.next(null);
-        }
-    }
-    clearToken(){ this.setToken(null); }
 
+    setToken(token: string) {
+        localStorage.setItem('token', token);
+        this.currentUserSubject.next(this.decodeToken(token));
+    }
+
+    clearToken() {
+        localStorage.removeItem('token');
+        this.currentUserSubject.next(null);
+    }
 
     // Đăng nhập (ví dụ backend trả về { token } hoặc { accessToken })
     login(payload: LoginRequest): Observable<any> {
@@ -89,21 +84,22 @@ export class AuthService {
         const p = this.getUserFromToken();
         if (!p) return false;
 
-        let raw: unknown = p.roles ?? p.authorities ?? p.role ?? p.scope ?? [];
-        let arr: string[] =
-            Array.isArray(raw) ? raw.map(String) :
-                typeof raw === 'string' ? raw.split(/[,\s]+/).filter(Boolean) :
-                    [];
+        // Gom tất cả khả năng đặt tên claim của backend
+        let rawRoles: unknown =
+            p.roles ?? p.authorities ?? p.role ?? p.scope ?? null;
 
-        const norm = (r: string) => {
-            const up = r.toUpperCase();
-            return up.startsWith('ROLE_') ? up.slice(5) : up; // ROLE_ADMIN -> ADMIN
-        };
+        // Chuẩn hoá về mảng string
+        let roles: string[] = [];
+        if (Array.isArray(rawRoles)) {
+            roles = rawRoles.map(String);
+        } else if (typeof rawRoles === 'string') {
+            // scope: 'ROLE_USER ROLE_OWNER' hoặc 'USER,OWNER'
+            roles = rawRoles.split(/[,\s]+/).filter(Boolean);
+        }
 
-        const roles = arr.map(norm);
-        return roles.includes(role.toUpperCase());
+        const needle = role.toUpperCase();
+        return roles.map(r => r.toUpperCase()).includes(needle);
     }
-
 
     // ====== 🔎 Decode & đọc user từ token ======
     private decodeToken(token: string): JwtPayload | null {
