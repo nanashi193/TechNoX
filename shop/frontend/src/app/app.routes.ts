@@ -67,7 +67,7 @@ export const routes: Routes = [
 
     {
         path: 'owner',
-        // canActivate: [ownerGuard], code xong bat len cho de
+        canActivate: [ownerGuard],
         loadComponent: () =>
             import('./components/owner/layout/owner-layout.component')
                 .then(m => m.OwnerLayoutComponent),
