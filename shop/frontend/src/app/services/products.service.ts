@@ -12,6 +12,33 @@ export interface ProductListResponse {
     products: Product[];
     totalPages: number; // từ BE
 }
+type RawProduct = {
+    id?: number;
+    name: string;
+    price: number | string;
+    thumbnail?: string;
+    imageUrl?: string;
+    description?: string;
+    status?: boolean;
+
+    variants?: Array<{ sku?: string; code?: string; quantity?: number; qty?: number }>;
+    variantsCount?: number;
+
+    createdAt?: string;  CreatedAt?: string;
+    categoryName?: string;
+    category?: { id: number; name: string };
+    CategoryId?: number;
+
+    sku?: string;
+    code?: string;
+    productCode?: string;
+
+    stockQty?: number;
+    quantity?: number;
+    totalQuantity?: number;
+};
+type ProductListResponseBE = { products: RawProduct[]; totalPages: number };
+
 
 @Injectable({providedIn: 'root'})
 export class ProductService {
@@ -19,68 +46,51 @@ export class ProductService {
     private base = `${environment.apiBaseUrl}/products`;
     private useMock = !!(environment as any).useMock; // true => dùng mock
 
-    search(opts: {
-        q?: string;
-        page?: number;
-        size?: number;
-        sort?: string;
-        inStock?: boolean | null;
-        sku?: string;
-        type?: string|number|null;
-    } = {})
-        : Observable<Page<Product>> {
-        if (!this.useMock) {
-            const page1 = opts.page ?? 1;              // FE 1-based
-            const size = opts.size ?? 20;
-            const page0 = Math.max(0, page1 - 1);      // BE 0-based
+    search({ page = 1, size = 8 } = {}) {
+        const page0 = Math.max(0, page - 1);
+        const params = new HttpParams().set('page', page0).set('limit', size);
 
-            let params = new HttpParams()
-                .set('page', String(page0))
-                .set('limit', String(size));
+        return this.http.get<ProductListResponseBE>(this.base, { params }).pipe(
+            map(res => {
+                const raw: RawProduct[] = res.products ?? [];
 
-            if (opts.q)                               params = params.set('q', opts.q);
-            if (typeof opts.inStock === 'boolean')    params = params.set('inStock', String(opts.inStock));
-            if (opts.sku && opts.sku.trim())          params = params.set('sku', opts.sku.trim());
-            if (opts.type !== null && opts.type !== undefined && String(opts.type).trim() !== '')
-                params = params.set('type', String(opts.type)); // nếu BE dùng categoryId thì đổi 'type' -> 'categoryId'
-            if (opts.sort)                            params = params.set('sort', opts.sort);
+                const items: Product[] = raw.map(p => {
+                    const sku =
+                        p.sku ?? p.code ?? p.productCode ??
+                        (Array.isArray(p.variants) && p.variants[0]
+                            ? (p.variants[0].sku ?? p.variants[0].code ?? '')
+                            : '');
 
-            // gọi BE: /products?page=<0-based>&limit=<size>
+                    const variants = Array.isArray(p.variants)
+                        ? p.variants.length
+                        : (p.variantsCount ?? 0);
 
-            return this.http.get<ProductListResponse>(this.base, { params }).pipe(
-                map(res => {
-                    const items = (res?.products ?? []).map(p => ({
-                        ...p,
-                        price: Number((p as any).price) // an toàn nếu BE đôi lúc trả string
-                    }));
-                    const totalPages = Math.max(0, res?.totalPages ?? 0);
-                    const total = totalPages * size;  // BE chưa trả totalElements -> ước lượng để vẽ pager
+                    const stockQty = Array.isArray(p.variants)
+                        ? p.variants.reduce((s, v) => s + (v.quantity ?? v.qty ?? 0), 0)
+                        : (p.stockQty ?? p.quantity ?? p.totalQuantity ?? 0);
 
-                    return { items, total, page: page1, size } as Page<Product>;
-                })
-            );
-        }
-        // MOCK search + paginate
-        const page = opts.page ?? 1, size = opts.size ?? 20;
-        const q = (opts.q ?? '').toLowerCase();
-        const sort = opts.sort ?? ''; // ví dụ: 'price,asc' | 'price,desc'
+                    const type =
+                        p.categoryName ?? p.category?.name ??
+                        (p.CategoryId != null ? `#${p.CategoryId}` : '');
 
-        let filtered = q
-            ? MOCK_PRODUCTS.filter(p => (p.name + p.sku + p.type + (p.description ?? '')).toLowerCase().includes(q))
-            : [...MOCK_PRODUCTS];
+                    return {
+                        id: p.id ?? 0,
+                        name: p.name,
+                        image: p.thumbnail ?? p.imageUrl ?? '',
+                        type,
+                        sku,
+                        price: Number(p.price ?? 0),
+                        variants,
+                        stockQty,
+                        inStock: p.status ?? stockQty > 0,
+                        description: p.description ?? '',
+                        createdAt: (p as any).createdAt ?? (p as any).CreatedAt ?? ''
+                    } as Product;
+                });
 
-        if (sort) {
-            const [field, dir] = sort.split(',');
-            filtered.sort((a: any, b: any) => {
-                const va = a[field], vb = b[field];
-                return (va > vb ? 1 : va < vb ? -1 : 0) * (dir === 'desc' ? -1 : 1);
-            });
-        }
-
-        const start = (page - 1) * size;
-        const items = filtered.slice(start, start + size);
-        return of({items, total: filtered.length, page, size}).pipe(delay(200));
-    }
+                return { items, total: (res.totalPages ?? 0) * size, page, size };
+            })
+        )}
 
     get(id: number): Observable<Product> {
         if (!this.useMock) return this.http.get<Product>(`${this.base}/${id}`);
