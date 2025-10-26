@@ -12,6 +12,8 @@ export interface ProductListResponse {
     products: Product[];
     totalPages: number; // từ BE
 }
+type RawVariant = { sku?: string; code?: string; quantity?: number; qty?: number; stock?: number };
+
 type RawProduct = {
     id?: number;
     name: string;
@@ -21,7 +23,7 @@ type RawProduct = {
     description?: string;
     status?: boolean;
 
-    variants?: Array<{ sku?: string; code?: string; quantity?: number; qty?: number }>;
+    variants?: RawVariant[] | number | null;
     variantsCount?: number;
 
     createdAt?: string;  CreatedAt?: string;
@@ -49,29 +51,35 @@ export class ProductService {
     search({ page = 1, size = 8 } = {}) {
         const page0 = Math.max(0, page - 1);
         const params = new HttpParams().set('page', page0).set('limit', size);
+        const toNum = (v: any) => (v == null ? 0 : Number(v));
 
         return this.http.get<ProductListResponseBE>(this.base, { params }).pipe(
             map(res => {
                 const raw: RawProduct[] = res.products ?? [];
-
                 const items: Product[] = raw.map(p => {
+                    // 1) số biến thể: nhận cả number lẫn array
+                    const variantsCount =
+                        typeof p.variants === 'number'
+                            ? p.variants
+                            : Array.isArray(p.variants)
+                                ? p.variants.length
+                                : (p.variantsCount ?? 0);
+
+                    // 2) tổng tồn kho: nếu có mảng biến thể thì cộng, nếu không lấy field tổng
+                    const stockQty = Array.isArray(p.variants)
+                        ? p.variants.reduce((s, v) => s + toNum(v.quantity ?? v.qty ?? v.stock), 0)
+                        : toNum(p.totalQuantity ?? p.quantity ?? p.stockQty);
+
+                    // 3) SKU: ưu tiên product-level; nếu không có thì lấy ở biến thể đầu
                     const sku =
                         p.sku ?? p.code ?? p.productCode ??
                         (Array.isArray(p.variants) && p.variants[0]
                             ? (p.variants[0].sku ?? p.variants[0].code ?? '')
                             : '');
 
-                    const variants = Array.isArray(p.variants)
-                        ? p.variants.length
-                        : (p.variantsCount ?? 0);
-
-                    const stockQty = Array.isArray(p.variants)
-                        ? p.variants.reduce((s, v) => s + (v.quantity ?? v.qty ?? 0), 0)
-                        : (p.stockQty ?? p.quantity ?? p.totalQuantity ?? 0);
-
+                    // 4) Loại: name nếu có, không thì hiển thị #ID cho đỡ trống
                     const type =
-                        p.categoryName ?? p.category?.name ??
-                        (p.CategoryId != null ? `#${p.CategoryId}` : '');
+                        p.categoryName ?? p.category?.name ?? (p.CategoryId != null ? `#${p.CategoryId}` : '');
 
                     return {
                         id: p.id ?? 0,
@@ -80,7 +88,7 @@ export class ProductService {
                         type,
                         sku,
                         price: Number(p.price ?? 0),
-                        variants,
+                        variants: variantsCount,
                         stockQty,
                         inStock: p.status ?? stockQty > 0,
                         description: p.description ?? '',
