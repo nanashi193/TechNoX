@@ -11,6 +11,7 @@ import com.g5.techdevices.techstore.entity.products.ProductVariant;
 import com.g5.techdevices.techstore.exceptions.DataNotFoundException;
 import com.g5.techdevices.techstore.responses.ProductListResponse;
 import com.g5.techdevices.techstore.responses.ProductResponse;
+import com.g5.techdevices.techstore.services.ImageStorageService;
 import com.g5.techdevices.techstore.services.ProductService;
 import com.github.javafaker.Faker;
 import lombok.RequiredArgsConstructor;
@@ -30,10 +31,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.nio.file.*;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -41,6 +39,9 @@ import java.util.UUID;
 
 public class ProductController {
     private final ProductService productService;
+    // thêm vào class (cạnh ProductService)
+    private final ImageStorageService storage; // ✅ NEW
+
 
     // ===================== CREATE =====================
 
@@ -74,10 +75,11 @@ public class ProductController {
             @ModelAttribute("files") List<MultipartFile> files){
         try {
             Product existingProduct = productService.getProductById(productId);
+            files = (files == null) ? new ArrayList<>() : files;
             if (files.size() > ProductImages.MAXIMUM_IMAGES_PER_PRODUCT){
                 return ResponseEntity.badRequest().body("You can upload maximun 5 inmages.");
             }
-            files = files ==null ? new ArrayList<MultipartFile>() : files;
+
             List<ProductImages> productImages = new ArrayList<>();
             for(MultipartFile file : files){
                 if(file.getSize() == 0){
@@ -94,12 +96,12 @@ public class ProductController {
                             .body("File must contain image");
                 }
                 //luu file va update thumbnaild trong DTO
-                String fileName = storeFile(file); //thay the lai code ở đây
+                var up = storage.upload(file, "techstore/products/" + productId);
                 //luu vào đối tượng product trong DB => sẽ làm sau
                 ProductImages productImage = productService.createProductImages(
                         existingProduct.getId()
                         , ProductImageDTO.builder()
-                                .imageUrl(fileName)
+                                .imageUrl(up.getUrl())
                                 .build()
                 );
                 productImages.add(productImage);
@@ -246,6 +248,33 @@ public class ProductController {
             }
         }
         return ResponseEntity.status(HttpStatus.OK).body("Product generated successfully");
+    }
+
+    @PutMapping("/{productId}/thumbnail/from-image/{imageId}")
+    public ResponseEntity<?> setThumbnailFromImage(@PathVariable Long productId,
+                                                   @PathVariable Long imageId) {
+        try {
+            // 1) Lấy product & image
+            Product product = productService.getProductById(productId);
+            ProductImages img = productService.getProductImageById(imageId);
+
+            // 2) Ảnh phải thuộc đúng product
+            if (!img.getProduct().getId().equals(productId)) {
+                return ResponseEntity.badRequest().body("Image does not belong to this product");
+            }
+
+            // 3) Cập nhật thumbnail = URL Cloudinary của ảnh
+            product.setThumbnail(img.getImageUrl());
+            productService.save(product);
+
+            // 4) Trả về kết quả
+            return ResponseEntity.ok(Map.of(
+                    "productId", productId,
+                    "thumbnail", product.getThumbnail()
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 
 }

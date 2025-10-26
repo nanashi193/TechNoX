@@ -34,6 +34,8 @@ public class WebSecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .addFilterBefore(jwtTokenFilter, UsernamePasswordAuthenticationFilter.class)
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers(GET, apiPrefix + "/_health/**").permitAll()
+                        .requestMatchers(GET, "/cloudinary-test").permitAll()
                         // Public POST endpoints
                         .requestMatchers(POST, String.format("%s/users/register", apiPrefix))
                         .permitAll()
@@ -57,10 +59,12 @@ public class WebSecurityConfig {
                         .permitAll()
                         // ✅ Cho phép tạo sản phẩm (POST)
                         .requestMatchers(POST, String.format("%s/products", apiPrefix))
-                        .permitAll()
+                        .hasAnyRole(Role.ADMIN, Role.OWNER)
                         // ✅ Cho phép upload ảnh sản phẩm (nếu có)
                         .requestMatchers(POST, String.format("%s/products/uploads/**", apiPrefix))
-                        .permitAll()
+                        .hasAnyRole(Role.ADMIN, Role.OWNER)
+                        .requestMatchers(PUT, apiPrefix + "/products/*/thumbnail/from-image/*")
+                        .hasAnyRole(Role.ADMIN, Role.OWNER)
                         .requestMatchers(PUT, apiPrefix + "/products/**")
                         .hasAnyRole(Role.ADMIN, Role.OWNER)
 

@@ -244,4 +244,17 @@ public class ProductService implements  IProductService {
                 .map(ProductResponse::fromProduct);
     }
 
+
+    // Lưu product sau khi đổi thumbnail
+    public Product save(Product product) {
+        return productRepository.save(product);
+    }
+
+    // Lấy ảnh theo id (dùng trong API đặt thumbnail)
+    public ProductImages getProductImageById(Long imageId) throws Exception {
+        return productImageRepository.findById(imageId)
+                .orElseThrow(() -> new DataNotFoundException("Cannot find product image with id: " + imageId));
+    }
+
+
 }

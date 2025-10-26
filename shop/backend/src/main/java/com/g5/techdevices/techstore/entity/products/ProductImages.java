@@ -23,6 +23,6 @@ public class ProductImages {
     @JoinColumn(name= "ProductId")
     private Product product;
 
-    @Column(name = "ImageUrl", length = 300)
+    @Column(name = "ImageUrl", columnDefinition = "nvarchar(500)") // lưu full https URL
     private String imageUrl;
 }
