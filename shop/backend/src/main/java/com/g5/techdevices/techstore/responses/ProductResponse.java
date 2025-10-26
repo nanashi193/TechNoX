@@ -35,6 +35,7 @@ public class ProductResponse extends BaseResponse {
                 product.getCategory() != null ? product.getCategory().getName() : null)
                 .status(product.isStatus())
                 .build();
+        productResponse.setId(product.getId());
         productResponse.setCreateAt(product.getCreatedAt());
         if (product.getVariants() != null) {
             productResponse.setVariants(

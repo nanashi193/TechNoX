@@ -50,7 +50,7 @@ export class ProductService {
 
     search({ page = 1, size = 8 } = {}) {
         const page0 = Math.max(0, page - 1);
-        const params = new HttpParams().set('page', page0).set('limit', size);
+        const params = new HttpParams().set('page', String(page0)).set('limit', String(size));
         const toNum = (v: any) => (v == null ? 0 : Number(v));
 
         return this.http.get<ProductListResponseBE>(this.base, { params }).pipe(
@@ -80,9 +80,11 @@ export class ProductService {
                     // 4) Loại: name nếu có, không thì hiển thị #ID cho đỡ trống
                     const type =
                         p.categoryName ?? p.category?.name ?? (p.CategoryId != null ? `#${p.CategoryId}` : '');
+                    const rawId = (p as any).id ?? (p as any).Id ?? (p as any).productId;
+                    const id = Number.isFinite(Number(rawId)) ? Number(rawId) : undefined;
 
                     return {
-                        id: p.id ?? 0,
+                        id,                         // dùng id đã chuẩn hoá
                         name: p.name,
                         image: p.thumbnail ?? p.imageUrl ?? '',
                         type,
