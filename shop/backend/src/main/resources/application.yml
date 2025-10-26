@@ -5,7 +5,7 @@ spring:
   datasource:
     url: jdbc:sqlserver://localhost:1433;databaseName=TEStore;encrypt=true;trustServerCertificate=true
     username: sa
-    password: 12345
+    password: Group5@12345
 
   jpa:
     hibernate:
@@ -26,7 +26,7 @@ spring:
     host: smtp.gmail.com
     port: 587
     username: trungdinh.dev@gmail.com
-    password: oprk lrcy ncki xnuc
+    password: 123
     properties:
       mail:
         smtp:
@@ -38,9 +38,10 @@ spring:
           writetimeout: 5000
 
 api:
-  prefix: /api/v1
+  prefix: api/v1
+
 
 jwt:
-  secretKey: QFj6plpOzUysQzNFGQwdZRMpebEpCicqSknkcg2Kx0E=
-  expiration: 86400000
-  expiration-refresh-token: 5184000 #60 days = 60 * 24 * 60 * 60git
+  expiration: 2592000 #30 days = 30 * 24 * 60 * 60
+  expiration-refresh-token: 5184000 #60 days = 60 * 24 * 60 * 60
+  secretKey: TaqlmGv1iEDMRiFp/pHuID1+T84IABfuA0xXh4GhiUI=

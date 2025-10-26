@@ -22,15 +22,17 @@ public class ProductResponse extends BaseResponse {
 
     private List<ProductVariantResponse> variants;
 
-    @JsonProperty("CategoryId")
-    protected Integer categoryId;
+
+    @JsonProperty("CategoryId")              // 👈 tên key trong JSON (tuỳ bạn: "category" / "CategoryName")
+    private String categoryName;
     public static ProductResponse fromProduct(Product product) {
         ProductResponse productResponse =  ProductResponse.builder()
                 .name(product.getName())
                 .price(product.getPrice())
                 .thumbnail(product.getThumbnail())
                 .description(product.getDescription())
-                .categoryId(product.getCategory().getId())
+                .categoryName(                                   // 👈 set theo tên
+                product.getCategory() != null ? product.getCategory().getName() : null)
                 .status(product.isStatus())
                 .build();
         productResponse.setCreateAt(product.getCreatedAt());
