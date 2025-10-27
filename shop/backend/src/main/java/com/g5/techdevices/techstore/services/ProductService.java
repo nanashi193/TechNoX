@@ -257,4 +257,36 @@ public class ProductService implements  IProductService {
     }
 
 
+    public ProductVariant createVariant(Long productId, ProductVariantDTO dto) throws Exception {
+        // 1️⃣ Kiểm tra product tồn tại
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new DataNotFoundException("Cannot find product id: " + productId));
+
+        // 2️⃣ Tạo variant mới
+        ProductVariant variant = ProductVariant.builder()
+                .color(dto.getColor())
+                .size(dto.getSize())
+                .quantity(dto.getQuantity())
+                .price(dto.getPrice())
+                .sku(
+                        (dto.getSku() == null || dto.getSku().isBlank())
+                                ? generateSku(product.getName(), dto.getColor(), dto.getSize())
+                                : dto.getSku()
+                )
+                .product(product)
+                .build();
+
+        // 3️⃣ Gắn variant vào product (nếu chưa có list)
+        if (product.getVariants() == null) {
+            product.setVariants(new ArrayList<>());
+        }
+        product.getVariants().add(variant);
+
+        // 4️⃣ Lưu product (cascade = ALL → Hibernate tự lưu variant)
+        productRepository.save(product);
+
+        return variant;
+    }
+
+
 }

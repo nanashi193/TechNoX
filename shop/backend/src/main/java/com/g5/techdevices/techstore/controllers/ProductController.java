@@ -213,6 +213,9 @@ public class ProductController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
     }
+
+
+    // ------------ VARIANTS ---------------------
     @PostMapping("/{productId}/variants")
     public ResponseEntity<?> upsertVariant(
             @PathVariable Long productId,
@@ -226,29 +229,6 @@ public class ProductController {
         }
     }
 
-    //@PostMapping("/generateFakeProduct")
-    public ResponseEntity<String> generateFakeProduct(){
-        Faker faker = new Faker();
-        for (int i = 0; i < 1000000; i++){
-            String productName = faker.name().fullName();
-            if(productService.existsByName(productName)){
-                continue;
-            }
-            ProductDTO   productDTO =  ProductDTO
-                    .builder()
-                    .name(productName)
-                    .price(BigDecimal.valueOf(faker.number().numberBetween(10, 50000000)))
-                    .description(faker.lorem().sentence())
-                    .categoryId(faker.number().numberBetween(1, 6))
-                    .build();
-            try {
-                productService.createProduct(productDTO);
-            } catch (DataNotFoundException e) {
-                return ResponseEntity.badRequest().body(e.getMessage());
-            }
-        }
-        return ResponseEntity.status(HttpStatus.OK).body("Product generated successfully");
-    }
 
     @PutMapping("/{productId}/thumbnail/from-image/{imageId}")
     public ResponseEntity<?> setThumbnailFromImage(@PathVariable Long productId,
@@ -276,5 +256,8 @@ public class ProductController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
+
+
+
 
 }
