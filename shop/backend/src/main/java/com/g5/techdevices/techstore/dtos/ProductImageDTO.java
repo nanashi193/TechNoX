@@ -19,4 +19,6 @@ public class ProductImageDTO {
     @Size(min = 5, max = 200, message=  "Image's name")
     @Column(name = "ImageUrl")
     private String imageUrl;
+
+    private String publicId;
 }

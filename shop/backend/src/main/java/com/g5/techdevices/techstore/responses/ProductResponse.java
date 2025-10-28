@@ -40,16 +40,25 @@ public class ProductResponse extends BaseResponse {
         if (product.getVariants() != null) {
             productResponse.setVariants(
                     product.getVariants().stream()
-                            .map(v -> ProductVariantResponse.builder()
-                                    .id(v.getId())
-                                    .color(v.getColor())
-                                    .size(v.getSize())
-                                    .quantity(v.getQuantity())
-                                    .price(v.getPrice())
-                                    .sku(v.getSku())
-                                    .build())
+                            .map(v -> {
+                                // ✅ THÊM DÒNG NÀY TRƯỚC
+                                boolean inStock = v.getQuantity() != null && v.getQuantity() > 0;
+
+                                // ✅ RỒI DÙNG BIẾN NÀY BÊN DƯỚI
+                                return ProductVariantResponse.builder()
+                                        .id(v.getId())
+                                        .color(v.getColor())
+                                        .size(v.getSize())
+                                        .quantity(v.getQuantity())
+                                        .price(v.getPrice())
+                                        .sku(v.getSku())
+                                        .inStock(inStock)
+                                        .selectable(inStock)
+                                        .build();
+                            })
                             .collect(Collectors.toList())
-            ); }
+            );
+        }
         return productResponse;
     }
 
