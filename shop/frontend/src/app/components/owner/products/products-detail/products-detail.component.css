@@ -415,7 +415,46 @@ textarea {
         left: 12px;
         right: 12px;
     }
+}/* grid */
+.v-grid { display: grid; gap: 8px; }
+.v-row  {
+    display: grid;
+    grid-template-columns: 1fr 1fr 120px 140px 40px;
+    gap: 8px;
+    align-items: center;
+    min-width: 0;
 }
+.v-head { font-weight: 600; color: var(--owner-muted, #6b7280); }
+.v-row > * { min-width: 0; } /* tránh text bị tràn làm bóp input */
+
+/* input look thống nhất */
+.v-td {
+    box-sizing: border-box;
+    width: 100%;
+    height: 40px;
+    padding: 8px 12px;
+    border: 1px solid var(--owner-border, rgba(0,0,0,.12));
+    border-radius: 10px;
+    background: #fff;
+    outline: none;
+    font: inherit;
+}
+.v-td:focus {
+    border-color: var(--owner-accent, #1a73e8);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--owner-accent, #1a73e8) 20%, transparent);
+}
+.v-td[readonly] {
+    background: #f8f9fb;
+    color: #6b7280;
+}
+
+/* ẩn spinner number để đồng bộ kiểu */
+.v-td[type="number"]::-webkit-outer-spin-button,
+.v-td[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.v-td[type="number"] { -moz-appearance: textfield; }
+
+/* icon xoá */
+.icon-btn { background: transparent; border: 0; cursor: pointer; }
 
 
 

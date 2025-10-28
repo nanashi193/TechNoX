@@ -2,16 +2,6 @@
     <!-- HEADER -->
     <div class="page-header">
         <a class="link" routerLink="/owner/products">← Quay lại danh sách</a>
-
-        <div class="actions">
-            <ng-container *ngIf="!editing; else editingBtns">
-                <button type="button" class="btn" (click)="edit()">Edit</button>
-            </ng-container>
-            <ng-template #editingBtns>
-                <button type="button" class="btn ghost" (click)="cancel()">Cancel</button>
-                <button type="submit" class="btn primary" [disabled]="f.invalid || !f.dirty">Save</button>
-            </ng-template>
-        </div>
     </div>
 
     <div class="form-grid">
@@ -27,12 +17,10 @@
             <div class="row-2">
                 <label class="field">
                     <span>Mã sản phẩm</span>
-                    <input type="text" formControlName="sku" placeholder="eg. 348121032" [readOnly]="!editing">
-                </label>
-
-                <label class="field">
-                    <span>Số lượng</span>
-                    <input type="number" formControlName="stockQty" min="0" step="1" [readOnly]="!editing">
+                    <input type="text"
+                           formControlName="sku"
+                           placeholder="Sẽ tự sinh sau khi lưu"
+                           readonly>
                 </label>
             </div>
 
@@ -72,45 +60,52 @@
 
             <section class="card">
                 <h3 class="card-title">Phân loại</h3>
+
                 <label class="field">
                     <span>Loại</span>
-                    <input type="text" formControlName="type" placeholder="Electronics / Shoes / ..." [readOnly]="!editing">
+                    <select formControlName="categoryId" [disabled]="!editing">
+                        <option [ngValue]="null" disabled selected>Chọn danh mục…</option>
+                        <option *ngFor="let c of categories" [ngValue]="c.id">{{ c.name }}</option>
+                    </select>
                 </label>
+                <div class="error" *ngIf="f.controls.categoryId.touched && f.controls.categoryId.hasError('required')">
+                    Vui lòng chọn danh mục.
+                </div>
             </section>
 
-            <!-- VARIANTS -->
+
             <section class="card variants-card">
                 <h3 class="card-title">Biến thể</h3>
-                <div class="muted small" style="margin-bottom:8px">OPTIONS</div>
 
-                <div class="variant-row" *ngFor="let opt of variants; index as i">
-                    <select class="v-name" [(ngModel)]="opt.name" [disabled]="variantsDisabled">
-                        <option *ngFor="let n of variantNames" [value]="n">{{ n }}</option>
-                    </select>
-
-                    <!-- chip input -->
-                    <div class="chip-input" [class.readonly]="variantsDisabled">
-            <span class="chip" *ngFor="let v of opt.values">
-              {{ v }}
-                <button type="button" (click)="removeTag(i, v)" *ngIf="!variantsDisabled">×</button>
-            </span>
-                        <input class="chip-editor"
-                               [placeholder]="i===0 ? 'Enter tags' : 'Add value'"
-                               [(ngModel)]="opt.input"
-                               (keydown)="onTagKeydown($event, i)"
-                               [disabled]="variantsDisabled">
+                <div class="v-grid" formArrayName="variants">
+                    <div class="v-row v-head">
+                        <div>Màu</div>
+                        <div>Size</div>
+                        <div>Tồn kho</div>
+                        <div>Giá</div>
+                        <div></div>
                     </div>
 
-                    <button type="button" class="icon-btn" aria-label="Remove option"
-                            (click)="removeOption(i)" *ngIf="!variantsDisabled">🗑️</button>
+                    <!-- 1 dòng gồm 4 input -->
+                    <div class="v-row" *ngFor="let _ of variantsFA.controls; let i = index" [formGroupName]="i">
+                        <input class="v-td" formControlName="color" placeholder="Đen" [readOnly]="!editing">
+                        <input class="v-td" formControlName="size"  placeholder="6.7 inch / 128GB" [readOnly]="!editing">
+                        <input class="v-td" type="number" min="0" formControlName="quantity" [readOnly]="!editing">
+                        <input class="v-td" type="number" min="0" formControlName="price"    [readOnly]="!editing">
+                        <button type="button" class="icon-btn" (click)="removeVariant(i)" *ngIf="editing">🗑️</button>
+                    </div>
+
+                    <div class="muted" *ngIf="variantsFA.length === 0">Chưa có biến thể.</div>
                 </div>
 
-                <button type="button" class="link"
-                        (click)="addOption()"
-                        [disabled]="variantsDisabled || variants.length >= 3">
+                <button type="button"
+                        class="link"
+                        (click)="addVariant({ color:'', size:'', quantity:0, price:0 })"
+                        [disabled]="!editing">
                     + Thêm biến thể
                 </button>
             </section>
+
         </div>
 
         <!-- MEDIA -->
@@ -118,7 +113,8 @@
             <div class="card-head">
                 <h3 class="card-title">Hình ảnh sản phẩm</h3>
                 <div class="menu">
-                    <button type="button" class="link" (click)="addMediaFromUrl()" *ngIf="editing">Thêm bằng URL ▾</button>
+                    <button type="button" class="link" (click)="addMediaFromUrl()" *ngIf="editing">Thêm bằng URL ▾
+                    </button>
                 </div>
             </div>
 
@@ -157,8 +153,8 @@
     <!-- Sticky action bar -->
     <div class="sticky-actions" *ngIf="showStickyBar">
         <div class="sa-right">
-            <button type="button" class="btn ghost light" (click)="cancel()">Hủy</button>
-            <button type="submit" class="btn primary" [disabled]="f.invalid">Lưu</button>
+            <button type="button" class="btn ghost light" (click)="discard()">Hủy</button>
+            <button type="submit" class="btn primary" [disabled]="f.invalid || !f.dirty">Lưu</button>
         </div>
     </div>
 </form>

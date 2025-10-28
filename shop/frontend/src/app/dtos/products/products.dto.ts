@@ -30,7 +30,6 @@ export interface ProductVariantDTO {
     size: string;
     quantity: number;
     price: number;
-    sku: string;
 }
 
 export interface ProductCreateDTO {

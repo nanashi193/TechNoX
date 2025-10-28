@@ -118,10 +118,9 @@ export class ProductService {
 
                     // 3) SKU: ưu tiên product-level; nếu không có thì lấy ở biến thể đầu
                     const sku =
-                        p.sku ?? p.code ?? p.productCode ??
-                        (Array.isArray(p.variants) && p.variants[0]
-                            ? (p.variants[0].sku ?? p.variants[0].code ?? '')
-                            : '');
+                        p.sku ?? p.code ??
+                        (Array.isArray(p.variants) && p.variants[0]?.sku ? p.variants[0].sku : '');
+
 
                     // 4) Loại: name nếu có, không thì hiển thị #ID cho đỡ trống
                     const type =
@@ -177,6 +176,8 @@ export class ProductService {
             map(p => this.mapRawProduct(p))
         );
     }
+
+
 
 
     delete(id: number): Observable<void> {
