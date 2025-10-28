@@ -146,22 +146,36 @@ public class ProductService implements  IProductService {
     @Override
     public ProductImages createProductImages(Long productId
             , ProductImageDTO productImageDTO) throws Exception {
+
+        //get ID
         Product existingProduct = productRepository
                 .findById(productId)
                 .orElseThrow(() ->
                         new DataNotFoundException(
-                                "Cannot find prodcut with id: "+productImageDTO.getProductId()));
-                ProductImages newProductImages = ProductImages
-                        .builder()
-                        .product(existingProduct)
-                        .imageUrl(productImageDTO.getImageUrl())
-                        .build();
+                                "Cannot find product with id: "+productImageDTO.getProductId()));
+
                 //khong cho insert qua 5 anh cho 1 san pham
                 int size = productImageRepository.findByProductId(productId).size();
                 if(size >= ProductImages.MAXIMUM_IMAGES_PER_PRODUCT){
                     throw new InvalidParamException("Number update must be <= "
                     + ProductImages.MAXIMUM_IMAGES_PER_PRODUCT);
                 }
+
+                // 3) Validate tối thiểu để còn xoá Cloudinary về sau
+        if (productImageDTO.getPublicId() == null || productImageDTO.getPublicId().isBlank()) {
+            throw new InvalidParamException("publicId is required");
+        }
+        if (productImageDTO.getImageUrl() == null || productImageDTO.getImageUrl().isBlank()) {
+            throw new InvalidParamException("imageUrl is required");
+        }
+
+        // 4) Tạo entity và LƯU CẢ publicId  ✅ (DÒNG QUAN TRỌNG)
+        ProductImages newProductImages = ProductImages.builder()
+                .product(existingProduct)
+                .imageUrl(productImageDTO.getImageUrl())
+                .publicId(productImageDTO.getPublicId()) // ✅ thêm dòng này
+                .build();
+
                 return productImageRepository.save(newProductImages);
     }
 
@@ -179,6 +193,47 @@ public class ProductService implements  IProductService {
     }
 
     // === ĐẶT HÀM NÀY Ở CUỐI CLASS, TRƯỚC DẤU } CUỐI CÙNG ===
+
+    // ================= DELETE IMAGE =================
+
+    @Transactional
+    public void deleteImageOfProduct(Long productId, Long imageId, ImageStorageService storage) throws Exception {
+        // 1️⃣ Kiểm tra ảnh có thuộc sản phẩm này không
+        ProductImages img = productImageRepository.findByIdAndProduct_Id(imageId, productId)
+                .orElseThrow(() -> new DataNotFoundException("Image not found for this product"));
+
+        // 2️⃣ Xóa file thật trên Cloudinary
+        try {
+            storage.delete(img.getPublicId());
+        } catch (Exception e) {
+            System.err.println("⚠️ Failed to delete image from Cloudinary: " + e.getMessage());
+        }
+
+        // 3️⃣ Nếu ảnh này đang là thumbnail thì clear thumbnail của product
+        Product product = img.getProduct();
+        if (product.getThumbnail() != null && product.getThumbnail().equals(img.getImageUrl())) {
+            product.setThumbnail(null);
+            productRepository.save(product);
+        }
+
+        // 4️⃣ Xóa record ảnh trong DB
+        productImageRepository.delete(img);
+    }
+
+    // (Tuỳ chọn) Xóa ảnh theo publicId – nếu FE chỉ gửi publicId
+    @Transactional
+    public void deleteImageByPublicId(String publicId, ImageStorageService storage) throws Exception {
+        try {
+            storage.delete(publicId);
+        } catch (Exception e) {
+            System.err.println("Failed to delete image from Cloudinary: " + e.getMessage());
+        }
+        productImageRepository.deleteByPublicId(publicId);
+    }
+
+
+        // ---------------------------------Auto SKU----------------------------------
+
         private String generateSku(String productName, String color, String size) {
             // Làm gọn tên sản phẩm: chỉ giữ chữ & số, viết hoa
             String cleanName = (productName == null ? "PRD" : productName)
@@ -198,6 +253,7 @@ public class ProductService implements  IProductService {
             }
             return sku;
         }
+
 
 
 
@@ -260,5 +316,50 @@ public class ProductService implements  IProductService {
                 .findAll(pageRequest)
                 .map(ProductResponse::fromProduct);
     }
+
+
+    // Lưu product sau khi đổi thumbnail
+    public Product save(Product product) {
+        return productRepository.save(product);
+    }
+
+    // Lấy ảnh theo id (dùng trong API đặt thumbnail)
+    public ProductImages getProductImageById(Long imageId) throws Exception {
+        return productImageRepository.findById(imageId)
+                .orElseThrow(() -> new DataNotFoundException("Cannot find product image with id: " + imageId));
+    }
+
+
+    public ProductVariant createVariant(Long productId, ProductVariantDTO dto) throws Exception {
+        // 1️⃣ Kiểm tra product tồn tại
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new DataNotFoundException("Cannot find product id: " + productId));
+
+        // 2️⃣ Tạo variant mới
+        ProductVariant variant = ProductVariant.builder()
+                .color(dto.getColor())
+                .size(dto.getSize())
+                .quantity(dto.getQuantity())
+                .price(dto.getPrice())
+                .sku(
+                        (dto.getSku() == null || dto.getSku().isBlank())
+                                ? generateSku(product.getName(), dto.getColor(), dto.getSize())
+                                : dto.getSku()
+                )
+                .product(product)
+                .build();
+
+        // 3️⃣ Gắn variant vào product (nếu chưa có list)
+        if (product.getVariants() == null) {
+            product.setVariants(new ArrayList<>());
+        }
+        product.getVariants().add(variant);
+
+        // 4️⃣ Lưu product (cascade = ALL → Hibernate tự lưu variant)
+        productRepository.save(product);
+
+        return variant;
+    }
+
 
 }

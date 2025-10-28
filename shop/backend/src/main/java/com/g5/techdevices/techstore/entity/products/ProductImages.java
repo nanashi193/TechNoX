@@ -23,6 +23,10 @@ public class ProductImages {
     @JoinColumn(name= "ProductId")
     private Product product;
 
-    @Column(name = "ImageUrl", length = 300)
+    @Column(name = "ImageUrl", columnDefinition = "nvarchar(500)") // lưu full https URL
     private String imageUrl;
+
+    @Column(name = "PublicId", nullable = false, unique = true, columnDefinition = "nvarchar(255)")
+    private String publicId; // <-- BẮT BUỘC để xoá Cloudinary
+
 }

@@ -1,16 +1,39 @@
+
+export interface ProductVariant {
+    id?: number;           // chỉ có khi EDIT
+    color: string;
+    size: string;
+    quantity: number;
+    price: number;
+    sku: string;
+}
+
 export interface Product {
     id: number;
     name: string;
-    type: string;     // Electronics | Shoes | ...
-    sku: string;
     price: number;
-    variants: number;
-    inStock: boolean;
+
+    // BE/FE chung
+    description?: string;
+    thumbnail?: string;     // ảnh chính BE dùng
+    status?: boolean;       // trạng thái hiển thị
+    categoryId?: number;    // để pre-select trong Edit
+    categoryName?: string;  // để hiển thị
+
+    // Các field FE đang dùng thêm
+    type?: string;          // nếu BE chưa có thì để optional
+    sku?: string;           // nếu SKU ở product-level
+    inStock?: boolean;
     stockQty?: number;
-    image: string;
+    image?: string;         // FE preview, map -> thumbnail khi gửi
+
+    variants?: ProductVariant[]; // ⟵ mảng biến thể, KHÔNG phải number
+    variantCount?: number;       // (tuỳ chọn) nếu bạn cần đếm cho list
+
     createdAt?: string;
     updatedAt?: string;
-    description: string;
+
+    [k: string]: any;
 }
 
 export interface Page<T> {

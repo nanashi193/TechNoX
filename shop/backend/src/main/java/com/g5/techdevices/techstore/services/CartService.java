@@ -7,6 +7,7 @@ import com.g5.techdevices.techstore.entity.Cart.Cart;
 import com.g5.techdevices.techstore.entity.Cart.CartItem;
 import com.g5.techdevices.techstore.entity.products.ProductVariant;
 import com.g5.techdevices.techstore.entity.users.User;
+import com.g5.techdevices.techstore.exceptions.InvalidParamException;
 import com.g5.techdevices.techstore.repositories.cart.CartItemRepository;
 import com.g5.techdevices.techstore.repositories.cart.CartRepository;
 import com.g5.techdevices.techstore.repositories.cart.ProductVariantRepository;
@@ -50,6 +51,12 @@ public class CartService implements ICartService{
     @Transactional
     @Override
     public CartDTO addProductToCart(User user, AddToCartRequestDTO requestDTO) {
+
+        // FIX: chặn input số lượng <= 0 sớm
+        if (requestDTO.getQuantity() <= 0) {
+            throw new RuntimeException("Invalid quantity");
+        }
+
         Cart cart = getOrCreateCart(user);
         ProductVariant variant = variantRepository.findById(requestDTO.getVariantId())
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy phiên bản sản phẩm"));
@@ -60,10 +67,18 @@ public class CartService implements ICartService{
         if (existingItem.isPresent()) {
             // Nếu có, tăng số lượng
             CartItem item = existingItem.get();
+
+            int newQty = item.getQuantity() + requestDTO.getQuantity();
+            assertVariantPurchasable(variant, newQty); // NOTE: kiểm tra tổng (đang giữ trong giỏ)
+
             item.setQuantity(item.getQuantity() + requestDTO.getQuantity());
             cartItemRepository.save(item);
         } else {
             // Nếu chưa, tạo CartItem mới
+
+            assertVariantPurchasable(variant, requestDTO.getQuantity()); // NOTE: kiểm tra trước khi thêm mới
+
+
             CartItem newItem = new CartItem();
             newItem.setCart(cart);
             newItem.setVariant(variant);
@@ -85,11 +100,12 @@ public class CartService implements ICartService{
         ProductVariant variant = variantRepository.findById(variantId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy phiên bản sản phẩm"));
 
-        cartItemRepository.findByCartAndVariant(cart, variant).ifPresent(item -> {
-            cartItemRepository.delete(item); // Xóa món hàng
-        });
+        // Xóa món hàng
+        cartItemRepository.findByCartAndVariant(cart, variant).ifPresent(cartItemRepository::delete);
 
-        return cartMapper.toCartDTO(cart); // Trả về giỏ hàng (đã trống)
+        // FIX: reload để DTO phản ánh đúng DB
+        Cart updatedCart = cartRepository.findByUser(user).orElseThrow();
+        return cartMapper.toCartDTO(updatedCart); // Trả về giỏ hàng (đã trống)
     }
     /**
      * CẬP NHẬT số lượng
@@ -106,6 +122,8 @@ public class CartService implements ICartService{
         ProductVariant variant = variantRepository.findById(variantId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy phiên bản sản phẩm"));
 
+        assertVariantPurchasable(variant, quantity); // NOTE: kiểm tra số lượng mới so với tồn kho
+
         CartItem item = cartItemRepository.findByCartAndVariant(cart, variant)
                 .orElseThrow(() -> new RuntimeException("Sản phẩm không có trong giỏ"));
 
@@ -114,5 +132,25 @@ public class CartService implements ICartService{
 
         Cart updatedCart = cartRepository.findByUser(user).get();
         return cartMapper.toCartDTO(updatedCart);
+    }
+    // ================== Helpers ==================
+
+    /**
+     * NOTE: Kiểm tra điều kiện cho phép thêm/sửa số lượng trong giỏ (KHÔNG trừ kho ở bước Cart).
+     * - requestQty phải > 0
+     * - variant phải còn hàng (>0)
+     * - requestQty không vượt quá tồn kho hiện tại
+     */
+    private void assertVariantPurchasable(ProductVariant v, int requestQty) {
+        if (requestQty <= 0) {
+            // FIX: dùng RuntimeException để khỏi phải khai báo throws
+            throw new RuntimeException("Invalid quantity");
+        }
+        if (v.getQuantity() == null || v.getQuantity() <= 0) {
+            throw new RuntimeException("Variant out of stock");
+        }
+        if (requestQty > v.getQuantity()) {
+            throw new RuntimeException("Not enough stock");
+        }
     }
 }

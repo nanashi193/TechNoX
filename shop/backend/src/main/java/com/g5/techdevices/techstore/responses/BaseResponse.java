@@ -14,6 +14,9 @@ import java.time.LocalDateTime;
 @MappedSuperclass
 
 public class BaseResponse {
+    @JsonProperty("id")
+    private Long id;
+
     @JsonProperty("CreatedAt")
     private LocalDateTime createAt;
 

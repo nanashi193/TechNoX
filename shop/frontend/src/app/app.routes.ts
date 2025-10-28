@@ -89,15 +89,15 @@ export const routes: Routes = [
             {
                 path: 'products/new',
                 loadComponent: () =>
-                    import('./components/owner/products/products-form/products-form.component')
-                        .then(m => m.ProductsFormComponent),
+                    import('./components/owner/products/products-detail/products-detail.component')
+                        .then(m => m.ProductsDetailComponent),
                 title: 'Thêm sản phẩm | Owner'
             },
             {
                 path: 'products/:id/edit',
                 loadComponent: () =>
-                    import('./components/owner/products/products-form/products-form.component')
-                        .then(m => m.ProductsFormComponent),
+                    import('./components/owner/products/products-detail/products-detail.component')
+                        .then(m => m.ProductsDetailComponent),
                 title: 'Sửa sản phẩm | Owner'
             },
             {
