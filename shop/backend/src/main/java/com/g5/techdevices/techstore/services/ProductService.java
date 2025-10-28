@@ -71,13 +71,16 @@ public class ProductService implements  IProductService {
     }
 
     @Override
-    @Transactional(readOnly = true) // NOTE: thêm readOnly để tăng hiệu năng
+    @Transactional(readOnly = true)
     public Product getProductById(Long productId) throws Exception {
-        Optional<Product> optionalProduct = productRepository.findDetailById(productId);
-        if(optionalProduct.isPresent()) {
-            return optionalProduct.get();
-        }
-        throw new DataNotFoundException("Cannot find product with id =" + productId);
+        Product product = productRepository.findDetailById(productId)
+                .orElseThrow(() -> new DataNotFoundException("Cannot find product with id = " + productId));
+
+        //  Bắt buộc load tách rời (không join-fetch 2 bag)
+        product.getImages().size();   // trigger lazy load bằng query riêng
+        product.getVariants().size(); // trigger lazy load bằng query riêng
+
+        return product;
     }
 
 

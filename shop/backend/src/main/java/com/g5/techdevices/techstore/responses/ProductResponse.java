@@ -2,6 +2,7 @@ package com.g5.techdevices.techstore.responses;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.g5.techdevices.techstore.entity.products.Product;
+import com.g5.techdevices.techstore.entity.products.ProductImages;
 import lombok.*;
 
 import java.math.BigDecimal;
@@ -22,6 +23,8 @@ public class ProductResponse extends BaseResponse {
 
     private List<ProductVariantResponse> variants;
 
+    private List<String> images; //list image
+
 
     @JsonProperty("CategoryId")              // 👈 tên key trong JSON (tuỳ bạn: "category" / "CategoryName")
     private String categoryName;
@@ -34,6 +37,11 @@ public class ProductResponse extends BaseResponse {
                 .categoryName(                                   // 👈 set theo tên
                 product.getCategory() != null ? product.getCategory().getName() : null)
                 .status(product.isStatus())
+                .images(product.getImages() != null
+                        ? product.getImages().stream()
+                        .map(ProductImages::getImageUrl)
+                        .collect(Collectors.toList())
+                        : null)
                 .build();
         productResponse.setCreateAt(product.getCreatedAt());
         if (product.getVariants() != null) {

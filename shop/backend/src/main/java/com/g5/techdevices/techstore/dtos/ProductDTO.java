@@ -27,8 +27,8 @@ public class ProductDTO {
     private Long productId;// bigint
 
     @NotNull(message = "categoryId is required")
-    @JsonProperty("CategoryId")
-    private Integer categoryId;// int
+    @JsonProperty("categoryId")
+    private int categoryId;// int
 
 
 

@@ -4,6 +4,7 @@ import com.g5.techdevices.techstore.entity.products.Category;       // NOTE: đ�
 import com.g5.techdevices.techstore.entity.products.Product;        // NOTE: đổi import
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -84,7 +85,9 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     // NOTE: đổi tên quan hệ từ productImages -> images (đúng với entity của bạn)
     // NOTE: đổi tên method thành findDetailById để khớp service ProductService.getProductById()
     //       CHỈ fetch images (không fetch reviews) để tránh MultipleBagFetchException
-    @Query("SELECT p FROM Product p LEFT JOIN FETCH p.images WHERE p.id = :productId")
+
+
+    @Query("SELECT p FROM Product p WHERE p.id = :productId")
     Optional<Product> findDetailById(@Param("productId") Long productId);
 
     @Query("SELECT p FROM Product p WHERE p.id IN :productIds")
