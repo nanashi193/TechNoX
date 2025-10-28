@@ -1,19 +1,53 @@
 <h1>Danh sách sản phẩm</h1>
 <div class="toolbar">
-    <div class="search">
-        <input type="text" placeholder="Search products" [(ngModel)]="q" (input)="onSearch()">
-    </div>
-
-    <button class="btn" (click)="create()">+ Add product</button>
-
-    <div class="bulk" *ngIf="selectedCount()">
-        <span class="muted">{{ selectedCount() }} Selected</span>
-        <button class="btn danger" (click)="bulk('delete')">Delete</button>
-    </div>
+    <input class="search" placeholder="Tìm kiếm sản phẩm" [(ngModel)]="q" (input)="onSearch()">
 
     <div class="right">
-        <button class="btn ghost">Filters</button>
+        <button class="btn" (click)="create()">+ Thêm sản phẩm</button>
+
+        <div class="bulk" *ngIf="selectedCount()">
+            <span class="muted">{{ selectedCount() }} đã chọn</span>
+            <button class="btn danger" (click)="bulk('delete')">Xóa</button>
+        </div>
+        <button class="btn ghost" (click)="toggleFilters($event)">Filters</button>
     </div>
+    <div class="sheet-backdrop" *ngIf="showFilters" (click)="closeFilters()"></div>
+
+    <aside class="filters-sheet" [class.open]="showFilters" (click)="$event.stopPropagation()">
+        <div class="sheet-header">
+            <h3>Bộ lọc</h3>
+            <button class="icon-btn" aria-label="Close" (click)="closeFilters()">×</button>
+        </div>
+
+        <!-- TỒN KHO -->
+        <div class="fp-group">
+            <div class="fp-label">Tồn kho</div>
+            <label class="fp-row"><input type="radio" name="stk" [(ngModel)]="flt.stock" value="all"> All</label>
+            <label class="fp-row"><input type="radio" name="stk" [(ngModel)]="flt.stock" value="in"> In stock</label>
+            <label class="fp-row"><input type="radio" name="stk" [(ngModel)]="flt.stock" value="out"> Out of stock</label>
+        </div>
+
+        <!-- SKU -->
+        <div class="fp-group">
+            <div class="fp-label">Mã SKU</div>
+            <input class="toolbar-input" [(ngModel)]="flt.sku" placeholder="VD: ABC-001">
+        </div>
+
+        <!-- TYPE -->
+        <div class="fp-group">
+            <div class="fp-label">Loại</div>
+            <select [(ngModel)]="flt.type" class="toolbar-select">
+                <option [ngValue]="null">All</option>
+                <option *ngFor="let t of types" [ngValue]="t">{{ t }}</option>
+            </select>
+        </div>
+
+
+        <div class="sheet-footer">
+            <button class="btn ghost" (click)="clearFilters()">Clear all filters</button>
+            <button class="btn primary" (click)="applyFilters()">Save</button>
+        </div>
+    </aside>
 </div>
 
 <div class="table">
@@ -23,48 +57,49 @@
         </label>
 
         <div class="cell col-product th sortable"
-             (click)="sortBy('name')" [attr.aria-sort]="ariaSort('name')">Product
+             (click)="sortBy('name')" [attr.aria-sort]="ariaSort('name')">
+            Tên sản phẩm
             <span class="sort-caret" [class.asc]="isAsc('name')" [class.desc]="isDesc('name')"
-                ></span>
+            ></span>
         </div>
 
-        <div class="cell col-product th sortable"
-             (click)="sortBy('type')" [attr.aria-sort]="ariaSort('type')">Type
+        <div class="cell col-type th sortable"
+             (click)="sortBy('type')" [attr.aria-sort]="ariaSort('type')">
+            Loại
             <span class="sort-caret" [class.asc]="isAsc('type')" [class.desc]="isDesc('type')"
-                  ></span>
+            ></span>
         </div>
 
-        <div class="cell col-stocks">Stocks</div>
+        <div class="cell col-stocks">Tồn kho</div>
 
 
         <div class="cell col-sku th sortable"
              (click)="sortBy('sku')" [attr.aria-sort]="ariaSort('sku')">
-            Sku
+            Mã sản phẩm
             <span class="sort-caret" [class.asc]="isAsc('sku')" [class.desc]="isDesc('sku')"
-                ></span>
+            ></span>
         </div>
 
         <div class="cell col-price th sortable"
              (click)="sortBy('price')" [attr.aria-sort]="ariaSort('price')">
-            Price
+            Giá
             <span class="sort-caret" [class.asc]="isAsc('price')" [class.desc]="isDesc('price')"
-               ></span>
+            ></span>
         </div>
 
         <div class="cell col-variants th sortable"
              (click)="sortBy('variants')" [attr.aria-sort]="ariaSort('variants')">
-            Variants
+            Biến thể
             <span class="sort-caret" [class.asc]="isAsc('variants')" [class.desc]="isDesc('variants')"
-                  ></span>
+            ></span>
         </div>
 
         <div class="cell col-qty th sortable"
              (click)="sortBy('stockQty')" [attr.aria-sort]="ariaSort('stockQty')">
-            Quantity
+            Số lượng
             <span class="sort-caret" [class.asc]="isAsc('stockQty')" [class.desc]="isDesc('stockQty')"
-                 ></span>
+            ></span>
         </div>
-        <div class="cell col-actions">Actions</div>
     </div>
 
     <div class="row" *ngFor="let p of filtered; trackBy: trackById">
@@ -73,10 +108,12 @@
         </label>
 
         <div class="cell col-product">
-            <img class="thumb" [src]="p.image" alt="">
-            <div class="info">
-                <div class="name">{{ p.name }}</div>
-            </div>
+            <a class="name-link" [routerLink]="['/owner/products', p.id]">
+                <img class="thumb" [src]="p.image" alt="">
+                <div class="info">
+                    <div class="name">{{ p.name }}</div>
+                </div>
+            </a>
         </div>
 
         <div class="cell col-type"><span class="muted">{{ p.type }}</span></div>
@@ -89,15 +126,9 @@
         </div>
 
         <div class="cell col-sku">#{{ p.sku }}</div>
-        <div class="cell col-price">{{ p.price | number:'1.0-0' }}₫ </div>
+        <div class="cell col-price">{{ p.price | number:'1.0-0' }}₫</div>
         <div class="cell col-variants">{{ p.variants }}</div>
         <div class="cell col-qty">{{ p.stockQty ?? 0 }}</div>
-
-        <!-- chỉ còn 8th cell: Actions -->
-        <div class="cell col-actions">
-            <button class="btn ghost sm" (click)="edit(p.id)">Edit</button>
-            <button class="btn ghost icon" aria-label="More">⋯</button>
-        </div>
     </div>
 
 </div>
@@ -107,11 +138,11 @@
 
     <ng-container *ngFor="let n of pages; let i = index">
         <ng-container *ngIf="i === 0 || n - pages[i-1] === 1; else dots">
-            <button class="pg num" [class.active]="n===page" (click)="goto(n)">{{n}}</button>
+            <button class="pg num" [class.active]="n===page" (click)="goto(n)">{{ n }}</button>
         </ng-container>
         <ng-template #dots>
             <span class="muted">…</span>
-            <button class="pg num" [class.active]="n===page" (click)="goto(n)">{{n}}</button>
+            <button class="pg num" [class.active]="n===page" (click)="goto(n)">{{ n }}</button>
         </ng-template>
     </ng-container>
 

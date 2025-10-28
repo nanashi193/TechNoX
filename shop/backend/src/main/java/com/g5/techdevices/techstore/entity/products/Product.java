@@ -9,8 +9,12 @@ import com.g5.techdevices.techstore.entity.Bills.BillDetail;
 import com.g5.techdevices.techstore.entity.review.Review;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
+import org.hibernate.annotations.BatchSize;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -21,13 +25,13 @@ import java.util.Map;
 @Entity
 @Builder
 @Table(name = "Product")
-public class Product extends BaseEntity{
+public class Product extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "ProductId")
     private Long id;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "CategoryId")
     @JsonBackReference
     private Category category;
@@ -45,31 +49,38 @@ public class Product extends BaseEntity{
     private String thumbnail;
 
     @Column(name = "status", nullable = false)
-    private boolean status = true;  // NOTE: mặc định là true (còn hàng)
+    private boolean status = true;
 
-    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
+    // ==== 2 collection "bag" dễ gây MultipleBagFetchException ====
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @JsonManagedReference("product-variants")
-    private List<ProductVariant> variants;
+    @Fetch(FetchMode.SUBSELECT)          // ✅ tránh MultipleBagFetch
+    @BatchSize(size = 50)                // ✅ giảm N+1 (tuỳ chọn)
+    private List<ProductVariant> variants = new ArrayList<>();
 
-    @OneToMany(mappedBy = "product")
-    private List<BillDetail> billDetails;
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @Fetch(FetchMode.SUBSELECT)          // ✅ tránh MultipleBagFetch
+    @BatchSize(size = 50)
+    private List<ProductImages> images = new ArrayList<>();
 
-    @OneToMany(mappedBy = "product")
-    private List<CartItem> cartItems;
+    // Các collection khác giữ LAZY (không fetch cùng lúc)
+    @OneToMany(mappedBy = "product", fetch = FetchType.LAZY)
+    private List<BillDetail> billDetails = new ArrayList<>();
 
-    @ManyToMany
+    @OneToMany(mappedBy = "product", fetch = FetchType.LAZY)
+    private List<CartItem> cartItems = new ArrayList<>();
+
+    @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
             name = "ProductPromotion",
             joinColumns = @JoinColumn(name = "ProductId"),
             inverseJoinColumns = @JoinColumn(name = "PromotionId")
     )
-    private List<Promotion> promotions;
+    private List<Promotion> promotions = new ArrayList<>();
 
-    @OneToMany(mappedBy = "product")
-    private List<Review> reviews;
+    @OneToMany(mappedBy = "product", fetch = FetchType.LAZY)
+    private List<Review> reviews = new ArrayList<>();
 
-    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<ProductImages> images;
     @JsonProperty("Category")
     public Map<String, Object> getCategorySummary() {
         if (category == null) return null;
@@ -78,8 +89,4 @@ public class Product extends BaseEntity{
                 "Name", category.getName()
         );
     }
-
-
-
 }
-

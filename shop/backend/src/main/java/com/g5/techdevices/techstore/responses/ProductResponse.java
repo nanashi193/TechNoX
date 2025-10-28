@@ -2,6 +2,7 @@ package com.g5.techdevices.techstore.responses;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.g5.techdevices.techstore.entity.products.Product;
+import com.g5.techdevices.techstore.entity.products.ProductImages;
 import lombok.*;
 
 import java.math.BigDecimal;
@@ -22,31 +23,50 @@ public class ProductResponse extends BaseResponse {
 
     private List<ProductVariantResponse> variants;
 
-    @JsonProperty("CategoryId")
-    protected Integer categoryId;
+    private List<String> images; //list image
+
+
+    @JsonProperty("CategoryId")              // 👈 tên key trong JSON (tuỳ bạn: "category" / "CategoryName")
+    private String categoryName;
     public static ProductResponse fromProduct(Product product) {
         ProductResponse productResponse =  ProductResponse.builder()
                 .name(product.getName())
                 .price(product.getPrice())
                 .thumbnail(product.getThumbnail())
                 .description(product.getDescription())
-                .categoryId(product.getCategory().getId())
+                .categoryName(                                   // 👈 set theo tên
+                product.getCategory() != null ? product.getCategory().getName() : null)
                 .status(product.isStatus())
+                .images(product.getImages() != null
+                        ? product.getImages().stream()
+                        .map(ProductImages::getImageUrl)
+                        .collect(Collectors.toList())
+                        : null)
                 .build();
+        productResponse.setId(product.getId());
         productResponse.setCreateAt(product.getCreatedAt());
         if (product.getVariants() != null) {
             productResponse.setVariants(
                     product.getVariants().stream()
-                            .map(v -> ProductVariantResponse.builder()
-                                    .id(v.getId())
-                                    .color(v.getColor())
-                                    .size(v.getSize())
-                                    .quantity(v.getQuantity())
-                                    .price(v.getPrice())
-                                    .sku(v.getSku())
-                                    .build())
+                            .map(v -> {
+                                // ✅ THÊM DÒNG NÀY TRƯỚC
+                                boolean inStock = v.getQuantity() != null && v.getQuantity() > 0;
+
+                                // ✅ RỒI DÙNG BIẾN NÀY BÊN DƯỚI
+                                return ProductVariantResponse.builder()
+                                        .id(v.getId())
+                                        .color(v.getColor())
+                                        .size(v.getSize())
+                                        .quantity(v.getQuantity())
+                                        .price(v.getPrice())
+                                        .sku(v.getSku())
+                                        .inStock(inStock)
+                                        .selectable(inStock)
+                                        .build();
+                            })
                             .collect(Collectors.toList())
-            ); }
+            );
+        }
         return productResponse;
     }
 

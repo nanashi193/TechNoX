@@ -1,12 +1,13 @@
 import {Injectable, inject} from '@angular/core';
 import {HttpClient, HttpParams} from '@angular/common/http';
-import {Observable} from 'rxjs';
+import {forkJoin, Observable} from 'rxjs';
 import {environment} from '../environments/environment';
-import {Page, Product} from '../models/products.model';
-import {MOCK_PRODUCTS} from "../components/owner/products/products.mock";
+import {Page, Product, ProductVariant} from '../models/products.model';
 import {of} from 'rxjs';
 import {delay} from 'rxjs/operators';
 import {map} from 'rxjs/operators';
+import {ProductCreateDTO, ProductUpdateDTO} from "../dtos/products/products.dto";
+import {ProductImage, ProductImageBE} from "../models/product-image.model";
 
 export interface ProductListResponse {
     products: Product[];
@@ -46,24 +47,72 @@ type ProductListResponseBE = { products: RawProduct[]; totalPages: number };
 export class ProductService {
     private http = inject(HttpClient);
     private base = `${environment.apiBaseUrl}/products`;
+    private readonly UPLOAD_URL = `${this.base}/images/upload`;     // ⬅️ chỉnh cho khớp BE
+    private readonly ATTACH_URL = (id: number) => `${this.base}/${id}/images`;
     private useMock = !!(environment as any).useMock; // true => dùng mock
+    private toNum = (v: any) => (v == null ? 0 : Number(v));
+
+    private mapRawProduct(p: any): Product {
+        const toNum = this.toNum;
+
+        const variantsArr: ProductVariant[] = Array.isArray(p?.variants)
+            ? (p.variants as any[]).map(v => ({
+                id: v.id,
+                color: v.color ?? '',
+                size: v.size ?? '',
+                quantity: toNum(v.quantity ?? v.qty ?? v.stock),
+                price: toNum(v.price ?? 0),
+                sku: v.sku ?? v.code ?? '',
+            }))
+            : [];
+
+        const stockQty = variantsArr.length
+            ? variantsArr.reduce((s, v) => s + toNum(v.quantity), 0)
+            : toNum(p?.totalQuantity ?? p?.quantity ?? p?.stockQty);
+
+        return {
+            id: Number(p?.id ?? p?.Id ?? p?.productId ?? 0),
+            name: p?.name ?? p?.productName ?? '',
+            image: p?.thumbnail ?? p?.imageUrl ?? '',     // FE vẫn dùng 'image' cho thumbnail
+            thumbnail: p?.thumbnail ?? p?.imageUrl ?? '',
+            type: p?.categoryName ?? p?.category?.name ?? (p?.CategoryId != null ? `#${p?.CategoryId}` : ''),
+            sku: p?.sku ?? p?.code ?? '',
+            price: toNum(p?.price ?? 0),
+            variants: variantsArr,                         // ⟵ mảng
+            variantCount: variantsArr.length ?? this.toNum(p?.variants ?? p?.variantCount ?? 0),
+            stockQty,
+            inStock: Boolean(p?.status ?? stockQty > 0),
+            description: p?.description ?? '',
+            createdAt: p?.createdAt ?? p?.createAt ?? p?.CreatedAt ?? '',
+            categoryId: p?.categoryId ?? p?.CategoryId,
+            categoryName: p?.categoryName ?? p?.category?.name,
+        } as Product;
+    }
 
     search({ page = 1, size = 8 } = {}) {
         const page0 = Math.max(0, page - 1);
-        const params = new HttpParams().set('page', page0).set('limit', size);
+        const params = new HttpParams().set('page', String(page0)).set('limit', String(size));
         const toNum = (v: any) => (v == null ? 0 : Number(v));
 
         return this.http.get<ProductListResponseBE>(this.base, { params }).pipe(
             map(res => {
                 const raw: RawProduct[] = res.products ?? [];
                 const items: Product[] = raw.map(p => {
+                    const variantsArr: ProductVariant[] = Array.isArray((p as any).variants)
+                        ? ((p as any).variants as any[]).map(v => ({
+                            id: v.id,
+                            color: v.color ?? '',
+                            size: v.size ?? '',
+                            quantity: toNum(v.quantity ?? v.qty ?? v.stock),
+                            price: toNum(v.price ?? 0),
+                            sku: v.sku ?? v.code ?? '',
+                        }))
+                        : [];
+
                     // 1) số biến thể: nhận cả number lẫn array
-                    const variantsCount =
-                        typeof p.variants === 'number'
-                            ? p.variants
-                            : Array.isArray(p.variants)
-                                ? p.variants.length
-                                : (p.variantsCount ?? 0);
+                    const variantCount =
+                        variantsArr.length ||
+                        toNum((p as any).variantsCount ?? (p as any).variantCount ?? (p as any).variants ?? 0);
 
                     // 2) tổng tồn kho: nếu có mảng biến thể thì cộng, nếu không lấy field tổng
                     const stockQty = Array.isArray(p.variants)
@@ -72,136 +121,108 @@ export class ProductService {
 
                     // 3) SKU: ưu tiên product-level; nếu không có thì lấy ở biến thể đầu
                     const sku =
-                        p.sku ?? p.code ?? p.productCode ??
-                        (Array.isArray(p.variants) && p.variants[0]
-                            ? (p.variants[0].sku ?? p.variants[0].code ?? '')
-                            : '');
+                        p.sku ?? p.code ??
+                        (Array.isArray(p.variants) && p.variants[0]?.sku ? p.variants[0].sku : '');
+
 
                     // 4) Loại: name nếu có, không thì hiển thị #ID cho đỡ trống
                     const type =
                         p.categoryName ?? p.category?.name ?? (p.CategoryId != null ? `#${p.CategoryId}` : '');
-
+                    const rawId = (p as any).id ?? (p as any).Id ?? (p as any).productId;
+                    const id = Number.isFinite(Number(rawId)) ? Number(rawId) : undefined;
                     return {
-                        id: p.id ?? 0,
-                        name: p.name,
-                        image: p.thumbnail ?? p.imageUrl ?? '',
+                        id,
+                        name: (p as any).name ?? (p as any).productName ?? '',
+                        image: (p as any).thumbnail ?? (p as any).imageUrl ?? '',
+                        thumbnail: (p as any).thumbnail ?? (p as any).imageUrl ?? '',
                         type,
                         sku,
-                        price: Number(p.price ?? 0),
-                        variants: variantsCount,
+                        price: toNum((p as any).price ?? 0),
+                        variants: variantsArr,          // ✅ mảng
+                        variantCount,                   // ✅ số lượng (cho UI)
                         stockQty,
-                        inStock: p.status ?? stockQty > 0,
-                        description: p.description ?? '',
-                        createdAt: (p as any).createdAt ?? (p as any).CreatedAt ?? ''
+                        inStock: Boolean((p as any).status ?? stockQty > 0),
+                        description: (p as any).description ?? '',
+                        createdAt: (p as any).createdAt ?? (p as any).CreatedAt ?? '',
+                        categoryId: (p as any).categoryId ?? (p as any).CategoryId,
+                        categoryName: (p as any).categoryName ?? (p as any).category?.name,
                     } as Product;
                 });
 
-                return { items, total: (res.totalPages ?? 0) * size, page, size };
+                // total: tuỳ BE (đừng nhân totalPages * size nếu BE có totalItems)
+                const total =
+                    (res as any).totalItems ??
+                    (res as any).totalElements ??
+                    (res as any).total ??
+                    ((res as any).totalPages ?? 0) * size;
+
+                return { items, total, page, size };
             })
-        )}
+        );
+    }
+
+    uploadImages(productId: number, files: File[]) {
+        const fd = new FormData();
+        files.forEach(f => fd.append('files', f));
+        return this.http
+            .post<ProductImageBE[]>(`${this.base}/uploads/${productId}`, fd)
+            .pipe(
+                map(arr =>
+                    (arr ?? []).map(i => ({
+                        id: (i.id ?? i.imageId)!,
+                        url: (i.imageUrl ?? i.url)!,
+                        publicId: i.publicId ?? ''
+                    }))
+                )
+            );
+    }
+// --- gắn list ảnh vào product (nếu BE tách 2 bước)
+    attachImages(productId: number, images: ProductImage[]) {
+        return this.http.post<void>(this.ATTACH_URL(productId), images);
+    }
+
+    setThumbnailFromImage(productId: number, imageId: number) {
+        return this.http.put(
+            `${this.base}/${productId}/thumbnail/from-image/${imageId}`,
+            {}
+        );
+    }
+    deleteImage(productId: number, imageId: number) {
+        return this.http.delete(`${this.base}/${productId}/images/${imageId}`);
+    }
 
     get(id: number): Observable<Product> {
-        if (!this.useMock) return this.http.get<Product>(`${this.base}/${id}`);
-        const found = MOCK_PRODUCTS.find(p => p.id === id)!;
-        return of(structuredClone(found)).pipe(delay(120));
+        return this.http.get<any>(`${this.base}/${id}`).pipe(
+            map(p => this.mapRawProduct(p))
+        );
     }
 
-    create(dto: Partial<Product>): Observable<Product> {
-        if (!this.useMock) return this.http.post<Product>(this.base, dto);
 
-        const id = (MOCK_PRODUCTS.at(-1)?.id ?? 0) + 1;
-        const now = new Date().toISOString();
-        const created: Product = {
-            id,
-            name: dto.name ?? '',
-            type: dto.type ?? '',
-            description: dto.description ?? '',
-            sku: dto.sku ?? String(id),
-            price: dto.price ?? 0,
-            variants: dto.variants ?? 0,
-            inStock: dto.inStock ?? true,
-            stockQty: dto.stockQty ?? 0,
-            image: dto.image ?? '',
-            createdAt: now,
-            updatedAt: now,
-        };
-        MOCK_PRODUCTS.unshift(created);
-        return of(structuredClone(created)).pipe(delay(150));
+    create(dto: ProductCreateDTO): Observable<Product> {
+        return this.http.post<any>(this.base, dto).pipe(
+            map(p => this.mapRawProduct(p))
+        );
     }
 
-    update(id: number, dto: Partial<Product>): Observable<Product> {
-        if (!this.useMock) return this.http.put<Product>(`${this.base}/${id}`, dto);
-
-        const idx = MOCK_PRODUCTS.findIndex(p => p.id === id);
-        const updated = {...MOCK_PRODUCTS[idx], ...dto, updatedAt: new Date().toISOString()} as Product;
-        MOCK_PRODUCTS[idx] = updated;
-        return of(structuredClone(updated)).pipe(delay(150));
+    update(id: number, dto: ProductUpdateDTO): Observable<Product> {
+        return this.http.put<any>(`${this.base}/${id}`, dto).pipe(
+            map(p => this.mapRawProduct(p))
+        );
     }
 
     delete(id: number): Observable<void> {
-        if (!this.useMock) return this.http.delete<void>(`${this.base}/${id}`);
-
-        const idx = MOCK_PRODUCTS.findIndex(p => p.id === id);
-        if (idx > -1) MOCK_PRODUCTS.splice(idx, 1);
-        return of(void 0).pipe(delay(120));
+        return this.http.delete<void>(`${this.base}/${id}`);
     }
 
     setStock(id: number, inStock: boolean): Observable<Product> {
-        if (!this.useMock) {
-            return this.http.patch<Product>(`${this.base}/${id}/stock`, {inStock});
-        }
-        const idx = MOCK_PRODUCTS.findIndex(p => p.id === id);
-        MOCK_PRODUCTS[idx] = {...MOCK_PRODUCTS[idx], inStock, updatedAt: new Date().toISOString()};
-        return of(structuredClone(MOCK_PRODUCTS[idx])).pipe(delay(120));
+        // nếu BE có endpoint riêng, giữ như sau; nếu không, dùng update(...)
+        return this.http.patch<any>(`${this.base}/${id}/stock`, { inStock }).pipe(
+            map(p => this.mapRawProduct(p))
+        );
     }
 
     bulkDelete(ids: number[]): Observable<void> {
-        if (!this.useMock) return this.http.post<void>(`${this.base}/bulk-delete`, {ids});
-
-        for (const id of ids) {
-            const i = MOCK_PRODUCTS.findIndex(p => p.id === id);
-            if (i > -1) MOCK_PRODUCTS.splice(i, 1);
-        }
-        return of(void 0).pipe(delay(150));
+        return this.http.post<void>(`${this.base}/bulk-delete`, { ids });
     }
-    bulkPublish(ids: number[]): Observable<void> {
-        // ---- PHẦN CODE MOCK ----
-        if (this.useMock) {
-            ids.forEach(id => {
-                const i = MOCK_PRODUCTS.findIndex((p: Product) => p.id === id); // Thêm kiểu dữ liệu cho p
-                if (i > -1) {
-                    // Logic mock: Có thể set một trường 'published' thành true
-                    // (Bạn cần thêm trường 'published?: boolean' vào interface Product)
-                    // MOCK_PRODUCTS[i].published = true;
-                    // Hoặc đơn giản là log ra
-                    console.log(`Mock publishing product with ID: ${id}`);
-                }
-            });
-            return of(void 0).pipe(delay(150));
-        }
-        // ---- PHẦN CODE THẬT ----
-        // Gọi API backend tương ứng (ví dụ: POST /products/bulk-publish)
-        return this.http.post<void>(`${this.base}/bulk-publish`, { ids });
     }
 
-    /**
-     * Unpublish nhiều sản phẩm cùng lúc
-     */
-    bulkUnpublish(ids: number[]): Observable<void> {
-        // ---- PHẦN CODE MOCK ----
-        if (this.useMock) {
-            ids.forEach(id => {
-                const i = MOCK_PRODUCTS.findIndex((p: Product) => p.id === id); // Thêm kiểu dữ liệu cho p
-                if (i > -1) {
-                    // Logic mock: Có thể set trường 'published' thành false
-                    // MOCK_PRODUCTS[i].published = false;
-                    console.log(`Mock unpublishing product with ID: ${id}`);
-                }
-            });
-            return of(void 0).pipe(delay(150));
-        }
-        // ---- PHẦN CODE THẬT ----
-        // Gọi API backend tương ứng (ví dụ: POST /products/bulk-unpublish)
-        return this.http.post<void>(`${this.base}/bulk-unpublish`, { ids });
-    }
-}
