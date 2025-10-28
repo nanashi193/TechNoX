@@ -1,53 +1,86 @@
-import { Product } from '../../models/products.model';
 
-export type CreateProductDTO = Omit<Product, 'id'|'createdAt'|'updatedAt'>;
-export type UpdateProductDTO = Partial<CreateProductDTO>;
-
-export type ProductFormValue = {
-    sku: string | null;
-    name: string | null;
-    price: number | null;
-    inStock: boolean | null;
-
-    // các field có trong Product
-    type: string | null;
-    variants: number | null;
-    image: string | null;         // nếu form đang dùng thumbnailUrl, vẫn giữ thêm ở dưới
-    thumbnailUrl?: string | null; // hỗ trợ alias -> map sang image
-
-    // UI-only
-    oldPrice?: number | null;
-    categoryId?: number | null;
-    stockQty?: number | null;
-    tags?: string | null;
-    description?: string | null;
+export type VariantValue = {
+    id?: number | null;         // có khi Edit
+    color: string;
+    size: string;
+    quantity: number;
+    price: number;
+    sku: string;
 };
 
-export function toCreateProductDTO(raw: ProductFormValue): CreateProductDTO {
-    return {
-        sku:      raw.sku ?? '',
-        name:     raw.name ?? '',
-        price:    raw.price ?? 0,
-        inStock:  raw.inStock ?? true,
-        type:     raw.type ?? '',
-        variants: raw.variants ?? 0,
-        image:    (raw.image ?? raw.thumbnailUrl ?? ''), // alias thumbnailUrl -> image
-    };
+export type ProductFormValue = {
+    name: string | null;
+    sku: string | null;
+    description: string | null;
+    price: number | null;
+    status: boolean | null;
+    categoryId: number | null;
+    thumbnail: string | null;
+    variants: VariantValue[];
+
+    // optional
+    type?: string | null;
+    inStock?: boolean | null;
+    stockQty?: number | null;
+    image?: string | null;
+};
+export interface ProductVariantDTO {
+    id?: number;                // chỉ gửi khi UPDATE
+    color: string;
+    size: string;
+    quantity: number;
+    price: number;
+    sku: string;
 }
 
+export interface ProductCreateDTO {
+    name: string;
+    price: number;
+    thumbnail?: string;
+    description?: string;
+    status: boolean;
+    categoryId: number;
+    variants: ProductVariantDTO[];  // mảng
+}export type ProductUpdateDTO = Partial<ProductCreateDTO>;
 
-export function toUpdateProductDTO(raw: ProductFormValue): UpdateProductDTO {
-    const dto: UpdateProductDTO = {};
-    if (raw.sku != null)      dto.sku = raw.sku;
-    if (raw.name != null)     dto.name = raw.name;
-    if (raw.price != null)    dto.price = raw.price;
-    if (raw.inStock != null)  dto.inStock = raw.inStock;
-    if (raw.type != null)     dto.type = raw.type;
-    if (raw.variants != null) dto.variants = raw.variants;
+// ----- Mappers: Form -> DTO -----
+export function toCreateProductDTO(raw: ProductFormValue): ProductCreateDTO {
+    const variants: ProductVariantDTO[] = (raw.variants ?? []).map(v => ({
+        color: v.color,
+        size: v.size,
+        quantity: Number(v.quantity ?? 0),
+        price: Number(v.price ?? 0),
+        sku: v.sku,
+    }));
 
-    // map alias image/thumbnailUrl
-    if (raw.image != null || raw.thumbnailUrl != null) {
-        dto.image = raw.image ?? raw.thumbnailUrl ?? '';
-    }
+    return {
+        name: (raw.name ?? '').trim(),
+        price: Number(raw.price ?? 0),
+        thumbnail: (raw.thumbnail ?? '') || undefined,
+        description: (raw.description ?? '') || undefined,
+        status: Boolean(raw.status ?? true),
+        categoryId: Number(raw.categoryId ?? 0),
+        variants,
+    };
+}
+export function toUpdateProductDTO(raw: Partial<ProductFormValue>): ProductUpdateDTO {
+    const dto: ProductUpdateDTO = {};
+
+    if (raw.name !== undefined)        dto.name = raw.name ?? '';
+    if (raw.price !== undefined)       dto.price = Number(raw.price ?? 0);
+    if (raw.thumbnail !== undefined)   dto.thumbnail = (raw.thumbnail ?? '') || undefined;
+    if (raw.description !== undefined) dto.description = (raw.description ?? '') || undefined;
+    if (raw.status !== undefined)      dto.status = Boolean(raw.status);
+    if (raw.categoryId !== undefined && raw.categoryId !== null)
+        dto.categoryId = Number(raw.categoryId);
+    if (raw.variants !== undefined)    dto.variants = (raw.variants ?? []).map(v => ({
+        ...(v.id != null ? { id: Number(v.id) } : {}),
+        color: v.color,
+        size: v.size,
+        quantity: Number(v.quantity ?? 0),
+        price: Number(v.price ?? 0),
+        sku: v.sku,
+    }));
+
     return dto;
 }
