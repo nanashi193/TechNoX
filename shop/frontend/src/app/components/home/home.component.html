@@ -8,7 +8,6 @@
         [class.force-off]="forceOff"
         (animationend)="onCoverAnimEnd($event)"
 >
-
     <img
             class="poster-media"
             src="assets/Phone/IPhone.jpg"
@@ -19,7 +18,6 @@
             fetchpriority="high"
     />
     <h1 class="poster-title">TECHNO<span>X</span></h1>
-    <!-- <button class="poster-skip" type="button" (click)="skipCover()">Skip</button> -->
 </section>
 
 <main>
@@ -34,7 +32,7 @@
             </p>
             <a class="btn btn--accent" href="#" aria-label="Mua ngay">MUA NGAY</a>
 
-            <!-- Hero gallery: ảnh đầu ưu tiên cao, ảnh sau lazy -->
+            <!-- Hero gallery -->
             <div class="hero__gallery">
                 <img
                         src="assets/Phone/IPhone.jpg"
@@ -52,6 +50,8 @@
                         loading="lazy"
                         decoding="async"
                 />
+                <!-- (tuỳ chọn) thêm ảnh thứ 3 để đủ bộ 3 -->
+                <!-- <img src="assets/Phone/Iphone2.jpg" alt="Flagship phone" loading="lazy" decoding="async" /> -->
             </div>
         </div>
     </section>
@@ -71,18 +71,29 @@
                             [attr.aria-label]="p.name"
                             href="#"
                     ></a>
+
                     <div class="card__body">
                         <h3 class="card__title">{{ p.name }}</h3>
+
                         <div class="chip-row" *ngIf="p.tags?.length">
                             <span class="chip" *ngFor="let t of p.tags">{{ t }}</span>
                         </div>
+
                         <p class="price">Từ {{ p.price | number:'1.0-0' }}đ</p>
-                        <button class="btn btn--block" type="button" (click)="add(p)">THÊM VÀO GIỎ</button>
                     </div>
+
+                    <button
+                            class="btn btn--block"
+                            type="button"
+                            (click)="add(p)"
+                            [attr.aria-label]="'Thêm ' + p.name + ' vào giỏ hàng'"
+                    >
+                        THÊM VÀO GIỎ
+                    </button>
                 </article>
             </div>
 
-            <!-- PHẦN PAGER + NÚT XEM THÊM (cân giữa) -->
+            <!-- PHẦN PAGER + NÚT XEM THÊM -->
             <div class="section-cta">
                 <nav class="pager" role="navigation" aria-label="Phân trang sản phẩm nổi bật">
                     <button
@@ -110,6 +121,7 @@
             </div>
         </div>
     </section>
+
     <!-- LAPTOP -->
     <section class="laptop-intro section-pad">
         <div class="container">
@@ -140,8 +152,7 @@
                     <h2 class="section-title">KHÁM PHÁ CÁC DÒNG<br/>LAPTOP HIỆN ĐẠI</h2>
                     <p class="muted">
                         TechNoX mang đến cho bạn các mẫu laptop hiệu năng cao, thiết kế sang trọng,
-                        phù hợp cho học tập, làm việc và giải trí.
-                        Khám phá ngay để chọn cho mình chiếc laptop ưng ý.
+                        phù hợp cho học tập, làm việc và giải trí. Khám phá ngay để chọn cho mình chiếc laptop ưng ý.
                     </p>
                     <a class="btn btn--outline" href="#">TÌM HIỂU THÊM</a>
                 </div>
@@ -158,9 +169,28 @@
             <!-- #catalogGrid: TS ước lượng cột -> pageSize -->
             <div #catalogGrid class="journal-grid">
                 <article class="story" *ngFor="let it of paged; trackBy: trackById">
-                    <a class="story__media" [style.background-image]="'url(' + it.image + ')'" href="#" [attr.aria-label]="it.name"></a>
-                    <h3 class="story__title">{{ it.name }}</h3>
-                    <p class="story__meta">{{ it.price | number:'1.0-0' }}đ — {{ it.tags[0] || 'Accessory' }}</p>
+                    <a
+                            class="story__media"
+                            [style.background-image]="'url(' + it.image + ')'"
+                            href="#"
+                            [attr.aria-label]="it.name">
+                    </a>
+
+                    <div class="story__body">
+                        <h3 class="story__title">{{ it.name }}</h3>
+                        <p class="story__meta">
+                            {{ it.price | number:'1.0-0' }}đ — {{ it.tags[0] || 'Accessory' }}
+                        </p>
+                    </div>
+
+                    <!-- Nút thêm vào giỏ cho phụ kiện -->
+                    <button
+                            class="btn btn--block story__btn"
+                            type="button"
+                            (click)="add(it)"
+                            [attr.aria-label]="'Thêm ' + it.name + ' vào giỏ hàng'">
+                        THÊM VÀO GIỎ
+                    </button>
                 </article>
             </div>
 

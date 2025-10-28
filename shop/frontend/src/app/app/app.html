@@ -1,3 +1,9 @@
-<app-site-header *ngIf="!isOwner()"></app-site-header>
-<router-outlet></router-outlet>
-<app-site-footer *ngIf="!isOwner()"></app-site-footer>
+<div class="app-shell">
+    <app-site-header *ngIf="showChrome()"></app-site-header>
+
+    <main class="app-main">
+        <router-outlet></router-outlet>
+    </main>
+
+    <app-site-footer *ngIf="showChrome()"></app-site-footer>
+</div>
