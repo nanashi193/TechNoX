@@ -48,4 +48,8 @@ public class ImageStorageService {
         private String url;      // secure_url
         private String publicId; // dùng để transform / xoá
     }
+    public void delete(String publicId) throws IOException {
+        cloudinary.uploader().destroy(publicId, Map.of("invalidate", true));
+    }
+
 }

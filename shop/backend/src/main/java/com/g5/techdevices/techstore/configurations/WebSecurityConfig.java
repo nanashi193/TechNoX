@@ -67,6 +67,8 @@ public class WebSecurityConfig {
                         // ✅ Cho phép upload ảnh sản phẩm (nếu có)
                         .requestMatchers(POST, String.format("%s/products/uploads/**", apiPrefix))
                         .hasAnyRole(Role.ADMIN, Role.OWNER)
+                        .requestMatchers(DELETE, String.format("%s/products/*/images/**", apiPrefix))
+                        .hasAnyRole(Role.ADMIN, Role.OWNER)
                         .requestMatchers(PUT, apiPrefix + "/products/*/thumbnail/from-image/*")
                         .hasAnyRole(Role.ADMIN, Role.OWNER)
                         .requestMatchers(PUT, apiPrefix + "/products/**")

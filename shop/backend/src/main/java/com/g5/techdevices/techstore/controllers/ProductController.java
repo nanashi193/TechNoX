@@ -77,7 +77,7 @@ public class ProductController {
             Product existingProduct = productService.getProductById(productId);
             files = (files == null) ? new ArrayList<>() : files;
             if (files.size() > ProductImages.MAXIMUM_IMAGES_PER_PRODUCT){
-                return ResponseEntity.badRequest().body("You can upload maximun 5 inmages.");
+                return ResponseEntity.badRequest().body("You can upload maximum 5 inmages.");
             }
 
             List<ProductImages> productImages = new ArrayList<>();
@@ -102,6 +102,7 @@ public class ProductController {
                         existingProduct.getId()
                         , ProductImageDTO.builder()
                                 .imageUrl(up.getUrl())
+                                .publicId(up.getPublicId())
                                 .build()
                 );
                 productImages.add(productImage);
@@ -256,6 +257,21 @@ public class ProductController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
+ //=============Delete Image==========================
+    @DeleteMapping("/{productId}/images/{imageId}")
+    public ResponseEntity<?> deleteImage(
+            @PathVariable Long productId,
+            @PathVariable Long imageId
+    ) {
+        try {
+            // gọi service để xoá cả Cloudinary + DB
+            productService.deleteImageOfProduct(productId, imageId, storage);
+            return ResponseEntity.ok(Map.of("message", "Image deleted successfully"));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
+    }
+
 
 
 

@@ -25,4 +25,8 @@ public class ProductImages {
 
     @Column(name = "ImageUrl", columnDefinition = "nvarchar(500)") // lưu full https URL
     private String imageUrl;
+
+    @Column(name = "PublicId", nullable = false, unique = true, columnDefinition = "nvarchar(255)")
+    private String publicId; // <-- BẮT BUỘC để xoá Cloudinary
+
 }
