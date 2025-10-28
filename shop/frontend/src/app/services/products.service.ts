@@ -1,12 +1,13 @@
 import {Injectable, inject} from '@angular/core';
 import {HttpClient, HttpParams} from '@angular/common/http';
-import {Observable} from 'rxjs';
+import {forkJoin, Observable} from 'rxjs';
 import {environment} from '../environments/environment';
 import {Page, Product, ProductVariant} from '../models/products.model';
 import {of} from 'rxjs';
 import {delay} from 'rxjs/operators';
 import {map} from 'rxjs/operators';
 import {ProductCreateDTO, ProductUpdateDTO} from "../dtos/products/products.dto";
+import {ProductImage, ProductImageBE} from "../models/product-image.model";
 
 export interface ProductListResponse {
     products: Product[];
@@ -46,6 +47,8 @@ type ProductListResponseBE = { products: RawProduct[]; totalPages: number };
 export class ProductService {
     private http = inject(HttpClient);
     private base = `${environment.apiBaseUrl}/products`;
+    private readonly UPLOAD_URL = `${this.base}/images/upload`;     // ⬅️ chỉnh cho khớp BE
+    private readonly ATTACH_URL = (id: number) => `${this.base}/${id}/images`;
     private useMock = !!(environment as any).useMock; // true => dùng mock
     private toNum = (v: any) => (v == null ? 0 : Number(v));
 
@@ -158,6 +161,36 @@ export class ProductService {
         );
     }
 
+    uploadImages(productId: number, files: File[]) {
+        const fd = new FormData();
+        files.forEach(f => fd.append('files', f));
+        return this.http
+            .post<ProductImageBE[]>(`${this.base}/uploads/${productId}`, fd)
+            .pipe(
+                map(arr =>
+                    (arr ?? []).map(i => ({
+                        id: (i.id ?? i.imageId)!,
+                        url: (i.imageUrl ?? i.url)!,
+                        publicId: i.publicId ?? ''
+                    }))
+                )
+            );
+    }
+// --- gắn list ảnh vào product (nếu BE tách 2 bước)
+    attachImages(productId: number, images: ProductImage[]) {
+        return this.http.post<void>(this.ATTACH_URL(productId), images);
+    }
+
+    setThumbnailFromImage(productId: number, imageId: number) {
+        return this.http.put(
+            `${this.base}/${productId}/thumbnail/from-image/${imageId}`,
+            {}
+        );
+    }
+    deleteImage(productId: number, imageId: number) {
+        return this.http.delete(`${this.base}/${productId}/images/${imageId}`);
+    }
+
     get(id: number): Observable<Product> {
         return this.http.get<any>(`${this.base}/${id}`).pipe(
             map(p => this.mapRawProduct(p))
@@ -176,9 +209,6 @@ export class ProductService {
             map(p => this.mapRawProduct(p))
         );
     }
-
-
-
 
     delete(id: number): Observable<void> {
         return this.http.delete<void>(`${this.base}/${id}`);

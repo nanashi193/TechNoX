@@ -21,6 +21,7 @@ import {
     toCreateProductDTO,
     toUpdateProductDTO
 } from "../../../../dtos/products/products.dto";
+import {ProductImage} from "../../../../models/product-image.model";
 
 type MediaItem = { id: string; previewUrl: string; file?: File; isUrl?: boolean };
 type VariantRow = { name: string; values: string[]; input: string };
@@ -113,6 +114,32 @@ export class ProductsDetailComponent implements OnInit {
     // ===== Media state
     media: MediaItem[] = [];
     dragOver = false;
+    private hydrateMediaFromServer(p: any) {
+        // reset gallery
+        this.media = [];
+
+        // 1) Thumbnail (URL public, không phải blob:)
+        const thumb =
+            p?.thumbnail ?? p?.image ?? p?.imageUrl ?? '';
+        if (thumb && !thumb.startsWith('blob:')) {
+            this.media.push({ id: 'thumb', previewUrl: thumb });
+        }
+
+        // 2) Danh sách ảnh (tuỳ BE: images / productImages / photos ...)
+        const imgs = p?.images ?? p?.productImages ?? p?.photos ?? [];
+        for (const img of imgs) {
+            const url = img?.url ?? img?.imageUrl ?? '';
+            if (url && !url.startsWith('blob:')) {
+                this.media.push({ id: img?.publicId ?? crypto.randomUUID(), previewUrl: url });
+            }
+        }
+
+        // 3) (tuỳ chọn) Nếu control thumbnail đang rỗng thì set bằng URL DB
+        if (!this.f.controls.thumbnail.value && thumb) {
+            this.f.controls.thumbnail.setValue(thumb, { emitEvent: false });
+        }
+    }
+
 
     // ===== Variants state
     variants: VariantRow[] = [{name: 'Size', values: [], input: ''}];
@@ -142,6 +169,8 @@ export class ProductsDetailComponent implements OnInit {
                     thumbnail: p.thumbnail ?? '',              // ⬅️ KHÔNG phải p.image
                     categoryId: p.categoryId ?? null,          // ⬅️ cần BE trả về id (đã nhắc sửa BE)
                 }, {emitEvent: false});
+
+                this.hydrateMediaFromServer(p);
 
                 // dựng lại variants
                 this.variantsFA.clear();
@@ -175,7 +204,12 @@ export class ProductsDetailComponent implements OnInit {
 
         const raw = this.f.getRawValue();
 
-        // 1) Map FormArray -> mảng biến thể KHÔNG có sku
+        // files mới chọn từ dropzone
+        const files: File[] = (this.media ?? [])
+            .filter(m => !!m.file)
+            .map(m => m.file as File);
+
+        // map biến thể (không gửi sku)
         const variants = this.variantsFA.controls.map(g => {
             const { id, color, size, quantity, price } = g.getRawValue();
             const base = {
@@ -184,30 +218,37 @@ export class ProductsDetailComponent implements OnInit {
                 quantity: +quantity || 0,
                 price: +price || 0,
             };
-            // UPDATE: chỉ gửi id nếu có
             return (this.id && id != null) ? { id, ...base } : base;
         });
 
         if (this.id) {
-            // 2a) UPDATE
+            // ===== UPDATE
             const dto: ProductUpdateDTO = {
-                name: raw.name,
-                price: +raw.price,
-                thumbnail: raw.thumbnail ?? '',
+                name: raw.name!,
+                price: +raw.price!,
+                thumbnail: raw.thumbnail ?? '',          // ⬅️ sửa thumbnailUrl -> raw.thumbnail
                 description: raw.description ?? '',
                 status: !!raw.status,
-                // tuỳ BE: nếu cần cập nhật category thì giữ, không thì bỏ dòng này
-                categoryId: raw.categoryId ?? undefined,
-                variants, // <-- mảng object: {id?, color, size, quantity, price}
+                ...(raw.categoryId != null ? { categoryId: +raw.categoryId } : {}),
+                variants,
             };
 
             await firstValueFrom(this.productService.update(this.id, dto));
+
+            if (files.length) {
+                const imgs = await firstValueFrom(this.productService.uploadImages(this.id, files)); // ⬅️ đổi attachImages -> uploadImages
+                // nếu form chưa có thumbnail thì set theo ảnh đầu (BE đã có endpoint)
+                if ((!raw.thumbnail || !raw.thumbnail.length) && imgs?.length) {
+                    await firstValueFrom(this.productService.setThumbnailFromImage(this.id, imgs[0].id));
+                }
+            }
+
             this.originalValue = this.f.getRawValue();
             this.f.markAsPristine();
             this.setEditMode(false);
 
         } else {
-            // 2b) CREATE (bắt buộc có categoryId số)
+            // ===== CREATE
             if (raw.categoryId == null) {
                 this.f.controls.categoryId.setErrors({ required: true });
                 this.f.markAllAsTouched();
@@ -220,13 +261,21 @@ export class ProductsDetailComponent implements OnInit {
                 thumbnail: raw.thumbnail ?? '',
                 description: raw.description ?? '',
                 status: !!raw.status,
-                categoryId: +raw.categoryId!,   // đảm bảo là number
+                categoryId: +raw.categoryId!,
                 variants,
             };
 
             const created = await firstValueFrom(this.productService.create(dto));
-            if (created?.id) this.router.navigate(['/owner/products', created.id]);
-            else this.router.navigate(['/owner/products']);
+
+            if (created?.id && files.length) {
+                const imgs = await firstValueFrom(this.productService.uploadImages(created.id, files));
+                if ((!raw.thumbnail || !raw.thumbnail.length) && imgs?.length) {
+                    await firstValueFrom(this.productService.setThumbnailFromImage(created.id, imgs[0].id));
+                }
+                this.router.navigate(['/owner/products', created.id]);
+            } else {
+                this.router.navigate(['/owner/products']);
+            }
         }
     }
 
@@ -309,10 +358,6 @@ export class ProductsDetailComponent implements OnInit {
         for (const f of files) {
             const preview = URL.createObjectURL(f);
             this.media.push({id: crypto.randomUUID(), previewUrl: preview, file: f});
-        }
-        // auto fill vào field image nếu đang trống (thumbnail chính)
-        if (!this.f.value.thumbnail && this.media[0]) {
-            this.f.patchValue({thumbnail: this.media[0].previewUrl});
         }
     }
 }
