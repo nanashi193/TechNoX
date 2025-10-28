@@ -49,7 +49,7 @@ button, a { font: inherit; }
     margin-bottom:10px;
 }
 .header h2{
-    margin:0 0 6px;
+    margin:0 0 10px;
     font-weight: 700;
     letter-spacing:.2px;
 }
@@ -75,12 +75,12 @@ button, a { font: inherit; }
     border-bottom:1px solid rgba(255,255,255,.22);
 }
 .row:not(.head):hover{ background: rgba(0,0,0,.10); } /* không mờ ảnh, chỉ tint tối nhẹ */
-.row .name .title{ font-size:15px; font-weight:700; }
-.row .name .sub{ font-size:12px; opacity:.9; margin-top:2px; }
+.row .name .title{ font-size:30px; font-weight:700; }
+.row .name .sub{ font-size:20px; opacity:.9; margin-top:2px; }
 .col.center{ text-align:center; }
 .col.right{ text-align:right; }
 
-.sep{ height:8px; }
+.sep{ height:10px; }
 
 /* Tổng kết */
 .summary{
@@ -88,11 +88,11 @@ button, a { font: inherit; }
     padding:12px 4px 4px;
 }
 .order{ opacity:.95; }
-.total{ font-size:18px; font-weight:800; }
+.total{ font-size:30px; font-weight:800; }
 
 /* QR box (bỏ hẳn blur/backdrop-filter) */
 .qrbox{
-    margin-top:14px;
+    margin-top:50px;
     background: rgba(10,16,40,.92);                 /* nền tối đặc, không mờ */
     border:1px dashed rgba(255,255,255,.22);
     border-radius:12px;
@@ -100,7 +100,7 @@ button, a { font: inherit; }
     text-align:center;
 }
 .qrbox img{
-    width:280px; max-width:100%;
+    width:350px; max-width:100%;
     display:block; margin:0 auto 10px;
     background:#fff; border-radius:12px;
     box-shadow:0 8px 22px rgba(0,0,0,.35);
@@ -125,7 +125,7 @@ button, a { font: inherit; }
 .btn.secondary[disabled]{ opacity:.55; cursor:not-allowed; }
 
 /* Hint / Empty */
-.hint{ font-size:12px; opacity:.9; margin-top:8px; text-shadow: 0 1px 2px rgba(0,0,0,.55); }
+.hint{ font-size:22px; opacity:.9; margin-top:8px; text-shadow: 0 1px 2px rgba(0,0,0,.55); }
 .empty{
     background: rgba(10,16,40,.92);
     border:1px dashed rgba(255,255,255,.22);

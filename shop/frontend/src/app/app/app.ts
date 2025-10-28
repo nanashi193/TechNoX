@@ -1,7 +1,7 @@
 import { Component, inject, signal } from '@angular/core';
-import { Router, NavigationEnd, RouterOutlet } from '@angular/router';
+import { Router, NavigationEnd, RouterOutlet, ActivatedRoute } from '@angular/router';
 import { NgIf } from '@angular/common';
-import { filter, map, startWith } from 'rxjs';
+import { filter, startWith } from 'rxjs';
 import { SiteHeaderComponent } from '../components/site-header/site-header.component';
 import { SiteFooterComponent } from '../components/site-footer/site-footer.component';
 
@@ -10,19 +10,32 @@ import { SiteFooterComponent } from '../components/site-footer/site-footer.compo
     standalone: true,
     imports: [RouterOutlet, NgIf, SiteHeaderComponent, SiteFooterComponent],
     templateUrl: './app.html',
-    styleUrl: './app.css'
+    // không cần styleUrls, ta dùng styles.css global
 })
 export class App {
     private router = inject(Router);
-    isOwner = signal(false);
+    private route  = inject(ActivatedRoute);
+    showChrome = signal(true);
 
     constructor() {
         this.router.events
             .pipe(
                 filter((e): e is NavigationEnd => e instanceof NavigationEnd),
-                startWith({ urlAfterRedirects: this.router.url } as NavigationEnd),
-                map(e => e.urlAfterRedirects.startsWith('/owner'))
+                startWith({ urlAfterRedirects: this.router.url } as NavigationEnd)
             )
-            .subscribe(flag => this.isOwner.set(flag));
+            .subscribe(() => this.updateChrome());
+    }
+
+    private updateChrome() {
+        let r: ActivatedRoute = this.route;
+        while (r.firstChild) r = r.firstChild;
+
+        let cur: ActivatedRoute | null = r;
+        let hide = false;
+        while (cur) {
+            if (cur.snapshot.data['hideChrome']) { hide = true; break; }
+            cur = cur.parent!;
+        }
+        this.showChrome.set(!hide);
     }
 }
