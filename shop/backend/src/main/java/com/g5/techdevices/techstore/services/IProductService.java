@@ -1,12 +1,14 @@
 package com.g5.techdevices.techstore.services;
 import com.g5.techdevices.techstore.dtos.ProductDTO;
 import com.g5.techdevices.techstore.dtos.ProductImageDTO;
+import com.g5.techdevices.techstore.dtos.customer.CustomerProductDTO;
 import com.g5.techdevices.techstore.entity.products.Product;
 import com.g5.techdevices.techstore.entity.products.ProductImages;
 import com.g5.techdevices.techstore.exceptions.DataNotFoundException;
 import com.g5.techdevices.techstore.responses.ProductResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 import java.math.BigDecimal;
@@ -36,4 +38,6 @@ public interface IProductService {
     boolean existsByName(String name);
     ProductImages createProductImages(Long productId
             , ProductImageDTO productImageDTO) throws Exception;
+    Page<CustomerProductDTO> getProductsForCustomer(Pageable pageable);
+    CustomerProductDTO getCustomerProductById(Long id) throws DataNotFoundException; // <-- THÊM HÀM NÀY
 }

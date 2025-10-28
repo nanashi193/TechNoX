@@ -1,6 +1,6 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule, CurrencyPipe } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { RouterModule, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { CartService } from '../../services/cart.service';
 import { Cart, CartItem } from '../../models/cart.model';
@@ -15,6 +15,7 @@ import { Cart, CartItem } from '../../models/cart.model';
 export class CartComponent implements OnInit {
 
     private cartService = inject(CartService);
+    private router = inject(Router);
 
     cart: Cart | null = null;
     loading = true; // Thêm trạng thái loading
@@ -111,4 +112,7 @@ export class CartComponent implements OnInit {
         });
     }
     trackByItem = (_: number, it: CartItem) => it.variantId;
+    goToPayment(): void {
+        this.router.navigate(['/payment']);
+    }
 }

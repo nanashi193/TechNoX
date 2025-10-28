@@ -164,4 +164,44 @@ export class ProductService {
         }
         return of(void 0).pipe(delay(150));
     }
+    bulkPublish(ids: number[]): Observable<void> {
+        // ---- PHẦN CODE MOCK ----
+        if (this.useMock) {
+            ids.forEach(id => {
+                const i = MOCK_PRODUCTS.findIndex((p: Product) => p.id === id); // Thêm kiểu dữ liệu cho p
+                if (i > -1) {
+                    // Logic mock: Có thể set một trường 'published' thành true
+                    // (Bạn cần thêm trường 'published?: boolean' vào interface Product)
+                    // MOCK_PRODUCTS[i].published = true;
+                    // Hoặc đơn giản là log ra
+                    console.log(`Mock publishing product with ID: ${id}`);
+                }
+            });
+            return of(void 0).pipe(delay(150));
+        }
+        // ---- PHẦN CODE THẬT ----
+        // Gọi API backend tương ứng (ví dụ: POST /products/bulk-publish)
+        return this.http.post<void>(`${this.base}/bulk-publish`, { ids });
+    }
+
+    /**
+     * Unpublish nhiều sản phẩm cùng lúc
+     */
+    bulkUnpublish(ids: number[]): Observable<void> {
+        // ---- PHẦN CODE MOCK ----
+        if (this.useMock) {
+            ids.forEach(id => {
+                const i = MOCK_PRODUCTS.findIndex((p: Product) => p.id === id); // Thêm kiểu dữ liệu cho p
+                if (i > -1) {
+                    // Logic mock: Có thể set trường 'published' thành false
+                    // MOCK_PRODUCTS[i].published = false;
+                    console.log(`Mock unpublishing product with ID: ${id}`);
+                }
+            });
+            return of(void 0).pipe(delay(150));
+        }
+        // ---- PHẦN CODE THẬT ----
+        // Gọi API backend tương ứng (ví dụ: POST /products/bulk-unpublish)
+        return this.http.post<void>(`${this.base}/bulk-unpublish`, { ids });
+    }
 }

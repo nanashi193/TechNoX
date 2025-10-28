@@ -1,8 +1,10 @@
 package com.g5.techdevices.techstore.services;
 
+import com.g5.techdevices.techstore.components.ProductMapper;
 import com.g5.techdevices.techstore.dtos.ProductDTO;
 import com.g5.techdevices.techstore.dtos.ProductImageDTO;
 import com.g5.techdevices.techstore.dtos.ProductVariantDTO;
+import com.g5.techdevices.techstore.dtos.customer.CustomerProductDTO;
 import com.g5.techdevices.techstore.entity.products.Category;
 import com.g5.techdevices.techstore.entity.products.Product;
 import com.g5.techdevices.techstore.entity.products.ProductImages;
@@ -16,6 +18,7 @@ import com.g5.techdevices.techstore.responses.ProductResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -34,6 +37,7 @@ public class ProductService implements  IProductService {
     private final ProductRepository productRepository;
     private final CategoryRepository categoryRepository;
     private final ProductImageRepository productImageRepository;
+    private final ProductMapper productMapper; // <-- Tiêm Mapper
 
 
     @Override
@@ -161,7 +165,20 @@ public class ProductService implements  IProductService {
                 return productImageRepository.save(newProductImages);
     }
 
-        // === ĐẶT HÀM NÀY Ở CUỐI CLASS, TRƯỚC DẤU } CUỐI CÙNG ===
+    @Override
+    public Page<CustomerProductDTO> getProductsForCustomer(Pageable pageable) {
+        Page<Product> productPage = productRepository.findAll(pageable);
+        return productPage.map(productMapper::mapToCustomerProductDTO);
+    }
+
+    @Override
+    public CustomerProductDTO getCustomerProductById(Long id) throws DataNotFoundException {
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new DataNotFoundException("Product not found with id: " + id));
+        return productMapper.mapToCustomerProductDTO(product);
+    }
+
+    // === ĐẶT HÀM NÀY Ở CUỐI CLASS, TRƯỚC DẤU } CUỐI CÙNG ===
         private String generateSku(String productName, String color, String size) {
             // Làm gọn tên sản phẩm: chỉ giữ chữ & số, viết hoa
             String cleanName = (productName == null ? "PRD" : productName)

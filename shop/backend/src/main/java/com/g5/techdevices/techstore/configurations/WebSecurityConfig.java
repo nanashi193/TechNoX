@@ -43,6 +43,8 @@ public class WebSecurityConfig {
                         .permitAll()
                         .requestMatchers(POST, String.format("%s/users/reset-password", apiPrefix))
                         .permitAll()
+                        .requestMatchers(GET, String.format("%s/customer/products/**", apiPrefix))
+                        .permitAll()
                         // ✅ Cho preflight
                         .requestMatchers(org.springframework.http.HttpMethod.OPTIONS, "/**")
                         .permitAll()

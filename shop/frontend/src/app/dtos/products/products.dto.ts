@@ -32,6 +32,7 @@ export function toCreateProductDTO(raw: ProductFormValue): CreateProductDTO {
         type:     raw.type ?? '',
         variants: raw.variants ?? 0,
         image:    (raw.image ?? raw.thumbnailUrl ?? ''), // alias thumbnailUrl -> image
+        description: raw.description ?? '',
     };
 }
 
@@ -44,7 +45,7 @@ export function toUpdateProductDTO(raw: ProductFormValue): UpdateProductDTO {
     if (raw.inStock != null)  dto.inStock = raw.inStock;
     if (raw.type != null)     dto.type = raw.type;
     if (raw.variants != null) dto.variants = raw.variants;
-
+    if (raw.description != null) dto.description = raw.description;
     // map alias image/thumbnailUrl
     if (raw.image != null || raw.thumbnailUrl != null) {
         dto.image = raw.image ?? raw.thumbnailUrl ?? '';
