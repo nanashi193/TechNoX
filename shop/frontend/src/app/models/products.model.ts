@@ -10,6 +10,7 @@ export interface Product {
     image: string;
     createdAt?: string;
     updatedAt?: string;
+    description: string;
 }
 
 export interface Page<T> {

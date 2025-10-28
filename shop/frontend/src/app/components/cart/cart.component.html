@@ -64,7 +64,11 @@
                     <span>Tổng tạm tính</span>
                     <span class="strong">{{ totalAmount | currency:'VND':'symbol':'1.0-0' }}</span>
                 </div>
-                <button class="btn-primary" [disabled]="!cart.items.length">Thanh toán</button>
+                <button class="btn-primary"
+                        [disabled]="!cart || !cart.items || cart.items.length === 0"
+                        (click)="goToPayment()">
+                    Thanh toán
+                </button>
                 <p class="note">Giá đã bao gồm VAT (nếu áp dụng).</p>
             </aside>
         </div>

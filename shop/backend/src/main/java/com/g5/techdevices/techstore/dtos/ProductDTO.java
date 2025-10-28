@@ -9,6 +9,8 @@ import lombok.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
+
 
 @Data
 @Getter
@@ -42,5 +44,7 @@ public class ProductDTO {
     private String thumbnail;
 
     private Boolean status; // Cho phép null khi update, vẫn mặc định true ở entity
+
+    private List<ProductVariantDTO> variants; // ✅ thêm dòng này
 
 }

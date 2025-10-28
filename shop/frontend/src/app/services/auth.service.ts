@@ -116,21 +116,20 @@ export class AuthService {
     }
     // ===== Forgot Password =====
     /** Gửi yêu cầu quên mật khẩu (BE sẽ gửi email có link đặt lại mật khẩu) */
-    forgotPassword(email: string): Observable<any> {
-        // Nhiều BE trả về text/empty -> dùng responseType 'text' để tránh lỗi JSON parse
+    forgotPassword(email: string): Observable<string> {
         return this.http.post(
             `${this.baseUrl}/forgot-password`,
             { email },
-            { responseType: 'text' as 'json' }
+            { responseType: 'text' }
         );
     }
 
     /** (Tuỳ chọn) Đặt lại mật khẩu khi người dùng click link từ email và có token */
-    resetPassword(token: string, newPassword: string): Observable<any> {
+    resetPassword(token: string, newPassword: string): Observable<string> {
         return this.http.post(
             `${this.baseUrl}/reset-password`,
             { token, newPassword },
-            { responseType: 'text' as 'json' }
+            { responseType: 'text' }
         );
     }
     verifyEmail(token: string) {

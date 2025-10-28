@@ -39,8 +39,11 @@ public class WebSecurityConfig {
                         .permitAll()
                         .requestMatchers(POST, String.format("%s/users/login", apiPrefix))
                         .permitAll()
-                        .requestMatchers(POST,
-                                String.format("%s/users/resetPassword", apiPrefix))
+                        .requestMatchers(POST, String.format("%s/users/forgot-password", apiPrefix))
+                        .permitAll()
+                        .requestMatchers(POST, String.format("%s/users/reset-password", apiPrefix))
+                        .permitAll()
+                        .requestMatchers(GET, String.format("%s/customer/products/**", apiPrefix))
                         .permitAll()
                         // ✅ Cho preflight
                         .requestMatchers(org.springframework.http.HttpMethod.OPTIONS, "/**")
@@ -71,7 +74,7 @@ public class WebSecurityConfig {
                         .hasAnyRole(Role.ADMIN, Role.OWNER)
                         .requestMatchers(DELETE, String.format("%s/users/**", apiPrefix))
                         .hasAnyRole(Role.ADMIN, Role.OWNER)
-                        .requestMatchers(HttpMethod.DELETE, String.format("%s/users/**", apiPrefix))
+                        .requestMatchers(PATCH, String.format("%s/users/**", apiPrefix))
                         .hasAnyRole(Role.ADMIN, Role.OWNER)
                         .requestMatchers(PUT, String.format("%s/users/restore/**", apiPrefix))
                         .hasAnyRole(Role.ADMIN, Role.OWNER)

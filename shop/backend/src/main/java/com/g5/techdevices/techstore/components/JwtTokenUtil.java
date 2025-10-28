@@ -28,6 +28,14 @@ public class JwtTokenUtil {
         Map<String, Object> claims = new HashMap<>();
 //        this.generateSecretKey();
         claims.put("email", user.getEmail());
+
+        // ✅ NHÚNG QUYỀN VÀO JWT
+        List<String> authorities = user.getAuthorities().stream()
+                .map(org.springframework.security.core.GrantedAuthority::getAuthority) // ví dụ ROLE_ADMIN
+                .toList();
+        claims.put("authorities", authorities);
+
+        // (tuỳ thích) vẫn giữ roleName để debug
         claims.put("roleName", user.getRole().getName());
         try {
             String token = Jwts.builder()
@@ -64,17 +72,19 @@ public class JwtTokenUtil {
         final Claims claim = this.extractAllClaims(token);
         return claimsResolver.apply(claim);
     }
+
     private boolean isTokenExpired(String token) {
          Date expirationDate = this.extractClaim(token, Claims::getExpiration);
          return expirationDate.before(new Date());
     }
+
     public String extractEmail(String token) {
-        return extractClaim(token, Claims::getSubject);
+        return extractClaim(token, io.jsonwebtoken.Claims::getSubject);
     }
     //Kiểm tra xem token còn hạng ko
     public boolean validateToken(String token, UserDetails userDetails) {
         String email = extractEmail(token);
-        return (email.equals(userDetails.getUsername())
-                && !isTokenExpired(token));
+        return (email.equals(userDetails.getUsername()) && !isTokenExpired(token));
     }
 }
+

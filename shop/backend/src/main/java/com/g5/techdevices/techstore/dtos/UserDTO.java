@@ -6,6 +6,8 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.*;
 
+import java.time.LocalDateTime;
+
 
 @Builder
 @Data
@@ -51,7 +53,7 @@ public class UserDTO {
     private long roleId =3L;
 
     @JsonProperty("CreateAt")
-    private String createdAt;
+    private LocalDateTime createdAt;
 
     @JsonProperty("AddressId")
     private Address addressId;

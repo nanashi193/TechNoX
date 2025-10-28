@@ -6,11 +6,15 @@ import com.g5.techdevices.techstore.dtos.AddressDTO;
 import com.g5.techdevices.techstore.dtos.UserDTO;
 import com.g5.techdevices.techstore.dtos.UserDetailDTO;
 import com.g5.techdevices.techstore.dtos.UserUpdateDTO;
+import com.g5.techdevices.techstore.entity.tokens.EmailType;
+import com.g5.techdevices.techstore.entity.tokens.PasswordResetToken;
 import com.g5.techdevices.techstore.entity.users.Address;
 import com.g5.techdevices.techstore.entity.users.Role;
 import com.g5.techdevices.techstore.entity.users.User;
 import com.g5.techdevices.techstore.exceptions.DataNotFoundException;
+import com.g5.techdevices.techstore.exceptions.InvalidTokenException;
 import com.g5.techdevices.techstore.exceptions.PermissionDenyException;
+import com.g5.techdevices.techstore.repositories.PasswordTokenRepository;
 import com.g5.techdevices.techstore.repositories.RoleRepository;
 import com.g5.techdevices.techstore.repositories.UserRepository;
 import com.g5.techdevices.techstore.repositories.AddressRepository;
@@ -30,8 +34,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -43,6 +46,8 @@ public class UserService implements IUserService{
     private final AuthenticationManager authenticationManager;
     private final JwtTokenUtil jwtTokenUtil;
     private final UserMapper userMapper;
+    private final PasswordTokenRepository  passwordTokenRepository;
+    private final EmailService emailService;
 
     /**
      * Helper method: Lấy thông tin User đang đăng nhập từ SecurityContext.
@@ -140,6 +145,23 @@ public class UserService implements IUserService{
 
         return userRepository.save(existingUser);
     }
+    //Nut gat xoa mem user
+    @Override
+    public User toggleActive(Long id, boolean isActive) throws DataNotFoundException {
+        User currentUser = getCurrentAuthenticatedUser();
+        boolean isAdmin = currentUser.getRole().getName().equalsIgnoreCase(Role.ADMIN);
+        boolean isOwner = currentUser.getRole().getName().equalsIgnoreCase(Role.OWNER);
+
+        if (!(isAdmin || isOwner)) {
+            throw new AccessDeniedException("You don't have permission to update this user.");
+        }
+        User existingUser = userRepository.findById(id)
+                .orElseThrow(() -> new DataNotFoundException("Cannot find user with id: " + id));
+
+        existingUser.setIsActive(isActive);
+        return userRepository.save(existingUser);
+    }
+
     @Override
     public void deleteUser(Long id){
         User user = userRepository.findById(id).orElse(null);
@@ -229,6 +251,47 @@ public class UserService implements IUserService{
 
         User updatedUser = userRepository.save(user);
         return userMapper.toUserDetailDTO(updatedUser);
+    }
+
+    @Override
+    public String createPasswordResetToken(String email) throws DataNotFoundException {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new DataNotFoundException("User not found"));
+
+        List<PasswordResetToken> oldTokens = passwordTokenRepository.findByUserAndExpireDateAfter(user, new Date());
+        oldTokens.forEach(passwordTokenRepository::delete);
+
+        String token = UUID.randomUUID().toString();
+        PasswordResetToken newToken = new PasswordResetToken(token, user);
+        passwordTokenRepository.save(newToken);
+        emailService.sendEmail(user.getEmail(), EmailType.RESET_PASSWORD, token);
+        return token;
+    }
+
+    @Override
+    @Transactional
+    public void resetPassword(String token, String newPassword)
+            throws DataNotFoundException, InvalidTokenException {
+        //Tìm token trong DB
+        PasswordResetToken resetToken = passwordTokenRepository.findByToken(token)
+                .orElseThrow(() -> new InvalidTokenException("Invalid or expired password reset token."));
+        //Kiểm tra token còn hạn
+        if (resetToken.getExpireDate().before(new Date())) {
+            passwordTokenRepository.delete(resetToken); //Xóa token hết hạn
+            throw new InvalidTokenException("Password reset token has expired.");
+        }
+        //Lấy User từ token
+        User user = resetToken.getUser();
+        if (user == null) {
+            throw new DataNotFoundException("User associated with the token not found.");
+        }
+        //Hash mật khẩu mới
+        String password = passwordEncoder.encode(newPassword);
+        //Cập nhật mật khẩu cho User
+        user.setPassword(password);
+        userRepository.save(user);
+        //Xóa token đã sử dụng
+        passwordTokenRepository.delete(resetToken);
     }
 }
 

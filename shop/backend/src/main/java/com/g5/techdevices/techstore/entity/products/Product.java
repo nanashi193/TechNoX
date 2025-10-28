@@ -1,6 +1,7 @@
 package com.g5.techdevices.techstore.entity.products;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.g5.techdevices.techstore.entity.Cart.CartItem;
 import com.g5.techdevices.techstore.entity.promotions.Promotion;
@@ -46,7 +47,8 @@ public class Product extends BaseEntity{
     @Column(name = "status", nullable = false)
     private boolean status = true;  // NOTE: mặc định là true (còn hàng)
 
-    @OneToMany(mappedBy = "product")
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference("product-variants")
     private List<ProductVariant> variants;
 
     @OneToMany(mappedBy = "product")
@@ -76,5 +78,8 @@ public class Product extends BaseEntity{
                 "Name", category.getName()
         );
     }
+
+
+
 }
 

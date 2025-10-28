@@ -1,22 +1,11 @@
-import {
-    Component, Input, TrackByFunction,
-    ViewChild, ElementRef, AfterViewInit, HostListener
-} from '@angular/core';
+import { Component, OnInit, inject, TrackByFunction } from '@angular/core'; // Bỏ các import không dùng nữa
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
+import { finalize } from 'rxjs';
 
-export interface Product {
-    id: number;
-    name: string;
-    price: number;
-    image: string;
-    category: string;
-    inStock: boolean;
-    tags?: string[];
-    isNew?: boolean;
-}
-type SortKey = 'relevance' | 'priceAsc' | 'priceDesc' | 'nameAsc';
+import { CustomerProduct } from '../../models/customer-product.model';
+import { CustomerProductService } from '../../services/customer-product.service';
 
 @Component({
     selector: 'app-product-page',
@@ -25,145 +14,89 @@ type SortKey = 'relevance' | 'priceAsc' | 'priceDesc' | 'nameAsc';
     templateUrl: './product-page.component.html',
     styleUrls: ['./product-page.component.css'],
 })
-export class ProductPageComponent implements AfterViewInit {
-    constructor(private router: Router) {}
+export class ProductPageComponent implements OnInit {
+    private router = inject(Router);
+    // --- SỬA: Inject service mới ---
+    private productSvc = inject(CustomerProductService);
 
-    @Input() products: Product[] = [
-        { id: 1, name: 'Beats Studio Pro',     price: 5_990_000, image: 'https://via.placeholder.com/1000x750?text=Beats+Studio+Pro',     category: 'Headphone', inStock: true,  tags: ['ANC','USB-C'], isNew: true },
-        { id: 2, name: 'MX Mechanical Mini',   price: 3_190_000, image: 'https://via.placeholder.com/1000x750?text=MX+Mechanical+Mini',   category: 'Keyboard', inStock: true,  tags: ['Low-profile','Backlight'], isNew: true },
-        { id: 3, name: 'Razer Basilisk V3',    price: 1_490_000, image: 'https://via.placeholder.com/1000x750?text=Basilisk+V3',          category: 'Mouse',     inStock: false, tags: ['26K DPI','RGB'], isNew: false },
-        { id: 4, name: 'Keychron K2 Pro',      price: 2_590_000, image: 'https://via.placeholder.com/1000x750?text=Keychron+K2+Pro',      category: 'Keyboard', inStock: true,  tags: ['Hot-swap','BT 5.1'] },
-        { id: 5, name: 'Sony WH-1000XM5',      price: 7_990_000, image: 'https://via.placeholder.com/1000x750?text=WH-1000XM5',           category: 'Headphone', inStock: true,  tags: ['ANC','LDAC'], isNew: true },
-        { id: 6, name: 'G Pro X Superlight',   price: 2_590_000, image: 'https://via.placeholder.com/1000x750?text=G+Pro+X+Superlight',   category: 'Mouse',     inStock: true,  tags: ['Wireless','63g'] },
-        { id: 7, name: 'Apple Magic Keyboard', price: 2_990_000, image: 'https://via.placeholder.com/1000x750?text=Magic+Keyboard',       category: 'Keyboard', inStock: true,  isNew: true },
-        { id: 8, name: 'HyperX Pulsefire Haste', price: 1_190_000, image: 'https://via.placeholder.com/1000x750?text=Pulsefire+Haste',   category: 'Mouse',     inStock: true },
-        { id: 9, name: 'Bose QC Ultra',        price: 8_490_000, image: 'https://via.placeholder.com/1000x750?text=Bose+QC+Ultra',        category: 'Headphone', inStock: true },
-    ];
+    // --- SỬA: Dùng model mới ---
+    products: CustomerProduct[] = [];
 
-    private minCard = 220;
-    private gap = 16;
+    loading = true;
+    currentPage = 1;   // Frontend thường dùng 1-based
+    totalPages = 1;
+    totalItems = 0;
+    pageSize = 12;     // Số lượng sản phẩm/trang
 
-    private readonly HERO_MAX_COLS = 3;
-    private heroRows = 1;
-
-    heroPageSize = 3;
-    private heroStart = 0;
-
-    @ViewChild('heroGrid', { static: false }) heroGrid!: ElementRef<HTMLDivElement>;
-    @ViewChild('catalogGrid', { static: false }) catalogGrid!: ElementRef<HTMLDivElement>;
-
-    get heroAll(): Product[] {
-        const list = this.products.filter(p => p.isNew);
-        return list.length ? list : this.products;
-    }
-
-    get heroWindow(): Product[] {
-        const data = this.heroAll;
-        const n = data.length;
-        if (!n) return [];
-        const k = Math.min(this.heroPageSize, n);
-        const out: Product[] = [];
-        for (let i = 0; i < k; i++) out.push(data[(this.heroStart + i) % n]);
-        return out;
-    }
-
-    heroNext(): void {
-        const n = this.heroAll.length;
-        if (n > this.heroPageSize) this.heroStart = (this.heroStart + 1) % n;
-    }
-    heroPrev(): void {
-        const n = this.heroAll.length;
-        if (n > this.heroPageSize) this.heroStart = (this.heroStart - 1 + n) % n;
-    }
-
+    // Các biến lọc/sắp xếp (sẽ cần tích hợp vào API sau)
     searchTerm = '';
     categoryFilter: string = 'all';
-    sortKey: SortKey = 'relevance';
+    sortKey: string = 'relevance';
 
-    page = 1;
-    pageSize = 6;
+    ngOnInit(): void {
+        this.loadProducts(this.currentPage);
+    }
+
+    loadProducts(page: number): void {
+        this.loading = true;
+        const pageIndex = page - 1; // Backend dùng 0-based
+
+        this.productSvc.getProducts(pageIndex, this.pageSize)
+            .pipe(finalize(() => this.loading = false))
+            .subscribe(response => {
+                this.products = response.content;
+                this.totalItems = response.page.totalElements;
+                this.totalPages = response.page.totalPages;
+                this.currentPage = response.page.number + 1
+
+                console.log('Total Pages received:', this.totalPages);
+            });
+    }
+
+    nextPage(): void { if (this.currentPage < this.totalPages) this.loadProducts(this.currentPage + 1); }
+    prevPage(): void { if (this.currentPage > 1) this.loadProducts(this.currentPage - 1); }
+    goToPage(n: number): void {
+        const targetPage = Math.max(1, Math.min(n, this.totalPages));
+        if (targetPage !== this.currentPage) {
+            this.loadProducts(targetPage);
+        }
+    }
+
+    // --- CÁC HÀM KHÁC (ví dụ format giá, điều hướng) ---
+    formatPrice(v: number): string { return v.toLocaleString('vi-VN') + ' ₫'; }
+
+    bgImg(url: string): { [key: string]: string } {
+        // Trả về một object có key là 'background-image' và value là `url(...)`
+        return { 'background-image': `url('${url}')` };
+    }
+
+    viewProduct(p: CustomerProduct): void {
+        // Sửa: Điều hướng đến trang chi tiết sản phẩm customer
+        this.router.navigate(['/product', p.id]);
+    }
 
     get categories(): string[] {
-        const set = new Set(this.products.map(p => p.category));
-        return ['all', ...Array.from(set)];
+        // Lấy danh sách tên category duy nhất từ mảng products
+        const categoryNames = this.products.map(p => p.categoryName);
+        const uniqueCategories = Array.from(new Set(categoryNames));
+
+        // Thêm 'all' vào đầu danh sách
+        return ['all', ...uniqueCategories];
     }
 
-    get filtered(): Product[] {
-        let list = [...this.products];
-        if (this.categoryFilter !== 'all') list = list.filter(p => p.category === this.categoryFilter);
+    trackById: TrackByFunction<CustomerProduct> = (_i, item) => item.id;
 
-        const q = this.searchTerm.trim().toLowerCase();
-        if (q) list = list.filter(p => (p.name + ' ' + (p.tags?.join(' ') ?? '')).toLowerCase().includes(q));
-
-        switch (this.sortKey) {
-            case 'priceAsc':  list.sort((a, b) => a.price - b.price); break;
-            case 'priceDesc': list.sort((a, b) => b.price - a.price); break;
-            case 'nameAsc':   list.sort((a, b) => a.name.localeCompare(b.name)); break;
-            case 'relevance':
-            default: break;
-        }
-        return list;
+    // TODO: Cập nhật hàm lọc/sắp xếp để gọi lại API thay vì lọc/sắp xếp ở frontend
+    onFilterChange(): void {
+        this.currentPage = 1; // Reset về trang 1 khi lọc
+        this.loadProducts(this.currentPage); // Gọi lại API với filter mới (cần sửa hàm loadProducts)
     }
-
-    get totalPages(): number { return Math.max(1, Math.ceil(this.filtered.length / this.pageSize)); }
-    get paged(): Product[] {
-        const start = (this.page - 1) * this.pageSize;
-        return this.filtered.slice(start, start + this.pageSize);
+    onSortChange(): void {
+        this.currentPage = 1; // Reset về trang 1 khi sắp xếp
+        this.loadProducts(this.currentPage); // Gọi lại API với sort mới (cần sửa hàm loadProducts)
     }
-
-    ngAfterViewInit(): void {
-        setTimeout(() => {
-            this.recalcHeroPageSize();
-            this.recalcCatalogPageSize();
-        });
+    onSearch(): void {
+        this.currentPage = 1; // Reset về trang 1 khi tìm kiếm
+        this.loadProducts(this.currentPage); // Gọi lại API với keyword mới (cần sửa hàm loadProducts)
     }
-
-    @HostListener('window:resize') onResize() {
-        this.recalcHeroPageSize();
-        this.recalcCatalogPageSize();
-    }
-    recalcAndSlice(): void {
-        this.recalcHeroPageSize();
-        this.recalcCatalogPageSize();
-    }
-
-    private recalcHeroPageSize(): void {
-        const rawCols = this.estimateCols(this.heroGrid?.nativeElement);
-        const cols = Math.min(this.HERO_MAX_COLS, rawCols);
-        const newSize = Math.max(1, cols * this.heroRows);
-
-        if (newSize !== this.heroPageSize) {
-            const n = Math.max(1, this.heroAll.length);
-            const center = (this.heroStart + Math.floor(this.heroPageSize / 2)) % n;
-            this.heroPageSize = newSize;
-            this.heroStart = (center - Math.floor(this.heroPageSize / 2) + n) % n;
-        } else {
-            this.heroPageSize = newSize;
-        }
-    }
-
-    private recalcCatalogPageSize(): void {
-        this.page = Math.min(this.page, this.totalPages);
-        this.page = Math.max(this.page, 1);
-    }
-
-    private estimateCols(el?: HTMLDivElement): number {
-        if (!el) return 1;
-        const w = el.clientWidth;
-        return Math.max(1, Math.floor((w + this.gap) / (this.minCard + this.gap)));
-    }
-
-    nextPage(): void { if (this.page < this.totalPages) this.page++; }
-    prevPage(): void { if (this.page > 1) this.page--; }
-    goToPage(n: number): void { this.page = Math.max(1, Math.min(n, this.totalPages)); }
-
-    formatPrice(v: number): string { return v.toLocaleString('vi-VN') + ' ₫'; }
-    bgImg(url: string) { return { 'background-image': `url('${url}')` }; }
-
-    /* Điều hướng chi tiết */
-    viewProduct(p: Product): void {
-        this.router.navigate(['/product', p.id], { state: { product: p } });
-    }
-
-    trackById: TrackByFunction<Product> = (_i, item) => item.id;
 }

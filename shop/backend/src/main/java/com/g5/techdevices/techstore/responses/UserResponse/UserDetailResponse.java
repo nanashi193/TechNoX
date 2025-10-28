@@ -47,7 +47,7 @@ public class UserDetailResponse {
         this.phoneNumber = user.getPhoneNumber();
         this.isActive = user.getIsActive();
         this.roleName = user.getRole().getName();
-        this.createAt = user.getCreateAt();
+        this.createAt = user.getCreatedAt().toString();
 
         this.stats = new UserStatsResponse(ordersCount, totalSpent);
         if (user.getAddress() != null) {
