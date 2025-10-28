@@ -1,25 +1,74 @@
 package com.g5.techdevices.techstore.entity.users;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.g5.techdevices.techstore.entity.Bills.Bill;
 import com.g5.techdevices.techstore.entity.Cart.Cart;
 import com.g5.techdevices.techstore.entity.review.Review;
+import com.g5.techdevices.techstore.entity.tokens.Token;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
+@Builder
 @Data
+@Getter
+@Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
+@ToString(onlyExplicitlyIncluded = true)
 @Table(name = "Users")
-public class User {
+public class User implements UserDetails {
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        List<SimpleGrantedAuthority> authorities = new ArrayList<>();
+        authorities.add(new SimpleGrantedAuthority("ROLE_"+getRole().getName().toUpperCase()));
+//        authorities.add(new SimpleGrantedAuthority("ROLE_USER"));
+        return authorities;
+    }
+
+    @Override
+    public String getPassword() {
+        return password;
+    }
+
+    @Override
+    public String getUsername() {
+        return email;
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return true;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return true;
+    }
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "UserId")
-    private Long id;
+    private int id;
 
     @Column(name = "FullName", nullable = false, columnDefinition = "nvarchar(200)")
     private String fullName;
@@ -27,8 +76,8 @@ public class User {
     @Column(name = "Email", nullable = false, unique = true, columnDefinition = "nvarchar(255)")
     private String email;
 
-    @Column(name = "PasswordHash", nullable = false, columnDefinition = "nvarchar(512)")
-    private String passwordHash;
+    @Column(name = "Password", nullable = false, columnDefinition = "nvarchar(512)")
+    private String password;
 
     @Column(name = "Gender")
     private Boolean gender;
@@ -36,11 +85,33 @@ public class User {
     @Column(name = "PhoneNumber", length = 50, nullable = false)
     private String phoneNumber;
 
-    @Column(name = "Role", length = 50)
-    private String role;
-
     @Column(name = "IsActive")
     private Boolean isActive;
+
+    @Column(name = "FacebookAccountId", length = 100)
+    private String facebookAccountId;
+
+    @Column(name = "GoogleAccountId", length = 100)
+    private String googleAccountId;
+
+    @Column(name = "EmailVerified", nullable = false)
+    private boolean emailVerified = false;
+
+    @Column(name = "CreatedAt", nullable = false, updatable = false)
+    @CreationTimestamp
+    private LocalDateTime createdAt;
+
+    @ManyToOne
+    @JoinColumn(name = "RoleId", nullable = false)
+    @ToString.Exclude
+    @JsonIgnoreProperties("users")
+    private Role role;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Token> tokens;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<SocialAccount> socialAccounts;
 
     @OneToMany(mappedBy = "user")
     private List<Bill> bills;
@@ -53,5 +124,11 @@ public class User {
 
     @OneToMany(mappedBy = "user")
     private List<RecentView> recentViews;
+
+    @ManyToOne
+    @ToString.Exclude
+    @JsonIgnoreProperties("users")
+    @JoinColumn(name = "AddressId")
+    private Address address;
 }
 

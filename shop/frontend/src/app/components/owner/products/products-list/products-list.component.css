@@ -1,0 +1,366 @@
+
+.bulk{display:flex; gap:8px; align-items:center}
+.muted{color:var(--muted)}
+
+.btn{
+    height:36px; padding:0 12px; border:1px solid var(--b); background:#fff; border-radius:10px; cursor:pointer;
+}
+.btn.ghost{background:#fff}
+.btn.danger{border-color:#ffd6d6; color:#e5484d; background:#fff5f5}
+.btn.sm{height:32px; padding:0 10px}
+.btn.icon{width:32px; padding:0; text-align:center}
+.badge{margin-left:6px; padding:0 6px; border-radius:8px; border:1px solid var(--b); font-size:12px}
+
+.table{
+    border:1px solid var(--b); border-radius:12px; overflow:hidden; background:#fff;
+}
+.row{
+    display:grid;
+    grid-template-columns:
+    48px var(--col-product) var(--col-type) var(--col-stocks)
+    var(--col-sku) var(--col-price) var(--col-variants) var(--col-qty) var(--col-actions); /* 9 cols */
+    align-items:center; column-gap:12px; padding:12px 16px; border-top:1px solid rgba(0,0,0,.06);
+}
+.row:first-child{border-top:none}
+.row > .col-actions{ grid-column: 9 / 10; display:flex; align-items:center; justify-content:flex-end; gap:8px; }
+.thead{background:#fafafa; color:var(--muted); font-weight:600}
+
+.cell{display:flex; align-items:center}
+.check{justify-content:center}
+.col-product{gap:12px}
+.thumb{width:40px; height:40px; border-radius:8px; object-fit:cover; background:#f6f7f9}
+.info .name{font-weight:600}
+
+.col-actions{justify-content:flex-end; gap:8px}
+
+/* Toggle switch */
+.switch{position:relative; display:inline-flex; align-items:center; width:46px; height:26px}
+.switch input{appearance:none; width:46px; height:26px; margin:0}
+.switch .track{
+    position:absolute; inset:0; background:#e6e7eb; border-radius:999px;
+}
+.switch input:checked + .track{background:var(--accent)}
+.switch .track::after{
+    content:""; position:absolute; top:3px; left:3px; width:20px; height:20px; background:#fff; border-radius:50%; transition:transform .2s ease;
+    box-shadow:0 1px 2px rgba(0,0,0,.12);
+}
+.switch input:checked + .track::after{ transform: translateX(20px); }
+/* Cell Actions luôn căn giữa */
+.col-actions{
+    display:flex;               /* phòng khi bị override */
+    align-items:center;
+    justify-content:flex-end;
+    gap:8px;
+    min-width: 120px;           /* tránh bị co dẫn tới wrap */
+}
+
+/* Button: căn giữa chữ tuyệt đối */
+.btn{
+    display:inline-flex;        /* <-- quan trọng */
+    align-items:center;
+    justify-content:center;
+    line-height:1;              /* <-- quan trọng */
+    height:36px;
+    padding:0 12px;
+    border:1px solid var(--b);
+    border-radius:10px;
+    background:#fff;
+    cursor:pointer;
+    vertical-align: middle;     /* thêm cho chắc */
+}
+.btn.sm{ height:32px; padding:0 10px; }
+
+/* Nút icon “…” */
+.btn.icon{
+    width:32px; height:32px; padding:0;
+    font-size:18px; line-height:1;
+    display:inline-flex; align-items:center; justify-content:center;
+}
+
+.pagination{
+    display:flex; align-items:center; justify-content:flex-end;
+    gap:12px; padding:16px 4px 8px;
+}
+.pg{
+    display:inline-flex; align-items:center; justify-content:center;
+    min-width:36px; height:36px; padding:0 12px;
+    border:1px solid var(--b); border-radius:10px;
+    background:#fff; color:var(--muted); cursor:pointer; line-height:1;
+}
+.pg.num.active{
+    background: var(--accent); color:#fff; border-color: transparent;
+}
+.pg:disabled{ opacity:.45; cursor:not-allowed; }
+
+/* Responsive */
+@media (max-width: 980px){
+    :host{ --col-sku:.8fr; --col-actions:.8fr }
+}
+@media (max-width: 760px){
+    .toolbar{flex-wrap:wrap}
+    .right{width:100%; justify-content:flex-end}
+    .row{grid-template-columns: 40px 1fr .9fr .7fr .9fr .7fr .6fr .9fr}
+}
+/* header clickable */
+.th.sortable{ cursor:pointer; user-select:none; display:inline-flex; gap:6px; align-items:center; }
+.th.sortable:focus{ outline: none; }
+
+.sort-caret{ position:relative; width:10px; height:12px; display:inline-block; }
+.sort-caret::before,
+.sort-caret::after{
+    content:""; position:absolute; left:50%; transform:translateX(-50%);
+    border-left:4px solid transparent; border-right:4px solid transparent;
+}
+.sort-caret::before{ top:0;  border-bottom:6px solid #cbd5e1; }  /* lên (xám) */
+.sort-caret::after { bottom:0; border-top:6px solid #cbd5e1; }  /* xuống (xám) */
+
+.sort-caret.asc::before{  border-bottom-color:#3b82f6; }  /* mũi trên xanh */
+.sort-caret.desc::after{  border-top-color:#3b82f6; }     /* mũi dưới xanh */
+
+.sort-caret.off::before{ border-bottom-color:transparent; }
+.sort-caret.off::after{  border-top-color:transparent; }
+
+.toolbar{
+    display:flex; align-items:center; gap:12px;
+    margin:0 0 12px;
+}
+/*.toolbar .search{*/
+/*    width:280px; height:36px; padding:0 12px;*/
+/*    border:1px solid #e5e7eb; border-radius:8px; outline:none;*/
+/*    background:#fff;*/
+/*}*/
+.toolbar .right{ margin-left:auto; }
+.bulk{ display:flex; align-items:center; gap:12px; }
+.bulk .muted{ color:#6b7280; }
+
+/* Buttons (reuse nếu đã có .btn chung) */
+.btn{ height:36px; padding:0 12px; border-radius:10px; border:1px solid #e5e7eb; background:#fff; }
+.btn.ghost{ background:#fff; }
+.btn.primary{ background:#5b6cff; color:#fff; border-color:transparent; }
+.btn.danger{ background:#fee2e2; color:#b91c1c; border-color:#fecaca; }
+
+/* Popover filters */
+.filters-backdrop{
+    position:fixed; inset:0; background:transparent; z-index:9;
+}
+.filters-pop{
+    position:absolute; right:0; top:100%; margin-top:8px;
+    min-width:240px; padding:12px;
+    background:#fff; border:1px solid rgba(0,0,0,.08);
+    border-radius:12px; box-shadow:0 10px 24px rgba(0,0,0,.08);
+    z-index:10;
+}
+.fp-head{ font-weight:700; margin-bottom:8px; }
+.fp-group{ padding:8px 0; }
+.fp-label{ font-size:12px; color:#6b7280; margin-bottom:4px; }
+.fp-row{ display:flex; align-items:center; gap:8px; padding:6px 0; }
+.fp-actions{ display:flex; justify-content:flex-end; gap:8px; margin-top:8px; }
+.toolbar .search{
+    /* kích thước như bạn muốn */
+    width:280px; height:36px; padding:0 12px;
+    border:1px solid #e5e7eb; border-radius:8px;
+    background:#fff; outline:none; box-shadow:none;
+
+    /* QUAN TRỌNG: bỏ UA style của searchfield */
+    -webkit-appearance: none;
+    appearance: none;
+
+    /* nếu đặt trong flex */
+    flex:0 0 280px;
+}
+
+/* Ẩn đồ trang trí mặc định của search trên WebKit */
+.toolbar .search::-webkit-search-cancel-button,
+.toolbar .search::-webkit-search-decoration{
+    -webkit-appearance:none;
+    appearance:none;
+    display:none;
+}
+
+/* Khi focus vẫn không có shadow viền thứ 2 */
+.toolbar .search:focus{ box-shadow:none; }
+
+.toolbar{ display:flex; align-items:center; gap:12px; margin:0 0 12px; }
+
+/* đẩy khối actions sang phải và nằm cùng hàng */
+.toolbar .right{
+    margin-left:auto;
+    display:flex;
+    align-items:center;
+    gap:8px;
+}
+
+/* giữ filters dropdown bám nút */
+.filters-group{ position:relative; }
+
+@media (max-width:760px){
+    .toolbar{ flex-wrap:wrap; }
+    .toolbar .right{ width:100%; justify-content:flex-end; }
+}
+/* Backdrop phủ toàn trang */
+.sheet-backdrop{
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,.08);
+    z-index: 60;
+}
+
+/* Drawer bên phải */
+.filters-sheet{
+    position: fixed; top:0; right:0;
+    width: min(420px, 92vw);
+    height: 100vh;
+    background: #fff;
+    border-left: 1px solid var(--b);
+    box-shadow: 0 20px 40px rgba(0,0,0,.12);
+    border-top-left-radius: 12px;
+    border-bottom-left-radius: 12px;
+
+    display: flex; flex-direction: column;
+    transform: translateX(100%);
+    transition: transform .24s ease;
+    z-index: 70;
+}
+.filters-sheet.open{ transform: translateX(0); }
+
+.sheet-header{
+    position: sticky; top:0;
+    display:flex; align-items:center; justify-content:space-between;
+    padding:16px 20px; background:#fff;
+    border-bottom:1px solid rgba(0,0,0,.06);
+    font-weight:700;
+}
+.icon-btn{
+    width:36px; height:36px; border:1px solid var(--b);
+    border-radius:10px; background:#fff; cursor:pointer;
+}
+
+.sheet-body{
+    padding: 16px 20px;
+    overflow: auto; flex: 1;
+}
+.sheet-footer{
+    position: sticky; bottom:0;
+    display:flex; justify-content:flex-end; gap:12px;
+    padding:12px 20px; background:#fff;
+    border-top:1px solid rgba(0,0,0,.06);
+}
+
+/* Reuse styles bạn đã có cho nhóm filter */
+.fp-group{ padding:12px 0; }
+.fp-label{ font-size:12px; color:#6b7280; margin-bottom:6px; }
+.fp-row{ display:flex; align-items:center; gap:8px; padding:8px 0; }
+
+:host{
+    --b: var(--owner-border, rgba(0,0,0,.08));
+    --muted: var(--owner-muted, #6b7280);
+    --accent: var(--owner-accent, #1a73e8);
+
+    /* cột */
+    --col-product: 1.8fr;
+    --col-type: .9fr;
+    --col-stocks: .7fr;
+    --col-sku: 1fr;
+    --col-price: .7fr;
+    --col-variants: .6fr;
+    --col-qty: .7fr;
+    /* (ĐÃ BỎ) --col-actions */
+}
+
+.row{
+    display:grid;
+    grid-template-columns:
+    48px
+    var(--col-product)
+    var(--col-type)
+    var(--col-stocks)
+    var(--col-sku)
+    var(--col-price)
+    var(--col-variants)
+    var(--col-qty);
+    align-items:center;
+    column-gap:12px;
+    padding:12px 16px;
+    border-top:1px solid rgba(0,0,0,.06);
+}
+
+.row > .col-actions{ display:none !important; }
+.col-actions{ display:none !important; }
+
+/* Cho phép grid item co lại */
+.row > .cell{ min-width:0; }
+
+/* Cột tên: ảnh + text không bể dòng */
+.col-product{ display:flex; align-items:center; gap:12px; min-width:0; }
+.thumb{
+    width:40px; height:40px; border-radius:8px; object-fit:cover;
+    background:#f6f7f9; flex:0 0 40px;
+}
+.info{ min-width:0; }
+
+/* Nếu name là <a> hoặc <span> */
+.info .name{
+    display:block; max-width:100%;
+    font-weight:600;
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+    color:inherit; text-decoration:none;
+}
+.info .name:hover{ text-decoration:underline; }
+
+/* 1) Cho phép các cell co lại trong grid */
+.row > .cell{ min-width:0; }
+
+/* 2) Cột tên: ảnh + text trong flex, cha phải min-width:0 */
+.col-product{ display:flex; align-items:center; gap:12px; min-width:0; }
+.col-product .thumb{
+    width:40px; height:40px; border-radius:8px; object-fit:cover; flex:0 0 40px;
+}
+
+/* 3) Container bao tên cũng cần min-width:0 và chiếm phần còn lại */
+.col-product .info{ flex:1; min-width:0; }   /* nếu bạn có .info */
+.name-link, .info .name, .info .name-link{
+    display:block; flex:1; min-width:0;
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+    font-weight:600; color:inherit; text-decoration:none;
+}
+.name-link:hover, .info .name:hover{ text-decoration:underline; }
+
+/* (tuỳ chọn) tránh cắt từ lạ do rule global */
+.name-link{ word-break:normal; }
+
+/* Cho cell co lại được trong grid */
+.row > .cell { min-width: 0; }
+
+/* Cột tên */
+.col-product { min-width: 0; }
+
+/* anchor bọc ảnh + text phải là flex và có thể co */
+.col-product .name-link{
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+    color: inherit;
+    text-decoration: none;
+}
+.col-product .name-link:hover{ text-decoration: underline; }
+
+/* ảnh cố định kích thước */
+.col-product .thumb{
+    width: 40px; height: 40px;
+    flex: 0 0 40px;
+    border-radius: 8px; object-fit: cover;
+}
+
+/* khối info chứa tên chiếm phần còn lại và có thể co */
+.col-product .info{ flex: 1; min-width: 0; }
+
+/* tên: một dòng + elipsis */
+.col-product .info .name{
+    display: block;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-weight: 600;
+}
+
+

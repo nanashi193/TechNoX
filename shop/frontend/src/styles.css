@@ -1,19 +1,89 @@
-/* Reset mặc định gây viền trắng */
+@import url('./app/styles/shared-styles.css');
+
+:root {
+    --font-sans: "Be Vietnam Pro", ui-sans-serif, system-ui, -apple-system,
+    "Segoe UI", Roboto, "Noto Sans", Arial, sans-serif;
+    --bs-body-font-family: var(--font-sans);
+
+    /* bump nhẹ cho footer (tăng giảm tuỳ ý) */
+    --footer-bump: 4px;
+}
+
+/* Reset & base */
+html {
+    box-sizing: border-box;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+*, *::before, *::after { box-sizing: inherit; }
+
 html, body {
-  height: 100%;
-  margin: 0;              /* <-- quan trọng */
-  padding: 0;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    background: #ffffff;
+    color: #1f1f1f;
 }
 
-/* Cho chắc: mọi tính toán theo border-box */
-*, *::before, *::after { box-sizing: border-box; }
+body.admin-scope { background:#f3f4f6; }
 
-/* Đảm bảo vùng app phủ đủ chiều cao */
-app-root, .auth-layout {
-  display: block;
-  min-height: 100vh;
+body {
+    font-family: var(--font-sans, sans-serif);
+    line-height: 1.5;
+    text-rendering: optimizeLegibility;
 }
 
-/* (tuỳ chọn) nền mặc định đen để thấy rõ khi ảnh chưa load */
-body { background: #000; }
-/* You can add global styles to this file, and also import other style files */
+/* App root/kv auth chiếm tối thiểu 1 viewport (xử lý thanh địa chỉ mobile) */
+app-root,
+.auth-layout {
+    display: block;
+    min-height: 100svh; /* có thể đổi 100dvh nếu need behavior mới */
+}
+
+/* ============================
+   STICKY FOOTER TOÀN ỨNG DỤNG
+   (không cần app.css)
+============================ */
+app-root .app-shell{
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+}
+app-root .app-main{
+    flex: 1 0 auto; /* nội dung chiếm chỗ còn lại → footer dính đáy */
+}
+
+/* Tránh lớp overlay nào đó đè footer */
+app-site-footer { position: relative; z-index: 1; }
+
+/* ============================
+   FOOTER “TO HƠN XÍU”
+============================ */
+.site-footer{
+    padding-block: calc(28px + var(--footer-bump));
+}
+.footer-grid{
+    gap: clamp(16px, 2.8vw, 32px);
+}
+.footer-title{
+    font-size: calc(13px + var(--footer-bump));
+    margin-bottom: calc(10px + var(--footer-bump)/2);
+}
+.site-footer a,
+.site-footer li,
+.site-footer p{
+    font-size: calc(13px + var(--footer-bump));
+    line-height: 1.6;
+}
+.footer-legal{
+    margin-top: calc(14px + var(--footer-bump));
+    padding-top: calc(10px + var(--footer-bump)/2);
+    font-size: calc(12px + var(--footer-bump));
+    border-top: 1px solid rgba(0,0,0,.08); /* hoặc rgba(255,255,255,.14) nếu nền tối */
+}
+
+/* Mobile: vẫn thoáng nhưng không phình quá */
+@media (max-width: 768px){
+    .site-footer{ padding-block: calc(24px + var(--footer-bump)); }
+    .footer-grid{ gap: clamp(14px, 4vw, 24px); }
+}

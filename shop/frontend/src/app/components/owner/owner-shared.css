@@ -1,0 +1,34 @@
+/* === Owner shared tokens & utilities === */
+:root {
+    --owner-border: rgba(0,0,0,.08);
+    --owner-muted: #6b7280;
+    --owner-accent: #1a73e8;
+
+    /* card defaults */
+    --card-radius: 12px;
+    --card-padding: 16px;
+}
+
+.owner-scope .card{
+    background:#fff;
+    border:1px solid var(--owner-border);
+    border-radius:var(--card-radius);
+    padding:var(--card-padding);
+    box-shadow:0 1px 3px rgba(0,0,0,.04);
+}
+.owner-scope .card-header{
+    display:flex;align-items:center;justify-content:space-between;gap:12px;
+}
+
+/* grids hay dùng trong dashboard */
+.owner-scope .grid-3{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px}
+.owner-scope .grid-2{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:14px}
+.owner-scope .grid-2-1{display:grid;grid-template-columns:2fr 1fr;gap:14px}
+@media (max-width:980px){ .owner-scope .grid-2-1{grid-template-columns:1fr} }
+
+/* list/reset tiện dụng */
+.owner-scope .list-unstyled{list-style:none;margin:0;padding:0}
+
+/* biến thể card cho từng widget */
+.owner-scope .card--lg{ --card-radius:16px; }
+.owner-scope .card--tight{ --card-padding:12px; }

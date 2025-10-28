@@ -1,0 +1,198 @@
+
+:host {
+    --black:#0f0f10; --near-black:#151618; --white:#fff;
+    --muted:#bdbdbd; --gold:#c6a56a; --border:rgba(255,255,255,.14);
+    --accent: rgba(255, 255, 255, 0.26);
+    --container:92%; --container-max:1180px;
+
+    color:#eaeaea;
+    font-family:"Be Vietnam Pro", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial, "Noto Sans", sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    font-feature-settings: "liga" 1, "tnum" 1;
+}
+
+/* utilities */
+.container{width:var(--container);max-width:var(--container-max);margin-inline:auto}
+.center{text-align:center}.small{font-size:12px}.muted{color:var(--muted)}
+.eyebrow{letter-spacing:.06em;font-size:18px;color:var(--muted);margin:0 0 12px}
+.eyebrow--gold{color:var(--gold)}
+.section-title{font-size:clamp(36px,9vw,68px);font-weight:800;line-height:.95;margin:8px 0 18px}
+.split__media {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 16/9;
+    overflow: hidden;
+    border-radius: 12px;
+}
+
+.hero-video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* hoặc contain nếu muốn thấy full video */
+    display: block;
+}
+
+.mute-btn {
+    position: absolute;
+    bottom: 12px;
+    right: 12px;
+    padding: 8px 12px;
+    border: none;
+    border-radius: 50%;
+    background: rgba(0,0,0,0.6);
+    color: #fff;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+/* ===== Header compact ===== */
+.site-header { background: var(--black); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 20; }
+.header-inner{
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    padding: 8px 0;
+    gap: 10px;
+}
+.icon-btn{
+    background: transparent; border: none; color: #fff;
+    font-size: 18px; line-height: 1; padding: 6px 8px; cursor: pointer;
+}
+.brand{
+    display: inline-flex; align-items: center; gap: 8px; justify-self: center;
+    text-decoration: none; min-width: 0;
+}
+.brand__logo{
+    height: 40px; width: auto; display: block; vertical-align: middle;
+    image-rendering: smooth;
+}
+.brand__name{ font-size: 20px; font-weight: 700; color: #fff; letter-spacing: .02em; }
+.header-actions{ justify-self: end; display: inline-flex; align-items: center; gap: 8px; }
+.link-auth{ color:#dcdcdc; text-decoration:none; font-size:13px; padding:4px 8px; border:1px solid transparent; }
+.link-auth:hover{ border-color:#333; }
+.btn-auth{ padding:6px 10px; font-size:13px; }
+.cart{ color:var(--muted); text-decoration:none; font-size:13px; }
+
+@media (max-width: 768px){
+    .header-inner{ padding: 6px 0; }
+    .brand__logo{ height: 32px; }
+    .brand__name{ display: none; }
+    .link-auth, .btn-auth, .cart{ display: none; }
+}
+
+/* ===== Mobile menu ===== */
+.mobile-menu ul{ list-style:none; padding:0; margin:0; display:grid; gap:12px; }
+.mobile-menu a{ color:#fff; text-decoration:none; font-size:18px; }
+
+.mobile-menu{position:fixed;inset:0;background:rgba(0,0,0,.45);opacity:0;pointer-events:none;transition:.2s;z-index:30}
+.mobile-menu.open{opacity:1;pointer-events:auto}
+.mobile-menu__panel{width:84%;max-width:360px;height:100%;background:#0f0f10;border-right:1px solid #222;padding:18px}
+.mobile-menu__close{background:transparent;border:1px solid #333;color:#ddd;padding:6px 10px;margin-bottom:12px;cursor:pointer}
+.mobile-menu .divider{height:1px;background:#222;margin:10px 0}
+
+/* footer */
+.site-footer{background:#0f0f10;padding:42px 0 16px}
+
+.footer-grid{
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: clamp(12px, 2vw, 24px);
+    align-items: start;
+}
+
+.footer-title{ color:#fff; font-size:14px; margin:0 0 8px; letter-spacing:.04em; word-spacing:.02em; text-transform:uppercase; }
+.site-footer ul{padding:0;margin:0;list-style:none;display:grid;gap:6px}
+.site-footer a{color:#d6d6d6;text-decoration:none}
+.footer-bottom{display:flex;justify-content:space-between;align-items:center;padding-top:16px;border-top:1px solid #222}
+
+/* responsive grids */
+@media (min-width:768px){
+    .card-grid{grid-template-columns:repeat(3,1fr)}
+    .split{grid-template-columns:1.2fr 1fr;align-items:center}
+    .journal-grid{grid-template-columns:repeat(3,1fr)}
+    .footer-grid{grid-template-columns:1.2fr 1fr 1fr 1fr}
+}
+
+
+/* ===== Respect reduced motion (global) ===== */
+@media (prefers-reduced-motion: reduce){
+    * { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
+}
+
+/* Keyframes poster */
+@keyframes poster-in-up {
+    from { opacity: 0; transform: translateY(28px); filter: blur(6px); }
+    to   { opacity: 1; transform: translateY(0);   filter: blur(0);  }
+}
+@keyframes cover-out-up {
+    to { opacity: 0; transform: translateY(-24px); }
+}
+
+/* Tôn trọng Reduce Motion */
+@media (prefers-reduced-motion: reduce){
+    .poster-cover{ animation: cover-out-up 300ms ease 300ms forwards; }
+}
+/* ===== Accessories Paging ===== */
+.pager {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    margin-top: 20px;
+}
+
+.pager__info {
+    font-size: 14px;
+    font-weight: 500;
+    color: #111;
+}
+
+.pager__btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: 1px solid #111;
+    background: transparent;
+    color: #111;
+    font-size: 18px;
+    line-height: 1;     /* quan trọng để bỏ caret cảm giác “text-input” */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.pager__btn:hover {
+    background: #111;
+    color: #fff;
+}
+
+.pager__btn[disabled] {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+/* Ngăn caret xuất hiện trên toàn site trừ input & textarea */
+*:not(input):not(textarea) {
+    caret-color: transparent !important;
+}
+.center {
+    margin-top: 20px;
+    text-align: center;
+}
+
+.btn.btn--outline {
+    padding: 10px 20px;
+    border: 1px solid #111;
+    color: #111;
+    text-transform: uppercase;
+    font-weight: 600;
+    letter-spacing: .05em;
+    transition: all .2s ease;
+}
+
+.btn.btn--outline:hover {
+    background: #111;
+    color: #fff;
+}

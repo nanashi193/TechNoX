@@ -1,0 +1,143 @@
+/* ====== Trắng toàn bộ, không overlay/blur ====== */
+:root{
+    --card: #111633;                 /* fallback khi ảnh chưa tải */
+    --ring: 0 0 0 3px rgba(255,255,255,.25);
+}
+:host, .frame {
+    font-family: "Be Vietnam Pro", system-ui, -apple-system, "Segoe UI",
+    Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
+    font-weight: 500;
+}
+
+
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+button, a { font: inherit; }
+
+/* Khung chính: chỉ ảnh nền, KHÔNG gradient overlay */
+.frame{
+    position: relative;
+    max-width: 1200px;
+    margin: 24px auto;
+    color: #fff;
+    border-radius: 18px;
+    padding: 20px;
+    border: 1px solid rgba(255,255,255,.12);
+    box-shadow: 0 10px 30px rgba(0,0,0,.35);
+    overflow: hidden;
+
+    background-color: var(--card);
+    background-image: url('/assets/Adu.jpg');   /* <- chỉ ảnh, không lớp mờ */
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    line-height: 1.45;
+}
+
+/* Tăng độ đọc trên nền sáng bằng text-shadow nhẹ */
+.frame :where(h1,h2,h3,h4,h5,h6,p,div,span,small,li,th,td,a,button,label,code,strong,b,i){
+    color: #fff;
+    text-shadow: 0 1px 2px rgba(0,0,0,.55);
+}
+
+/* Header */
+.header{
+    display:flex; justify-content:space-between; align-items:center;
+    margin-bottom:10px;
+}
+.header h2{
+    margin:0 0 10px;
+    font-weight: 700;
+    letter-spacing:.2px;
+}
+.link{
+    background:none; border:none; padding:6px 10px;
+    color:#fff; cursor:pointer; border-radius:10px;
+}
+.link:hover{ background: rgba(255,255,255,.08); }
+.link:focus-visible{ outline: none; box-shadow: var(--ring); }
+
+/* Bảng giỏ hàng */
+.cart{ margin-top:6px; }
+.row{
+    display:grid;
+    grid-template-columns: 1fr 90px 140px 160px;
+    gap:12px; align-items:center;
+    padding:10px 12px;
+    border-bottom:1px dashed rgba(255,255,255,.18);
+    font-variant-numeric: tabular-nums;
+}
+.row.head{
+    font-weight:600;
+    border-bottom:1px solid rgba(255,255,255,.22);
+}
+.row:not(.head):hover{ background: rgba(0,0,0,.10); } /* không mờ ảnh, chỉ tint tối nhẹ */
+.row .name .title{ font-size:30px; font-weight:700; }
+.row .name .sub{ font-size:20px; opacity:.9; margin-top:2px; }
+.col.center{ text-align:center; }
+.col.right{ text-align:right; }
+
+.sep{ height:10px; }
+
+/* Tổng kết */
+.summary{
+    display:flex; justify-content:space-between; align-items:center;
+    padding:12px 4px 4px;
+}
+.order{ opacity:.95; }
+.total{ font-size:30px; font-weight:800; }
+
+/* QR box (bỏ hẳn blur/backdrop-filter) */
+.qrbox{
+    margin-top:50px;
+    background: rgba(10,16,40,.92);                 /* nền tối đặc, không mờ */
+    border:1px dashed rgba(255,255,255,.22);
+    border-radius:12px;
+    padding:18px 14px;
+    text-align:center;
+}
+.qrbox img{
+    width:350px; max-width:100%;
+    display:block; margin:0 auto 10px;
+    background:#fff; border-radius:12px;
+    box-shadow:0 8px 22px rgba(0,0,0,.35);
+}
+.qrbox .meta{
+    display:flex; gap:12px; justify-content:center;
+}
+
+/* Buttons */
+.actions{ display:flex; gap:10px; justify-content:center; margin-top:10px; }
+.btn.secondary{
+    color:#fff;
+    background: rgba(0,0,0,.25);
+    border: 1px solid rgba(255,255,255,.28);
+    border-radius:12px;
+    padding:9px 14px; cursor:pointer;
+    transition: transform .06s ease, box-shadow .12s ease, background .12s ease;
+}
+.btn.secondary:hover{ background: rgba(0,0,0,.38); box-shadow:0 6px 14px rgba(0,0,0,.28); }
+.btn.secondary:active{ transform: translateY(1px); }
+.btn.secondary:focus-visible{ outline:none; box-shadow: var(--ring); }
+.btn.secondary[disabled]{ opacity:.55; cursor:not-allowed; }
+
+/* Hint / Empty */
+.hint{ font-size:22px; opacity:.9; margin-top:8px; text-shadow: 0 1px 2px rgba(0,0,0,.55); }
+.empty{
+    background: rgba(10,16,40,.92);
+    border:1px dashed rgba(255,255,255,.22);
+    border-radius:12px; padding:16px; text-align:center;
+}
+
+/* Responsive */
+@media (max-width: 900px){
+    .row{ grid-template-columns: 1fr 70px 120px 120px; }
+}
+@media (max-width: 600px){
+    .frame{ margin:14px; padding:14px; border-radius:14px; }
+    .row{ grid-template-columns: 1fr 60px 100px 100px; gap:10px; }
+    .header h2{ font-size:20px; }
+}

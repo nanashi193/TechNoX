@@ -1,0 +1,95 @@
+<div class="auth-layout">
+    <aside class="brand-pane">
+        <a routerLink="/" class="logo-link" aria-label="Home"></a>
+
+        <h1 class="brand-title">
+            Welcome<br/>
+            to TechNoX <br/>
+        </h1>
+        <p class="brand-note">Hướng đến tương lai cùng chúng tôi.</p>
+
+        <div class="hotlines">
+            <a href="tel:+245941660355">+245 04 166 0355</a>
+            <a href="tel:+347423902456">+347 42 390 2456</a>
+        </div>
+
+        <div class="socials">
+            <a aria-label="Facebook" href="#i">f</a>
+            <a aria-label="Twitter/X" href="#i">t</a>
+            <a aria-label="LinkedIn" href="#i">ln</a>
+        </div>
+    </aside>
+
+    <main class="form-pane">
+        <div class="card">
+            <h2>Đăng nhập</h2>
+            <p class="description">Hãy cho chúng tôi biết bạn là ai.</p>
+
+            <!-- Thông báo lỗi chung từ server -->
+            <div *ngIf="errorMsg" class="alert error">
+                {{ errorMsg }}
+            </div>
+
+            <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
+                <!-- USERNAME -->
+                <div class="field">
+                    <input
+                            type="text"
+                            formControlName="email"
+                            placeholder="Email"
+                            autocomplete="email"
+                            [class.invalid]="emailCtrl.touched && emailCtrl.invalid"
+                            [attr.aria-invalid]="emailCtrl.touched && emailCtrl.invalid"
+                    />
+                    <div class="error-text" *ngIf="emailCtrl.touched && emailCtrl.hasError('required')">
+                        Vui lòng nhập email của bạn.
+                    </div>
+                    <div class="error-text" *ngIf="emailCtrl.touched && emailCtrl.hasError('pattern')">
+                        Vui lòng nhập đúng định dạng email.
+                    </div>
+                </div>
+
+                <!-- PASSWORD -->
+                <div class="field">
+                    <input
+                            type="password"
+                            formControlName="password"
+                            placeholder="Mật khẩu"
+                            autocomplete="current-password"
+                            [class.invalid]="passwordCtrl.touched && passwordCtrl.invalid"
+                            [attr.aria-invalid]="passwordCtrl.touched && passwordCtrl.invalid"
+                    />
+                    <div class="error-text" *ngIf="passwordCtrl.touched && passwordCtrl.hasError('required')">
+                        Vui lòng nhập mật khẩu.
+                    </div>
+                    <div class="error-text" *ngIf="passwordCtrl.touched && passwordCtrl.hasError('minlength')">
+                        Mật khẩu phải có ít nhất 8 ký tự.
+                    </div>
+                </div>
+
+                <div class="remember-forgot">
+                    <label>
+                        <input type="checkbox" formControlName="remember" class="form-check-label"/>
+                        Nhớ mật khẩu
+                    </label>
+
+                    <a routerLink="/forgot-password" class="forgot-link">Quên mật khẩu?</a>
+                </div>
+
+                <button
+                        type="submit"
+                        class="primary-btn"
+                        [disabled]="loading || form.invalid"
+                >
+                    <span *ngIf="!loading">Đăng nhập</span>
+                    <span *ngIf="loading">Đang đăng nhập...</span>
+                </button>
+            </form>
+
+            <p class="no-account">
+                Bạn chưa có tài khoản?
+                <a routerLink="/signup" class="create-link">Đăng ký</a>
+            </p>
+        </div>
+    </main>
+</div>

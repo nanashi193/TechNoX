@@ -1,0 +1,88 @@
+<section class="detail section-pad bv-font" *ngIf="!loading; else loadingOrError">
+    <div class="container" *ngIf="product; "> <div class="detail-top">
+        <button class="icon-btn back" type="button" (click)="goBack()" aria-label="Quay lại">← Quay lại</button>
+    </div>
+
+        <div class="detail-card">
+            <div class="detail-grid">
+                <div class="detail-left">
+                    <figure class="gallery">
+                        <div class="gallery__stage">
+                            <img class="gallery__img" [src]="product.image" [alt]="product.name" />
+                        </div>
+                    </figure>
+                </div>
+
+                <aside class="detail-right">
+                    <header class="pd-head">
+                        <h1 class="title">{{ product.name }}</h1>
+                        <div class="pd-meta">
+                            <span class="chip" *ngIf="product.inStock && (!selectedVariant || selectedVariant.quantity > 0); else oosChip">Còn hàng</span>
+                            <ng-template #oosChip><span class="chip chip--oos">Hết hàng</span></ng-template>
+                        </div>
+                    </header>
+
+                    <section class="panel">
+                        <h2 class="panel__title">Giá tiền</h2>
+                        <div class="price-line">
+                            <span class="price--current">{{ formatPrice(selectedVariant?.price || product.price) }}</span>
+                        </div>
+                    </section>
+
+                    <section class="panel variant-selector" *ngIf="product.variants && product.variants.length > 0">
+                        <h2 class="panel__title">Chọn phiên bản ({{ selectedVariant?.color || '...' }})</h2>
+                        <div class="colors"> <button *ngFor="let variant of product.variants"
+                                                     type="button"
+                                                     class="color-option"
+                                                     [style.background-color]="variant.color?.toLowerCase() || 'grey'"
+                                                     [class.selected]="variant === selectedVariant"
+                                                     [class.disabled]="variant.quantity <= 0"
+                                                     (click)="selectVariant(variant)"
+                                                     title="{{ variant.color }} {{ variant.quantity <= 0 ? '(Hết hàng)' : '' }}">
+                            <span *ngIf="variant.quantity <= 0" class="oos-mark">X</span> </button>
+                        </div>
+                        <p class="stock-info" *ngIf="selectedVariant">
+                            {{ selectedVariant.quantity > 0 ? 'Còn ' + selectedVariant.quantity + ' sản phẩm' : 'Tạm hết hàng' }}
+                        </p>
+                    </section>
+
+                    <section class="panel">
+                        <h2 class="panel__title">Số lượng</h2>
+                        <div class="qty" role="group" aria-label="Chọn số lượng">
+                            <button type="button" (click)="decQty()" aria-label="Giảm">−</button>
+                            <input type="number" [(ngModel)]="quantity" min="1" [max]="selectedVariant?.quantity || (product.inStock ? 99 : 0)" aria-live="polite" />
+                            <button type="button" (click)="incQty()" aria-label="Tăng">+</button>
+                        </div>
+                    </section>
+
+                    <div class="actions">
+                        <button class="btn btn--ghost action" type="button" (click)="buyNow()"
+                                [disabled]="!product.inStock || (selectedVariant && selectedVariant.quantity < quantity) || quantity <= 0">
+                            Mua ngay
+                        </button>
+                        <button class="btn btn--accent action" type="button" (click)="addToCart()"
+                                [disabled]="!product.inStock || (selectedVariant && selectedVariant.quantity < quantity) || quantity <= 0">
+                            Thêm vào giỏ hàng
+                        </button>
+                    </div>
+                </aside>
+            </div>
+
+            <section class="product-info" *ngIf="product">
+                <h2 class="info-title">Thông tin sản phẩm</h2>
+                <p class="desc" *ngIf="product.description; else noDesc">{{ product.description }}</p>
+                <ng-template #noDesc><p class="muted">Chưa có mô tả cho sản phẩm này.</p></ng-template>
+            </section>
+        </div>
+    </div>
+</section>
+
+<ng-template #loadingOrError>
+    <div class="container section-pad">
+        <div *ngIf="loading" class="state">Đang tải chi tiết sản phẩm...</div>
+        <div *ngIf="!loading && !product" class="state">
+            Không tìm thấy sản phẩm.
+            <a routerLink="/products" class="btn btn--outline">Về danh sách</a>
+        </div>
+    </div>
+</ng-template>

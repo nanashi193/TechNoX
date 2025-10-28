@@ -1,0 +1,24 @@
+:host{ display:block; background:#ffffff; color:#1f1f1f; }
+
+.container { max-width:1200px; margin:0 auto; padding:24px 20px; }
+
+.layout{
+    display:grid; grid-template-columns:300px 1fr; gap:24px; align-items:start;
+}
+
+.toc-wrapper{
+    margin-top:80px; position:sticky; top:24px;
+    background:#fff; border:1px solid rgba(0,0,0,.08);
+    border-radius:14px; padding:12px;
+    box-shadow:0 1px 3px rgba(0,0,0,.06);
+}
+
+.content{
+    min-width:0; background:#fff; color:#1f1f1f;
+    border:1px solid rgba(0,0,0,.06); border-radius:14px; padding:24px;
+}
+
+@media (max-width:900px){
+    .layout{ grid-template-columns:1fr; }
+    .toc-wrapper{ position:static; margin-top:0; }
+}
