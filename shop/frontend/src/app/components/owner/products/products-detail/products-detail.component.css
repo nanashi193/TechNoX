@@ -249,7 +249,7 @@ textarea {
 /* minh hoạ trong dropzone */
 .box-illus{
     width: 140px; height: 140px;
-    background: url("/web-shop/shop/frontend/src/assets/upload-box.v2.png") center/contain no-repeat;
+    background: url("/assets/upload-box.v2.png") center/contain no-repeat;
     margin: 4px auto 8px;
 }
 .dropzone.dragover .box-illus{
@@ -455,5 +455,6 @@ textarea {
 
 /* icon xoá */
 .icon-btn { background: transparent; border: 0; cursor: pointer; }
+
 
 
