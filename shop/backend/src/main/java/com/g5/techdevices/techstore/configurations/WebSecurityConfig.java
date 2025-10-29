@@ -64,7 +64,7 @@ public class WebSecurityConfig {
                         .hasAnyRole(Role.ADMIN, Role.OWNER)
 
                         // ✅ Xoá nhiều sản phẩm (batch delete)
-                        .requestMatchers(DELETE, String.format("%s/products/batch", apiPrefix))
+                        .requestMatchers(DELETE, String.format("%s/products/bulk-delete", apiPrefix))
                         .hasAnyRole(Role.ADMIN, Role.OWNER)
                         // đã có:
                         // ✅ Cho phép tạo sản phẩm (POST)

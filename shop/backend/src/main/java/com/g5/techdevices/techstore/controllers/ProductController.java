@@ -190,17 +190,11 @@ public class ProductController {
     //Delete
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteProduct(
-            @PathVariable long id
-    ){
-        try {
-                productService.deleteProduct(id);
-                return ResponseEntity.ok(String.format("Product with id %d has been deleted", id));
-        } catch (Exception e) {
-                return ResponseEntity.badRequest().body(e.getMessage());
-        }
+    public ResponseEntity<Void> deleteProduct(@PathVariable long id) {
+        productService.deleteProduct(id);          // ném DataNotFoundException nếu không thấy
+        return ResponseEntity.noContent().build(); // ✅ 204, không body
     }
-    @DeleteMapping("/batch")
+    @DeleteMapping("/bulk-delete")
     public ResponseEntity<?> deleteProductsBatch(@RequestParam("ids") String ids) {
         try {
             List<Long> idList = Arrays.stream(ids.split(","))
@@ -209,20 +203,20 @@ public class ProductController {
                     .map(Long::parseLong)
                     .toList();
 
-            // Gọi service batch (xem mục 4 bên dưới)
             var result = productService.deleteProductsByIds(idList);
 
-            // Trả về thống kê rõ ràng
-            Map<String, Object> body = new HashMap<>();
-            body.put("requestedIds", idList);
-            body.put("deletedCount", result.getDeletedCount());
-            body.put("notFoundIds", result.getNotFoundIds());
-            return ResponseEntity.ok(body);
+            if (result.getNotFoundIds().isEmpty()) {
+                return ResponseEntity.noContent().build(); // ✅ 204: tất cả xoá OK, không body
+            }
+            // Có id không tồn tại → 207 + chi tiết để FE hiển thị cảnh báo
+            return ResponseEntity.status(207).body(Map.of(
+                    "requestedIds", idList,
+                    "deletedCount", result.getDeletedCount(),
+                    "notFoundIds", result.getNotFoundIds()
+            ));
 
         } catch (NumberFormatException ex) {
             return ResponseEntity.badRequest().body("Invalid ids format. Use: ids=1,2,3");
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
 
