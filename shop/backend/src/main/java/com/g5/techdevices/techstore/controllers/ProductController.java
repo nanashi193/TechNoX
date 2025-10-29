@@ -190,16 +190,11 @@ public class ProductController {
     //Delete
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteProduct(
-            @PathVariable long id
-    ){
-        try {
-                productService.deleteProduct(id);
-                return ResponseEntity.ok(String.format("Product with id %d has been deleted", id));
-        } catch (Exception e) {
-                return ResponseEntity.badRequest().body(e.getMessage());
-        }
+    public ResponseEntity<Void> deleteProduct(@PathVariable long id) {
+        productService.deleteProduct(id);   // sẽ noop nếu không tìm thấy
+        return ResponseEntity.noContent().build(); // 204, không body
     }
+
 
     //update
     @PutMapping("/{id}")

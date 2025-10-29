@@ -214,6 +214,10 @@ export class ProductService {
         return this.http.delete<void>(`${this.base}/${id}`);
     }
 
+    bulkDelete(ids: number[]): Observable<void> {
+        return this.http.post<void>(`${this.base}/bulk-delete`, { ids });
+    }
+
     setStock(id: number, inStock: boolean): Observable<Product> {
         // nếu BE có endpoint riêng, giữ như sau; nếu không, dùng update(...)
         return this.http.patch<any>(`${this.base}/${id}/stock`, { inStock }).pipe(
@@ -221,8 +225,5 @@ export class ProductService {
         );
     }
 
-    bulkDelete(ids: number[]): Observable<void> {
-        return this.http.post<void>(`${this.base}/bulk-delete`, { ids });
-    }
     }
 

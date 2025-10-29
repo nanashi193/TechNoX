@@ -5,8 +5,8 @@
     <div class="right">
         <button class="btn" (click)="create()">+ Thêm sản phẩm</button>
 
-        <div class="bulk" *ngIf="selectedCount()">
-            <span class="muted">{{ selectedCount() }} đã chọn</span>
+        <div class="bulk" *ngIf="selectedCount">
+            <span class="muted">{{ selectedCount }} đã chọn</span>
             <button class="btn danger" (click)="bulk('delete')">Xóa</button>
         </div>
         <button class="btn ghost" (click)="toggleFilters($event)">Filters</button>

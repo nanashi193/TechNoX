@@ -22,6 +22,7 @@ type SortField = 'name'|'type'|'sku'|'price'|'variants'|'stockQty';
 export class ProductsListComponent implements OnInit {
     private svc = inject(ProductService);
     private router = inject(Router);
+
     // ====== state ======
     q = '';
     page = 1;                 // UI: 1-based
@@ -115,27 +116,57 @@ export class ProductsListComponent implements OnInit {
     // Selection
     trackById = (_:number, p:Product)=>p.id;
     isSelected = (id:number) => this.selected.has(id);
-    selectedCount(){ return this.selected.size; }
+  get  selectedCount(){ return this.selected.size; }
 
-    toggle(id:number, e:Event){ (e.target as HTMLInputElement).checked ? this.selected.add(id) : this.selected.delete(id); }
-    allSelected(){ return this.filtered.length>0 && this.filtered.every(p=>this.selected.has(p.id)); }
-    toggleAll(e:Event){ const on=(e.target as HTMLInputElement).checked; (on?this.filtered:[]).forEach(p=>this.selected.add(p.id)); if(!on) this.filtered.forEach(p=>this.selected.delete(p.id)); }
+    toggle(id: number, e: Event) {
+        (e.target as HTMLInputElement).checked ? this.selected.add(id) : this.selected.delete(id);
+    }
+    allSelected() {
+        return this.filtered.length > 0 && this.filtered.every(p => this.selected.has(p.id));
+    }
+    toggleAll(e: Event) {
+        const on = (e.target as HTMLInputElement).checked;
+        if (on) {
+            this.selected = new Set(this.filtered.map(p => p.id));   // replace selection
+        } else {
+            this.filtered.forEach(p => this.selected.delete(p.id));
+        }
+    }
 
     // CRUD
     edit(id:number){ this.router.navigate(['/owner/products', id, 'edit']); }
     create(){ this.router.navigate(['/owner/products', 'new']); }
 
-    removeOne(id:number){
-        this.svc.delete(id).subscribe(() => this.load());
+    // Bulk actions
+    bulk(action: 'delete') {
+        if (action !== 'delete') return;
+
+        const ids = [...this.selected];
+        if (!ids.length) return;
+        if (!confirm(`Xóa ${ids.length} sản phẩm?`)) return;
+
+        this.loading = true;
+
+        const req$ = (ids.length === 1)
+            ? this.svc.delete(ids[0])          // DELETE /products/{id}
+            : this.svc.bulkDelete(ids);           // POST /products/bulk-delete
+
+        req$.subscribe({
+            next: (res: any) => {
+                // Nếu bulk trả 204, không có body → dùng fallback là ids đã gửi
+                const deleted = Array.isArray(res?.deletedIds) ? res.deletedIds : ids;
+                // Cập nhật UI + clear selection
+                this.products = this.products.filter(r => !deleted.includes(r.id));
+                this.filtered  = this.filtered .filter((p: Product) => !deleted.includes(p.id));
+                this.selected.clear();
+                // hoặc gọi this.load() nếu bạn muốn refresh từ BE
+                // this.load();
+            },
+            error: e => alert(`Xóa thất bại: ${e?.status || ''}`),
+            complete: () => this.loading = false
+        });
     }
 
-    // Bulk actions
-    bulk(action:'delete'|'archive'|'publish'|'unpublish'){
-        const ids = [...this.selected];
-        if (ids.length === 0) return;
-        if (action==='delete') this.svc.bulkDelete(ids).subscribe(()=>this.load());
-        // 'archive' tuỳ BE: có thể reuse bulkUnpublish hoặc tạo endpoint riêng
-    }
 
     // Toggle stock inline (switch)
     toggleStock(p: Product){
