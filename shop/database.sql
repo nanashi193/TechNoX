@@ -482,7 +482,8 @@ VALUES
     (N'Tạ Thị Hương', N'huong.ta@example.com', N'$2a$10$ykF9xhomFn0uj.s1NeQS4u5xSXqKnR8mu71mrqs0k9Po17FPyjjcu', 1, N'0933445566', 2, 1, 10);
 GO
 
-
-
-  ALTER TABLE ProductImages ALTER COLUMN ImageUrl NVARCHAR(500) NULL;
-ALTER TABLE Product ALTER COLUMN Thumbnail NVARCHAR(500) NULL;
+    ALTER TABLE ProductImages ALTER COLUMN ImageUrl NVARCHAR(500) NULL;
+    ALTER TABLE Product ALTER COLUMN Thumbnail NVARCHAR(500) NULL;
+GO
+    ALTER TABLE ProductImages ADD PublicId NVARCHAR(255) NOT NULL DEFAULT N'';
+    CREATE UNIQUE INDEX UQ_ProductImages_PublicId ON ProductImages (PublicId);

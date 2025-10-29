@@ -42,6 +42,11 @@ export const routes: Routes = [
     { path: 'checkout', redirectTo: 'payment', pathMatch: 'full' },
 
     { path: 'forgot-password', component: ForgotPasswordComponent, data: { hideChrome: true, title: 'Quên mật khẩu | TechNoX' } },
+    {path: 'reset-password',
+        loadComponent: () => import('./components/reset-password/reset-password.component') // Đường dẫn đến component
+            .then(m => m.ResetPasswordComponent),
+        title: 'Đặt lại mật khẩu | TechNoX',
+        data: { hideChrome: true }},
     { path: 'products', component: ProductPageComponent },
 
     { path: 'user/:id', loadComponent: () => import('./components/detail-user/detail.user').then(m => m.DetailUserComponent) },
@@ -75,8 +80,6 @@ export const routes: Routes = [
             { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
             { path: 'dashboard',  loadComponent: () => import('./components/owner/dashboard/dashboard.component').then(m => m.DashboardComponent),               title: 'Tổng quan | Owner' },
             { path: 'products',   loadComponent: () => import('./components/owner/products/products-list/products-list.component').then(m => m.ProductsListComponent), title: 'Quản lý sản phẩm | Owner' },
-            { path: 'products/new', loadComponent: () => import('./components/owner/products/products-form/products-form.component').then(m => m.ProductsFormComponent), title: 'Thêm sản phẩm | Owner' },
-            { path: 'products/:id/edit', loadComponent: () => import('./components/owner/products/products-form/products-form.component').then(m => m.ProductsFormComponent), title: 'Sửa sản phẩm | Owner' },
             { path: 'users',      loadComponent: () => import('./components/owner/users/users-list/users-list.component').then(m => m.UsersListComponent),         title: 'Người dùng của TechNoX' },
             { path: 'users/:id',  loadComponent: () => import('./components/owner/users/users-detail/users-detail.component').then(m => m.UserDetailComponent) }
         ]
