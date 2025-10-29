@@ -191,8 +191,33 @@ public class ProductController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteProduct(@PathVariable long id) {
-        productService.deleteProduct(id);   // sẽ noop nếu không tìm thấy
-        return ResponseEntity.noContent().build(); // 204, không body
+        productService.deleteProduct(id);          // ném DataNotFoundException nếu không thấy
+        return ResponseEntity.noContent().build(); // ✅ 204, không body
+    }
+    @DeleteMapping("/bulk-delete")
+    public ResponseEntity<?> deleteProductsBatch(@RequestParam("ids") String ids) {
+        try {
+            List<Long> idList = Arrays.stream(ids.split(","))
+                    .map(String::trim)
+                    .filter(s -> !s.isEmpty())
+                    .map(Long::parseLong)
+                    .toList();
+
+            var result = productService.deleteProductsByIds(idList);
+
+            if (result.getNotFoundIds().isEmpty()) {
+                return ResponseEntity.noContent().build(); // ✅ 204: tất cả xoá OK, không body
+            }
+            // Có id không tồn tại → 207 + chi tiết để FE hiển thị cảnh báo
+            return ResponseEntity.status(207).body(Map.of(
+                    "requestedIds", idList,
+                    "deletedCount", result.getDeletedCount(),
+                    "notFoundIds", result.getNotFoundIds()
+            ));
+
+        } catch (NumberFormatException ex) {
+            return ResponseEntity.badRequest().body("Invalid ids format. Use: ids=1,2,3");
+        }
     }
 
 

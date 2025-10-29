@@ -133,10 +133,40 @@ public class ProductService implements  IProductService {
 
 
     @Override
-    public void deleteProduct(Long id) {
-        Optional<Product>optionalProduct= productRepository.findById(id);
-        optionalProduct.ifPresent(productRepository::delete);
+    public void deleteProduct(Long id) { // SỬA
+        Product p = productRepository.findById(id)
+                .orElseThrow(() -> new DataNotFoundException("Cannot find product with id = " + id)); // SỬA
+        productRepository.delete(p); // nếu bạn dùng soft delete qua @SQLDelete thì đây vẫn là update cờ
     }
+
+    // THÊM: DTO kết quả xoá hàng loạt (đếm & danh sách id không tồn tại)
+    @lombok.Getter // THÊM
+    @lombok.AllArgsConstructor // THÊM
+    public static class DeleteBatchResult { // THÊM
+        private int deletedCount;          // THÊM
+        private List<Long> notFoundIds;    // THÊM
+    }
+
+    // THÊM: Batch delete – tái sử dụng deleteProduct(id) để giữ nguyên logic (soft/hard/validate/log)
+    @Transactional // THÊM
+    public DeleteBatchResult deleteProductsByIds(List<Long> ids) { // THÊM
+        if (ids == null || ids.isEmpty()) {
+            return new DeleteBatchResult(0, List.of());
+        }
+        List<Long> notFound = new ArrayList<>();
+        int deleted = 0;
+
+        for (Long id : ids) {
+            try {
+                deleteProduct(id); // gọi lại hàm phía trên (đã SỬA)
+                deleted++;
+            } catch (DataNotFoundException e) {
+                notFound.add(id);
+            }
+        }
+        return new DeleteBatchResult(deleted, notFound);
+    }
+
 
 
     @Override
@@ -209,7 +239,7 @@ public class ProductService implements  IProductService {
         try {
             storage.delete(img.getPublicId());
         } catch (Exception e) {
-            System.err.println("⚠️ Failed to delete image from Cloudinary: " + e.getMessage());
+            System.err.println(" Failed to delete image from Cloudinary: " + e.getMessage());
         }
 
         // 3️⃣ Nếu ảnh này đang là thumbnail thì clear thumbnail của product
@@ -237,25 +267,24 @@ public class ProductService implements  IProductService {
 
         // ---------------------------------Auto SKU----------------------------------
 
-        private String generateSku(String productName, String color, String size) {
-            // Làm gọn tên sản phẩm: chỉ giữ chữ & số, viết hoa
-            String cleanName = (productName == null ? "PRD" : productName)
-                    .replaceAll("[^A-Za-z0-9]", "")
-                    .toUpperCase();
+    private String generateSku(String productName, String color, String size) {
+        // Giữ toàn bộ tên sản phẩm, viết hoa và bỏ hết khoảng trắng
+        String cleanName = (productName == null ? "PRD" : productName)
+                .replaceAll("\\s+", "") // bỏ khoảng trắng
+                .toUpperCase();
 
-            // Rút gọn cho ngắn gọn
-            if (cleanName.length() > 10) cleanName = cleanName.substring(0, 10);
-
-            // Ghép các phần lại thành SKU
-            String sku = cleanName;
-            if (color != null && !color.isBlank()) {
-                sku += "-" + color.trim().replaceAll("\\s+", "").toUpperCase();
-            }
-            if (size != null && !size.isBlank()) {
-                sku += "-" + size.trim().replaceAll("\\s+", "").toUpperCase();
-            }
-            return sku;
+        // Ghép các phần lại thành SKU
+        String sku = cleanName;
+        if (color != null && !color.isBlank()) {
+            sku += "-" + color.trim().replaceAll("\\s+", "").toUpperCase();
         }
+        if (size != null && !size.isBlank()) {
+            sku += "-" + size.trim().replaceAll("\\s+", "").toUpperCase();
+        }
+
+        return sku;
+    }
+
 
 
 
