@@ -1,47 +1,59 @@
 <div class="container">
     <header class="header">
         <h1>Thanh toán – Chi tiết đơn hàng</h1>
-
         <div class="order-id">
             <span>Mã đơn hàng:</span>
             <strong>{{ orderId() || '— sẽ được cấp khi tạo đơn' }}</strong>
         </div>
     </header>
 
+    <!-- USER SNAPSHOT: hiển thị UserID + Name từ DB -->
+    <section class="card user-card">
+        <ng-container *ngIf="user$ | async as u; else userLoading">
+            <h2>Thông tin người dùng</h2>
+            <div class="user-grid">
+                <div><span class="label">User ID</span><b>{{ u?.id || '—' }}</b></div>
+                <div><span class="label">Email</span><b>{{ u?.email || '—' }}</b></div>
+                <div><span class="label">Họ tên</span><b>{{ u?.fullName || '—' }}</b></div>
+                <div><span class="label">CCCD</span><b>{{ u?.cccd || '—' }}</b></div>
+                <div class="full"><span class="label">Địa chỉ</span><b>{{ u?.address || '—' }}</b></div>
+            </div>
+            <p class="hint">Thông tin trên được lấy từ hồ sơ người dùng. Form bên dưới chỉ cần CCCD & địa chỉ (nếu cần cập nhật).</p>
+        </ng-container>
+        <ng-template #userLoading>
+            <h2>Thông tin người dùng</h2>
+            <p class="hint">Đang tải…</p>
+        </ng-template>
+    </section>
+
     <form [formGroup]="form" (ngSubmit)="proceedToPayment()" novalidate>
-        <!-- THÔNG TIN GIAO DỊCH -->
+        <!-- THÔNG TIN GIAO DỊCH (KHÔNG có Họ tên) -->
         <section class="card">
             <h2>Thông tin giao dịch</h2>
-            <div class="grid">
-                <label>
-                    Họ tên
-                    <input type="text" placeholder="Nguyễn Văn A" formControlName="name" formGroupName="customer" />
-                    <small *ngIf="isInvalid('customer.name')">Vui lòng nhập họ tên hợp lệ.</small>
-                </label>
 
+            <div class="grid" formGroupName="customer">
                 <label>
-                    Số điện thoại
-                    <input type="tel" placeholder="09xx..." formControlName="phone" formGroupName="customer" />
-                    <small *ngIf="isInvalid('customer.phone')">SĐT chưa đúng định dạng (VD: 09xxxxxxxx).</small>
+                    CCCD
+                    <input type="text" placeholder="12 chữ số" formControlName="cccd" />
+                    <small *ngIf="isInvalid('customer.cccd')">CCCD phải đủ 12 chữ số.</small>
                 </label>
 
                 <label class="full">
                     Địa chỉ
-                    <input type="text" placeholder="Số nhà, đường, phường/xã, quận/huyện, tỉnh/thành"
-                           formControlName="address" formGroupName="customer" />
+                    <input type="text" placeholder="Số nhà, đường, phường/xã, quận/huyện, tỉnh/thành" formControlName="address" />
                     <small *ngIf="isInvalid('customer.address')">Địa chỉ tối thiểu 5 ký tự.</small>
                 </label>
             </div>
         </section>
 
-        <!-- SẢN PHẨM (load từ backend) -->
+        <!-- SẢN PHẨM -->
         <section class="card">
             <h2>Sản phẩm</h2>
 
-            <div class="table-wrap" *ngIf="!loading; else loadingTpl">
-                <div class="empty" *ngIf="loadError">{{ loadError }}</div>
+            <div class="table-wrap" *ngIf="!loading(); else loadingTpl">
+                <div class="empty" *ngIf="loadError()">{{ loadError() }}</div>
 
-                <table *ngIf="!loadError">
+                <table *ngIf="!loadError()">
                     <thead>
                     <tr>
                         <th style="width: 40%">Tên sản phẩm</th>
@@ -52,26 +64,20 @@
                     </thead>
                     <tbody formArrayName="items">
                     <tr *ngFor="let item of items.controls; let i = index; trackBy: trackByIndex" [formGroupName]="i">
-                        <td>
-                            <input type="text" formControlName="productName" [readonly]="true" />
-                        </td>
-                        <td>
-                            <input type="number" formControlName="price" [readonly]="true" />
-                        </td>
-                        <td>
-                            <input type="number" formControlName="quantity" [readonly]="true" />
-                        </td>
+                        <td><input type="text" formControlName="productName" readonly /></td>
+                        <td><input type="number" formControlName="price" readonly /></td>
+                        <td><input type="number" formControlName="quantity" readonly /></td>
                         <td class="money">
                             {{
                                 (item.get('price')?.value || 0) * (item.get('quantity')?.value || 0)
-                                    | currency:'VND':'symbol':'1.0-0'
+                                    | currency : 'VND' : 'symbol' : '1.0-0' : 'vi-VN'
                             }}
                         </td>
                     </tr>
                     </tbody>
                 </table>
 
-                <div class="empty" *ngIf="!loadError && items.length === 0">
+                <div class="empty" *ngIf="!loadError() && items.length === 0">
                     Giỏ hàng trống. Về <a routerLink="/cart">giỏ hàng</a> để thêm sản phẩm.
                 </div>
             </div>
@@ -97,7 +103,7 @@
             </div>
 
             <button class="btn primary" type="submit"
-                    [disabled]="loading || !!loadError || form.invalid || items.length === 0 || subtotal() <= 0">
+                    [disabled]="loading() || !!loadError() || form.invalid || items.length === 0 || subtotal() <= 0">
                 Đến thanh toán
             </button>
         </section>

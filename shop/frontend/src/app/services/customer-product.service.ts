@@ -41,8 +41,17 @@ export class CustomerProductService {
      * @returns Observable chứa thông tin chi tiết sản phẩm
      */
     getProductById(id: number): Observable<CustomerProduct> {
-        // Gọi API backend lấy chi tiết
-        return this.http.get<CustomerProduct>(`${this.baseUrl}/${id}`);
+        return this.http.get<CustomerProduct>(`${this.baseUrl}/${id}`).pipe(
+            map(product => {
+                if (product && product.image) {
+                    return {
+                        ...product,
+                        image: `assets/DTTrungQuoc/${product.image}`
+                    };
+                }
+                return product;
+            })
+        );
     }
 
     // Bạn có thể thêm các hàm khác ở đây sau (ví dụ: tìm kiếm, lọc theo category...)
