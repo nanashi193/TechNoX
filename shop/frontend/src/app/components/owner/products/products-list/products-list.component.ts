@@ -9,7 +9,7 @@ type ProductRow = {
     id:number; name:string; image:string; type:string;
     sku:string; price:number; variants:number; inStock:boolean;
 };
-type SortField = 'name'|'type'|'sku'|'price'|'variants'|'stockQty';
+type SortField = 'name'|'categoryName'|'sku'|'price'|'variants'|'stockQty';
 
 @Component({
     selector: 'app-products-list',
@@ -69,20 +69,31 @@ export class ProductsListComponent implements OnInit {
         // SKU
         const sku = this.flt.sku.trim();
         if (sku) params.sku = sku;
-        // type (nếu BE dùng categoryId, đổi key & kiểu)
-        if (this.flt.type) params.type = this.flt.type;
 
+
+        // sort: map 'type' -> 'categoryName' cho BE
         if (this.sort) params.sort = `${this.sort.field},${this.sort.dir}`;
+
 
         this.svc.search(params).subscribe({
             next: (res: any) => {
-                const items: Product[] = (res.items ?? res.content ?? res) as Product[];
+                const raw: any[] = (res.items ?? res.content ?? res) as any[];
+
+                const items: Product[] = raw.map(p => {
+                    const categoryId   = p.categoryId   ?? p.CategoryId   ?? null;
+                    const categoryName = p.categoryName ?? p.CategoryName ?? null;
+                    return {
+                        ...p,
+                        categoryId,
+                        categoryName,
+                        type: p.type ?? categoryName ?? ''   // back-compat cho UI
+                    } as Product;
+                });
                 this.products = items;
                 this.filtered = [...items];
 
                 // gom các type có trong trang hiện tại để show select (tuỳ chọn)
-                const moreTypes = Array.from(new Set(items.map(p => p.type).filter(Boolean) as string[]));
-                this.types = Array.from(new Set([...(this.types ?? []), ...moreTypes]));
+                this.types = Array.from(new Set(items.map(p => p.categoryName).filter(Boolean) as string[]));
 
                 this.total = res.total ?? res.totalCount ?? res.totalElements ?? items.length;
                 const tp = this.totalPages;
@@ -160,7 +171,7 @@ export class ProductsListComponent implements OnInit {
                 this.filtered  = this.filtered .filter((p: Product) => !deleted.includes(p.id));
                 this.selected.clear();
                 // hoặc gọi this.load() nếu bạn muốn refresh từ BE
-                // this.load();
+                this.load();
             },
             error: e => alert(`Xóa thất bại: ${e?.status || ''}`),
             complete: () => this.loading = false

@@ -29,6 +29,7 @@ type RawProduct = {
 
     createdAt?: string;  CreatedAt?: string;
     categoryName?: string;
+    CategoryName?: string;
     category?: { id: number; name: string };
     CategoryId?: number;
 

@@ -25,8 +25,11 @@ public class ProductResponse extends BaseResponse {
 
     private List<String> images; //list image
 
+    @JsonProperty("categoryId")
+    private int categoryId;
 
-    @JsonProperty("CategoryId")              // 👈 tên key trong JSON (tuỳ bạn: "category" / "CategoryName")
+
+    @JsonProperty("categoryName")              // 👈 tên key trong JSON (tuỳ bạn: "category" / "CategoryName")
     private String categoryName;
     public static ProductResponse fromProduct(Product product) {
         ProductResponse productResponse =  ProductResponse.builder()
@@ -34,8 +37,9 @@ public class ProductResponse extends BaseResponse {
                 .price(product.getPrice())
                 .thumbnail(product.getThumbnail())
                 .description(product.getDescription())
-                .categoryName(                                   // 👈 set theo tên
-                product.getCategory() != null ? product.getCategory().getName() : null)
+                // ✅ THÊM: set categoryId + categoryName
+                .categoryId(product.getCategory() != null ? product.getCategory().getId() : null)
+                .categoryName(product.getCategory() != null ? product.getCategory().getName() : null)
                 .status(product.isStatus())
                 .images(product.getImages() != null
                         ? product.getImages().stream()

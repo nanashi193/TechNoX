@@ -64,9 +64,9 @@
         </div>
 
         <div class="cell col-type th sortable"
-             (click)="sortBy('type')" [attr.aria-sort]="ariaSort('type')">
+             (click)="sortBy('categoryName')" [attr.aria-sort]="ariaSort('categoryName')">
             Loại
-            <span class="sort-caret" [class.asc]="isAsc('type')" [class.desc]="isDesc('type')"
+            <span class="sort-caret" [class.asc]="isAsc('categoryName')" [class.desc]="isDesc('categoryName')"
             ></span>
         </div>
 
@@ -116,7 +116,9 @@
             </a>
         </div>
 
-        <div class="cell col-type"><span class="muted">{{ p.type }}</span></div>
+        <div class="cell col-type">
+            <span class="muted">{{ p.categoryName || '—' }}</span>
+        </div>
 
         <div class="cell col-stocks">
             <label class="switch">

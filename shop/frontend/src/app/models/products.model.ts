@@ -17,11 +17,11 @@ export interface Product {
     description?: string;
     thumbnail?: string;     // ảnh chính BE dùng
     status?: boolean;       // trạng thái hiển thị
-    categoryId?: number;    // để pre-select trong Edit
-    categoryName?: string;  // để hiển thị
+    categoryId?: number | null;    // để pre-select trong Edit
+    categoryName?: string | null;  // để hiển thị
+
 
     // Các field FE đang dùng thêm
-    type?: string;          // nếu BE chưa có thì để optional
     sku?: string;           // nếu SKU ở product-level
     inStock?: boolean;
     stockQty?: number;
