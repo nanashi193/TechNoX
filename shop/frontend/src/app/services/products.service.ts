@@ -214,8 +214,11 @@ export class ProductService {
         return this.http.delete<void>(`${this.base}/${id}`);
     }
 
-    bulkDelete(ids: number[]): Observable<void> {
-        return this.http.post<void>(`${this.base}/bulk-delete`, { ids });
+    bulkDelete(ids: number[]) {
+        return this.http.post<{deletedIds:number[]}>(
+            `${this.base}/bulk-delete`,
+            { ids } // hoặc ids nếu BE nhận mảng
+        ).pipe(map(() => void 0));
     }
 
     setStock(id: number, inStock: boolean): Observable<Product> {
