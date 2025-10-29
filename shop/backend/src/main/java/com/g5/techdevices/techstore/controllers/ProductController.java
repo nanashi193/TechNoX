@@ -200,6 +200,31 @@ public class ProductController {
                 return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
+    @DeleteMapping("/batch")
+    public ResponseEntity<?> deleteProductsBatch(@RequestParam("ids") String ids) {
+        try {
+            List<Long> idList = Arrays.stream(ids.split(","))
+                    .map(String::trim)
+                    .filter(s -> !s.isEmpty())
+                    .map(Long::parseLong)
+                    .toList();
+
+            // Gọi service batch (xem mục 4 bên dưới)
+            var result = productService.deleteProductsByIds(idList);
+
+            // Trả về thống kê rõ ràng
+            Map<String, Object> body = new HashMap<>();
+            body.put("requestedIds", idList);
+            body.put("deletedCount", result.getDeletedCount());
+            body.put("notFoundIds", result.getNotFoundIds());
+            return ResponseEntity.ok(body);
+
+        } catch (NumberFormatException ex) {
+            return ResponseEntity.badRequest().body("Invalid ids format. Use: ids=1,2,3");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
 
     //update
     @PutMapping("/{id}")
