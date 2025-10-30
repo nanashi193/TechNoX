@@ -3,27 +3,14 @@ import { CommonModule } from '@angular/common';
 import { Router, RouterModule, ActivatedRoute } from '@angular/router';
 import { HttpClientModule } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
-import { PaymentService } from './payment-service';
+import { PaymentService } from './payment.service';
+
 
 type PayMethod = 'COD' | 'BANK';
 
-interface CartItem {
-    id: string;
-    name: string;
-    price: number;
-    qty: number;
-}
-
-interface User {
-    id: string;
-    fullName: string;
-    email?: string;
-}
-
-interface Customer {
-    cccd?: string;
-    address?: string;
-}
+interface CartItem { id: string; name: string; price: number; qty: number; }
+interface User { id: string; fullName: string; email?: string; }
+interface Customer { cccd?: string; address?: string; }
 
 @Component({
     selector: 'app-payment',
@@ -33,15 +20,14 @@ interface Customer {
     styleUrls: ['./payment-component.css'],
 })
 export class PaymentComponent implements OnInit {
-    // UI state
+    // UI
     loading = false;
     pLoading = false;
 
     // data
+    items: CartItem[] = [];
     currentUser: User | null = null;
     customer: Customer | null = null;
-
-    items: CartItem[] = [];
     orderId: string | null = null;
 
     method: PayMethod = 'COD';
@@ -61,7 +47,6 @@ export class PaymentComponent implements OnInit {
             const id = q.get('orderId');
             if (id) this.orderId = id;
         });
-
         this.hydrateFromLocal();
         this.refresh();
     }
@@ -95,7 +80,7 @@ export class PaymentComponent implements OnInit {
     async refresh(): Promise<void> {
         this.loading = true;
         try {
-            // 1) Cart
+            // Cart
             try {
                 const list = await firstValueFrom(this.paymentService.getCart());
                 if (Array.isArray(list) && list.length) {
@@ -108,13 +93,13 @@ export class PaymentComponent implements OnInit {
                 }
             } catch {}
 
-            // 2) User
+            // User
             try {
                 const u = await firstValueFrom(this.paymentService.getMe());
                 this.currentUser = u ?? this.currentUser;
             } catch {}
 
-            // 3) Customer snapshot
+            // Customer
             try {
                 const c = await firstValueFrom(this.paymentService.getCustomer());
                 this.customer = c ?? this.customer;
@@ -124,24 +109,18 @@ export class PaymentComponent implements OnInit {
         }
     }
 
-    onMethodChange(m: PayMethod): void {
-        this.method = m;
-    }
+    onMethodChange(m: PayMethod): void { this.method = m; }
 
     private toOrderCode(): number {
-        // PayOS yêu cầu orderCode là số nguyên dương & duy nhất
-        // Lấy số trong orderId; nếu không có thì dùng timestamp
         const num = Number(this.orderId?.toString().replace(/\D+/g, ''));
         return Number.isFinite(num) && num > 0 ? num : Date.now();
     }
 
     async goPayOS(): Promise<void> {
         if (!this.items?.length || this.subtotal <= 0 || this.pLoading) return;
-
         this.pLoading = true;
         try {
             const orderCode = this.toOrderCode();
-
             const payload = {
                 orderCode,
                 amount: Math.round(this.subtotal),
@@ -149,26 +128,21 @@ export class PaymentComponent implements OnInit {
                 returnUrl: `${location.origin}/payment/success?orderId=${this.orderId || orderCode}`,
                 cancelUrl: `${location.origin}/payment/cancel?orderId=${this.orderId || orderCode}`,
                 items: this.items.map((it) => ({
-                    name: it.name,
-                    quantity: it.qty,
-                    price: Math.round(it.price),
+                    name: it.name, quantity: it.qty, price: Math.round(it.price)
                 })),
                 buyer: {
                     name: this.currentUser?.fullName,
                     address: this.customer?.address,
-                    email: this.currentUser?.email,
-                },
+                    email: this.currentUser?.email
+                }
             };
 
             const { checkoutUrl } = await firstValueFrom(
                 this.paymentService.createPayOSLink(payload)
             );
 
-            if (checkoutUrl) {
-                window.location.href = checkoutUrl;
-            } else {
-                alert('Không tạo được link thanh toán. Vui lòng thử lại.');
-            }
+            if (checkoutUrl) window.location.href = checkoutUrl;
+            else alert('Không tạo được link thanh toán. Vui lòng thử lại.');
         } catch (e) {
             console.error(e);
             alert('Không tạo được link thanh toán. Vui lòng thử lại.');
@@ -178,7 +152,6 @@ export class PaymentComponent implements OnInit {
     }
 
     confirmCOD(): void {
-        // TODO: gọi API xác nhận COD nếu có
         alert('Đã tạo đơn COD. Chúng tôi sẽ liên hệ giao hàng.');
         this.router.navigate(['/home']);
     }

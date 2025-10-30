@@ -6,17 +6,38 @@ import { ForgotPasswordComponent } from './components/forgot-password/forgot-pas
 import { ProductPageComponent } from './components/product/product-page.component';
 import { CartComponent } from './components/cart/cart.component';
 import { loginGuard } from './guards/login.guard';
+import { ownerGuard } from './guards/owner.guard';
 
-// ĐÚNG path: components/paymentDetail/...
+// Non-standalone (nếu component này không standalone)
 import { PaymentDetailComponent } from './components/paymentDetail/payment-detail.component';
-import {ownerGuard} from "./guards/owner.guard";
-
 
 export const routes: Routes = [
     { path: '', redirectTo: 'home', pathMatch: 'full' },
 
-    { path: 'home', component: HomeComponent },
+    // ===== Payment =====
+    {
+        path: 'payment',
+        loadComponent: () =>
+            import('./components/payment/payment-component').then(m => m.PaymentComponent),
+        title: 'Thanh toán | TechNoX'
+    },
+    {
+        path: 'payment/success',
+        loadComponent: () =>
+            import('./components/paymentDetail/paymentStatus/payment-success.component')
+                .then(m => m.PaymentSuccessComponent)
+    },
+    {
+        path: 'payment/cancel',
+        loadComponent: () =>
+            import('./components/paymentDetail/paymentStatus/payment-cancel.component')
+                .then(m => m.PaymentCancelComponent)
+    },
+    { path: 'payment-detail', component: PaymentDetailComponent, data: { title: 'Chi tiết đơn hàng | TechNoX' } },
+    { path: 'checkout', redirectTo: 'payment', pathMatch: 'full' },
 
+    // ===== Public =====
+    { path: 'home', component: HomeComponent },
     { path: 'login',  component: LoginComponent,  canActivate: [loginGuard], data: { hideChrome: true, title: 'Đăng nhập | TechNoX' } },
     { path: 'signup', component: SignupComponent, canActivate: [loginGuard], data: { hideChrome: true, title: 'Đăng ký | TechNoX' } },
 
@@ -31,35 +52,17 @@ export const routes: Routes = [
         data: { hideChrome: true, title: 'Đang chờ xác minh | TechNoX' }
     },
 
-    // Payment detail
-    { path: 'payment-detail', component: PaymentDetailComponent, data: { title: 'Chi tiết đơn hàng | TechNoX' } },
-
-    // Payment (lazy) — ĐÚNG path: components/payment/payment.component
-    {
-        path: 'payment',
-        loadComponent: () => import('./components/payment/payment-component').then(m => m.PaymentComponent),
-        title: 'Thanh toán | TechNoX'
-    },
-    { path: 'checkout', redirectTo: 'payment', pathMatch: 'full' },
-
-    { path: 'forgot-password', component: ForgotPasswordComponent, data: { hideChrome: true, title: 'Quên mật khẩu | TechNoX' } },
-    {path: 'reset-password',
-        loadComponent: () => import('./components/reset-password/reset-password.component') // Đường dẫn đến component
-            .then(m => m.ResetPasswordComponent),
-        title: 'Đặt lại mật khẩu | TechNoX',
-        data: { hideChrome: true }},
+    // ===== Products & users =====
     { path: 'products', component: ProductPageComponent },
-
-    { path: 'user/:id', loadComponent: () => import('./components/detail-user/detail.user').then(m => m.DetailUserComponent) },
-    { path: 'profile',  loadComponent: () => import('./components/detail-user/detail.user').then(m => m.DetailUserComponent) },
-
     { path: 'cart', component: CartComponent },
-
     {
         path: 'product/:id',
         loadComponent: () => import('./components/detail-product/detail-product.component').then(m => m.DetailProductComponent),
     },
+    { path: 'user/:id', loadComponent: () => import('./components/detail-user/detail.user').then(m => m.DetailUserComponent) },
+    { path: 'profile',  loadComponent: () => import('./components/detail-user/detail.user').then(m => m.DetailUserComponent) },
 
+    // ===== Legal =====
     {
         path: 'legal',
         loadComponent: () => import('./components/legal/legal-layout/legal-layout.component').then(m => m.LegalLayoutComponent),
@@ -73,6 +76,7 @@ export const routes: Routes = [
         ]
     },
 
+    // ===== Owner =====
     {
         path: 'owner',
         canActivate: [ownerGuard],
@@ -88,8 +92,6 @@ export const routes: Routes = [
                         .then(m => m.DashboardComponent),
                 title: 'Tổng quan | Owner'
             },
-
-            // ===== Products =====
             {
                 path: 'products',
                 loadComponent: () =>
@@ -118,13 +120,14 @@ export const routes: Routes = [
                         .then(m => m.UsersListComponent),
                 title: 'Người dùng của TechNoX'
             },
-            {path: 'users/:id', loadComponent: () =>
+            {
+                path: 'users/:id',
+                loadComponent: () =>
                     import('./components/owner/users/users-detail/users-detail.component')
-                        .then(m => m.UserDetailComponent),}
-
+                        .then(m => m.UserDetailComponent)
+            }
         ]
     },
 
-
-    { path: '**', redirectTo: 'home' },
+    { path: '**', redirectTo: 'home' }
 ];
