@@ -175,16 +175,22 @@ public class ProductController {
 
     //search with id
 
-    @GetMapping("/{id}")
-    public ResponseEntity <?> getProductById(
-            @PathVariable("id") Long productId){
+    @GetMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> getProductById(@PathVariable Long id) {
         try {
-           Product existingProduct = productService.getProductById(productId);
-            return ResponseEntity.ok(ProductResponse.fromProduct(existingProduct));
+            Product product = productService.getProductById(id);
+            ProductResponse response = ProductResponse.fromProduct(product);
+            return ResponseEntity.ok()
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .body(response);
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
+            // Trả lỗi JSON để FE đọc được, không lỗi parse
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of("error", e.getMessage()));
         }
     }
+
+
 
 
     //Delete

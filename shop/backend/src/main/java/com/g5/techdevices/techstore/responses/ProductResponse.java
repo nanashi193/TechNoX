@@ -24,9 +24,10 @@ public class ProductResponse extends BaseResponse {
     private List<ProductVariantResponse> variants;
 
     private List<String> images; //list image
+    private List<ImagesItemResponse> imageItems;
 
     @JsonProperty("categoryId")
-    private int categoryId;
+    private Integer categoryId;
 
 
     @JsonProperty("categoryName")              // 👈 tên key trong JSON (tuỳ bạn: "category" / "CategoryName")
@@ -41,11 +42,16 @@ public class ProductResponse extends BaseResponse {
                 .categoryId(product.getCategory() != null ? product.getCategory().getId() : null)
                 .categoryName(product.getCategory() != null ? product.getCategory().getName() : null)
                 .status(product.isStatus())
-                .images(product.getImages() != null
-                        ? product.getImages().stream()
-                        .map(ProductImages::getImageUrl)
-                        .collect(Collectors.toList())
-                        : null)
+                .images(product.getImages() == null ? List.of() :
+                        product.getImages().stream()
+                                .map(ProductImages::getImageUrl)
+                                .collect(Collectors.toList()))
+
+                // ✅ imageItems: List<ImageItemResponse>
+                .imageItems(product.getImages() == null ? List.of() :
+                        product.getImages().stream()
+                                .map(img -> new ImagesItemResponse(img.getId(), img.getImageUrl()))
+                                .collect(Collectors.toList()))
                 .build();
         productResponse.setId(product.getId());
         productResponse.setCreateAt(product.getCreatedAt());
