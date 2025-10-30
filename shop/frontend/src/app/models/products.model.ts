@@ -26,6 +26,7 @@ export interface Product {
     inStock?: boolean;
     stockQty?: number;
     image?: string;         // FE preview, map -> thumbnail khi gửi
+    images?: string[];
 
     variants?: ProductVariant[]; // ⟵ mảng biến thể, KHÔNG phải number
     variantCount?: number;       // (tuỳ chọn) nếu bạn cần đếm cho list

@@ -456,5 +456,19 @@ textarea {
 /* icon xoá */
 .icon-btn { background: transparent; border: 0; cursor: pointer; }
 
+.page-head{
+    display:flex; justify-content:space-between; align-items:center;
+    /* giữ chiều cao ổn định như lúc có nút (~44–48px tuỳ nút của bạn) */
+    min-height: 48px;
+    margin:8px 0 16px;
+}
+
+.actions.invisible{
+    visibility: hidden;      /* vẫn chiếm chỗ, không click được */
+    /* hoặc dùng:
+       opacity: 0; pointer-events: none;
+    */
+}
+
 
 

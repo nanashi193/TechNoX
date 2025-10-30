@@ -65,6 +65,7 @@ export class ProductsDetailComponent implements OnInit {
     private productService = inject(ProductService);
     private route = inject(ActivatedRoute);
     private router = inject(Router);
+    saving = false;
     categories: CategoryOpt[] = STATIC_CATEGORIES;
 
     id?: number;
@@ -115,30 +116,40 @@ export class ProductsDetailComponent implements OnInit {
     media: MediaItem[] = [];
     dragOver = false;
     private hydrateMediaFromServer(p: any) {
-        // reset gallery
         this.media = [];
 
-        // 1) Thumbnail (URL public, không phải blob:)
-        const thumb =
-            p?.thumbnail ?? p?.image ?? p?.imageUrl ?? '';
-        if (thumb && !thumb.startsWith('blob:')) {
-            this.media.push({ id: 'thumb', previewUrl: thumb });
-        }
+        // 1) Gom toàn bộ URL ảnh từ nhiều dạng khóa
+        const rawList: any[] = (p?.images ?? p?.productImages ?? p?.photos ?? []) as any[];
 
-        // 2) Danh sách ảnh (tuỳ BE: images / productImages / photos ...)
-        const imgs = p?.images ?? p?.productImages ?? p?.photos ?? [];
-        for (const img of imgs) {
-            const url = img?.url ?? img?.imageUrl ?? '';
-            if (url && !url.startsWith('blob:')) {
-                this.media.push({ id: img?.publicId ?? crypto.randomUUID(), previewUrl: url });
-            }
-        }
+        // Chuẩn hóa: chấp nhận string hoặc object {url|imageUrl|src}
+        const urls = rawList
+            .map((it: any) => {
+                if (!it) return null;
+                if (typeof it === 'string') return it;
+                if (typeof it === 'object') return it.url ?? it.imageUrl ?? it.src ?? null;
+                return null;
+            })
+            .filter((u: any): u is string => !!u && typeof u === 'string' && !u.startsWith('blob:'));
 
-        // 3) (tuỳ chọn) Nếu control thumbnail đang rỗng thì set bằng URL DB
+        // 2) Thumbnail (fallback lấy ảnh đầu nếu BE chưa set thumbnail)
+        const thumb = (p?.thumbnail ?? p?.image ?? p?.imageUrl ?? urls[0] ?? '') as string;
+
+        // 3) Khử trùng và đặt thumbnail lên đầu danh sách
+        const unique = Array.from(new Set([thumb, ...urls].filter(Boolean)));
+
+        // 4) Đổ vào media để render gallery
+        this.media = unique.map((u, i) => ({ id: `srv-${i}`, previewUrl: u, isUrl: true }));
+
+        // 5) Cập nhật control thumbnail nếu đang rỗng
         if (!this.f.controls.thumbnail.value && thumb) {
             this.f.controls.thumbnail.setValue(thumb, { emitEvent: false });
         }
+
+        // Debug nhanh
+        console.log('BE images:', p.images);
+        console.log('Media hydrated:', this.media);
     }
+
 
 
     // ===== Variants state
@@ -201,100 +212,112 @@ export class ProductsDetailComponent implements OnInit {
     // ===== Save
     async save() {
         if (this.f.invalid) { this.f.markAllAsTouched(); return; }
+        if (this.saving) return;
+        this.saving = true;
 
-        const raw = this.f.getRawValue();
+        try {
+            const raw = this.f.getRawValue();
 
-        // files mới chọn từ dropzone
-        const files: File[] = (this.media ?? [])
-            .filter(m => !!m.file)
-            .map(m => m.file as File);
+            // files mới chọn từ dropzone
+            const files: File[] = (this.media ?? [])
+                .filter(m => !!m.file)
+                .map(m => m.file as File);
 
-        // map biến thể (không gửi sku)
-        const variants = this.variantsFA.controls.map(g => {
-            const { id, color, size, quantity, price } = g.getRawValue();
-            const base = {
-                color: (color ?? '').trim(),
-                size: (size ?? '').trim(),
-                quantity: +quantity || 0,
-                price: +price || 0,
-            };
-            return (this.id && id != null) ? { id, ...base } : base;
-        });
+            // map biến thể (không gửi sku)
+            const variants = this.variantsFA.controls.map(g => {
+                const { id, color, size, quantity, price } = g.getRawValue();
+                const base = {
+                    color: (color ?? '').trim(),
+                    size: (size ?? '').trim(),
+                    quantity: +quantity || 0,
+                    price: +price || 0,
+                };
+                return (this.id && id != null) ? { id, ...base } : base;
+            });
 
-        if (this.id) {
-            // ===== UPDATE
-            const dto: ProductUpdateDTO = {
-                name: raw.name!,
-                price: +raw.price!,
-                thumbnail: raw.thumbnail ?? '',          // ⬅️ sửa thumbnailUrl -> raw.thumbnail
-                description: raw.description ?? '',
-                status: !!raw.status,
-                ...(raw.categoryId != null ? { categoryId: +raw.categoryId } : {}),
-                variants,
-            };
+            if (this.id) {
+                // ===== UPDATE
+                const dto: ProductUpdateDTO = {
+                    name: raw.name!,
+                    price: +raw.price!,
+                    thumbnail: raw.thumbnail ?? '',
+                    description: raw.description ?? '',
+                    status: !!raw.status,
+                    ...(raw.categoryId != null ? { categoryId: +raw.categoryId } : {}),
+                    variants,
+                };
 
-            await firstValueFrom(this.productService.update(this.id, dto));
+                await firstValueFrom(this.productService.update(this.id, dto));
 
-            if (files.length) {
-                const imgs = await firstValueFrom(this.productService.uploadImages(this.id, files)); // ⬅️ đổi attachImages -> uploadImages
-                // nếu form chưa có thumbnail thì set theo ảnh đầu (BE đã có endpoint)
-                if ((!raw.thumbnail || !raw.thumbnail.length) && imgs?.length) {
-                    await firstValueFrom(this.productService.setThumbnailFromImage(this.id, imgs[0].id));
+                if (files.length) {
+                    const imgs = await firstValueFrom(this.productService.uploadImages(this.id, files));
+                    if ((!raw.thumbnail || !raw.thumbnail.length) && imgs?.length) {
+                        await firstValueFrom(this.productService.setThumbnailFromImage(this.id, imgs[0].id));
+                    }
                 }
-            }
 
-            this.originalValue = this.f.getRawValue();
-            this.f.markAsPristine();
-            this.setEditMode(false);
+                // cập nhật snapshot và thoát edit
+                this.originalValue = this.f.getRawValue();
+                this.f.markAsPristine();
+                this.setEditMode(false);
 
-        } else {
-            // ===== CREATE
-            if (raw.categoryId == null) {
-                this.f.controls.categoryId.setErrors({ required: true });
-                this.f.markAllAsTouched();
-                return;
-            }
-
-            const dto: ProductCreateDTO = {
-                name: raw.name!,
-                price: +raw.price!,
-                thumbnail: raw.thumbnail ?? '',
-                description: raw.description ?? '',
-                status: !!raw.status,
-                categoryId: +raw.categoryId!,
-                variants,
-            };
-
-            const created = await firstValueFrom(this.productService.create(dto));
-
-            if (created?.id && files.length) {
-                const imgs = await firstValueFrom(this.productService.uploadImages(created.id, files));
-                if ((!raw.thumbnail || !raw.thumbnail.length) && imgs?.length) {
-                    await firstValueFrom(this.productService.setThumbnailFromImage(created.id, imgs[0].id));
-                }
-                this.router.navigate(['/owner/products', created.id]);
             } else {
-                this.router.navigate(['/owner/products']);
+                // ===== CREATE
+                if (raw.categoryId == null) {
+                    this.f.controls.categoryId.setErrors({ required: true });
+                    this.f.markAllAsTouched();
+                    return;                         // finally sẽ reset saving
+                }
+
+                const dto: ProductCreateDTO = {
+                    name: raw.name!,
+                    price: +raw.price!,
+                    thumbnail: raw.thumbnail ?? '',
+                    description: raw.description ?? '',
+                    status: !!raw.status,
+                    categoryId: +raw.categoryId!,
+                    variants,
+                };
+
+                const created = await firstValueFrom(this.productService.create(dto));
+
+                if (created?.id && files.length) {
+                    const imgs = await firstValueFrom(this.productService.uploadImages(created.id, files));
+                    if ((!raw.thumbnail || !raw.thumbnail.length) && imgs?.length) {
+                        await firstValueFrom(this.productService.setThumbnailFromImage(created.id, imgs[0].id));
+                    }
+                    await this.router.navigate(['/owner/products', created.id]);
+                } else {
+                    await this.router.navigate(['/owner/products']);
+                }
             }
+        } catch (e) {
+            console.error(e);
+        } finally {
+            this.saving = false;                // luôn reset dù nhánh nào / có lỗi
         }
     }
 
 
 
-
     setEditMode(on: boolean) {
         this.editing = on;
-        on ? this.f.enable({emitEvent: false}) : this.f.disable({emitEvent: false});
-        this.variantsDisabled = !on; // nếu không có Variants, giữ cũng không sao
-        this.f.controls.sku.disable({ emitEvent:false });   // ⬅️ giữ sku disable mọi lúc
+        on ? this.f.enable({ emitEvent:false }) : this.f.disable({ emitEvent:false });
+        this.variantsDisabled = !on;
+        this.f.controls.sku.disable({ emitEvent:false }); // luôn disable SKU
     }
 
     edit() {
         this.setEditMode(true);
     }
 
-    get showStickyBar() {         // nếu HTML đang dùng thanh sticky khi có thay đổi
-        return this.editing && this.f.dirty;
+    get showStickyBar() {
+        return this.editing;            // bỏ f.dirty
+    }
+    cancel() {
+        if (this.f.dirty && !confirm('Discard all unsaved changes?')) return;
+        this.discard();
+        this.setEditMode(false);
     }
 
     discard() {

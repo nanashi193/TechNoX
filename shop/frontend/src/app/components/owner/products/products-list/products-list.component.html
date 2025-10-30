@@ -129,7 +129,7 @@
 
         <div class="cell col-sku">#{{ p.sku }}</div>
         <div class="cell col-price">{{ p.price | number:'1.0-0' }}₫</div>
-        <div class="cell col-variants">{{ p.variants }}</div>
+        <div class="cell col-variants">{{ p.variants?.length || 0 }}</div>
         <div class="cell col-qty">{{ p.stockQty ?? 0 }}</div>
     </div>
 

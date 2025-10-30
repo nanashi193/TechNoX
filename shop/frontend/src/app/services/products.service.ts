@@ -3,8 +3,6 @@ import {HttpClient, HttpParams} from '@angular/common/http';
 import {forkJoin, Observable} from 'rxjs';
 import {environment} from '../environments/environment';
 import {Page, Product, ProductVariant} from '../models/products.model';
-import {of} from 'rxjs';
-import {delay} from 'rxjs/operators';
 import {map} from 'rxjs/operators';
 import {ProductCreateDTO, ProductUpdateDTO} from "../dtos/products/products.dto";
 import {ProductImage, ProductImageBE} from "../models/product-image.model";
@@ -69,24 +67,30 @@ export class ProductService {
 
         const stockQty = variantsArr.length
             ? variantsArr.reduce((s, v) => s + toNum(v.quantity), 0)
-            : toNum(p?.totalQuantity ?? p?.quantity ?? p?.stockQty);
+            : toNum(p?.totalQuantity ?? p?.quantity ?? p?.stockQty ?? 0);
+
+        const images: string[] = (p?.images ?? p?.Images ?? p?.allImages ?? p?.AllImages ?? [])
+            .filter((u: any) => typeof u === 'string' && u.trim());
+
+        const thumbnail = p?.thumbnail ?? p?.imageUrl ?? images[0] ?? '';
 
         return {
             id: Number(p?.id ?? p?.Id ?? p?.productId ?? 0),
             name: p?.name ?? p?.productName ?? '',
-            image: p?.thumbnail ?? p?.imageUrl ?? '',     // FE vẫn dùng 'image' cho thumbnail
-            thumbnail: p?.thumbnail ?? p?.imageUrl ?? '',
+            image: thumbnail,                // back-compat nếu UI cũ dùng 'image'
+            thumbnail,                       // ảnh đại diện
+            images,
             type: p?.categoryName ?? p?.category?.name ?? (p?.CategoryId != null ? `#${p?.CategoryId}` : ''),
             sku: p?.sku ?? p?.code ?? '',
             price: toNum(p?.price ?? 0),
-            variants: variantsArr,                         // ⟵ mảng
-            variantCount: variantsArr.length ?? this.toNum(p?.variants ?? p?.variantCount ?? 0),
+            variants: variantsArr,
+            variantCount: variantsArr.length,
             stockQty,
-            inStock: Boolean(p?.status ?? stockQty > 0),
+            inStock: (p?.status ?? null) != null ? Boolean(p.status) : stockQty > 0,
             description: p?.description ?? '',
             createdAt: p?.createdAt ?? p?.createAt ?? p?.CreatedAt ?? '',
-            categoryId: p?.categoryId ?? p?.CategoryId,
-            categoryName: p?.categoryName ?? p?.category?.name,
+            categoryId: p?.categoryId ?? p?.CategoryId ?? p?.category?.id ?? null,
+            categoryName: p?.categoryName ?? p?.category?.name ?? null,
         } as Product;
     }
 
@@ -139,8 +143,8 @@ export class ProductService {
                         type,
                         sku,
                         price: toNum((p as any).price ?? 0),
-                        variants: variantsArr,          // ✅ mảng
-                        variantCount,                   // ✅ số lượng (cho UI)
+                        variants: variantsArr,
+                        variantCount,
                         stockQty,
                         inStock: Boolean((p as any).status ?? stockQty > 0),
                         description: (p as any).description ?? '',
@@ -191,6 +195,7 @@ export class ProductService {
     deleteImage(productId: number, imageId: number) {
         return this.http.delete(`${this.base}/${productId}/images/${imageId}`);
     }
+
 
     get(id: number): Observable<Product> {
         return this.http.get<any>(`${this.base}/${id}`).pipe(
