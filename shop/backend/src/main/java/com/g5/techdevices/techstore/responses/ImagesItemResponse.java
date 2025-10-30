@@ -1,4 +1,4 @@
-package com.g5.techdevices.techstore.dtos.resetPassword;
+package com.g5.techdevices.techstore.responses;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

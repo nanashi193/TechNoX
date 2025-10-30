@@ -1,7 +1,6 @@
 package com.g5.techdevices.techstore.responses;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.g5.techdevices.techstore.dtos.resetPassword.ImagesItemResponse;
 import com.g5.techdevices.techstore.entity.products.Product;
 import com.g5.techdevices.techstore.entity.products.ProductImages;
 import lombok.*;
