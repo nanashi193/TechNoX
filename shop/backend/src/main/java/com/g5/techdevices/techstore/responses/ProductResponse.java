@@ -1,6 +1,7 @@
 package com.g5.techdevices.techstore.responses;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.g5.techdevices.techstore.dtos.resetPassword.ImagesItemResponse;
 import com.g5.techdevices.techstore.entity.products.Product;
 import com.g5.techdevices.techstore.entity.products.ProductImages;
 import lombok.*;
@@ -24,9 +25,13 @@ public class ProductResponse extends BaseResponse {
     private List<ProductVariantResponse> variants;
 
     private List<String> images; //list image
+    private List<ImagesItemResponse> imageItems;
+
+    @JsonProperty("categoryId")
+    private Integer categoryId;
 
 
-    @JsonProperty("CategoryId")              // 👈 tên key trong JSON (tuỳ bạn: "category" / "CategoryName")
+    @JsonProperty("categoryName")              // 👈 tên key trong JSON (tuỳ bạn: "category" / "CategoryName")
     private String categoryName;
     public static ProductResponse fromProduct(Product product) {
         ProductResponse productResponse =  ProductResponse.builder()
@@ -34,14 +39,20 @@ public class ProductResponse extends BaseResponse {
                 .price(product.getPrice())
                 .thumbnail(product.getThumbnail())
                 .description(product.getDescription())
-                .categoryName(                                   // 👈 set theo tên
-                product.getCategory() != null ? product.getCategory().getName() : null)
+                // ✅ THÊM: set categoryId + categoryName
+                .categoryId(product.getCategory() != null ? product.getCategory().getId() : null)
+                .categoryName(product.getCategory() != null ? product.getCategory().getName() : null)
                 .status(product.isStatus())
-                .images(product.getImages() != null
-                        ? product.getImages().stream()
-                        .map(ProductImages::getImageUrl)
-                        .collect(Collectors.toList())
-                        : null)
+                .images(product.getImages() == null ? List.of() :
+                        product.getImages().stream()
+                                .map(ProductImages::getImageUrl)
+                                .collect(Collectors.toList()))
+
+                // ✅ imageItems: List<ImageItemResponse>
+                .imageItems(product.getImages() == null ? List.of() :
+                        product.getImages().stream()
+                                .map(img -> new ImagesItemResponse(img.getId(), img.getImageUrl()))
+                                .collect(Collectors.toList()))
                 .build();
         productResponse.setCreateAt(product.getCreatedAt());
         if (product.getVariants() != null) {
