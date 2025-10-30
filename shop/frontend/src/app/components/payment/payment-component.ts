@@ -1,8 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule, ActivatedRoute } from '@angular/router';
-import { HttpClient, HttpClientModule } from '@angular/common/http';
+import { HttpClientModule } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
+import { PaymentService } from './payment-service';
 
 type PayMethod = 'COD' | 'BANK';
 
@@ -24,12 +25,6 @@ interface Customer {
     address?: string;
 }
 
-interface Merchant {
-    bank: string;
-    accountNumber: string;
-    accountName: string;
-}
-
 @Component({
     selector: 'app-payment',
     standalone: true,
@@ -40,7 +35,7 @@ interface Merchant {
 export class PaymentComponent implements OnInit {
     // UI state
     loading = false;
-    qLoading = false;
+    pLoading = false;
 
     // data
     currentUser: User | null = null;
@@ -51,20 +46,10 @@ export class PaymentComponent implements OnInit {
 
     method: PayMethod = 'COD';
 
-    // QR
-    qrSrc: string | null = null;
-    qError: string | null = null;
-
-    merchant: Merchant = {
-        bank: 'MB Bank',
-        accountNumber: '0853907917',
-        accountName: 'TECHNOX CO., LTD',
-    };
-
     constructor(
-        private http: HttpClient,
         private router: Router,
-        private route: ActivatedRoute
+        private route: ActivatedRoute,
+        private paymentService: PaymentService
     ) {}
 
     get subtotal(): number {
@@ -107,111 +92,93 @@ export class PaymentComponent implements OnInit {
         } catch {}
     }
 
-    refresh(): void {
+    async refresh(): Promise<void> {
         this.loading = true;
-        this.qError = null;
+        try {
+            // 1) Cart
+            try {
+                const list = await firstValueFrom(this.paymentService.getCart());
+                if (Array.isArray(list) && list.length) {
+                    this.items = list.map((it) => ({
+                        id: it.id,
+                        name: it.name,
+                        price: Number(it.price) || 0,
+                        qty: Number(it.qty) || 1,
+                    }));
+                }
+            } catch {}
 
-        const tasks: Promise<any>[] = [];
+            // 2) User
+            try {
+                const u = await firstValueFrom(this.paymentService.getMe());
+                this.currentUser = u ?? this.currentUser;
+            } catch {}
 
-        // 1) Cart
-        tasks.push(
-            firstValueFrom(this.http.get<CartItem[]>('/api/cart'))
-                .then((list) => {
-                    if (Array.isArray(list) && list.length) {
-                        this.items = list.map((it) => ({
-                            id: it.id,
-                            name: it.name,
-                            price: Number(it.price) || 0,
-                            qty: Number(it.qty) || 1,
-                        }));
-                    }
-                })
-                .catch(() => {})
-        );
-
-        // 2) User
-        tasks.push(
-            firstValueFrom(this.http.get<User>('/api/me'))
-                .then((u) => {
-                    this.currentUser = u ?? this.currentUser;
-                })
-                .catch(() => {})
-        );
-
-        // 3) Customer snapshot
-        tasks.push(
-            firstValueFrom(this.http.get<Customer>('/api/customer'))
-                .then((c) => {
-                    this.customer = c ?? this.customer;
-                })
-                .catch(() => {})
-        );
-
-        Promise.all(tasks).finally(() => {
+            // 3) Customer snapshot
+            try {
+                const c = await firstValueFrom(this.paymentService.getCustomer());
+                this.customer = c ?? this.customer;
+            } catch {}
+        } finally {
             this.loading = false;
-            if (this.method === 'BANK') this.generateQR();
-        });
+        }
     }
 
     onMethodChange(m: PayMethod): void {
         this.method = m;
-        if (m === 'BANK') this.generateQR();
-        else {
-            this.qrSrc = null;
-            this.qError = null;
-        }
     }
 
-    private buildAddInfo(): string {
-        const id = this.orderId ?? 'DON_' + new Date().getTime();
-        return `Thanh toan ${id}`;
+    private toOrderCode(): number {
+        // PayOS yêu cầu orderCode là số nguyên dương & duy nhất
+        // Lấy số trong orderId; nếu không có thì dùng timestamp
+        const num = Number(this.orderId?.toString().replace(/\D+/g, ''));
+        return Number.isFinite(num) && num > 0 ? num : Date.now();
     }
 
-    private buildQrUrl(): string {
-        const amount = Math.max(0, Math.floor(this.subtotal));
-        const addInfo = encodeURIComponent(this.buildAddInfo());
-        const acc = this.merchant.accountNumber.replace(/\s+/g, '');
-        return `https://img.vietqr.io/image/MB-${acc}-compact2.png?amount=${amount}&addInfo=${addInfo}`;
-    }
+    async goPayOS(): Promise<void> {
+        if (!this.items?.length || this.subtotal <= 0 || this.pLoading) return;
 
-    generateQR(): void {
-        this.qLoading = true;
-        this.qError = null;
-
+        this.pLoading = true;
         try {
-            this.qrSrc = this.buildQrUrl();
-            const img = new Image();
-            img.onload = () => (this.qLoading = false);
-            img.onerror = () => {
-                this.qLoading = false;
-                this.qError = 'Không tải được QR, thử lại.';
-                this.qrSrc = null;
+            const orderCode = this.toOrderCode();
+
+            const payload = {
+                orderCode,
+                amount: Math.round(this.subtotal),
+                description: `Thanh toan ${this.orderId || orderCode}`,
+                returnUrl: `${location.origin}/payment/success?orderId=${this.orderId || orderCode}`,
+                cancelUrl: `${location.origin}/payment/cancel?orderId=${this.orderId || orderCode}`,
+                items: this.items.map((it) => ({
+                    name: it.name,
+                    quantity: it.qty,
+                    price: Math.round(it.price),
+                })),
+                buyer: {
+                    name: this.currentUser?.fullName,
+                    address: this.customer?.address,
+                    email: this.currentUser?.email,
+                },
             };
-            img.src = this.qrSrc;
-        } catch {
-            this.qLoading = false;
-            this.qError = 'Không tạo được QR.';
-            this.qrSrc = null;
+
+            const { checkoutUrl } = await firstValueFrom(
+                this.paymentService.createPayOSLink(payload)
+            );
+
+            if (checkoutUrl) {
+                window.location.href = checkoutUrl;
+            } else {
+                alert('Không tạo được link thanh toán. Vui lòng thử lại.');
+            }
+        } catch (e) {
+            console.error(e);
+            alert('Không tạo được link thanh toán. Vui lòng thử lại.');
+        } finally {
+            this.pLoading = false;
         }
-    }
-
-    printQR(): void {
-        if (!this.qrSrc) return;
-        const w = window.open('', '_blank');
-        if (!w) return;
-        w.document.write(
-            `<img src="${this.qrSrc}" alt="VietQR" style="max-width:100%"/><script>window.onload=()=>window.print()</script>`
-        );
-        w.document.close();
-    }
-
-    copyAddInfo(): void {
-        const text = this.buildAddInfo();
-        navigator.clipboard?.writeText(text).catch(() => {});
     }
 
     confirmCOD(): void {
-        // TODO: call API xác nhận COD nếu có
+        // TODO: gọi API xác nhận COD nếu có
         alert('Đã tạo đơn COD. Chúng tôi sẽ liên hệ giao hàng.');
         this.router.navigate(['/home']);
     }

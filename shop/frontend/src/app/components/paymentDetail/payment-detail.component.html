@@ -7,42 +7,75 @@
         </div>
     </header>
 
-    <!-- USER SNAPSHOT: hiển thị UserID + Name từ DB -->
+    <!-- USER SNAPSHOT: hiển thị từ DB -->
     <section class="card user-card">
         <ng-container *ngIf="user$ | async as u; else userLoading">
             <h2>Thông tin người dùng</h2>
+
             <div class="user-grid">
-                <div><span class="label">User ID</span><b>{{ u?.id || '—' }}</b></div>
-                <div><span class="label">Email</span><b>{{ u?.email || '—' }}</b></div>
-                <div><span class="label">Họ tên</span><b>{{ u?.fullName || '—' }}</b></div>
-                <div><span class="label">CCCD</span><b>{{ u?.cccd || '—' }}</b></div>
-                <div class="full"><span class="label">Địa chỉ</span><b>{{ u?.address || '—' }}</b></div>
+                <div>
+                    <span class="label">User ID</span>
+                    <b>{{ u?.id || '—' }}</b>
+                </div>
+
+                <div>
+                    <span class="label">Email</span>
+                    <b>{{ u?.email || '—' }}</b>
+                </div>
+
+                <div>
+                    <span class="label">Họ tên</span>
+                    <b>{{ u?.fullName || '—' }}</b>
+                </div>
+
+                <div>
+                    <span class="label">CCCD</span>
+                    <b>{{ u?.cccd || '—' }}</b>
+                </div>
+
+                <div class="full">
+                    <span class="label">Địa chỉ</span>
+                    <b>{{ u?.address || '—' }}</b>
+                </div>
             </div>
-            <p class="hint">Thông tin trên được lấy từ hồ sơ người dùng. Form bên dưới chỉ cần CCCD & địa chỉ (nếu cần cập nhật).</p>
+
+            <p class="hint">
+                Thông tin trên lấy từ hồ sơ người dùng. Bên dưới chỉ cần nhập/cập nhật <b>địa chỉ giao hàng</b> nếu khác.
+            </p>
         </ng-container>
+
         <ng-template #userLoading>
             <h2>Thông tin người dùng</h2>
             <p class="hint">Đang tải…</p>
         </ng-template>
     </section>
 
+    <!-- FORM -->
     <form [formGroup]="form" (ngSubmit)="proceedToPayment()" novalidate>
-        <!-- THÔNG TIN GIAO DỊCH (KHÔNG có Họ tên) -->
         <section class="card">
             <h2>Thông tin giao dịch</h2>
 
-            <div class="grid" formGroupName="customer">
-                <label>
-                    CCCD
-                    <input type="text" placeholder="12 chữ số" formControlName="cccd" />
-                    <small *ngIf="isInvalid('customer.cccd')">CCCD phải đủ 12 chữ số.</small>
-                </label>
+            <!-- Địa chỉ: tách 3 trường -->
+            <div formGroupName="customer">
+                <div class="address-grid" formGroupName="address">
+                    <label>
+                        Số nhà, đường
+                        <input type="text" formControlName="street" placeholder="12 Nguyễn Văn Bảo" />
+                        <small *ngIf="isInvalid('customer.address.street')">Vui lòng nhập số nhà, đường.</small>
+                    </label>
 
-                <label class="full">
-                    Địa chỉ
-                    <input type="text" placeholder="Số nhà, đường, phường/xã, quận/huyện, tỉnh/thành" formControlName="address" />
-                    <small *ngIf="isInvalid('customer.address')">Địa chỉ tối thiểu 5 ký tự.</small>
-                </label>
+                    <label>
+                        Quận/Huyện
+                        <input type="text" formControlName="district" placeholder="Gò Vấp" />
+                        <small *ngIf="isInvalid('customer.address.district')">Vui lòng nhập Quận/Huyện.</small>
+                    </label>
+
+                    <label>
+                        Thành phố/Tỉnh
+                        <input type="text" formControlName="city" placeholder="TP. Hồ Chí Minh" />
+                        <small *ngIf="isInvalid('customer.address.city')">Vui lòng nhập Thành phố/Tỉnh.</small>
+                    </label>
+                </div>
             </div>
         </section>
 
@@ -102,8 +135,11 @@
                 <strong>{{ total() | currency:'VND':'symbol':'1.0-0' }}</strong>
             </div>
 
-            <button class="btn primary" type="submit"
-                    [disabled]="loading() || !!loadError() || form.invalid || items.length === 0 || subtotal() <= 0">
+            <button
+                    class="btn primary"
+                    type="submit"
+                    [disabled]="loading() || !!loadError() || form.invalid || items.length === 0 || subtotal() <= 0"
+            >
                 Đến thanh toán
             </button>
         </section>

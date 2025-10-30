@@ -192,3 +192,48 @@ td.money{ text-align:right; }
 @media (prefers-reduced-motion: reduce){
     *{ transition:none !important; }
 }
+/* === FORCE WHITE TEXT (inputs, placeholder, pill, v.v.) === */
+
+/* Tiêu đề + nhãn */
+:host .header h2,
+:host .card h3,
+:host .label { color: #fff !important; }
+
+/* Giá trị hiển thị & text trong input */
+:host .value,
+:host input[type="text"],
+:host input[type="tel"],
+:host input[type="number"] {
+    color: #fff !important;
+    border-color: #fff !important;   /* viền trắng như ảnh */
+}
+
+/* Placeholder cũng trắng (nhạt hơn chút để phân biệt) */
+:host input::placeholder {
+    color: rgba(255,255,255,0.75) !important;
+}
+
+/* Radio + nhãn lựa chọn phương thức thanh toán */
+:host .pmethods,
+:host .pill { color: #fff !important; border-color: #fff !important; }
+:host input[type="radio"] { accent-color: #fff !important; }
+
+/* Bảng giỏ hàng & phần tổng kết */
+:host .row,
+:host .row .name .title,
+:host .row .name .sub,
+:host .summary,
+:host .meta,
+:host .hint,
+:host .empty,
+:host .success {
+    color: #fff !important;
+}
+
+/* Nút */
+:host .btn,
+:host .btn.ghost,
+:host .link { color: #fff !important; }
+:host .btn.primary { color: #fff !important; } /* nếu muốn primary chữ đen thì bỏ dòng này */
+.address-grid{ display:grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap:12px 16px; }
+@media (max-width: 900px){ .address-grid{ grid-template-columns: 1fr; } }

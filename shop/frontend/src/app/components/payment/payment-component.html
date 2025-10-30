@@ -1,8 +1,8 @@
-<div class="frame" [attr.aria-busy]="(loading || qLoading) ? 'true' : null">
+<div class="frame" [attr.aria-busy]="(loading || pLoading) ? 'true' : null">
     <!-- Header -->
     <div class="header">
         <h2>Thanh toán</h2>
-        <button class="link" type="button" (click)="refresh()" [disabled]="loading || qLoading">
+        <button class="link" type="button" (click)="refresh()" [disabled]="loading || pLoading">
             ↻ Tải lại giỏ hàng
         </button>
     </div>
@@ -55,67 +55,9 @@
                         [checked]="method === 'BANK'"
                         (change)="onMethodChange('BANK')"
                 />
-                <span>Chuyển khoản ngân hàng (VietQR)</span>
+                <span>Thanh toán trực tuyến (PayOS)</span>
             </label>
         </div>
-    </section>
-
-    <!-- ===== QR khi chọn BANK ===== -->
-    <section class="card" *ngIf="method === 'BANK'">
-        <h3>Quét VietQR</h3>
-
-        <ng-container *ngIf="!qLoading && qrSrc; else qrState">
-            <div class="qrbox">
-                <img
-                        [src]="qrSrc"
-                        [attr.alt]="'VietQR chuyển khoản ngân hàng cho đơn ' + (orderId || '')"
-                        loading="lazy"
-                        decoding="async"
-                />
-
-                <div class="meta">
-                    <span><b>{{ merchant.accountName }}</b></span>
-                    <span>{{ merchant.bank }} • {{ merchant.accountNumber }}</span>
-                </div>
-
-                <div class="actions">
-                    <a class="btn secondary" [href]="qrSrc" [attr.download]="'vietqr-' + (orderId || 'don') + '.png'">
-                        Tải ảnh
-                    </a>
-                    <button class="btn secondary" type="button" (click)="printQR()">In QR</button>
-                    <button class="btn secondary" type="button" (click)="copyAddInfo()">Sao chép nội dung</button>
-                </div>
-
-                <p class="hint">
-                    Nội dung chuyển khoản:
-                    <code>Thanh toan {{ orderId || 'DON' }}</code>
-                </p>
-                <p class="hint">Quét QR bằng app ngân hàng. Nội dung đã kèm mã đơn <b>{{ orderId || '—' }}</b>.</p>
-            </div>
-        </ng-container>
-
-        <ng-template #qrState>
-            <div *ngIf="qLoading" class="qr-loading">
-                <div class="skeleton qr"></div>
-                <div class="hint" role="status">Đang tạo QR…</div>
-            </div>
-
-            <div *ngIf="!qLoading && !qrSrc" class="empty">
-                Không tải được QR.
-                <div class="actions">
-                    <button class="btn secondary" type="button" (click)="refresh()">Thử lại</button>
-                </div>
-            </div>
-        </ng-template>
-    </section>
-
-    <!-- ===== Thông báo khi chọn COD ===== -->
-    <section class="card success" *ngIf="method === 'COD'">
-        <h3>Thanh toán khi nhận hàng (COD)</h3>
-        <p>Chúng tôi sẽ liên hệ giao hàng. Bạn thanh toán trực tiếp cho shipper.</p>
-        <button class="btn primary" type="button" (click)="confirmCOD()" [disabled]="loading">
-            Xác nhận COD
-        </button>
     </section>
 
     <!-- ===== Giỏ hàng ===== -->
@@ -143,6 +85,32 @@
     <ng-template #emptyCart>
         <div class="card empty">Giỏ hàng đang trống.</div>
     </ng-template>
+
+    <!-- ===== Nút đi PayOS khi chọn BANK ===== -->
+    <section class="card" *ngIf="method === 'BANK'">
+        <h3>Thanh toán trực tuyến</h3>
+        <div class="payos">
+            <button class="btn primary"
+                    type="button"
+                    (click)="goPayOS()"
+                    [disabled]="pLoading || loading || items.length === 0 || subtotal <= 0">
+                {{ pLoading ? 'Đang chuyển đến PayOS…' : 'Thanh toán qua PayOS' }}
+            </button>
+            <p class="hint">
+                Bạn sẽ được chuyển sang trang thanh toán an toàn của PayOS.
+                Sau khi hoàn tất, hệ thống sẽ chuyển về trang cửa hàng.
+            </p>
+        </div>
+    </section>
+
+    <!-- ===== Thông báo khi chọn COD ===== -->
+    <section class="card success" *ngIf="method === 'COD'">
+        <h3>Thanh toán khi nhận hàng (COD)</h3>
+        <p>Chúng tôi sẽ liên hệ giao hàng. Bạn thanh toán trực tiếp cho shipper.</p>
+        <button class="btn primary" type="button" (click)="confirmCOD()" [disabled]="loading">
+            Xác nhận COD
+        </button>
+    </section>
 
     <!-- ===== Tổng kết ===== -->
     <section class="card totals" *ngIf="items.length > 0">

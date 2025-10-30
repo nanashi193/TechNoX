@@ -12,8 +12,8 @@ export interface CartItem {
 }
 
 export interface OrderDraft {
-    userId: string | null; // gửi kèm cho backend nếu cần
-    customer: { cccd: string; address: string };
+    userId: string | null;
+    customer: { address: string }; // gửi full địa chỉ đã ghép
     items: CartItem[];
     subtotal: number;
     tax: number;
@@ -26,11 +26,10 @@ export interface User {
     email: string;
     fullName?: string;
     cccd?: string;
-    address?: string;
+    address?: string;    // full string từ DB: "12 Nguyễn Văn Bảo, Gò Vấp, TP.HCM"
     createdAt?: string;
 }
 
-const CCCD_REGEX = /^\d{12}$/;  // 12 số
 const TAX_RATE = 0.1;
 
 @Component({
@@ -45,10 +44,8 @@ export class PaymentDetailComponent implements OnInit {
     private readonly fb     = inject(FormBuilder);
     private readonly router = inject(Router);
 
-    // Lưu userId để đính kèm vào order
     currentUserId = signal<string | null>(null);
 
-    // Lấy user & prefill CCCD/địa chỉ nếu trống
     user$ = this.http.get<User>('/api/me').pipe(
         tap(u => {
             this.currentUserId.set(u?.id ?? null);
@@ -58,11 +55,14 @@ export class PaymentDetailComponent implements OnInit {
         catchError(() => of(null))
     );
 
-    // ❗ Không còn name trong form
+    // ⬇️ Địa chỉ tách thành 3 trường
     form: FormGroup = this.fb.group({
         customer: this.fb.group({
-            cccd: ['', [Validators.required, Validators.pattern(CCCD_REGEX)]],
-            address: ['', [Validators.required, Validators.minLength(5)]],
+            address: this.fb.group({
+                street:  ['', [Validators.required, Validators.minLength(3)]], // Số nhà, đường
+                district:['', [Validators.required, Validators.minLength(2)]], // Quận/Huyện
+                city:    ['', [Validators.required, Validators.minLength(2)]], // Thành phố/Tỉnh
+            }),
         }),
         items: this.fb.array<FormGroup>([])
     });
@@ -89,12 +89,20 @@ export class PaymentDetailComponent implements OnInit {
         this.loadCartFromBackend();
     }
 
+    // Điền sẵn address nếu DB có (tách theo dấu phẩy)
     private prefillFromUser(u: User | null) {
-        if (!u) return;
-        const c = this.form.get('customer')!;
+        if (!u?.address) return;
+        const a = this.form.get('customer.address') as FormGroup;
         const blank = (v: unknown) => v == null || `${v}`.trim() === '';
-        if (blank(c.get('cccd')?.value)   && u.cccd)   c.get('cccd')?.setValue(u.cccd);
-        if (blank(c.get('address')?.value) && u.address) c.get('address')?.setValue(u.address);
+
+        const parts = u.address.split(',').map(s => s.trim());
+        const street   = parts[0] ?? '';
+        const district = parts[1] ?? '';
+        const city     = parts.slice(2).join(', ') || '';
+
+        if (blank(a.get('street')?.value)   && street)   a.get('street')?.setValue(street);
+        if (blank(a.get('district')?.value) && district) a.get('district')?.setValue(district);
+        if (blank(a.get('city')?.value)     && city)     a.get('city')?.setValue(city);
     }
 
     private loadCartFromBackend(): void {
@@ -131,9 +139,18 @@ export class PaymentDetailComponent implements OnInit {
             return;
         }
 
+        // Ghép địa chỉ đầy đủ trước khi gửi
+        const addr = (this.form.get('customer.address') as FormGroup).value as {
+            street: string; district: string; city: string;
+        };
+        const fullAddress = [addr.street, addr.district, addr.city]
+            .map(s => (s || '').trim())
+            .filter(Boolean)
+            .join(', ');
+
         const draft: OrderDraft = {
             userId: this.currentUserId(),
-            customer: this.form.value.customer, // { cccd, address }
+            customer: { address: fullAddress },
             items: this.form.value.items as CartItem[],
             subtotal: +this.subtotal().toFixed(2),
             tax: +this.tax().toFixed(2),
