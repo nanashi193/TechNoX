@@ -100,7 +100,7 @@ public class WebSecurityConfig {
                         .hasAnyRole(Role.ADMIN, Role.OWNER)
                         .requestMatchers(DELETE, String.format("%s/categories/**", apiPrefix))
                         .hasAnyRole(Role.ADMIN, Role.OWNER)
-
+                        .requestMatchers(POST, String.format("%s/bills", apiPrefix)).authenticated()
                         // Default fallback
                         .anyRequest().authenticated());
 

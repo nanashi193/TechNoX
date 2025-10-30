@@ -8,7 +8,7 @@ import { CartComponent } from './components/cart/cart.component';
 import { loginGuard } from './guards/login.guard';
 import { ownerGuard } from './guards/owner.guard';
 
-// Non-standalone (nếu component này không standalone)
+// ĐÚNG path: components/paymentDetail/...
 import { PaymentDetailComponent } from './components/paymentDetail/payment-detail.component';
 
 export const routes: Routes = [
@@ -38,6 +38,7 @@ export const routes: Routes = [
 
     // ===== Public =====
     { path: 'home', component: HomeComponent },
+
     { path: 'login',  component: LoginComponent,  canActivate: [loginGuard], data: { hideChrome: true, title: 'Đăng nhập | TechNoX' } },
     { path: 'signup', component: SignupComponent, canActivate: [loginGuard], data: { hideChrome: true, title: 'Đăng ký | TechNoX' } },
 
@@ -52,7 +53,23 @@ export const routes: Routes = [
         data: { hideChrome: true, title: 'Đang chờ xác minh | TechNoX' }
     },
 
-    // ===== Products & users =====
+    // Payment detail
+    { path: 'payment-detail', component: PaymentDetailComponent, data: { title: 'Chi tiết đơn hàng | TechNoX' } },
+
+    // Payment (lazy) — ĐÚNG path: components/payment/payment.component
+    {
+        path: 'payment',
+        loadComponent: () => import('./components/payment/payment-component').then(m => m.PaymentComponent),
+        title: 'Thanh toán | TechNoX'
+    },
+    { path: 'checkout', redirectTo: 'payment', pathMatch: 'full' },
+
+    { path: 'forgot-password', component: ForgotPasswordComponent, data: { hideChrome: true, title: 'Quên mật khẩu | TechNoX' } },
+    {path: 'reset-password',
+        loadComponent: () => import('./components/reset-password/reset-password.component')
+            .then(m => m.ResetPasswordComponent),
+        title: 'Đặt lại mật khẩu | TechNoX',
+        data: { hideChrome: true }},
     { path: 'products', component: ProductPageComponent },
     { path: 'cart', component: CartComponent },
     {

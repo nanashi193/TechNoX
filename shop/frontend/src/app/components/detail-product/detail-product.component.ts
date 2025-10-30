@@ -152,7 +152,7 @@ export class DetailProductComponent implements OnInit {
         if (variantToAddId) {
             this.cartService.addItem(variantToAddId, this.quantity).subscribe({
                 next: () => {
-                    this.router.navigate(['/checkout']);
+                    this.router.navigate(['/payment-detail']);
                 },
                 error: (err) => {
                     console.error("Lỗi thêm vào giỏ (Buy Now):", err);

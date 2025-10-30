@@ -15,14 +15,24 @@
         <div *ngIf="cart.items.length > 0; else empty" class="cart__grid">
             <div class="cart__list">
                 <div class="cart__row cart__row--head">
+                    <div class="center select-col">
+                        <input type="checkbox"
+                               [checked]="allSelected"
+                               (change)="toggleSelectAll($event)"
+                               title="Chọn tất cả">
+                    </div>
                     <div>Sản phẩm</div>
                     <div class="center">Giá</div>
                     <div class="center">Số lượng</div>
                     <div class="right">Tạm tính</div>
-                    <div></div>
-                </div>
+                    <div></div> </div>
 
                 <div *ngFor="let item of cart.items; trackBy: trackByItem" class="cart__row">
+                    <div class="center select-col">
+                        <input type="checkbox"
+                               [(ngModel)]="item.selected"
+                               (ngModelChange)="onItemSelectChange()">
+                    </div>
 
                     <div class="cart__product">
                         <div>
@@ -57,17 +67,17 @@
             <aside class="cart__summary">
                 <h2>Tóm tắt</h2>
                 <div class="sum-row">
-                    <span>Tổng số lượng</span>
-                    <span>{{ totalQuantity }}</span>
+                    <span>Tổng số lượng (đã chọn)</span>
+                    <span>{{ totalSelectedQuantity }}</span>
                 </div>
                 <div class="sum-row">
-                    <span>Tổng tạm tính</span>
-                    <span class="strong">{{ totalAmount | currency:'VND':'symbol':'1.0-0' }}</span>
+                    <span>Tổng tạm tính (đã chọn)</span>
+                    <span class="strong">{{ totalSelectedAmount | currency:'VND':'symbol':'1.0-0' }}</span>
                 </div>
                 <button class="btn-primary"
-                        [disabled]="!cart || !cart.items || cart.items.length === 0"
+                        [disabled]="selectedItems.length === 0"
                         (click)="goToPayment()">
-                    Thanh toán
+                    Thanh toán ({{ selectedItems.length }} sản phẩm)
                 </button>
                 <p class="note">Giá đã bao gồm VAT (nếu áp dụng).</p>
             </aside>
