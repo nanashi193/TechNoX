@@ -11,19 +11,17 @@ import {
 import {FormsModule} from '@angular/forms';
 import {ActivatedRoute, Router, RouterLink} from '@angular/router';
 import {ProductService} from "../../../../services/products.service";
-import {Product} from '../../../../models/products.model';
+import {Product, ProductImageItem} from '../../../../models/products.model';
 import {take} from 'rxjs/operators';
 import {firstValueFrom} from 'rxjs';
 import {
     ProductFormValue,
     ProductCreateDTO,
     ProductUpdateDTO,
-    toCreateProductDTO,
-    toUpdateProductDTO
 } from "../../../../dtos/products/products.dto";
 import {ProductImage} from "../../../../models/product-image.model";
+import {MediaItem} from "../../../../models/products.model";
 
-type MediaItem = { id: string; previewUrl: string; file?: File; isUrl?: boolean };
 type VariantRow = { name: string; values: string[]; input: string };
 
 type VariantValue = {
@@ -114,42 +112,35 @@ export class ProductsDetailComponent implements OnInit {
 
     // ===== Media state
     media: MediaItem[] = [];
+    mediaDirty = false;
+    trackByUrl = (_: number, m: MediaItem) => m.previewUrl;
+    selectedThumb: string | null = null;
     dragOver = false;
-    private hydrateMediaFromServer(p: any) {
-        this.media = [];
+    private hydrateMediaFromServer(p: Product | any) {
+        this.media = (p.imageItems ?? []).map((it: ProductImageItem, i: number) => ({
+            id: `srv-${i}`,
+            previewUrl: it.url,
+            imageId: it.id,
+            isUrl: true
+        }));
 
-        // 1) Gom toàn bộ URL ảnh từ nhiều dạng khóa
-        const rawList: any[] = (p?.images ?? p?.productImages ?? p?.photos ?? []) as any[];
+        const list: any[] = (p.imageItems ?? []);
+        const urls = list.map((it: any) =>
+            typeof it === 'string' ? { id: undefined, url: it }
+                : { id: it.id, url: it.url });
 
-        // Chuẩn hóa: chấp nhận string hoặc object {url|imageUrl|src}
-        const urls = rawList
-            .map((it: any) => {
-                if (!it) return null;
-                if (typeof it === 'string') return it;
-                if (typeof it === 'object') return it.url ?? it.imageUrl ?? it.src ?? null;
-                return null;
-            })
-            .filter((u: any): u is string => !!u && typeof u === 'string' && !u.startsWith('blob:'));
+        const thumb = p.thumbnail ?? urls[0]?.url ?? '';
+        const unique = Array.from(new Set([thumb, ...urls.map(x => x.url)]));
+        this.selectedThumb = thumb;
+        this.media = unique.map((u, i) => {
+            const found = urls.find(x => x.url === u);
+            return { id: `srv-${i}`, previewUrl: u, imageId: found?.id, isUrl: true };
+        });
 
-        // 2) Thumbnail (fallback lấy ảnh đầu nếu BE chưa set thumbnail)
-        const thumb = (p?.thumbnail ?? p?.image ?? p?.imageUrl ?? urls[0] ?? '') as string;
-
-        // 3) Khử trùng và đặt thumbnail lên đầu danh sách
-        const unique = Array.from(new Set([thumb, ...urls].filter(Boolean)));
-
-        // 4) Đổ vào media để render gallery
-        this.media = unique.map((u, i) => ({ id: `srv-${i}`, previewUrl: u, isUrl: true }));
-
-        // 5) Cập nhật control thumbnail nếu đang rỗng
         if (!this.f.controls.thumbnail.value && thumb) {
             this.f.controls.thumbnail.setValue(thumb, { emitEvent: false });
         }
-
-        // Debug nhanh
-        console.log('BE images:', p.images);
-        console.log('Media hydrated:', this.media);
     }
-
 
 
     // ===== Variants state
@@ -157,9 +148,6 @@ export class ProductsDetailComponent implements OnInit {
 
     private original!: ProductFormValue;
 
-    get isEdit() {
-        return !!this.id;
-    }
 
     ngOnInit(): void {
         const raw = this.route.snapshot.paramMap.get('id');
@@ -299,7 +287,6 @@ export class ProductsDetailComponent implements OnInit {
     }
 
 
-
     setEditMode(on: boolean) {
         this.editing = on;
         on ? this.f.enable({ emitEvent:false }) : this.f.disable({ emitEvent:false });
@@ -371,10 +358,63 @@ export class ProductsDetailComponent implements OnInit {
         this.media.push({id: crypto.randomUUID(), previewUrl: url, isUrl: true});
     }
 
+    setThumb(m: MediaItem) {
+        if (this.selectedThumb === m.previewUrl) return;
+        this.selectedThumb = m.previewUrl;
+        const ctrl = this.f.controls.thumbnail;
+        ctrl.setValue(m.previewUrl);
+        ctrl.markAsDirty();
+        ctrl.markAsTouched();
+        this.f.markAsDirty();
+        this.f.updateValueAndValidity();
+
+        if (this.id && m.imageId) {
+            this.productService.setThumbnailFromImage(this.id, m.imageId).subscribe();
+        }
+    }
     removeMedia(i: number) {
         const m = this.media[i];
-        if (m?.file) URL.revokeObjectURL(m.previewUrl);
+        if (this.id && m.imageId) {
+            this.productService.deleteImage(this.id, m.imageId).subscribe(() => {
+                this.media.splice(i,1);
+                if (this.selectedThumb === m.previewUrl) {
+                    this.selectedThumb = this.media[0]?.previewUrl ?? null;
+                }
+            });
+        } else {
+            if (m.file) URL.revokeObjectURL(m.previewUrl);
+            this.media.splice(i,1);
+        }
+    }
+
+    onRemove(i: number, ev: MouseEvent) {
+        ev.stopPropagation();              // ⬅️ quan trọng
+        const m = this.media[i];
+        if (!m) return;
+
+        // Optimistic UI
         this.media.splice(i, 1);
+        this.media = [...this.media];      // đảm bảo cập nhật view (kể cả OnPush)
+        this.mediaDirty = true;
+
+        // Nếu vừa xoá ảnh đang là thumbnail → chọn ảnh kế
+        if (this.selectedThumb === m.previewUrl) {
+            this.selectedThumb = this.media[0]?.previewUrl ?? null;
+            this.f.controls.thumbnail.setValue(this.selectedThumb ?? '', { emitEvent: true });
+            this.f.controls.thumbnail.markAsDirty();
+        }
+
+        // Gọi API xoá nếu có imageId
+        if (this.id && m.imageId) {
+            this.productService.deleteImage(this.id, m.imageId).subscribe({
+                error: _ => {
+                    // rollback khi lỗi
+                    this.media.splice(i, 0, m);
+                    this.media = [...this.media];
+                    this.mediaDirty = false;
+                }
+            });
+        }
     }
 
     private pushFiles(files: File[]) {

@@ -141,25 +141,39 @@
 
                 <ng-template #gallery>
                     <div class="media-grid">
-                        <div class="media-item" *ngFor="let m of media; index as i">
-                            <img [src]="m.previewUrl" alt="">
-                            <button type="button" class="remove" (click)="removeMedia(i)" *ngIf="editing">✕</button>
+                        <div class="media-item"
+                             *ngFor="let m of media; index as i"
+                             [class.is-thumb]="m.previewUrl === selectedThumb">
+
+                            <img [src]="m.previewUrl" alt=""
+                                 (click)="editing && setThumb(m)">
+
+
+                            <!-- Nút xoá -->
+                            <button type="button"
+                                    class="remove"
+                                    *ngIf="editing"
+                                    (click)="onRemove(i, $event)"
+                                    aria-label="Xoá ảnh">✕</button>
+
+                            <span class="badge" *ngIf="m.previewUrl === selectedThumb">Ảnh đại diện</span>
+
                         </div>
                     </div>
+
                     <div class="media-actions" *ngIf="editing">
                         <button type="button" class="btn" (click)="fileInput.click()">Add more</button>
                         <input #fileInput type="file" accept="image/*" multiple hidden (change)="onFileSelect($event)">
                     </div>
                 </ng-template>
+
             </div>
         </section>
     </div>
 
     <!-- Sticky action bar -->
     <div class="sticky-actions" *ngIf="showStickyBar">
-        <div class="sa-right">
             <button type="button" class="btn ghost" (click)="cancel()">Hủy</button>
             <button type="submit" class="btn primary" [disabled]="f.invalid || saving || !editing || !f.dirty">Lưu</button>
-        </div>
     </div>
 </form>
