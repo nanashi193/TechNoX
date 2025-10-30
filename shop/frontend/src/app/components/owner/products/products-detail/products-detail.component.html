@@ -2,6 +2,11 @@
     <!-- HEADER -->
     <div class="page-header">
         <a class="link" routerLink="/owner/products">← Quay lại danh sách</a>
+
+        <div class="actions" [class.invisible]="editing">
+            <button class="btn ghost" (click)="edit()">Chỉnh sửa</button>
+        </div>
+
     </div>
 
     <div class="form-grid">
@@ -52,7 +57,7 @@
                 <div class="field inline">
                     <span>Còn hàng</span>
                     <label class="switch">
-                        <input type="checkbox" formControlName="inStock" [disabled]="!editing">
+                        <input type="checkbox" formControlName="inStock">
                         <span class="track"></span>
                     </label>
                 </div>
@@ -63,7 +68,7 @@
 
                 <label class="field">
                     <span>Loại</span>
-                    <select formControlName="categoryId" [disabled]="!editing">
+                    <select formControlName="categoryId">
                         <option [ngValue]="null" disabled selected>Chọn danh mục…</option>
                         <option *ngFor="let c of categories" [ngValue]="c.id">{{ c.name }}</option>
                     </select>
@@ -153,8 +158,8 @@
     <!-- Sticky action bar -->
     <div class="sticky-actions" *ngIf="showStickyBar">
         <div class="sa-right">
-            <button type="button" class="btn ghost light" (click)="discard()">Hủy</button>
-            <button type="submit" class="btn primary" [disabled]="f.invalid || !f.dirty">Lưu</button>
+            <button type="button" class="btn ghost" (click)="cancel()">Hủy</button>
+            <button type="submit" class="btn primary" [disabled]="f.invalid || saving || !editing || !f.dirty">Lưu</button>
         </div>
     </div>
 </form>
