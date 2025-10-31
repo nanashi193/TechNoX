@@ -177,6 +177,10 @@ export class ProductService {
     upsertVariant(productId: number, dto: ProductVariantDTO) {
         return this.http.post<void>(`${this.base}/${productId}/variants`, dto);
     }
+    deleteVariant(productId: number, variantId: number) {
+        return this.http.delete(`/api/v1/products/${productId}/variants/${variantId}`);
+    }
+
 
     delete(id: number): Observable<void> {
         return this.http.delete<void>(`${this.base}/${id}`);

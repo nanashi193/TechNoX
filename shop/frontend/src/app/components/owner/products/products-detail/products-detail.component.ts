@@ -101,13 +101,20 @@ export class ProductsDetailComponent implements OnInit {
         });
     }
 
+    deletedVariantIds: number[] = [];
 
     addVariant(v?: any) {
         this.variantsFA.push(this.buildVariant(v));
+        this.f.markAsDirty();
+        console.log('[DEBUG] add ->', this.variantsFA.length, this.variantsFA.getRawValue());
     }
 
     removeVariant(i: number) {
+        const g = this.variantsFA.at(i);
+        const id = g.get('id')?.value;
+        if (id != null) this.deletedVariantIds.push(id);   // sẽ xoá trên BE
         this.variantsFA.removeAt(i);
+        this.f.markAsDirty();
     }
 
     // ===== Media state
@@ -211,16 +218,42 @@ export class ProductsDetailComponent implements OnInit {
                 .filter(m => !!m.file)
                 .map(m => m.file as File);
 
-            const variants = this.variantsFA.controls.map(g => {
-                const { id, color, size, quantity, price } = g.getRawValue();
-                const base = {
-                    color: (color ?? '').trim(),
-                    size:  (size ?? '').trim(),
-                    quantity: +quantity || 0,
-                    price: +price || 0,
-                };
-                return (this.id && id != null) ? { id, ...base } : base;
-            });
+            const variants = this.variantsFA.getRawValue().map(v => ({
+                ...(v.id != null ? { id: v.id } : {}),
+                color:     (v.color ?? '').trim(),
+                size:      (v.size ?? '').trim(),
+                quantity:  +v.quantity || 0,
+                price:     +v.price || 0,
+            }));
+            console.log('[DEBUG][before PUT] variantsFA.length =', this.variantsFA.length, variants);
+
+            // UPDATE SCALARS
+            const scalarsDto: ProductUpdateDTO = {
+                name: raw.name!, price: +raw.price!, thumbnail: raw.thumbnail ?? '',
+                description: raw.description ?? '', status: !!(raw as any).inStock,
+                ...(raw.categoryId != null ? { categoryId: +raw.categoryId } : {})
+            };
+            await firstValueFrom(this.productService.update(this.id!, scalarsDto));
+
+            // UPSERT VARIANTS (mỗi dòng một call)
+            const toUpsert = this.variantsFA.getRawValue().map(v => ({
+                ...(v.id != null ? { id: v.id } : {}),
+                color: (v.color ?? '').trim(),
+                size: (v.size ?? '').trim(),
+                quantity: +v.quantity || 0,
+                price: +v.price || 0
+            }));
+
+            await Promise.all(
+                toUpsert.map(v => firstValueFrom(this.productService.upsertVariant(this.id!, v)))
+            );
+            // 3) DELETE VARIANTS (những dòng đã xoá trong UI)
+            await Promise.all(
+                this.deletedVariantIds.map(vid => firstValueFrom(this.productService.deleteVariant(this.id!, vid)))
+            );
+            this.deletedVariantIds = [];
+
+
 
             if (this.id) {
                 const dto: ProductUpdateDTO = {
