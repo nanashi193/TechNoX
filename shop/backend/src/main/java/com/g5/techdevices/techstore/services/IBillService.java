@@ -15,4 +15,5 @@ public interface IBillService {
     BillResponse updateBill(long id, BillDTO billDTO) throws DataNotFoundException;
     void deleteBill(long id);
     List<BillResponse> findById(long userId);
+    void updateStatus(Long billId, String gatewayStatus) throws DataNotFoundException;
 }
