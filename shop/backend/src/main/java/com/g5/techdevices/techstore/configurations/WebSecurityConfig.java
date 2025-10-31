@@ -31,9 +31,8 @@ public class WebSecurityConfig {
     private String apiPrefix; // ví dụ: /api/v1
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain SecurityFilterChain(HttpSecurity http) throws Exception {
         http
-                // CORS + CSRF
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(AbstractHttpConfigurer::disable)
 
@@ -64,7 +63,7 @@ public class WebSecurityConfig {
                         .requestMatchers(GET,  apiPrefix + "/customer/products/**").permitAll()
 
                         // PayOS endpoints
-                        .requestMatchers(POST, apiPrefix + "/bills/pay").authenticated()   // tạo link thanh toán
+                        .requestMatchers(POST, apiPrefix + "/bills/{billId}/pay").authenticated()  // tạo link thanh toán
                         .requestMatchers(POST, apiPrefix + "/bills/webhook").permitAll()   // PayOS gọi vào
                         .requestMatchers(GET,  apiPrefix + "/bills/status/**").permitAll() // FE tra cứu
 
@@ -79,6 +78,7 @@ public class WebSecurityConfig {
                         .requestMatchers(PUT, apiPrefix + "/products/**").hasAnyRole(Role.ADMIN, Role.OWNER)
 
                         // Quản trị Users/Categories
+                        .requestMatchers(POST, apiPrefix + "/bills").authenticated()
                         .requestMatchers(PUT, apiPrefix + "/users/**").authenticated()
                         .requestMatchers(GET, apiPrefix + "/users").hasAnyRole(Role.ADMIN, Role.OWNER)
                         .requestMatchers(DELETE, apiPrefix + "/users/**").hasAnyRole(Role.ADMIN, Role.OWNER)
@@ -98,19 +98,19 @@ public class WebSecurityConfig {
 
         return http.build();
     }
+        @Bean
+        public CorsConfigurationSource corsConfigurationSource () {
+            CorsConfiguration configuration = new CorsConfiguration();
+            configuration.addAllowedOrigin("http://localhost:4200");
+            configuration.addAllowedOrigin("https://f46bbed85f2e.ngrok-free.app"); //Thay link day = frontend
+            configuration.addAllowedHeader("*");
+            configuration.addAllowedMethod("*");
+            configuration.setAllowCredentials(true);
+            configuration.setExposedHeaders(List.of("Authorization"));
 
-    @Bean
-    public CorsConfigurationSource corsConfigurationSource() {
-        // Nếu cần wildcard: setAllowedOriginPatterns(List.of("http://localhost:*"))
-        CorsConfiguration cfg = new CorsConfiguration();
-        cfg.setAllowedOrigins(List.of("http://localhost:4200"));
-        cfg.setAllowedMethods(List.of("GET","POST","PUT","PATCH","DELETE","OPTIONS"));
-        cfg.setAllowedHeaders(List.of("*"));
-        cfg.setAllowCredentials(true);
-        cfg.setExposedHeaders(List.of("Authorization"));
+            UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+            source.registerCorsConfiguration("/**", configuration);
+            return source;
+        }
 
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", cfg);
-        return source;
     }
-}

@@ -55,6 +55,14 @@
               "optimization": false,
               "extractLicenses": false,
               "sourceMap": true
+            },
+            "ngrok": {
+              "fileReplacements": [
+                {
+                  "replace": "src/app/environments/environment.ts",
+                  "with": "src/app/environments/environment.ngrok.ts"
+                }
+              ]
             }
           },
           "defaultConfiguration": "production"
@@ -73,6 +81,12 @@
             },
             "development": {
               "buildTarget": "App:build:development"
+            },
+            "ngrok": {
+              "buildTarget": "App:build:ngrok",
+              "allowedHosts": [
+                "f46bbed85f2e.ngrok-free.app"
+              ]
             }
           },
           "defaultConfiguration": "development"

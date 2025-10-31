@@ -27,7 +27,10 @@ public class BillCreateRequestDTO {
     @NotBlank(message = "Shipping address is required.")
     @JsonProperty("ShippingAddress")
     private String shippingAddress;
-
+//
+//    @NotBlank(message = "Paymemt method ís required.")
+//    @JsonProperty("PaymentMethod")
+//    private String paymentMethod;
 
     @NotEmpty(message = "Order details cannot be empty.")
     @JsonProperty("details")

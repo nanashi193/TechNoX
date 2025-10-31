@@ -487,3 +487,35 @@ GO
 GO
     ALTER TABLE ProductImages ADD PublicId NVARCHAR(255) NOT NULL DEFAULT N'';
     CREATE UNIQUE INDEX UQ_ProductImages_PublicId ON ProductImages (PublicId);
+GO
+IF OBJECT_ID('dbo.PayTransaction', 'U') IS NULL
+BEGIN
+CREATE TABLE dbo.PayTransaction (
+                                    Id           BIGINT IDENTITY(1,1) PRIMARY KEY,
+                                    OrderCode    BIGINT       NOT NULL UNIQUE,   -- từ PayOS
+                                    BillId       BIGINT       NOT NULL,          -- bill của bạn
+                                    Amount       DECIMAL(18,2) NOT NULL,         -- tổng tiền tại lúc tạo
+                                    Status       VARCHAR(20)  NOT NULL,          -- PENDING/PAID/CANCELLED/UNKNOWN
+                                    PayCode      VARCHAR(10)  NULL,              -- "00","07","09"
+                                    RawWebhook   NVARCHAR(MAX) NULL,             -- lưu body để trace
+                                    CreatedAt    DATETIME2    NOT NULL DEFAULT SYSDATETIME(),
+                                    UpdatedAt    DATETIME2    NOT NULL DEFAULT SYSDATETIME()
+);
+
+CREATE INDEX IX_PayTransaction_BillId ON dbo.PayTransaction(BillId);
+END
+GO
+
+-- trigger cập nhật UpdatedAt
+IF OBJECT_ID('dbo.trg_PayTransaction_UpdatedAt', 'TR') IS NULL
+BEGIN
+EXEC('CREATE TRIGGER dbo.trg_PayTransaction_UpdatedAt
+        ON dbo.PayTransaction AFTER UPDATE AS
+        BEGIN
+          SET NOCOUNT ON;
+          UPDATE t SET UpdatedAt = SYSDATETIME()
+          FROM dbo.PayTransaction t
+          JOIN inserted i ON i.Id = t.Id;
+        END');
+END
+GO

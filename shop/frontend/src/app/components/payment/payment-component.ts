@@ -1,23 +1,25 @@
 import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+// Thêm CurrencyPipe
+import { CommonModule, CurrencyPipe } from '@angular/common';
 import { Router, RouterModule, ActivatedRoute } from '@angular/router';
 import { HttpClientModule } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
-import { PaymentService } from './payment.service';
-
+// Sửa lại đường dẫn import và thêm PayOSLinkResponse
+import { PaymentService, PayOSLinkResponse } from '../../services/payment.service';
 
 type PayMethod = 'COD' | 'BANK';
 
 interface CartItem { id: string; name: string; price: number; qty: number; }
 interface User { id: string; fullName: string; email?: string; }
-interface Customer { cccd?: string; address?: string; }
+interface Customer { address?: string; phone?: string; }
 
 @Component({
     selector: 'app-payment',
     standalone: true,
-    imports: [CommonModule, RouterModule, HttpClientModule],
+    imports: [CommonModule, RouterModule, HttpClientModule, CurrencyPipe],
+    providers: [PaymentService],
     templateUrl: './payment-component.html',
-    styleUrls: ['./payment-component.css'],
+    styleUrls: ['./payment-component.css']
 })
 export class PaymentComponent implements OnInit {
     // UI
@@ -26,16 +28,16 @@ export class PaymentComponent implements OnInit {
 
     // data
     items: CartItem[] = [];
-    currentUser: User | null = null;
-    customer: Customer | null = null;
-    orderId: string | null = null;
+    currentUser: User | null = { id: '', fullName: '', email: '' };
+    customer: Customer | null = { address: '', phone: ''};
+    orderId: string | null = null; // Đây chính là billId
 
     method: PayMethod = 'COD';
 
     constructor(
         private router: Router,
         private route: ActivatedRoute,
-        private paymentService: PaymentService
+        private paymentService: PaymentService // Đã inject service
     ) {}
 
     get subtotal(): number {
@@ -53,57 +55,47 @@ export class PaymentComponent implements OnInit {
 
     private hydrateFromLocal(): void {
         try {
-            const raw = localStorage.getItem('orderDraft');
-            if (!raw) return;
+            const raw = sessionStorage.getItem('orderDraft');
+            if (!raw) {
+                console.warn('Không tìm thấy "orderDraft" trong sessionStorage.');
+                return;
+            }
+
             const draft = JSON.parse(raw);
-
-            if (draft?.id && !this.orderId) this.orderId = draft.id;
-
-            if (Array.isArray(draft?.items) && this.items.length === 0) {
-                this.items = draft.items.map((x: any) => ({
-                    id: x.id ?? crypto.randomUUID(),
-                    name: x.productName ?? x.name ?? 'Sản phẩm',
-                    price: Number(x.price) || 0,
-                    qty: Number(x.quantity ?? x.qty) || 1,
+            if (Array.isArray(draft?.fullItems) && this.items.length === 0) {
+                this.items = draft.fullItems.map((x: any) => ({
+                    id: x.variantId?.toString() ?? crypto.randomUUID(),
+                    name: x.productName ?? 'Sản phẩm',
+                    price: Number(x.unitPrice) || 0, // Sửa từ price -> unitPrice
+                    qty: Number(x.quantity) || 1,
                 }));
             }
 
-            if (draft?.customer) {
-                this.customer = {
-                    cccd: draft.customer.cccd,
-                    address: draft.customer.address,
-                };
+            if (this.currentUser) {
+                this.currentUser.fullName = draft.FullName || '';
+                this.currentUser.email = draft.Email || '';
             }
-        } catch {}
+            if (this.customer) {
+                this.customer.address = draft.ShippingAddress || '';
+                this.customer.phone = draft.Phone || '';
+            }
+
+        } catch (e) {
+            console.error('Lỗi đọc dữ liệu từ sessionStorage:', e);
+        }
     }
 
     async refresh(): Promise<void> {
         this.loading = true;
         try {
-            // Cart
-            try {
-                const list = await firstValueFrom(this.paymentService.getCart());
-                if (Array.isArray(list) && list.length) {
-                    this.items = list.map((it) => ({
-                        id: it.id,
-                        name: it.name,
-                        price: Number(it.price) || 0,
-                        qty: Number(it.qty) || 1,
-                    }));
-                }
-            } catch {}
-
-            // User
             try {
                 const u = await firstValueFrom(this.paymentService.getMe());
-                this.currentUser = u ?? this.currentUser;
-            } catch {}
-
-            // Customer
-            try {
-                const c = await firstValueFrom(this.paymentService.getCustomer());
-                this.customer = c ?? this.customer;
-            } catch {}
+                if (u) {
+                    this.currentUser = { ...this.currentUser, ...u };
+                }
+            } catch (e) {
+                console.warn('Không thể tải thông tin user:', e);
+            }
         } finally {
             this.loading = false;
         }
@@ -111,41 +103,36 @@ export class PaymentComponent implements OnInit {
 
     onMethodChange(m: PayMethod): void { this.method = m; }
 
-    private toOrderCode(): number {
-        const num = Number(this.orderId?.toString().replace(/\D+/g, ''));
-        return Number.isFinite(num) && num > 0 ? num : Date.now();
-    }
-
     async goPayOS(): Promise<void> {
-        if (!this.items?.length || this.subtotal <= 0 || this.pLoading) return;
+        // QUAN TRỌNG: Cần lấy Order ID (billId)
+        // Hiện tại this.orderId đang được lấy từ query param (ngOnInit)
+        // Nếu trang trước KHÔNG đẩy orderId qua URL, code này sẽ thất bại.
+
+        if (!this.orderId) {
+            // Thử lấy ID từ draft (nếu trang detail có lưu)
+            const raw = sessionStorage.getItem('orderDraft');
+            if (raw) this.orderId = JSON.parse(raw)?.id;
+        }
+
+        if (!this.orderId || this.pLoading) {
+            alert('Không tìm thấy mã đơn hàng (orderId).');
+            return;
+        }
+
         this.pLoading = true;
         try {
-            const orderCode = this.toOrderCode();
-            const payload = {
-                orderCode,
-                amount: Math.round(this.subtotal),
-                description: `Thanh toan ${this.orderId || orderCode}`,
-                returnUrl: `${location.origin}/payment/success?orderId=${this.orderId || orderCode}`,
-                cancelUrl: `${location.origin}/payment/cancel?orderId=${this.orderId || orderCode}`,
-                items: this.items.map((it) => ({
-                    name: it.name, quantity: it.qty, price: Math.round(it.price)
-                })),
-                buyer: {
-                    name: this.currentUser?.fullName,
-                    address: this.customer?.address,
-                    email: this.currentUser?.email
-                }
-            };
-
-            const { checkoutUrl } = await firstValueFrom(
-                this.paymentService.createPayOSLink(payload)
+            const { checkoutUrl }: PayOSLinkResponse = await firstValueFrom(
+                this.paymentService.createPayOSLink(this.orderId)
             );
 
-            if (checkoutUrl) window.location.href = checkoutUrl;
-            else alert('Không tạo được link thanh toán. Vui lòng thử lại.');
+            if (checkoutUrl) {
+                window.location.href = checkoutUrl;
+            } else {
+                alert('Không tạo được link thanh toán. Vui lòng thử lại.');
+            }
         } catch (e) {
             console.error(e);
-            alert('Không tạo được link thanh toán. Vui lòng thử lại.');
+            alert('Lỗi: Không tạo được link thanh toán. Vui lòng thử lại.');
         } finally {
             this.pLoading = false;
         }
@@ -153,8 +140,10 @@ export class PaymentComponent implements OnInit {
 
     confirmCOD(): void {
         alert('Đã tạo đơn COD. Chúng tôi sẽ liên hệ giao hàng.');
+        sessionStorage.removeItem('orderDraft'); // Xóa đơn nháp
         this.router.navigate(['/home']);
     }
 
     trackByCartItem = (_: number, it: CartItem) => it.id;
 }
+

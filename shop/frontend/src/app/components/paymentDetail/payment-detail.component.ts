@@ -2,7 +2,7 @@ import {Component, OnInit, computed, signal, inject, ChangeDetectorRef} from '@a
 import { CommonModule, CurrencyPipe } from '@angular/common';
 import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
-import {finalize, tap, catchError, of, shareReplay, startWith} from 'rxjs';
+import {finalize, tap, catchError, of, shareReplay, startWith, firstValueFrom} from 'rxjs';
 import { toSignal } from '@angular/core/rxjs-interop'; //
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { CartService } from '../../services/cart.service';
@@ -178,7 +178,7 @@ export class PaymentDetailComponent implements OnInit {
         return !!ctrl && ctrl.invalid && (ctrl.dirty || ctrl.touched);
     }
 
-    proceedToPayment(): void {
+    async proceedToPayment(): Promise<void> {
         this.createOrderError = null;
         if (this.form.invalid || this.items.length === 0 || this.subtotal() <= 0) {
             this.form.markAllAsTouched();
@@ -187,6 +187,7 @@ export class PaymentDetailComponent implements OnInit {
         }
 
         this.creatingOrder = true;
+        this.cdr.detectChanges();
 
         const customerInfo = this.form.get('customer')?.value;
         const addr = customerInfo.address;
@@ -195,36 +196,48 @@ export class PaymentDetailComponent implements OnInit {
             .filter(Boolean)
             .join(', ');
 
-        const orderItemsDetails = this.items.value; // Đây là mảng đầy đủ thông tin (tên, giá, sl,...)
-
-        const orderItemsPayload = orderItemsDetails.map((item: any) => ({
+        const orderItemsPayload = this.items.value.map((item: any) => ({
             variantId: item.variantId,
             quantity: item.quantity
         }));
 
-        const orderDraft = {
+        const createBillPayload = {
             FullName: customerInfo.name,
             Phone: customerInfo.phone,
             Email: customerInfo.email,
             ShippingAddress: fullAddress,
-            paymentMethod: 'COD', // Tạm gán, trang sau có thể thay đổi
-
             details: orderItemsPayload,
-            fullItems: orderItemsDetails,
-            subtotal: this.subtotal(),
-            tax: this.tax(),
-            total: this.total()
+            paymentMethod: 'COD'
         };
 
-        try {
-            sessionStorage.setItem('orderDraft', JSON.stringify(orderDraft));
-            this.creatingOrder = false; // Xong việc
-            this.cdr.detectChanges();
-            this.router.navigate(['/payment']);
+        const orderDraftForSession = {
+            FullName: customerInfo.name,
+            Phone: customerInfo.phone,
+            Email: customerInfo.email,
+            ShippingAddress: fullAddress,
+            fullItems: this.items.value,
+        };
 
-        } catch (e) {
-            console.error("Lỗi khi lưu đơn nháp vào sessionStorage:", e);
-            this.createOrderError = "Đã xảy ra lỗi. Vui lòng thử lại.";
+
+        try {
+            const newBill = await firstValueFrom(this.billService.createBill(createBillPayload));
+
+            if (!newBill || !newBill.id) {
+                throw new Error("API tạo bill không trả về ID.");
+            }
+
+            const realBillId = newBill.id;
+
+            sessionStorage.setItem('orderDraft', JSON.stringify(orderDraftForSession));
+
+            this.router.navigate(['/payment'], {
+                queryParams: { orderId: realBillId }
+            });
+
+        } catch (e){
+            console.error("Lỗi khi tạo Bill hoặc lưu đơn nháp:", e);
+            this.createOrderError = "Đã xảy ra lỗi khi tạo đơn hàng. Vui lòng thử lại.";
+        } finally {
             this.creatingOrder = false;
             this.cdr.detectChanges();
         }

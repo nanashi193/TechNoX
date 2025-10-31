@@ -1,11 +1,20 @@
 package com.g5.techdevices.techstore.controllers;
 
+import com.g5.techdevices.techstore.dtos.BillCreateRequestDTO;
+import com.g5.techdevices.techstore.entity.Bills.Bill;
+import com.g5.techdevices.techstore.exceptions.DataNotFoundException;
+import com.g5.techdevices.techstore.exceptions.InsufficientStockException;
 import com.g5.techdevices.techstore.services.BillService;
+import com.g5.techdevices.techstore.services.PayTransactionService;
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
 
 import vn.payos.PayOS;
@@ -14,6 +23,7 @@ import vn.payos.model.v2.paymentRequests.CreatePaymentLinkResponse;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
@@ -25,7 +35,7 @@ public class BillController {
 
     private final BillService billService;   // service của bạn
     private final PayOS payOS;               // bean từ PayOSConfig
-
+    private final PayTransactionService payTransactionService;
     /** Store tạm để test (prod hãy cập nhật DB thật) */
     private final ConcurrentHashMap<Long, Tx> txStore = new ConcurrentHashMap<>(); // key = orderCode
 
@@ -41,31 +51,22 @@ public class BillController {
     // ============= 1) Tạo link thanh toán cho 1 bill =============
     @PostMapping("/{billId}/pay")
     public ResponseEntity<?> createPaymentLink(@PathVariable Long billId) throws Exception {
-        // đảm bảo bill tồn tại (ném lỗi nếu không có)
-        billService.assertExists(billId);
-
-        // lấy tổng tiền từ DB qua service (đÃ tính trong createBill)
+        // 1. Lấy thông tin bill và tổng tiền
+        billService.assertExists(billId); // Kiểm tra bill có tồn tại
         BigDecimal total = billService.getBillTotal(billId);
-        long amount = total.longValue(); // PayOS nhận long (VND)
+        long amount = total.longValue(); // PayOS dùng long
+        long orderCode = Instant.now().toEpochMilli(); // Mã đơn hàng unique
 
-        // orderCode unique (bạn có thể thay bằng sequence DB)
-        long orderCode = Instant.now().toEpochMilli();
+        // 2. LƯU VÀO DB (Gọi hàm mới 'createPending')
+        payTransactionService.createPending(billId, total, orderCode);
 
-        // lưu trạng thái tạm
-        txStore.put(orderCode, Tx.builder()
-                .billId(billId)
-                .orderCode(orderCode)
-                .amount(amount)
-                .status("PENDING")
-                .build());
-
-        // gọi PayOS SDK v2 để tạo link
+        // 3. Tạo link PayOS
         CreatePaymentLinkRequest req = CreatePaymentLinkRequest.builder()
                 .orderCode(orderCode)
                 .amount(amount)
                 .description("Thanh toán đơn " + billId)
-                .returnUrl("http://localhost:4200/checkout/success") // sửa theo FE
-                .cancelUrl("http://localhost:4200/checkout/cancel")  // sửa theo FE
+                .returnUrl("http://localhost:4200/checkout/success") // Sửa theo URL FE
+                .cancelUrl("http://localhost:4200/checkout/cancel")  // Sửa theo URL FE
                 .build();
 
         CreatePaymentLinkResponse res = payOS.paymentRequests().create(req);
@@ -83,28 +84,23 @@ public class BillController {
     @PostMapping("/pay/webhook")
     public ResponseEntity<Void> handlePayOSWebhook(@RequestBody String rawBody) {
         try {
-            // KHÔNG import WebhookData nữa. SDK v2 trả object có sẵn các getter.
+            // 1. Xác thực webhook
             var data = payOS.webhooks().verify(rawBody);
 
-            long   orderCode = data.getOrderCode(); // OK với SDK v2
-            String code      = data.getCode();      // "00", "07", "09", ...
+            long   orderCode = data.getOrderCode();
+            String code      = data.getCode(); // "00", "07", "09", ...
 
-            String status = switch (code) {
-                case "00"        -> "PAID";
-                case "07", "09"  -> "CANCELLED";
-                default          -> "UNKNOWN";
-            };
+            // Hàm này đã bao gồm cả việc cập nhật Bill chính (qua billService.updateStatus)
+            payTransactionService.updateFromWebhook(
+                    orderCode,
+                    code,
+                    rawBody
+            );
 
-            Tx tx = txStore.get(orderCode);
-            if (tx != null) {
-                tx.setStatus(status);
-                tx.setWebhookRaw(rawBody);
-                // TODO: cập nhật DB thực tế nếu cần, ví dụ:
-                // if ("PAID".equals(status)) billService.markPaid(tx.getBillId());
-            }
             return ResponseEntity.ok().build();
         } catch (Exception e) {
-            // sai chữ ký/format -> 400
+            // Ghi log lỗi
+            // e.printStackTrace();
             return ResponseEntity.badRequest().build();
         }
     }
@@ -142,4 +138,29 @@ public class BillController {
                 "status", t.getStatus()
         ));
     }
+
+    @PostMapping()
+    public ResponseEntity<?> createBill(
+            @Valid @RequestBody BillCreateRequestDTO billDTO,
+            BindingResult result
+    ) {
+        if (result.hasErrors()){
+            List<org.springframework.validation.FieldError> fieldErrors = result.getFieldErrors();
+            List<String> errorMessages = fieldErrors.stream()
+                    .map(FieldError::getDefaultMessage)
+                    .toList();
+            return ResponseEntity.badRequest().body(errorMessages);
+        }
+        try {
+            Bill createdBill = billService.createBill(billDTO);
+            return ResponseEntity.status(HttpStatus.CREATED).body(createdBill);
+        } catch (DataNotFoundException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        } catch (InsufficientStockException e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("error", e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("error", "An unexpected error occurred: " + e.getMessage()));
+        }
+    }
+
 }

@@ -9,20 +9,20 @@
     <section class="card user-card">
         <h3>Thông tin người dùng & giao dịch</h3>
         <div class="user-grid">
-            <div class="full">
-                <div class="label">User ID</div>
-                <div class="value">{{ currentUser?.id || '—' }}</div>
-            </div>
             <div>
                 <div class="label">Họ tên</div>
                 <div class="value">{{ currentUser?.fullName || '—' }}</div>
             </div>
             <div>
-                <div class="label">CCCD</div>
-                <div class="value">{{ customer?.cccd || '—' }}</div>
+                <div class="label">Số điện thoại</div>
+                <div class="value">{{ customer?.phone || '—' }}</div>
+            </div>
+            <div>
+                <div class="label">Email</div>
+                <div class="value">{{ currentUser?.email || '—' }}</div>
             </div>
             <div class="full">
-                <div class="label">Địa chỉ</div>
+                <div class="label">Địa chỉ nhận hàng</div>
                 <div class="value">{{ customer?.address || '—' }}</div>
             </div>
         </div>
@@ -42,30 +42,6 @@
             </label>
         </div>
     </section>
-
-    <section class="card" *ngIf="items.length > 0; else emptyCart">
-        <h3>Giỏ hàng</h3>
-        <div class="row head">
-            <div class="col name">Sản phẩm</div>
-            <div class="col center">SL</div>
-            <div class="col right">Giá</div>
-            <div class="col right">Thành tiền</div>
-        </div>
-        <div class="row" *ngFor="let it of items; trackBy: trackByCartItem">
-            <div class="col name">
-                <div class="title">{{ it.name }}</div>
-                <div class="sub">ID: {{ it.id }}</div>
-            </div>
-            <div class="col center">x{{ it.qty }}</div>
-            <div class="col right">{{ it.price | currency:'VND':'symbol':'1.0-0':'vi-VN' }}</div>
-            <div class="col right">{{ (it.price * it.qty) | currency:'VND':'symbol':'1.0-0':'vi-VN' }}</div>
-        </div>
-    </section>
-
-    <ng-template #emptyCart>
-        <div class="card empty">Giỏ hàng đang trống.</div>
-    </ng-template>
-
     <!-- Nút đi PayOS -->
     <section class="card" *ngIf="method === 'BANK'">
         <h3>Thanh toán trực tuyến</h3>
@@ -89,7 +65,7 @@
     <section class="card totals" *ngIf="items.length > 0">
         <div class="summary">
             <div class="left">Mã đơn hàng: <b>{{ orderId || '—' }}</b></div>
-            <div class="right">Tổng cộng: <b>{{ subtotal | currency:'VND':'symbol':'1.0-0':'vi-VN' }}</b></div>
+            <div class="right">Tổng cộng: <b>{{ subtotal*1.1 | currency:'VND':'symbol':'1.0-0':'vi-VN' }}</b></div>
         </div>
     </section>
 </div>

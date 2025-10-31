@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { BehaviorSubject, Observable, tap } from 'rxjs';
 import { jwtDecode } from 'jwt-decode';
+import { environment } from '../environments/environment';
 
 export interface LoginRequest  { email: string; password: string; }
 export interface SignupRequest { username: string; email: string; password: string; }
@@ -19,7 +20,7 @@ type JwtPayload = {
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
-    private baseUrl = 'http://localhost:8080/api/v1/users'; // đổi theo backend
+    private baseUrl = `${environment.apiBaseUrl}/users`;
 
     private currentUserSubject = new BehaviorSubject<JwtPayload | null>(this.getUserFromToken());
     currentUser$ = this.currentUserSubject.asObservable();

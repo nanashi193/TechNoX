@@ -1,7 +1,7 @@
 package com.g5.techdevices.techstore.entity.pay;
 
 import jakarta.persistence.*;
-import lombok.Getter; import lombok.Setter;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -11,7 +11,12 @@ import java.time.Instant;
 @Entity
 @Table(name = "PayTransaction", schema = "dbo",
         uniqueConstraints = @UniqueConstraint(columnNames = "OrderCode"))
-@Getter @Setter
+@Getter
+@Setter
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class PayTransaction {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

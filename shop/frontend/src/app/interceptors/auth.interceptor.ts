@@ -1,26 +1,46 @@
-import { HttpInterceptorFn } from '@angular/common/http';
+import { HttpInterceptorFn, HttpRequest, HttpHandlerFn } from '@angular/common/http';
 import { inject } from '@angular/core';
 import { AuthService } from '../services/auth.service';
+import { environment } from '../environments/environment';
 
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
     const auth = inject(AuthService);
 
+    const apiBaseUrl = environment.apiBaseUrl;
+    let modifiedReq = req;
+    if (apiBaseUrl && req.url.startsWith(apiBaseUrl) && apiBaseUrl.includes('ngrok-free.app')) {
+        modifiedReq = modifiedReq.clone({
+            setHeaders: {
+                'ngrok-skip-browser-warning': 'true'
+            }
+        });
+    }
     const PUBLIC_ENDPOINTS = [
         '/login',
         '/register',
         '/forgot-password',
         '/reset-password',
         '/verify-email',
-        '/resend-verification'
+        '/resend-verification',
+        '/customer/products',
+        '/products'
     ];
 
-    if (PUBLIC_ENDPOINTS.some(p => req.url.includes(p))) {
-        return next(req);
+    const isPublic = PUBLIC_ENDPOINTS.some(p => req.url.includes(p));
+    if (isPublic) {
+        return next(modifiedReq);
     }
 
     const token = auth.token;
-    if (!token) return next(req);
+    if (!token) {
+        return next(modifiedReq);
+    }
 
-    req = req.clone({ setHeaders: { Authorization: `Bearer ${token}` } });
-    return next(req);
+    modifiedReq = modifiedReq.clone({
+        setHeaders: {
+            Authorization: `Bearer ${token}`
+        }
+    });
+
+    return next(modifiedReq);
 };
