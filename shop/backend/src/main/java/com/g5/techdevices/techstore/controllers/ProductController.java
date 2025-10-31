@@ -220,7 +220,7 @@ public class ProductController {
     ){
         try{
              Product updatedProduct = productService.updateProduct(id, productDTO);
-             return ResponseEntity.ok(updatedProduct);
+            return ResponseEntity.noContent().build();
         }catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
@@ -235,7 +235,7 @@ public class ProductController {
     ) {
         try {
             ProductVariant savedVariant = productService.upsertVariant(productId, dto);
-            return ResponseEntity.ok(savedVariant);
+            return ResponseEntity.noContent().build();
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }

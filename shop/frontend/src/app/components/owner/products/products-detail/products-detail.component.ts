@@ -199,24 +199,23 @@ export class ProductsDetailComponent implements OnInit {
 
     // ===== Save
     async save() {
-        if (this.f.invalid) { this.f.markAllAsTouched(); return; }
-        if (this.saving) return;
+        if  (!this.editing || !this.f.dirty || this.f.invalid || this.saving) {
+            this.f.markAllAsTouched();
+            return;
+        }
         this.saving = true;
-
         try {
             const raw = this.f.getRawValue();
 
-            // files mới chọn từ dropzone
             const files: File[] = (this.media ?? [])
                 .filter(m => !!m.file)
                 .map(m => m.file as File);
 
-            // map biến thể (không gửi sku)
             const variants = this.variantsFA.controls.map(g => {
                 const { id, color, size, quantity, price } = g.getRawValue();
                 const base = {
                     color: (color ?? '').trim(),
-                    size: (size ?? '').trim(),
+                    size:  (size ?? '').trim(),
                     quantity: +quantity || 0,
                     price: +price || 0,
                 };
@@ -224,51 +223,47 @@ export class ProductsDetailComponent implements OnInit {
             });
 
             if (this.id) {
-                // ===== UPDATE
                 const dto: ProductUpdateDTO = {
                     name: raw.name!,
                     price: +raw.price!,
                     thumbnail: raw.thumbnail ?? '',
                     description: raw.description ?? '',
-                    status: !!raw.status,
+                    status: !!(raw as any).inStock,                 // ✅ lấy từ inStock
                     ...(raw.categoryId != null ? { categoryId: +raw.categoryId } : {}),
                     variants,
                 };
 
-                await firstValueFrom(this.productService.update(this.id, dto));
+                await firstValueFrom(this.productService.update(this.id!, dto));
 
                 if (files.length) {
-                    const imgs = await firstValueFrom(this.productService.uploadImages(this.id, files));
+                    const imgs = await firstValueFrom(this.productService.uploadImages(this.id!, files));
                     if ((!raw.thumbnail || !raw.thumbnail.length) && imgs?.length) {
-                        await firstValueFrom(this.productService.setThumbnailFromImage(this.id, imgs[0].id));
+                        await firstValueFrom(this.productService.setThumbnailFromImage(this.id!, imgs[0].id));
                     }
                 }
 
-                // cập nhật snapshot và thoát edit
-                this.originalValue = this.f.getRawValue();
+                const fresh = await firstValueFrom(this.productService.get(this.id!));
+                this.f.patchValue(fresh);                 // patch với {emitEvent:false} bên trong cho chắc
                 this.f.markAsPristine();
                 this.setEditMode(false);
 
             } else {
-                // ===== CREATE
                 if (raw.categoryId == null) {
                     this.f.controls.categoryId.setErrors({ required: true });
                     this.f.markAllAsTouched();
-                    return;                         // finally sẽ reset saving
+                    return;
                 }
-
                 const dto: ProductCreateDTO = {
                     name: raw.name!,
                     price: +raw.price!,
                     thumbnail: raw.thumbnail ?? '',
                     description: raw.description ?? '',
-                    status: !!raw.status,
+                    status: !!(raw as any).inStock,      // ✅ đồng nhất
                     categoryId: +raw.categoryId!,
                     variants,
                 };
 
                 const created = await firstValueFrom(this.productService.create(dto));
-
                 if (created?.id && files.length) {
                     const imgs = await firstValueFrom(this.productService.uploadImages(created.id, files));
                     if ((!raw.thumbnail || !raw.thumbnail.length) && imgs?.length) {
@@ -281,10 +276,12 @@ export class ProductsDetailComponent implements OnInit {
             }
         } catch (e) {
             console.error(e);
+            alert('Lưu thất bại. Vui lòng thử lại.');
         } finally {
-            this.saving = false;                // luôn reset dù nhánh nào / có lỗi
+            this.saving = false;
         }
     }
+
 
 
     setEditMode(on: boolean) {

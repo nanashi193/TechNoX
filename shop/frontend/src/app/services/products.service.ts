@@ -4,7 +4,7 @@ import {forkJoin, Observable} from 'rxjs';
 import {environment} from '../environments/environment';
 import {Page, Product, ProductImageItem, ProductVariant} from '../models/products.model';
 import {map} from 'rxjs/operators';
-import {ProductCreateDTO, ProductUpdateDTO} from "../dtos/products/products.dto";
+import {ProductCreateDTO, ProductUpdateDTO, ProductVariantDTO} from "../dtos/products/products.dto";
 import {ProductImage, ProductImageBE} from "../models/product-image.model";
 
 export interface ProductListResponse {
@@ -171,10 +171,11 @@ export class ProductService {
         );
     }
 
-    update(id: number, dto: ProductUpdateDTO): Observable<Product> {
-        return this.http.put<any>(`${this.base}/${id}`, dto).pipe(
-            map(p => this.mapRawProduct(p))
-        );
+    update(id: number, dto: ProductUpdateDTO) {
+        return this.http.put<void>(`${this.base}/${id}`, dto);
+    }
+    upsertVariant(productId: number, dto: ProductVariantDTO) {
+        return this.http.post<void>(`${this.base}/${productId}/variants`, dto);
     }
 
     delete(id: number): Observable<void> {
