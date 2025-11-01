@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import {Product, ProductListItem} from "../../../../models/products.model";
 import {ProductService} from "../../../../services/products.service";
 import {Router, RouterLink} from "@angular/router";
+import {CATEGORIES, categoryName, CategoryOpt} from "../../../../../data/categories";
 
 type ProductRow = {
     id:number; name:string; image:string; type:string;
@@ -12,6 +13,7 @@ type ProductRow = {
 
 type SortDir = 'asc' | 'desc';
 type SortField = 'id' | 'name' | 'price';
+
 
 @Component({
     selector: 'app-products-list',
@@ -24,7 +26,17 @@ type SortField = 'id' | 'name' | 'price';
 export class ProductsListComponent implements OnInit {
     private svc = inject(ProductService);
     private router = inject(Router);
+    categories: CategoryOpt[] = CATEGORIES;
 
+    flt = {
+        stock: 'all' as 'all' | 'in' | 'out', // tồn kho
+        categoryId: null as number | null           // loại (type). Nếu BE dùng categoryId: đổi sang number|null
+    };
+
+    onChangeCategory(v: string) {
+        // v là string do radio trả về
+        this.flt.categoryId = (v === '' ? null : Number(v));
+    }
     // ====== state ======
     q = '';
     page = 1;                 // UI: 1-based
@@ -39,6 +51,11 @@ export class ProductsListComponent implements OnInit {
     filtered: ProductListItem[] = [];
     selected = new Set<number>();
     visibleCols = 6;
+
+    showFilters = false;
+    private _bodyOverflow?: string;
+
+
 // ====== derived ======
     get totalPages(): number {
         return Math.max(1, Math.ceil(this.total / this.size));
@@ -67,8 +84,9 @@ export class ProductsListComponent implements OnInit {
         };
 
         // tồn kho
-        if (this.flt.stock !== 'all') params.inStock = (this.flt.stock === 'in');
-        // SKU
+        // if (this.flt.stock !== 'all') params.inStock = (this.flt.stock === 'in');
+
+        if (this.flt.categoryId != null) params.category_id = this.flt.categoryId;
 
         // sort: map 'type' -> 'categoryName' cho BE
         if (this.sort) params.sort = `${this.sort.field}_${this.sort.dir}`;
@@ -80,7 +98,7 @@ export class ProductsListComponent implements OnInit {
 
                 const items: ProductListItem[] = raw.map(p => {
                     const categoryId   = p.categoryId   ?? p.CategoryId   ?? null;
-                    const categoryName = p.categoryName ?? p.CategoryName ?? null;
+                    const catName = p.categoryName ?? p.CategoryName ?? categoryName(categoryId);
 
                     const vs = Array.isArray(p.variants) ? p.variants : [];
                     const prices = vs.map((v:any) => Number(v.price) || 0).filter((n: number) => n > 0);
@@ -91,7 +109,7 @@ export class ProductsListComponent implements OnInit {
                     return {
                         ...p,
                         categoryId,
-                        categoryName,
+                        categoryName: catName,
                         type: p.type ?? categoryName ?? '',
                         minPrice,
                         maxPrice,
@@ -201,12 +219,6 @@ export class ProductsListComponent implements OnInit {
         });
     }
 
-    showFilters = false;
-    private _bodyOverflow?: string;
-    flt = {
-        stock: 'all' as 'all' | 'in' | 'out', // tồn kho
-        type: null as string | null           // loại (type). Nếu BE dùng categoryId: đổi sang number|null
-    };
     types: string[] = [];
 
 
@@ -223,7 +235,7 @@ export class ProductsListComponent implements OnInit {
     }
 
     clearFilters(){
-        this.flt = { stock: 'all', type: null };
+        this.flt = { stock: 'all', categoryId: null };
         this.page = 1;
         this.load();
     }

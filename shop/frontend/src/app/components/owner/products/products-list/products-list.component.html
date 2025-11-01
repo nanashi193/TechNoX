@@ -35,22 +35,30 @@
             <ul class="radio-list">
                 <li>
                     <label class="r">
-                        <input type="radio" name="type" [value]="''"
-                               [(ngModel)]="flt.type">
+                        <input
+                                type="radio"
+                                name="type"
+                                [value]="''"
+                                [ngModel]="flt.categoryId ?? ''"
+                                (ngModelChange)="onChangeCategory($event)" />
                         <span>All</span>
                     </label>
                 </li>
 
-                <li *ngFor="let t of types">
-                    <label class="r">
-                        <input type="radio" name="type" [value]="t"
-                               [(ngModel)]="flt.type">
-                        <span>{{ t }}</span>
+                <li>
+                    <label class="r" *ngFor="let c of categories">
+                        <input
+                                type="radio"
+                                name="type"
+                                [value]="c.id"
+                        [ngModel]="flt.categoryId ?? ''"
+                        (ngModelChange)="onChangeCategory($event)" />
+                        <span>{{ c.name }}</span>
                     </label>
                 </li>
             </ul>
 
-            <button type="button" class="link-clear" (click)="flt.type = ''">Clear</button>
+            <button type="button" class="link-clear" (click)="flt.categoryId = null">Clear</button>
         </div>
 
 
