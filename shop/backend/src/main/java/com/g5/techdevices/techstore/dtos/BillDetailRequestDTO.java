@@ -10,7 +10,7 @@ public class BillDetailRequestDTO {
 
     @NotNull(message = "Variant ID is required.")
     @JsonProperty("variantId")
-    private Integer variantId;
+    private Long variantId;
 
     @NotNull(message = "Quantity is required.")
     @Min(value = 1, message = "Quantity must be at least 1.")

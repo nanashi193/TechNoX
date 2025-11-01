@@ -2,8 +2,15 @@ package com.g5.techdevices.techstore.controllers;
 
 import com.g5.techdevices.techstore.dtos.BillCreateRequestDTO;
 import com.g5.techdevices.techstore.entity.Bills.Bill;
+import com.g5.techdevices.techstore.entity.Bills.BillDetail;
+import com.g5.techdevices.techstore.entity.products.ProductVariant;
+import com.g5.techdevices.techstore.entity.users.User;
 import com.g5.techdevices.techstore.exceptions.DataNotFoundException;
 import com.g5.techdevices.techstore.exceptions.InsufficientStockException;
+import com.g5.techdevices.techstore.exceptions.InvalidOperationException;
+import com.g5.techdevices.techstore.repositories.BillRepository;
+import com.g5.techdevices.techstore.repositories.cart.ProductVariantRepository;
+import com.g5.techdevices.techstore.responses.BillResponse;
 import com.g5.techdevices.techstore.services.BillService;
 import com.g5.techdevices.techstore.services.PayTransactionService;
 import jakarta.validation.Valid;
@@ -11,10 +18,14 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.Authentication;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.BindingResult;
-import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
 
 import vn.payos.PayOS;
@@ -28,14 +39,19 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
+@CrossOrigin(origins = "http://localhost:4200")
 @RestController
 @RequestMapping("${api.prefix}/bills")
 @RequiredArgsConstructor
 public class BillController {
 
-    private final BillService billService;   // service của bạn
+    private final BillService billService;
     private final PayOS payOS;               // bean từ PayOSConfig
     private final PayTransactionService payTransactionService;
+    private final BillRepository billRepository;
+    private static final Logger logger = LoggerFactory.getLogger(BillService.class);
+    private  final ProductVariantRepository productVariantRepository;
+
     /** Store tạm để test (prod hãy cập nhật DB thật) */
     private final ConcurrentHashMap<Long, Tx> txStore = new ConcurrentHashMap<>(); // key = orderCode
 
@@ -46,6 +62,9 @@ public class BillController {
         long amount;
         String status;     // PENDING | PAID | CANCELLED | UNKNOWN
         String webhookRaw; // raw payload cuối cùng
+    }
+    private User getCurrentUser(Authentication authentication) {
+        return (User) authentication.getPrincipal();
     }
 
     // ============= 1) Tạo link thanh toán cho 1 bill =============
@@ -145,22 +164,69 @@ public class BillController {
             BindingResult result
     ) {
         if (result.hasErrors()){
-            List<org.springframework.validation.FieldError> fieldErrors = result.getFieldErrors();
-            List<String> errorMessages = fieldErrors.stream()
-                    .map(FieldError::getDefaultMessage)
+            List<String> errorMessages = result.getFieldErrors().stream()
+                    .map(error -> error.getField() + ": " + error.getDefaultMessage())
                     .toList();
             return ResponseEntity.badRequest().body(errorMessages);
         }
         try {
             Bill createdBill = billService.createBill(billDTO);
-            return ResponseEntity.status(HttpStatus.CREATED).body(createdBill);
+            BillResponse responseDTO = new BillResponse();
+            responseDTO.setBillId(createdBill.getId());
+            responseDTO.setUserId(createdBill.getUser().getId());
+            responseDTO.setFullName(createdBill.getFullName());
+            responseDTO.setPhoneNumber(createdBill.getPhone());
+            responseDTO.setShippingAddress(createdBill.getShippingAddress());
+            responseDTO.setTotal(createdBill.getTotal());
+            responseDTO.setPaymentMethod(createdBill.getPaymentMethod());
+            responseDTO.setStatus(createdBill.getStatus());
+
+            return ResponseEntity.status(HttpStatus.CREATED).body(responseDTO);
+
         } catch (DataNotFoundException e) {
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         } catch (InsufficientStockException e) {
             return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("error", e.getMessage()));
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("error", "An unexpected error occurred: " + e.getMessage()));
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "An unexpected error occurred: " + e.getMessage()));
         }
     }
 
+    @PostMapping("/{billId}/confirm-cod")
+    public ResponseEntity<?> confirmCOD(@PathVariable Long billId,
+                                        Authentication authentication) {
+        try {
+            User currentUser = getCurrentUser(authentication);
+            // SỬA SERVICE ĐỂ NHẬN USER
+            BillResponse confirmedBillDTO = billService.confirmCOD(billId, currentUser);
+            return ResponseEntity.ok(confirmedBillDTO);
+        } catch (DataNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        } catch (AccessDeniedException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
+        } catch (InvalidOperationException e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
+        } catch (InsufficientStockException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An unexpected error occurred.");
+        }
+    }
+
+    @PostMapping("/{billId}/confirm-payos")
+    public ResponseEntity<?> confirmPayOSPayment(@PathVariable Long billId) {
+        try {
+            Bill confirmedBill = billService.confirmPayOSPayment(billId);
+            return ResponseEntity.ok(confirmedBill);
+        } catch (DataNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        } catch (InvalidOperationException e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
+        } catch (InsufficientStockException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An unexpected error occurred.");
+        }
+    }
 }

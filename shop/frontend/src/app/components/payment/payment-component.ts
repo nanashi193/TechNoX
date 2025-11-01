@@ -4,13 +4,13 @@ import { CommonModule, CurrencyPipe } from '@angular/common';
 import { Router, RouterModule, ActivatedRoute } from '@angular/router';
 import { HttpClientModule } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
-// Sửa lại đường dẫn import và thêm PayOSLinkResponse
-import { PaymentService, PayOSLinkResponse } from '../../services/payment.service';
+import { PaymentService, PayOSLinkResponse, UserAPI } from '../../services/payment.service';
+import { BillResponse } from '../../models/bill.model';
+
 
 type PayMethod = 'COD' | 'BANK';
 
 interface CartItem { id: string; name: string; price: number; qty: number; }
-interface User { id: string; fullName: string; email?: string; }
 interface Customer { address?: string; phone?: string; }
 
 @Component({
@@ -25,19 +25,19 @@ export class PaymentComponent implements OnInit {
     // UI
     loading = false;
     pLoading = false;
-
-    // data
+    codError: string | null = null;
     items: CartItem[] = [];
-    currentUser: User | null = { id: '', fullName: '', email: '' };
+    currentUser: UserAPI | null = null;
+
     customer: Customer | null = { address: '', phone: ''};
-    orderId: string | null = null; // Đây chính là billId
+    orderId: string | null = null;
 
     method: PayMethod = 'COD';
 
     constructor(
         private router: Router,
         private route: ActivatedRoute,
-        private paymentService: PaymentService // Đã inject service
+        private paymentService: PaymentService
     ) {}
 
     get subtotal(): number {
@@ -48,9 +48,26 @@ export class PaymentComponent implements OnInit {
         this.route.queryParamMap.subscribe((q) => {
             const id = q.get('orderId');
             if (id) this.orderId = id;
+
+            if (!this.orderId) {
+                this.hydrateOrderIdFromLocal();
+            }
         });
         this.hydrateFromLocal();
-        this.refresh();
+    }
+
+    private hydrateOrderIdFromLocal(): void {
+        try {
+            const raw = sessionStorage.getItem('orderDraft');
+            if (raw) {
+                const draft = JSON.parse(raw);
+                if (draft.id) {
+                    this.orderId = draft.id.toString();
+                }
+            }
+        } catch(e) {
+            console.error("Lỗi đọc orderId từ draft", e);
+        }
     }
 
     private hydrateFromLocal(): void {
@@ -71,8 +88,16 @@ export class PaymentComponent implements OnInit {
                 }));
             }
 
+            if (!this.currentUser) {
+                this.currentUser = {
+                    UserId: '0',
+                    FullName: '',
+                    email: ''
+                };
+            }
+
             if (this.currentUser) {
-                this.currentUser.fullName = draft.FullName || '';
+                this.currentUser.FullName = draft.FullName || '';
                 this.currentUser.email = draft.Email || '';
             }
             if (this.customer) {
@@ -85,65 +110,62 @@ export class PaymentComponent implements OnInit {
         }
     }
 
-    async refresh(): Promise<void> {
-        this.loading = true;
-        try {
-            try {
-                const u = await firstValueFrom(this.paymentService.getMe());
-                if (u) {
-                    this.currentUser = { ...this.currentUser, ...u };
-                }
-            } catch (e) {
-                console.warn('Không thể tải thông tin user:', e);
-            }
-        } finally {
-            this.loading = false;
-        }
-    }
-
     onMethodChange(m: PayMethod): void { this.method = m; }
 
     async goPayOS(): Promise<void> {
-        // QUAN TRỌNG: Cần lấy Order ID (billId)
-        // Hiện tại this.orderId đang được lấy từ query param (ngOnInit)
-        // Nếu trang trước KHÔNG đẩy orderId qua URL, code này sẽ thất bại.
-
         if (!this.orderId) {
-            // Thử lấy ID từ draft (nếu trang detail có lưu)
-            const raw = sessionStorage.getItem('orderDraft');
-            if (raw) this.orderId = JSON.parse(raw)?.id;
+            this.hydrateOrderIdFromLocal();
         }
-
         if (!this.orderId || this.pLoading) {
             alert('Không tìm thấy mã đơn hàng (orderId).');
             return;
         }
-
         this.pLoading = true;
         try {
             const { checkoutUrl }: PayOSLinkResponse = await firstValueFrom(
                 this.paymentService.createPayOSLink(this.orderId)
             );
-
             if (checkoutUrl) {
                 window.location.href = checkoutUrl;
             } else {
                 alert('Không tạo được link thanh toán. Vui lòng thử lại.');
             }
-        } catch (e) {
+        } catch (e: any) {
             console.error(e);
-            alert('Lỗi: Không tạo được link thanh toán. Vui lòng thử lại.');
+            alert(`Lỗi: ${e.message || 'Không tạo được link thanh toán.'}`);
         } finally {
             this.pLoading = false;
         }
     }
-
     confirmCOD(): void {
-        alert('Đã tạo đơn COD. Chúng tôi sẽ liên hệ giao hàng.');
-        sessionStorage.removeItem('orderDraft'); // Xóa đơn nháp
-        this.router.navigate(['/home']);
-    }
+        if (!this.orderId) {
+            this.hydrateOrderIdFromLocal();
+        }
 
+        if (!this.orderId) {
+            this.codError = 'Không tìm thấy mã đơn hàng. Vui lòng tải lại trang.';
+            return;
+        }
+        this.loading = true;
+        this.codError = null;
+        this.paymentService.confirmCOD(this.orderId).subscribe({
+            next: (response: BillResponse) => {
+                // THÀNH CÔNG
+                this.loading = false;
+                console.log('Xác nhận COD thành công', response);
+                alert('Đặt hàng thành công! Chúng tôi sẽ liên hệ với bạn sớm.');
+
+                sessionStorage.removeItem('orderDraft');
+                this.router.navigate(['/']);
+            },
+            error: (err) => {
+                // THẤT BẠI
+                this.loading = false;
+                console.error('Lỗi khi xác nhận COD:', err);
+                this.codError = err.message || 'Lỗi không xác định. Vui lòng thử lại.';
+            }
+        });
+    }
     trackByCartItem = (_: number, it: CartItem) => it.id;
 }
 

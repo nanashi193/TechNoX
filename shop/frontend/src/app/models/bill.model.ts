@@ -5,23 +5,20 @@ export interface BillDetailRequest {
 
 export interface BillCreateRequest {
     FullName: string;
-    Email?: string;
     Phone: string;
+    Email: string;
     ShippingAddress: string;
-    paymentMethod: string;
-    details: BillDetailRequest[];
+    details: { variantId: number; quantity: number; }[];
+    PaymentMethod: string;
 }
 
-export interface Bill {
-    id: number;
-    userId: number;
-    fullName: string;
-    email: string;
-    total: number;
-    paymentMethod: string;
-    orderDate: string;
-    shippingAddress: string;
-    phone: string;
+export interface BillResponse {
+    BillId: number;
+    UserId: number;
+    FullName: string;
+    Phone: string;
+    ShippingAddress: string;
     status: string;
-    details: any[];
+    Total: number;
+    PaymentMethod: string;
 }

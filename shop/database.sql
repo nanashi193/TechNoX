@@ -519,3 +519,13 @@ EXEC('CREATE TRIGGER dbo.trg_PayTransaction_UpdatedAt
         END');
 END
 GO
+--------------Test Data-------------------
+INSERT INTO dbo.Product (CategoryId, Name, Price, Description, Thumbnail)
+VALUES
+    (5, N'Iphone 19', 5000, N'Điện thoại đời mới nhất của Iphone với biệt danh là "Không thể bị Hack"', 'ip19.jpg'),
+    (5, N'Cục gạch Nokia', 5000, N'Cứng nhất thế giới. Ném chó chó chết, ném ruồi không bao giờ trúng', 'nokia1.jpg')
+GO
+INSERT INTO dbo.ProductVariant (ProductId, Color, Size, Quantity, Price, SKU)
+VALUES
+    (34, N'Galaxy', N'6.67 inch', 100, 5000, N'VIP-1123'),
+    (35, N'Đen', N'6.67 inch', 30, 5000, N'NKA-293')

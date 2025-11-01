@@ -7,7 +7,7 @@ import { toSignal } from '@angular/core/rxjs-interop'; //
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { CartService } from '../../services/cart.service';
 import { BillService } from '../../services/bill.service';
-import {BillCreateRequest} from "../../models/bill.model";
+import {BillCreateRequest, BillResponse} from "../../models/bill.model";
 import { UserService } from '../../services/user.service';
 import { User, Address} from "../../models/user.model";
 
@@ -200,40 +200,34 @@ export class PaymentDetailComponent implements OnInit {
             variantId: item.variantId,
             quantity: item.quantity
         }));
-
-        const createBillPayload = {
+        const createBillPayload: BillCreateRequest = {
             FullName: customerInfo.name,
             Phone: customerInfo.phone,
             Email: customerInfo.email,
             ShippingAddress: fullAddress,
             details: orderItemsPayload,
-            paymentMethod: 'COD'
+            PaymentMethod: 'COD'
         };
-
-        const orderDraftForSession = {
-            FullName: customerInfo.name,
-            Phone: customerInfo.phone,
-            Email: customerInfo.email,
-            ShippingAddress: fullAddress,
-            fullItems: this.items.value,
-        };
-
-
         try {
-            const newBill = await firstValueFrom(this.billService.createBill(createBillPayload));
+            const newBill: BillResponse = await firstValueFrom(
+                this.billService.createBill(createBillPayload)
+            );
 
-            if (!newBill || !newBill.id) {
-                throw new Error("API tạo bill không trả về ID.");
+            if (!newBill || !newBill.BillId) {
+                throw new Error("API tạo bill không trả về BillID.");
             }
-
-            const realBillId = newBill.id;
-
+            const realBillId = newBill.BillId;
+            const orderDraftForSession = {
+                FullName: newBill.FullName,
+                Phone: newBill.Phone,
+                Email: customerInfo.email,
+                ShippingAddress: newBill.ShippingAddress,
+                fullItems: this.items.value,
+            };
             sessionStorage.setItem('orderDraft', JSON.stringify(orderDraftForSession));
-
             this.router.navigate(['/payment'], {
                 queryParams: { orderId: realBillId }
             });
-
         } catch (e){
             console.error("Lỗi khi tạo Bill hoặc lưu đơn nháp:", e);
             this.createOrderError = "Đã xảy ra lỗi khi tạo đơn hàng. Vui lòng thử lại.";

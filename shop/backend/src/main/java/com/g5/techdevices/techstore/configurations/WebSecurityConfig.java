@@ -77,8 +77,11 @@ public class WebSecurityConfig {
                         .requestMatchers(PUT, apiPrefix + "/products/*/thumbnail/from-image/*").hasAnyRole(Role.ADMIN, Role.OWNER)
                         .requestMatchers(PUT, apiPrefix + "/products/**").hasAnyRole(Role.ADMIN, Role.OWNER)
 
-                        // Quản trị Users/Categories
+                        //Bills
                         .requestMatchers(POST, apiPrefix + "/bills").authenticated()
+                        .requestMatchers(POST, apiPrefix + "/bills/*/confirm-cod").authenticated()
+                        .requestMatchers(POST, apiPrefix + "/bills/*/confirm-payos").authenticated()
+                        // Quản trị Users/Categories
                         .requestMatchers(PUT, apiPrefix + "/users/**").authenticated()
                         .requestMatchers(GET, apiPrefix + "/users").hasAnyRole(Role.ADMIN, Role.OWNER)
                         .requestMatchers(DELETE, apiPrefix + "/users/**").hasAnyRole(Role.ADMIN, Role.OWNER)

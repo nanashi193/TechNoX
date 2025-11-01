@@ -14,8 +14,8 @@ public interface ICartService {
     CartDTO addProductToCart(User user, AddToCartRequestDTO requestDTO);
 
     @Transactional
-    CartDTO removeProductFromCart(User user, Integer variantId);
+    CartDTO removeProductFromCart(User user, Long variantId);
 
     @Transactional
-    CartDTO updateProductQuantity(User user, Integer variantId, int quantity);
+    CartDTO updateProductQuantity(User user, Long variantId, int quantity);
 }

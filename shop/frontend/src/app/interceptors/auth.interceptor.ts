@@ -27,11 +27,14 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
     ];
 
     const isPublic = PUBLIC_ENDPOINTS.some(p => req.url.includes(p));
+    console.log(`[Interceptor] Request URL: ${req.url}`);
+    console.log(`[Interceptor] Is Public: ${isPublic}`);
     if (isPublic) {
         return next(modifiedReq);
     }
 
     const token = auth.token;
+    console.log(`[Interceptor] Token from AuthService:`, token);
     if (!token) {
         return next(modifiedReq);
     }
