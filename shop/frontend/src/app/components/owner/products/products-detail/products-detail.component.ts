@@ -115,6 +115,23 @@ export class ProductsDetailComponent implements OnInit {
         this.variantsFA.removeAt(i);
         this.f.markAsDirty();
     }
+    toggleVariantStock(i: number, on: boolean) {
+        const g = this.variantsFA.at(i);
+        const qty = +g.get('quantity')!.value || 0;
+        if (on) {
+            // nếu đang 0 thì bật -> set 1 (hoặc giữ nguyên nếu >0)
+            if (qty === 0) g.get('quantity')!.setValue(1);
+        } else {
+            // tắt -> set 0
+            if (qty !== 0) g.get('quantity')!.setValue(0);
+        }
+        this.f.markAsDirty();
+    }
+    onVariantStockChange(i: number, ev: Event) {
+        const checked = (ev.target as HTMLInputElement | null)?.checked ?? false;
+        this.toggleVariantStock(i, checked);
+    }
+
 
     // ===== Media state
     media: MediaItem[] = [];
@@ -226,15 +243,19 @@ export class ProductsDetailComponent implements OnInit {
                 quantity: +v.quantity || 0,
                 price: +v.price || 0,
             }));
+            const minVariantPrice = variants.length
+                ? Math.min(...variants.map(v => v.price || 0))
+                : 0;
+            const anyInStock = variants.some(v => (v.quantity || 0) > 0);
 
             if (isUpdate) {
                 // ===== UPDATE SCALARS
                 const scalarsDto: ProductUpdateDTO = {
                     name: raw.name!,
-                    price: +raw.price!,
+                    price: minVariantPrice,
                     thumbnail: raw.thumbnail ?? '',
                     description: raw.description ?? '',
-                    status: !!(raw as any).inStock,
+                    status: anyInStock,
                     ...(raw.categoryId != null ? { categoryId: +raw.categoryId } : {}),
                 };
                 await firstValueFrom(this.productService.update(this.id!, scalarsDto));
@@ -274,10 +295,10 @@ export class ProductsDetailComponent implements OnInit {
 
                 const createDto: ProductCreateDTO = {
                     name: raw.name!,
-                    price: +raw.price!,
+                    price: minVariantPrice,
                     thumbnail: raw.thumbnail ?? '',
                     description: raw.description ?? '',
-                    status: !!(raw as any).inStock,
+                    status: anyInStock,
                     categoryId: +raw.categoryId!,
                     variants, // gửi luôn các biến thể khi tạo
                 };

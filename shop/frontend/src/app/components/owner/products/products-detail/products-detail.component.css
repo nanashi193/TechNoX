@@ -513,5 +513,14 @@ textarea {
         max-width: none; /* Full width trên mobile */
     }
 }
+/* ví dụ */
+.v-row {
+    display: grid;
+    grid-template-columns: 1.2fr 1fr 0.8fr 0.8fr auto auto; /* color size qty price switch btn */
+    gap: 8px;
+    align-items: center;
+}
+.v-head { font-weight: 600; color: var(--muted); }
+.switch.center { display: inline-flex; justify-content: center; }
 
 

@@ -36,6 +36,11 @@ export interface Product {
 
     [k: string]: any;
 }
+export type ProductListItem = Product & {
+    minPrice: number;
+    maxPrice: number;
+    hasPriceRange: boolean;
+};
 export interface ProductImageItem { id: number; url: string; }
 
 export interface MediaItem {

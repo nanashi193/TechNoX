@@ -41,27 +41,6 @@
 
         <!-- RIGHT: Pricing + Organization + Variants -->
         <div class="side">
-            <section class="card">
-                <h3 class="card-title">Giá (VND)</h3>
-
-                <label class="field">
-                    <span>Giá</span>
-                    <ng-container *ngIf="!editing; else priceEdit">
-                        {{ f.value.price | currency:'VND':'symbol-narrow':'1.0-0' }}
-                    </ng-container>
-                    <ng-template #priceEdit>
-                        <input type="number" min="0" step="1" formControlName="price">
-                    </ng-template>
-                </label>
-
-                <div class="field inline">
-                    <span>Còn hàng</span>
-                    <label class="switch">
-                        <input type="checkbox" formControlName="inStock">
-                        <span class="track"></span>
-                    </label>
-                </div>
-            </section>
 
             <section class="card">
                 <h3 class="card-title">Phân loại</h3>
@@ -88,6 +67,7 @@
                         <div>Size</div>
                         <div>Tồn kho</div>
                         <div>Giá</div>
+                        <div>Còn hàng</div>
                         <div></div>
                     </div>
 
@@ -97,6 +77,14 @@
                         <input class="v-td" formControlName="size"  placeholder="6.7 inch / 128GB" [readOnly]="!editing">
                         <input class="v-td" type="number" min="0" formControlName="quantity" [readOnly]="!editing">
                         <input class="v-td" type="number" min="0" formControlName="price"    [readOnly]="!editing">
+
+                        <label class="switch center">
+                            <input type="checkbox"
+                                   [checked]="(variantsFA.at(i).get('quantity')!.value || 0) > 0"
+                                   (change)="onVariantStockChange(i, $event)"
+                                   [disabled]="!editing">
+                            <span class="track"></span>
+                        </label>
                         <button type="button" class="icon-btn" (click)="removeVariant(i)" *ngIf="editing">🗑️</button>
                     </div>
 

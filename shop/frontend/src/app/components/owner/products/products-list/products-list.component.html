@@ -124,7 +124,16 @@
         </div>
 
         <div class="cell col-sku">#{{ p.sku }}</div>
-        <div class="cell col-price">{{ p.price | number:'1.0-0' }}₫</div>
+        <div class="cell col-price">
+            <ng-container *ngIf="!p.hasPriceRange; else priceRange">
+                {{ p.minPrice | currency:'VND':'symbol-narrow':'1.0-0' }}
+            </ng-container>
+            <ng-template #priceRange>
+                {{ p.minPrice | currency:'VND':'symbol-narrow':'1.0-0' }}
+                –
+                {{ p.maxPrice | currency:'VND':'symbol-narrow':'1.0-0' }}
+            </ng-template>
+        </div>
         <div class="cell col-variants">{{ p.variants?.length || 0 }}</div>
         <div class="cell col-qty">{{ p.stockQty ?? 0 }}</div>
     </div>

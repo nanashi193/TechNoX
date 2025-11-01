@@ -1,7 +1,7 @@
 import {Component, HostListener, inject, OnInit} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import {Product} from "../../../../models/products.model";
+import {Product, ProductListItem} from "../../../../models/products.model";
 import {ProductService} from "../../../../services/products.service";
 import {Router, RouterLink} from "@angular/router";
 
@@ -35,8 +35,8 @@ export class ProductsListComponent implements OnInit {
     // Nếu BE dùng page 0-based => bật cờ này
     private apiPageZeroBased = false;
 
-    products: Product[] = [];
-    filtered: Product[] = [];
+    products: ProductListItem[] = [];
+    filtered: ProductListItem[] = [];
     selected = new Set<number>();
     visibleCols = 6;
 // ====== derived ======
@@ -81,15 +81,25 @@ export class ProductsListComponent implements OnInit {
             next: (res: any) => {
                 const raw: any[] = (res.items ?? res.content ?? res) as any[];
 
-                const items: Product[] = raw.map(p => {
+                const items: ProductListItem[] = raw.map(p => {
                     const categoryId   = p.categoryId   ?? p.CategoryId   ?? null;
                     const categoryName = p.categoryName ?? p.CategoryName ?? null;
+
+                    const vs = Array.isArray(p.variants) ? p.variants : [];
+                    const prices = vs.map((v:any) => Number(v.price) || 0).filter((n: number) => n > 0);
+                    const fallback = Number(p.price) || 0;
+                    const minPrice = prices.length ? Math.min(...prices) : fallback;
+                    const maxPrice = prices.length ? Math.max(...prices) : minPrice;
+
                     return {
                         ...p,
                         categoryId,
                         categoryName,
-                        type: p.type ?? categoryName ?? ''   // back-compat cho UI
-                    } as Product;
+                        type: p.type ?? categoryName ?? '',
+                        minPrice,
+                        maxPrice,
+                        hasPriceRange: minPrice !== maxPrice
+                    } as ProductListItem;
                 });
                 this.products = items;
                 this.filtered = [...items];
@@ -112,15 +122,11 @@ export class ProductsListComponent implements OnInit {
             error: () => this.loading = false
         });
     }
-
     sortBy(field: SortField) {
-        if (!this.sort || this.sort.field !== field) {
-            this.sort = { field, dir: 'asc' };
-        } else if (this.sort.dir === 'asc') {
-            this.sort = { field, dir: 'desc' };
-        } else {
-            this.sort = null; // không gửi sort => BE dùng default id_desc
-        }
+        if (!this.sort || this.sort.field !== field) this.sort = { field, dir: 'asc' };
+        else if (this.sort.dir === 'asc') this.sort = { field, dir: 'desc' };
+        else this.sort = null; // clear sort
+
         this.page = 1;
         this.load();
     }
@@ -133,7 +139,7 @@ export class ProductsListComponent implements OnInit {
     onSearch(){ this.page = 1; this.load(); }
 
     // Selection
-    trackById = (_:number, p:Product)=>p.id;
+    trackById = (_:number, p:ProductListItem)=>p.id;
     isSelected = (id:number) => this.selected.has(id);
   get  selectedCount(){ return this.selected.size; }
 
@@ -176,7 +182,7 @@ export class ProductsListComponent implements OnInit {
                 const deleted = Array.isArray(res?.deletedIds) ? res.deletedIds : ids;
                 // Cập nhật UI + clear selection
                 this.products = this.products.filter(r => !deleted.includes(r.id));
-                this.filtered  = this.filtered .filter((p: Product) => !deleted.includes(p.id));
+                this.filtered  = this.filtered .filter((p: ProductListItem) => !deleted.includes(p.id));
                 this.selected.clear();
                 // hoặc gọi this.load() nếu bạn muốn refresh từ BE
                 this.load();
@@ -188,7 +194,7 @@ export class ProductsListComponent implements OnInit {
 
 
     // Toggle stock inline (switch)
-    toggleStock(p: Product){
+    toggleStock(p: ProductListItem){
         const prev = p.inStock;
         p.inStock = !prev; // optimistic UI
         this.svc.setStock(p.id, p.inStock).subscribe({
