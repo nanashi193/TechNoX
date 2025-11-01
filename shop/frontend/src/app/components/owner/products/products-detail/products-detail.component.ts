@@ -106,7 +106,6 @@ export class ProductsDetailComponent implements OnInit {
     addVariant(v?: any) {
         this.variantsFA.push(this.buildVariant(v));
         this.f.markAsDirty();
-        console.log('[DEBUG] add ->', this.variantsFA.length, this.variantsFA.getRawValue());
     }
 
     removeVariant(i: number) {
@@ -206,68 +205,52 @@ export class ProductsDetailComponent implements OnInit {
 
     // ===== Save
     async save() {
-        if  (!this.editing || !this.f.dirty || this.f.invalid || this.saving) {
+        if (!this.editing || !this.f.dirty || this.f.invalid || this.saving) {
             this.f.markAllAsTouched();
             return;
         }
         this.saving = true;
+
         try {
             const raw = this.f.getRawValue();
+            const isUpdate = typeof this.id === 'number' && Number.isFinite(this.id);
 
-            const files: File[] = (this.media ?? [])
-                .filter(m => !!m.file)
-                .map(m => m.file as File);
+            // files mới
+            const files: File[] = (this.media ?? []).filter(m => !!m.file).map(m => m.file as File);
 
+            // map biến thể từ form
             const variants = this.variantsFA.getRawValue().map(v => ({
-                ...(v.id != null ? { id: v.id } : {}),
-                color:     (v.color ?? '').trim(),
-                size:      (v.size ?? '').trim(),
-                quantity:  +v.quantity || 0,
-                price:     +v.price || 0,
-            }));
-            console.log('[DEBUG][before PUT] variantsFA.length =', this.variantsFA.length, variants);
-
-            // UPDATE SCALARS
-            const scalarsDto: ProductUpdateDTO = {
-                name: raw.name!, price: +raw.price!, thumbnail: raw.thumbnail ?? '',
-                description: raw.description ?? '', status: !!(raw as any).inStock,
-                ...(raw.categoryId != null ? { categoryId: +raw.categoryId } : {})
-            };
-            await firstValueFrom(this.productService.update(this.id!, scalarsDto));
-
-            // UPSERT VARIANTS (mỗi dòng một call)
-            const toUpsert = this.variantsFA.getRawValue().map(v => ({
                 ...(v.id != null ? { id: v.id } : {}),
                 color: (v.color ?? '').trim(),
                 size: (v.size ?? '').trim(),
                 quantity: +v.quantity || 0,
-                price: +v.price || 0
+                price: +v.price || 0,
             }));
 
-            await Promise.all(
-                toUpsert.map(v => firstValueFrom(this.productService.upsertVariant(this.id!, v)))
-            );
-            // 3) DELETE VARIANTS (những dòng đã xoá trong UI)
-            await Promise.all(
-                this.deletedVariantIds.map(vid => firstValueFrom(this.productService.deleteVariant(this.id!, vid)))
-            );
-            this.deletedVariantIds = [];
-
-
-
-            if (this.id) {
-                const dto: ProductUpdateDTO = {
+            if (isUpdate) {
+                // ===== UPDATE SCALARS
+                const scalarsDto: ProductUpdateDTO = {
                     name: raw.name!,
                     price: +raw.price!,
                     thumbnail: raw.thumbnail ?? '',
                     description: raw.description ?? '',
-                    status: !!(raw as any).inStock,                 // ✅ lấy từ inStock
+                    status: !!(raw as any).inStock,
                     ...(raw.categoryId != null ? { categoryId: +raw.categoryId } : {}),
-                    variants,
                 };
+                await firstValueFrom(this.productService.update(this.id!, scalarsDto));
 
-                await firstValueFrom(this.productService.update(this.id!, dto));
+                // ===== UPSERT VARIANTS (mỗi dòng một call)
+                await Promise.all(
+                    variants.map(v => firstValueFrom(this.productService.upsertVariant(this.id!, v)))
+                );
 
+                // ===== DELETE VARIANTS đã xoá trên UI
+                await Promise.all(
+                    this.deletedVariantIds.map(vid => firstValueFrom(this.productService.deleteVariant(this.id!, vid)))
+                );
+                this.deletedVariantIds = [];
+
+                // ===== Upload ảnh & thumbnail (nếu cần)
                 if (files.length) {
                     const imgs = await firstValueFrom(this.productService.uploadImages(this.id!, files));
                     if ((!raw.thumbnail || !raw.thumbnail.length) && imgs?.length) {
@@ -275,28 +258,32 @@ export class ProductsDetailComponent implements OnInit {
                     }
                 }
 
+                // refresh & thoát edit
                 const fresh = await firstValueFrom(this.productService.get(this.id!));
-                this.f.patchValue(fresh);                 // patch với {emitEvent:false} bên trong cho chắc
+                this.f.patchValue(fresh);
                 this.f.markAsPristine();
                 this.setEditMode(false);
 
             } else {
+                // ===== CREATE
                 if (raw.categoryId == null) {
                     this.f.controls.categoryId.setErrors({ required: true });
                     this.f.markAllAsTouched();
                     return;
                 }
-                const dto: ProductCreateDTO = {
+
+                const createDto: ProductCreateDTO = {
                     name: raw.name!,
                     price: +raw.price!,
                     thumbnail: raw.thumbnail ?? '',
                     description: raw.description ?? '',
-                    status: !!(raw as any).inStock,      // ✅ đồng nhất
+                    status: !!(raw as any).inStock,
                     categoryId: +raw.categoryId!,
-                    variants,
+                    variants, // gửi luôn các biến thể khi tạo
                 };
 
-                const created = await firstValueFrom(this.productService.create(dto));
+                const created = await firstValueFrom(this.productService.create(createDto));
+
                 if (created?.id && files.length) {
                     const imgs = await firstValueFrom(this.productService.uploadImages(created.id, files));
                     if ((!raw.thumbnail || !raw.thumbnail.length) && imgs?.length) {

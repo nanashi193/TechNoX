@@ -9,7 +9,9 @@ type ProductRow = {
     id:number; name:string; image:string; type:string;
     sku:string; price:number; variants:number; inStock:boolean;
 };
-type SortField = 'name'|'categoryName'|'sku'|'price'|'variants'|'stockQty';
+
+type SortDir = 'asc' | 'desc';
+type SortField = 'id' | 'name' | 'price';
 
 @Component({
     selector: 'app-products-list',
@@ -59,9 +61,9 @@ export class ProductsListComponent implements OnInit {
         this.loading = true;
 
         const params: any = {
-            q: this.q || undefined,   // nếu bạn vẫn muốn giữ ô search
+            keyword: this.q || undefined,   // nếu bạn vẫn muốn giữ ô search
             page: this.page,
-            size: this.size
+            limit: this.size
         };
 
         // tồn kho
@@ -72,7 +74,7 @@ export class ProductsListComponent implements OnInit {
 
 
         // sort: map 'type' -> 'categoryName' cho BE
-        if (this.sort) params.sort = `${this.sort.field},${this.sort.dir}`;
+        if (this.sort) params.sort = `${this.sort.field}_${this.sort.dir}`;
 
 
         this.svc.search(params).subscribe({
@@ -95,7 +97,12 @@ export class ProductsListComponent implements OnInit {
                 // gom các type có trong trang hiện tại để show select (tuỳ chọn)
                 this.types = Array.from(new Set(items.map(p => p.categoryName).filter(Boolean) as string[]));
 
-                this.total = res.total ?? res.totalCount ?? res.totalElements ?? items.length;
+                this.total =
+                    (res as any).total ??
+                    (res as any).totalCount ??
+                    (res as any).totalElements ??
+                    ((res as any).totalPages ? (res as any).totalPages * this.size : this.products.length);
+
                 const tp = this.totalPages;
                 if (this.page > tp) { this.page = tp; if (tp > 0) this.load(); else this.loading = false; return; }
 
@@ -106,17 +113,18 @@ export class ProductsListComponent implements OnInit {
         });
     }
 
-    sortBy(field: SortField){
+    sortBy(field: SortField) {
         if (!this.sort || this.sort.field !== field) {
             this.sort = { field, dir: 'asc' };
         } else if (this.sort.dir === 'asc') {
             this.sort = { field, dir: 'desc' };
         } else {
-            this.sort = null;
+            this.sort = null; // không gửi sort => BE dùng default id_desc
         }
         this.page = 1;
         this.load();
     }
+
     isAsc  = (f: SortField) => this.sort?.field === f && this.sort?.dir === 'asc';
     isDesc = (f: SortField) => this.sort?.field === f && this.sort?.dir === 'desc';
     ariaSort(f: SortField){ return this.isAsc(f)?'ascending':this.isDesc(f)?'descending':'none'; }

@@ -10,7 +10,11 @@ import {ProductImage, ProductImageBE} from "../models/product-image.model";
 export interface ProductListResponse {
     products: Product[];
     totalPages: number; // từ BE
+    totalElements?: number;
+    total?: number;
+    totalItems?: number;
 }
+
 type RawVariant = { sku?: string; code?: string; quantity?: number; qty?: number; stock?: number };
 
 type RawProduct = {
@@ -25,7 +29,7 @@ type RawProduct = {
     variants?: RawVariant[] | number | null;
     variantsCount?: number;
 
-    createdAt?: string;  CreatedAt?: string;
+    createdAt?: string; CreatedAt?: string;
     categoryName?: string;
     CategoryName?: string;
     category?: { id: number; name: string };
@@ -39,8 +43,6 @@ type RawProduct = {
     quantity?: number;
     totalQuantity?: number;
 };
-type ProductListResponseBE = { products: RawProduct[]; totalPages: number };
-
 
 @Injectable({providedIn: 'root'})
 export class ProductService {
@@ -105,11 +107,41 @@ export class ProductService {
         } as Product;
     }
 
-    search({ page = 1, size = 8 } = {}) {
+    search({
+               page = 1,
+               size = 8,
+               keyword,
+               sku,
+               category_id,
+               min_price,
+               max_price,
+               sort,
+           }: {
+        page?: number;
+        size?: number;
+        keyword?: string;
+        sku?: string;
+        category_id?: number;
+        min_price?: number;
+        max_price?: number;
+        sort?: string;
+    } = {}) {
         const page0 = Math.max(0, page - 1);
-        const params = new HttpParams().set('page', String(page0)).set('limit', String(size));
 
-        return this.http.get<ProductListResponseBE>(this.base, { params }).pipe(
+        let params = new HttpParams()
+            .set('page', String(page0))
+            .set('limit', String(size));
+
+        if (keyword)             params = params.set('keyword', keyword);
+        if (sku)                 params = params.set('sku', sku);
+        if (category_id != null && category_id > 0)
+            params = params.set('category_id', String(category_id));
+        if (min_price != null)   params = params.set('min_price', String(min_price));
+        if (max_price != null)   params = params.set('max_price', String(max_price));
+        if (sort)                params = params.set('sort', sort); // 👈 field_dir
+
+
+        return this.http.get<ProductListResponse>(this.base, {params}).pipe(
             map(res => {
                 const raw = (res.products ?? []) as any[];
                 const items: Product[] = raw.map(p => this.mapRawProduct(p)); // 👈 dùng lại mapper đã đúng kiểu
@@ -120,7 +152,7 @@ export class ProductService {
                     (res as any).total ??
                     ((res as any).totalPages ?? 0) * size;
 
-                return { items, total, page, size };
+                return {items, total, page, size};
             })
         );
     }
@@ -141,19 +173,20 @@ export class ProductService {
                 )
             );
     }
+
 // --- gắn list ảnh vào product (nếu BE tách 2 bước)
     attachImages(productId: number, images: ProductImage[]) {
         return this.http.post<void>(this.ATTACH_URL(productId), images);
     }
 
     setThumbnailFromImage(productId: number, imageId: number) {
-        return this.http.put<{productId:number; thumbnail:string}>(
+        return this.http.put<{ productId: number; thumbnail: string }>(
             `${this.base}/${productId}/thumbnail/from-image/${imageId}`, {}
         );
     }
 
     deleteImage(productId: number, imageId: number) {
-        return this.http.delete<{message:string}>(
+        return this.http.delete<{ message: string }>(
             `${this.base}/${productId}/images/${imageId}`
         );
     }
@@ -172,11 +205,14 @@ export class ProductService {
     }
 
     update(id: number, dto: ProductUpdateDTO) {
+        if (id == null) throw new Error('update() called without id');
         return this.http.put<void>(`${this.base}/${id}`, dto);
     }
+
     upsertVariant(productId: number, dto: ProductVariantDTO) {
         return this.http.post<void>(`${this.base}/${productId}/variants`, dto);
     }
+
     deleteVariant(productId: number, variantId: number) {
         return this.http.delete(`/api/v1/products/${productId}/variants/${variantId}`);
     }
@@ -187,18 +223,18 @@ export class ProductService {
     }
 
     bulkDelete(ids: number[]) {
-        return this.http.post<{deletedIds:number[]}>(
+        return this.http.post<{ deletedIds: number[] }>(
             `${this.base}/bulk-delete`,
-            { ids } // hoặc ids nếu BE nhận mảng
+            {ids} // hoặc ids nếu BE nhận mảng
         ).pipe(map(() => void 0));
     }
 
     setStock(id: number, inStock: boolean): Observable<Product> {
         // nếu BE có endpoint riêng, giữ như sau; nếu không, dùng update(...)
-        return this.http.patch<any>(`${this.base}/${id}/stock`, { inStock }).pipe(
+        return this.http.patch<any>(`${this.base}/${id}/stock`, {inStock}).pipe(
             map(p => this.mapRawProduct(p))
         );
     }
 
-    }
+}
 

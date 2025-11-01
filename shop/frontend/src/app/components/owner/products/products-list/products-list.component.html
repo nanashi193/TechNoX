@@ -64,20 +64,18 @@
         </div>
 
         <div class="cell col-type th sortable"
-             (click)="sortBy('categoryName')" [attr.aria-sort]="ariaSort('categoryName')">
+          >
             Loại
-            <span class="sort-caret" [class.asc]="isAsc('categoryName')" [class.desc]="isDesc('categoryName')"
-            ></span>
+
         </div>
 
         <div class="cell col-stocks">Tồn kho</div>
 
 
         <div class="cell col-sku th sortable"
-             (click)="sortBy('sku')" [attr.aria-sort]="ariaSort('sku')">
+             (click)="sortBy('id')" [attr.aria-sort]="ariaSort('id')">
             Mã sản phẩm
-            <span class="sort-caret" [class.asc]="isAsc('sku')" [class.desc]="isDesc('sku')"
-            ></span>
+            <span class="sort-caret" [class.asc]="isAsc('id')" [class.desc]="isDesc('id')"></span>
         </div>
 
         <div class="cell col-price th sortable"
@@ -88,17 +86,15 @@
         </div>
 
         <div class="cell col-variants th sortable"
-             (click)="sortBy('variants')" [attr.aria-sort]="ariaSort('variants')">
+       >
             Biến thể
-            <span class="sort-caret" [class.asc]="isAsc('variants')" [class.desc]="isDesc('variants')"
-            ></span>
+
         </div>
 
         <div class="cell col-qty th sortable"
-             (click)="sortBy('stockQty')" [attr.aria-sort]="ariaSort('stockQty')">
+      >
             Số lượng
-            <span class="sort-caret" [class.asc]="isAsc('stockQty')" [class.desc]="isDesc('stockQty')"
-            ></span>
+
         </div>
     </div>
 
