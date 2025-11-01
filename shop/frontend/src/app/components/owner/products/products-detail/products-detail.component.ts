@@ -103,17 +103,17 @@ export class ProductsDetailComponent implements OnInit {
 
     deletedVariantIds: number[] = [];
 
-    addVariant(v?: any) {
+    addVariant(v?: any, markDirty = true) {
         this.variantsFA.push(this.buildVariant(v));
-        this.f.markAsDirty();
+        if (markDirty) this.f.markAsDirty();
     }
 
-    removeVariant(i: number) {
+    removeVariant(i: number, markDirty = true) {
         const g = this.variantsFA.at(i);
         const id = g.get('id')?.value;
         if (id != null) this.deletedVariantIds.push(id);   // sẽ xoá trên BE
         this.variantsFA.removeAt(i);
-        this.f.markAsDirty();
+        if (markDirty) this.f.markAsDirty();
     }
     toggleVariantStock(i: number, on: boolean) {
         const g = this.variantsFA.at(i);
@@ -210,6 +210,10 @@ export class ProductsDetailComponent implements OnInit {
 
                 this.originalValue = this.f.getRawValue();
                 this.original = this.f.getRawValue() as ProductFormValue;   // snapshot cho discard()
+                this.f.markAsPristine();
+                this.f.markAsUntouched();
+                this.f.updateValueAndValidity({ emitEvent: false });
+
                 this.setEditMode(false);
             });
         } else {

@@ -69,9 +69,6 @@ export class ProductsListComponent implements OnInit {
         // tồn kho
         if (this.flt.stock !== 'all') params.inStock = (this.flt.stock === 'in');
         // SKU
-        const sku = this.flt.sku.trim();
-        if (sku) params.sku = sku;
-
 
         // sort: map 'type' -> 'categoryName' cho BE
         if (this.sort) params.sort = `${this.sort.field}_${this.sort.dir}`;
@@ -105,7 +102,9 @@ export class ProductsListComponent implements OnInit {
                 this.filtered = [...items];
 
                 // gom các type có trong trang hiện tại để show select (tuỳ chọn)
-                this.types = Array.from(new Set(items.map(p => p.categoryName).filter(Boolean) as string[]));
+                this.types = Array.from(
+                    new Set(items.map(p => p.categoryName).filter(Boolean) as string[])
+                ).sort((a, b) => a.localeCompare(b, 'vi', { numeric: true }));
 
                 this.total =
                     (res as any).total ??
@@ -206,7 +205,6 @@ export class ProductsListComponent implements OnInit {
     private _bodyOverflow?: string;
     flt = {
         stock: 'all' as 'all' | 'in' | 'out', // tồn kho
-        sku: '',                              // mã SKU
         type: null as string | null           // loại (type). Nếu BE dùng categoryId: đổi sang number|null
     };
     types: string[] = [];
@@ -225,7 +223,7 @@ export class ProductsListComponent implements OnInit {
     }
 
     clearFilters(){
-        this.flt = { stock: 'all', sku: '', type: null };
+        this.flt = { stock: 'all', type: null };
         this.page = 1;
         this.load();
     }

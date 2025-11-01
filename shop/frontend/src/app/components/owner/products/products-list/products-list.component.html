@@ -20,26 +20,37 @@
         </div>
 
         <!-- TỒN KHO -->
-        <div class="fp-group">
+        <div class="filter-group">
             <div class="fp-label">Tồn kho</div>
             <label class="fp-row"><input type="radio" name="stk" [(ngModel)]="flt.stock" value="all"> All</label>
             <label class="fp-row"><input type="radio" name="stk" [(ngModel)]="flt.stock" value="in"> In stock</label>
             <label class="fp-row"><input type="radio" name="stk" [(ngModel)]="flt.stock" value="out"> Out of stock</label>
         </div>
 
-        <!-- SKU -->
-        <div class="fp-group">
-            <div class="fp-label">Mã SKU</div>
-            <input class="toolbar-input" [(ngModel)]="flt.sku" placeholder="VD: ABC-001">
-        </div>
 
         <!-- TYPE -->
         <div class="fp-group">
-            <div class="fp-label">Loại</div>
-            <select [(ngModel)]="flt.type" class="toolbar-select">
-                <option [ngValue]="null">All</option>
-                <option *ngFor="let t of types" [ngValue]="t">{{ t }}</option>
-            </select>
+            <div class="fg-title">Loại</div>
+
+            <ul class="radio-list">
+                <li>
+                    <label class="r">
+                        <input type="radio" name="type" [value]="''"
+                               [(ngModel)]="flt.type">
+                        <span>All</span>
+                    </label>
+                </li>
+
+                <li *ngFor="let t of types">
+                    <label class="r">
+                        <input type="radio" name="type" [value]="t"
+                               [(ngModel)]="flt.type">
+                        <span>{{ t }}</span>
+                    </label>
+                </li>
+            </ul>
+
+            <button type="button" class="link-clear" (click)="flt.type = ''">Clear</button>
         </div>
 
 
