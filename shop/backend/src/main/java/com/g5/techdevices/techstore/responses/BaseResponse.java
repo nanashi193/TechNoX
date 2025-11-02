@@ -17,7 +17,7 @@ public class BaseResponse {
     @JsonProperty("id")
     private Long id;
 
-    @JsonProperty("CreatedAt")
+    @JsonProperty("createdAt")
     private LocalDateTime createAt;
 
 }

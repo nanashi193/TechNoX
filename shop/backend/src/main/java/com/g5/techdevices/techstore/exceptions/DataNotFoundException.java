@@ -1,6 +1,6 @@
 package com.g5.techdevices.techstore.exceptions;
 
-public class DataNotFoundException extends Exception
+public class DataNotFoundException extends RuntimeException
 {
     public DataNotFoundException()
     {

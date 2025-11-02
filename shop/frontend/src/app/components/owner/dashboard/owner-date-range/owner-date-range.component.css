@@ -1,0 +1,218 @@
+.dr-btn{
+    display:inline-flex; align-items:center; gap:8px;
+    height:40px; padding:0 12px; border:1px solid rgba(0,0,0,.08);
+    border-radius:12px; background:#fff; box-shadow:0 1px 3px rgba(0,0,0,.04);
+    font-weight:600;
+}
+.dr-btn .chev{ opacity:.7; }
+
+
+.item{ width:100%; text-align:left; padding:12px 14px; border-radius:10px; font-size:15px; }
+.item:hover{ background:#f3f6ff; }
+.item.active{ background:#eef3ff; color:#2563eb; font-weight:700; }
+
+.divider{ height:1px; background:#eef1f4; margin:8px 0; }
+
+.custom{ padding:6px; display:grid; gap:8px; }
+.row{ display:grid; grid-template-columns:48px 1fr; gap:8px; align-items:center; }
+.row input{ height:36px; border:1px solid #e5e7eb; border-radius:8px; padding:0 10px; }
+.apply{ height:38px; border:1px solid #d6e0ff; border-radius:10px; background:#eef3ff; font-weight:600; }
+
+.icon{
+    width: 18px;
+    height: 18px;
+    display: inline-block;
+    flex: 0 0 18px;
+}
+
+.ico-mask{
+    background-color: currentColor;
+    -webkit-mask-image: var(--ico);
+    mask-image: var(--ico);
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+    -webkit-mask-position: center;
+    mask-position: center;
+    -webkit-mask-size: 100% 100%;
+    mask-size: 100% 100%;
+    opacity: .9;
+}
+
+/* Màu chữ điều khiển màu icon */
+.sidebar a{ color: rgba(255,255,255,.72); display:flex; align-items:center; gap:10px; }
+.sidebar a.active{ color:#fff; }
+
+:host{
+    --dr-menu-width: 320px;
+    --dr-label-col: 72px;
+}
+
+
+
+.custom{ padding: 8px; }
+.row{
+    display: grid;
+    grid-template-columns: var(--dr-label-col) 1fr;
+    gap: 8px;
+    align-items: center;
+}
+.row label{
+    white-space: nowrap;
+}
+
+
+.item{ white-space: nowrap; }
+/* Đảm bảo nút có chỗ cho text và không bị ẩn */
+:host { display: inline-block; }
+.dr-btn{
+    display:inline-flex; align-items:center; gap:8px;
+    height:40px; padding:0 12px;
+    border:1px solid rgba(0,0,0,.08);
+    border-radius:12px; background:#fff;
+    box-shadow:0 1px 3px rgba(0,0,0,.04);
+    font-size:14px;                 /* tránh bị reset về 0 */
+    min-width: 180px;               /* để có chỗ hiển thị ngày */
+}
+
+/* Bắt buộc hiện label, không cho rớt hàng */
+.dr-btn .label{
+    display:inline-block !important;
+    white-space: nowrap;
+    max-width: 240px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Nếu có rule .btn.icon-only ở shared CSS, ép nó không áp dụng */
+.dr-btn.icon-only, .card-header .btn.icon-only { font-size:14px; }
+
+.dr-btn{
+    display:inline-flex; align-items:center; gap:8px;
+    height:40px; padding:0 12px;
+    border:1px solid rgba(0,0,0,.08);
+    border-radius:12px; background:#fff;
+    min-width: 200px;                  /* có chỗ cho text */
+    color: inherit; font-size:14px; line-height:1.2;
+}
+
+.dr-label{
+    display:inline-block !important;
+    white-space: nowrap;
+    max-width: 260px;                  /* tránh tràn */
+    overflow: hidden; text-overflow: ellipsis;
+    font-size:14px !important;
+    color: currentColor !important;    /* phòng trường hợp bị set màu = nền */
+}
+
+:host{ display:inline-block; --dr-menu-width:320px; }
+
+/* BTN */
+.dr-btn{
+    display:inline-flex; align-items:center; gap:8px;
+    min-width:200px; height:40px; padding:0 12px;
+    border:1px solid rgba(0,0,0,.08); border-radius:12px;
+    background:#fff; box-shadow:0 1px 3px rgba(0,0,0,.04);
+    color:inherit; font-size:14px; line-height:1.2;
+}
+.dr-btn .chev{ opacity:.7; }
+
+/* Icon mask (giữ như bạn có) */
+.icon{ width:18px; height:18px; display:inline-block; flex:0 0 18px; }
+.ico-mask{
+    background-color: currentColor;
+    -webkit-mask-image: var(--ico); mask-image: var(--ico);
+    -webkit-mask-repeat:no-repeat; mask-repeat:no-repeat;
+    -webkit-mask-position:center;  mask-position:center;
+    -webkit-mask-size:100% 100%;   mask-size:100% 100%;
+}
+
+/* LABEL – ép hiển thị, tránh bị .btn span {...} ở global */
+:host ::ng-deep .dr-btn span{ display:inline-block !important; }
+:host ::ng-deep .dr-btn .dr-label{
+    white-space:nowrap; max-width:260px; overflow:hidden; text-overflow:ellipsis;
+    font-size:14px !important; color:currentColor !important; opacity:1 !important;
+}
+
+
+.item{ width:100%; text-align:left; padding:12px 14px; border-radius:10px; font-size:15px; white-space:nowrap; }
+.item:hover{ background:#f3f6ff; } .item.active{ background:#eef3ff; color:#2563eb; font-weight:700; }
+.divider{ height:1px; background:#eef1f4; margin:8px 0; }
+.custom{ padding:8px; }
+.row{ display:grid; grid-template-columns:72px 1fr; gap:8px; align-items:center; }
+.row label{ white-space:nowrap; }
+.row input{ height:36px; border:1px solid #e5e7eb; border-radius:8px; padding:0 10px; }
+.apply{ height:38px; border:1px solid #d6e0ff; border-radius:10px; background:#eef3ff; font-weight:600; }
+
+/* === MENU CONTAINER: trắng, bo tròn, bóng đổ mềm === */
+.dr-menu{
+    position:absolute; z-index:1000; margin-top:8px;
+    width:var(--dr-menu-width, 320px);
+    padding:12px;
+    background:#fff;
+    border-radius:16px;
+    box-shadow:0 20px 40px rgba(0,0,0,.15);
+    /* bỏ border nếu trước đó có */
+    border: none;
+}
+
+/* === ITEM: bỏ viền mặc định của button, tăng padding, bo tròn nhẹ === */
+.dr-menu .item{
+    width:100%;
+    display:block;
+    text-align:left;
+    padding:12px 16px;
+    border:0;               /* 👈 loại bỏ viền đen */
+    outline:0;
+    background:transparent; /* nền trong suốt */
+    border-radius:12px;
+    font-size:16px;
+    color:#374151;          /* slate-700 */
+    cursor:pointer;
+}
+
+/* khoảng cách giữa các item */
+.dr-menu .item + .item{ margin-top:8px; }
+
+/* hover: nền xanh rất nhạt */
+.dr-menu .item:hover{
+    background:#f3f6ff;
+}
+
+/* active: giống mẫu – nền xanh nhạt + chữ xanh + đậm */
+.dr-menu .item.active{
+    background:#eef3ff;
+    color:#2563eb;
+    font-weight:700;
+}
+
+/* focus a11y nhưng mềm, không có viền đen */
+.dr-menu .item:focus-visible{
+    outline:2px solid rgba(37,99,235,.35);
+    outline-offset:2px;
+}
+
+/* === CUSTOM RANGE: dãn cách & style input tinh tế như mẫu === */
+.divider{ display:none; } /* không cần thanh chia đậm */
+.custom{
+    margin-top:10px;
+    padding-top:10px;
+    border-top:1px solid #eef1f6;  /* vạch mảnh */
+}
+.row{
+    display:grid; grid-template-columns:72px 1fr; gap:10px; align-items:center;
+}
+.row label{ white-space:nowrap; color:#6b7280; }
+.row input{
+    height:38px; padding:0 10px;
+    border:1px solid #e5e7eb; border-radius:10px;
+    background:#f9fafb;
+}
+.apply{
+    margin-top:6px;
+    height:40px;
+    border-radius:12px;
+    border:1px solid #d6e0ff;
+    background:#eef3ff;
+    font-weight:700;
+    color:#1f2937;
+}

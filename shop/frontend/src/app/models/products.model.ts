@@ -17,15 +17,16 @@ export interface Product {
     description?: string;
     thumbnail?: string;     // ảnh chính BE dùng
     status?: boolean;       // trạng thái hiển thị
-    categoryId?: number;    // để pre-select trong Edit
-    categoryName?: string;  // để hiển thị
+    categoryId?: number | null;    // để pre-select trong Edit
+    categoryName?: string | null;  // để hiển thị
+
 
     // Các field FE đang dùng thêm
-    type?: string;          // nếu BE chưa có thì để optional
     sku?: string;           // nếu SKU ở product-level
     inStock?: boolean;
     stockQty?: number;
     image?: string;         // FE preview, map -> thumbnail khi gửi
+    imageItems: ProductImageItem[];
 
     variants?: ProductVariant[]; // ⟵ mảng biến thể, KHÔNG phải number
     variantCount?: number;       // (tuỳ chọn) nếu bạn cần đếm cho list
@@ -34,6 +35,20 @@ export interface Product {
     updatedAt?: string;
 
     [k: string]: any;
+}
+export type ProductListItem = Product & {
+    minPrice: number;
+    maxPrice: number;
+    hasPriceRange: boolean;
+};
+export interface ProductImageItem { id: number; url: string; }
+
+export interface MediaItem {
+    id: string;
+    previewUrl: string;
+    imageId?: number;   // <= id từ BE (nếu có)
+    file?: File|null;
+    isUrl?: boolean;
 }
 
 export interface Page<T> {

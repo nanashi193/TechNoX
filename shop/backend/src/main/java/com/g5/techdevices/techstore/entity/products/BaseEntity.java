@@ -1,5 +1,6 @@
 package com.g5.techdevices.techstore.entity.products;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.Column;
 import jakarta.persistence.MappedSuperclass;
 import jakarta.persistence.PrePersist;
@@ -10,7 +11,8 @@ import java.time.LocalDateTime;
 @MappedSuperclass
 public abstract class BaseEntity {
 
-    @Column(name = "CreatedAt", updatable = false)
+    @JsonProperty("createdAt") // ✅ ép key JSON về camelCase
+    @Column(name = "createdAt", updatable = false)
     private LocalDateTime createdAt;
 
     @PrePersist

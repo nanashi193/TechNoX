@@ -2,6 +2,11 @@
     <!-- HEADER -->
     <div class="page-header">
         <a class="link" routerLink="/owner/products">← Quay lại danh sách</a>
+
+        <div class="actions" [class.invisible]="editing">
+            <button type="button" class="btn ghost" (click)="edit()">Chỉnh sửa</button>
+        </div>
+
     </div>
 
     <div class="form-grid">
@@ -36,34 +41,13 @@
 
         <!-- RIGHT: Pricing + Organization + Variants -->
         <div class="side">
-            <section class="card">
-                <h3 class="card-title">Giá (VND)</h3>
-
-                <label class="field">
-                    <span>Giá</span>
-                    <ng-container *ngIf="!editing; else priceEdit">
-                        {{ f.value.price | currency:'VND':'symbol-narrow':'1.0-0' }}
-                    </ng-container>
-                    <ng-template #priceEdit>
-                        <input type="number" min="0" step="1" formControlName="price">
-                    </ng-template>
-                </label>
-
-                <div class="field inline">
-                    <span>Còn hàng</span>
-                    <label class="switch">
-                        <input type="checkbox" formControlName="inStock" [disabled]="!editing">
-                        <span class="track"></span>
-                    </label>
-                </div>
-            </section>
 
             <section class="card">
                 <h3 class="card-title">Phân loại</h3>
 
                 <label class="field">
                     <span>Loại</span>
-                    <select formControlName="categoryId" [disabled]="!editing">
+                    <select formControlName="categoryId">
                         <option [ngValue]="null" disabled selected>Chọn danh mục…</option>
                         <option *ngFor="let c of categories" [ngValue]="c.id">{{ c.name }}</option>
                     </select>
@@ -83,6 +67,7 @@
                         <div>Size</div>
                         <div>Tồn kho</div>
                         <div>Giá</div>
+                        <div>Còn hàng</div>
                         <div></div>
                     </div>
 
@@ -92,6 +77,14 @@
                         <input class="v-td" formControlName="size"  placeholder="6.7 inch / 128GB" [readOnly]="!editing">
                         <input class="v-td" type="number" min="0" formControlName="quantity" [readOnly]="!editing">
                         <input class="v-td" type="number" min="0" formControlName="price"    [readOnly]="!editing">
+
+                        <label class="switch center">
+                            <input type="checkbox"
+                                   [checked]="(variantsFA.at(i).get('quantity')!.value || 0) > 0"
+                                   (change)="onVariantStockChange(i, $event)"
+                                   [disabled]="!editing">
+                            <span class="track"></span>
+                        </label>
                         <button type="button" class="icon-btn" (click)="removeVariant(i)" *ngIf="editing">🗑️</button>
                     </div>
 
@@ -136,25 +129,39 @@
 
                 <ng-template #gallery>
                     <div class="media-grid">
-                        <div class="media-item" *ngFor="let m of media; index as i">
-                            <img [src]="m.previewUrl" alt="">
-                            <button type="button" class="remove" (click)="removeMedia(i)" *ngIf="editing">✕</button>
+                        <div class="media-item"
+                             *ngFor="let m of media; index as i"
+                             [class.is-thumb]="m.previewUrl === selectedThumb">
+
+                            <img [src]="m.previewUrl" alt=""
+                                 (click)="editing && setThumb(m)">
+
+
+                            <!-- Nút xoá -->
+                            <button type="button"
+                                    class="remove"
+                                    *ngIf="editing"
+                                    (click)="onRemove(i, $event)"
+                                    aria-label="Xoá ảnh">✕</button>
+
+                            <span class="badge" *ngIf="m.previewUrl === selectedThumb">Ảnh đại diện</span>
+
                         </div>
                     </div>
+
                     <div class="media-actions" *ngIf="editing">
                         <button type="button" class="btn" (click)="fileInput.click()">Add more</button>
                         <input #fileInput type="file" accept="image/*" multiple hidden (change)="onFileSelect($event)">
                     </div>
                 </ng-template>
+
             </div>
         </section>
     </div>
 
     <!-- Sticky action bar -->
     <div class="sticky-actions" *ngIf="showStickyBar">
-        <div class="sa-right">
-            <button type="button" class="btn ghost light" (click)="discard()">Hủy</button>
-            <button type="submit" class="btn primary" [disabled]="f.invalid || !f.dirty">Lưu</button>
-        </div>
+            <button type="button" class="btn ghost" (click)="cancel()">Hủy</button>
+            <button type="submit" class="btn primary" [disabled]="f.invalid || saving || !editing || !f.dirty">Lưu</button>
     </div>
 </form>
