@@ -1,6 +1,13 @@
 <button class="dr-btn" (click)="toggle($event)">
     <span class="icon ico-mask" style="--ico:url('assets/icons/calendar.svg')"></span>
-    <span>{{ label() }}</span>
+
+    <span class="dr-label">
+    {{ fmt(range.start) }}
+        <ng-container *ngIf="!isSameDay(range.start, range.end)">
+      &nbsp;–&nbsp;{{ fmt(range.end) }}
+    </ng-container>
+  </span>
+
     <span class="chev">▾</span>
 </button>
 

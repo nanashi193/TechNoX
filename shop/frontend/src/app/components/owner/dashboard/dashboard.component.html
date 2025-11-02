@@ -3,7 +3,7 @@
 <section class="grid-3">
     <div class="card stat">
         <h3>Doanh thu hôm nay</h3>
-        <p class="value">{{ kpi.revenueToday | number }} ₫</p>
+        <p class="value">{{ kpi.revenueToday | number:'1.0-0' }} ₫</p>
         <a class="link" routerLink="/owner/orders">Xem báo cáo</a>
     </div>
     <div class="card stat">
@@ -26,7 +26,9 @@
         </div>
 
         <div class="chart-wrap">
-            <canvas baseChart [data]="lineData" [options]="lineOpts" [type]="'line'"></canvas>
+            <div class="card-body">
+                <canvas #revChart class="w-full" style="max-height: 320px;"></canvas>
+            </div>
         </div>
     </div>
 

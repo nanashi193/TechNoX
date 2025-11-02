@@ -26,6 +26,13 @@ export class OwnerDateRangeComponent {
         this.open = false;
     }
 
+    isSameDay(a?: Date, b?: Date){
+        if (!a || !b) return true;
+        return a.getFullYear()===b.getFullYear()
+            && a.getMonth()===b.getMonth()
+            && a.getDate()===b.getDate();
+    }
+
     toggle(e: MouseEvent) {
         e.stopPropagation();
         this.open = !this.open;
@@ -117,7 +124,13 @@ export class OwnerDateRangeComponent {
         return new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
     }
 
-    private fmt(d: Date) {
-        return d.toLocaleDateString('vi-VN', {day: '2-digit', month: 'short', year: 'numeric'});
+    fmt(d?: unknown): string {
+        if (!d) return '—';
+        const x = d instanceof Date ? d : new Date(d as any);
+        if (isNaN(+x)) return '—';
+        return x.toLocaleDateString('vi-VN', { day:'2-digit', month:'short', year:'numeric' });
     }
+
+
+
 }

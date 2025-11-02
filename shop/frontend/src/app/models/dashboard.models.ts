@@ -24,3 +24,23 @@ export interface NewProduct {
     name: string;
     date: string;   // có thể đổi sang Date nếu backend trả dạng ISO
 }
+export type Bucket = 'day'|'month';
+
+export interface RevenueQuery {
+    from: string;
+    to: string;
+    bucket?: Bucket;
+}
+
+export interface RevenuePoint {
+    date: string;         // ISO yyyy-MM-dd
+    revenue: number;
+    orders: number;
+}
+
+export interface RevenueSeries {
+    bucket: Bucket;
+    currency: 'VND'|'USD';
+    points: RevenuePoint[];
+    totals: { revenue: number; orders: number; aov: number };
+}
