@@ -21,15 +21,10 @@
 <section class="charts">
     <div class="card chart">
         <div class="card-header">
-            <h3>Doanh thu – Tất cả kênh bán hàng</h3>
-            <div class="controls">
-                <select>
-                    <option>Hôm nay</option>
-                    <option>7 ngày</option>
-                    <option>30 ngày</option>
-                </select>
-            </div>
+            <h3>Doanh thu của TechNoX </h3>
+            <owner-date-range (changed)="onRangeChanged($event)"></owner-date-range>
         </div>
+
         <div class="chart-wrap">
             <canvas baseChart [data]="lineData" [options]="lineOpts" [type]="'line'"></canvas>
         </div>

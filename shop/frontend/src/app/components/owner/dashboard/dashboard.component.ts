@@ -7,12 +7,13 @@ import { NewProductsComponent } from './new-products/new-products.component';
 import {BaseChartDirective} from "ng2-charts";
 import {RouterLink} from "@angular/router";
 import { ChartConfiguration, ChartOptions } from 'chart.js';
+import {DateRange, OwnerDateRangeComponent} from "./owner-date-range/owner-date-range.component";
 
 
 @Component({
     selector: 'app-dashboard',
     standalone: true,
-    imports: [CommonModule, TopProductsComponent, NewProductsComponent, BaseChartDirective, RouterLink],
+    imports: [CommonModule, TopProductsComponent, NewProductsComponent, BaseChartDirective, RouterLink, OwnerDateRangeComponent],
     templateUrl: './dashboard.component.html',
     styleUrls: ['./dashboard.component.css','../../owner/owner-shared.css']
 })
@@ -21,6 +22,8 @@ export class DashboardComponent implements OnInit {
     orderStats: OrderStat[] = [];
     topProducts: TopProduct[] = [];
     newProducts: NewProduct[] = [];
+    range: DateRange = { start: new Date(), end: new Date() };
+
 // mock dữ liệu biểu đồ
     lineData: ChartConfiguration<'line'>['data'] = {
         labels: ['T2','T3','T4','T5','T6','T7','CN'],
@@ -45,8 +48,15 @@ export class DashboardComponent implements OnInit {
             y: { grid: { color: 'rgba(0,0,0,0.06)' } }
         }
     };
+    onRangeChanged(r: DateRange){
+        this.range = r;
+        // ví dụ: gọi API và cập nhật chart/top-products:
+        const from = r.start.toISOString();
+        const to   = r.end.toISOString();
+    }
 
-    constructor(private dashboardService: DashboardService) {}
+
+        constructor(private dashboardService: DashboardService) {}
     ngOnInit(): void {
         this.dashboardService.getKpi().subscribe(res => this.kpi = res);
         this.dashboardService.getOrderStats().subscribe(res => this.orderStats = res);

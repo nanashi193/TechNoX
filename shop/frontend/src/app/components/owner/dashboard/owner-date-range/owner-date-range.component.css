@@ -1,0 +1,47 @@
+.dr-btn{
+    display:inline-flex; align-items:center; gap:8px;
+    height:40px; padding:0 12px; border:1px solid rgba(0,0,0,.08);
+    border-radius:12px; background:#fff; box-shadow:0 1px 3px rgba(0,0,0,.04);
+    font-weight:600;
+}
+.dr-btn .chev{ opacity:.7; }
+
+.dr-menu{
+    position:absolute; z-index:1000; margin-top:8px; width:260px; padding:10px;
+    background:#fff; border-radius:16px; box-shadow:0 20px 40px rgba(0,0,0,.15);
+}
+
+.item{ width:100%; text-align:left; padding:12px 14px; border-radius:10px; font-size:15px; }
+.item:hover{ background:#f3f6ff; }
+.item.active{ background:#eef3ff; color:#2563eb; font-weight:700; }
+
+.divider{ height:1px; background:#eef1f4; margin:8px 0; }
+
+.custom{ padding:6px; display:grid; gap:8px; }
+.row{ display:grid; grid-template-columns:48px 1fr; gap:8px; align-items:center; }
+.row input{ height:36px; border:1px solid #e5e7eb; border-radius:8px; padding:0 10px; }
+.apply{ height:38px; border:1px solid #d6e0ff; border-radius:10px; background:#eef3ff; font-weight:600; }
+
+.icon{
+    width: 18px;
+    height: 18px;
+    display: inline-block;
+    flex: 0 0 18px;
+}
+
+.ico-mask{
+    background-color: currentColor;
+    -webkit-mask-image: var(--ico);
+    mask-image: var(--ico);
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+    -webkit-mask-position: center;
+    mask-position: center;
+    -webkit-mask-size: 100% 100%;
+    mask-size: 100% 100%;
+    opacity: .9;
+}
+
+/* Màu chữ điều khiển màu icon */
+.sidebar a{ color: rgba(255,255,255,.72); display:flex; align-items:center; gap:10px; }
+.sidebar a.active{ color:#fff; }
