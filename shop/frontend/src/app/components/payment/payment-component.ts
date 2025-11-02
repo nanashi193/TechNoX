@@ -16,7 +16,7 @@ interface Customer { address?: string; phone?: string; }
 @Component({
     selector: 'app-payment',
     standalone: true,
-    imports: [CommonModule, RouterModule, HttpClientModule, CurrencyPipe],
+    imports: [CommonModule, RouterModule, CurrencyPipe],
     providers: [PaymentService],
     templateUrl: './payment-component.html',
     styleUrls: ['./payment-component.css']
