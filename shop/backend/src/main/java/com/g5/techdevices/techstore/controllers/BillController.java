@@ -3,6 +3,7 @@ package com.g5.techdevices.techstore.controllers;
 import com.g5.techdevices.techstore.dtos.BillCreateRequestDTO;
 import com.g5.techdevices.techstore.entity.Bills.Bill;
 import com.g5.techdevices.techstore.entity.Bills.BillDetail;
+import com.g5.techdevices.techstore.entity.pay.PayTransaction;
 import com.g5.techdevices.techstore.entity.products.ProductVariant;
 import com.g5.techdevices.techstore.entity.users.User;
 import com.g5.techdevices.techstore.exceptions.DataNotFoundException;
@@ -80,12 +81,15 @@ public class BillController {
         payTransactionService.createPending(billId, total, orderCode);
 
         // 3. Tạo link PayOS
+        String returnUrl = "http://localhost:4200/payment/success?billId=" + billId;
+        String cancelUrl = "http://localhost:4200/payment/cancel?billId=" + billId;
+
         CreatePaymentLinkRequest req = CreatePaymentLinkRequest.builder()
                 .orderCode(orderCode)
                 .amount(amount)
                 .description("Thanh toán đơn " + billId)
-                .returnUrl("http://localhost:4200/checkout/success") // Sửa theo URL FE
-                .cancelUrl("http://localhost:4200/checkout/cancel")  // Sửa theo URL FE
+                .returnUrl(returnUrl)
+                .cancelUrl(cancelUrl)
                 .build();
 
         CreatePaymentLinkResponse res = payOS.paymentRequests().create(req);
@@ -120,26 +124,29 @@ public class BillController {
         } catch (Exception e) {
             // Ghi log lỗi
             // e.printStackTrace();
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.ok().build();
         }
     }
 
+    @GetMapping("/pay/webhook")
+    public ResponseEntity<String> verifyWebhook() {
+        return ResponseEntity.ok("Webhook endpoint active.");
+    }
     // ============= 3) Xem trạng thái theo billId (tiện test) =============
     @GetMapping("/{billId}/pay/status")
     public ResponseEntity<?> getBillPayStatus(@PathVariable Long billId) {
-        Optional<Tx> txOpt = txStore.values().stream()
-                .filter(t -> t.getBillId().equals(billId))
-                .findFirst();
+        Optional<PayTransaction> txOpt = payTransactionService.findByBillId(billId);
 
         if (txOpt.isEmpty()) {
-            return ResponseEntity.ok(Map.of("billId", billId, "status", "NOT_FOUND"));
+            // Nếu chưa có giao dịch, coi như là PENDING (hoặc NOT_FOUND)
+            return ResponseEntity.ok(Map.of("billId", billId, "status", "PENDING"));
         }
-        Tx t = txOpt.get();
+        PayTransaction tx = txOpt.get();
         return ResponseEntity.ok(Map.of(
-                "billId", t.getBillId(),
-                "orderCode", t.getOrderCode(),
-                "amount", t.getAmount(),
-                "status", t.getStatus()
+                "billId", tx.getBillId(),
+                "orderCode", tx.getOrderCode(),
+                "amount", tx.getAmount(),
+                "status", tx.getStatus()
         ));
     }
 
@@ -205,22 +212,6 @@ public class BillController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         } catch (AccessDeniedException e) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
-        } catch (InvalidOperationException e) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
-        } catch (InsufficientStockException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An unexpected error occurred.");
-        }
-    }
-
-    @PostMapping("/{billId}/confirm-payos")
-    public ResponseEntity<?> confirmPayOSPayment(@PathVariable Long billId) {
-        try {
-            Bill confirmedBill = billService.confirmPayOSPayment(billId);
-            return ResponseEntity.ok(confirmedBill);
-        } catch (DataNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         } catch (InvalidOperationException e) {
             return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
         } catch (InsufficientStockException e) {

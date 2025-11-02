@@ -85,7 +85,7 @@
             "ngrok": {
               "buildTarget": "App:build:ngrok",
               "allowedHosts": [
-                "f46bbed85f2e.ngrok-free.app"
+                "2c48f49d004c.ngrok-free.app"
               ]
             }
           },

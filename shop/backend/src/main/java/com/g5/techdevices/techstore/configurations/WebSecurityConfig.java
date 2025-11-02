@@ -64,7 +64,8 @@ public class WebSecurityConfig {
 
                         // PayOS endpoints
                         .requestMatchers(POST, apiPrefix + "/bills/{billId}/pay").authenticated()  // tạo link thanh toán
-                        .requestMatchers(POST, apiPrefix + "/bills/webhook").permitAll()   // PayOS gọi vào
+                        .requestMatchers(POST, apiPrefix + "/bills/pay/webhook").permitAll() // PayOS gọi vào
+                        .requestMatchers(GET, apiPrefix + "/bills/pay/webhook").permitAll()
                         .requestMatchers(GET,  apiPrefix + "/bills/status/**").permitAll() // FE tra cứu
 
                         // Quản trị sản phẩm
@@ -105,7 +106,7 @@ public class WebSecurityConfig {
         public CorsConfigurationSource corsConfigurationSource () {
             CorsConfiguration configuration = new CorsConfiguration();
             configuration.addAllowedOrigin("http://localhost:4200");
-            configuration.addAllowedOrigin("https://f46bbed85f2e.ngrok-free.app"); //Thay link day = frontend
+            configuration.addAllowedOrigin("https://45e5237ba232.ngrok-free.app"); //Thay link day = frontend
             configuration.addAllowedHeader("*");
             configuration.addAllowedMethod("*");
             configuration.setAllowCredentials(true);

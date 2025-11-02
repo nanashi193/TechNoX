@@ -67,5 +67,13 @@ export class PaymentService {
         console.error(`[PaymentService] ${errorMessage} - URL: ${error.url}`);
         return throwError(() => new Error(errorMessage));
     }
+    getBillPayStatus(billId: string | number): Observable<{ status: string }> {
+        const url = `${this.apiPrefix}/bills/${billId}/pay/status`;
+
+        return this.http.get<{ status: string }>(url)
+            .pipe(
+                catchError(this.handleError)
+            );
+    }
 }
 
