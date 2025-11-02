@@ -362,5 +362,27 @@
     text-overflow: ellipsis;
     font-weight: 600;
 }
+.filter-group { margin-top: 16px; }
+.fg-title{
+    font-weight: 700;
+    font-size: 12px;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: #111827;
+    margin-bottom: 12px;
+}
+
+.radio-list{ list-style: none; padding: 0; margin: 0; display: grid; gap: 10px; }
+.r{ display: flex; align-items: center; gap: 10px; cursor: pointer; user-select: none; }
+.r input[type="radio"]{ width: 16px; height: 16px; accent-color: var(--owner-accent, #6366f1); }
+.r span{ color: #111827; }
+
+/* link Clear */
+.link-clear{
+    margin-top: 8px;
+    background: none; border: none; padding: 0;
+    color: #2563eb; font-weight: 600; cursor: pointer;
+}
+.link-clear:hover{ text-decoration: underline; }
 
 

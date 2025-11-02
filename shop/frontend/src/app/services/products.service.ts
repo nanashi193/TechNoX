@@ -2,17 +2,19 @@ import {Injectable, inject} from '@angular/core';
 import {HttpClient, HttpParams} from '@angular/common/http';
 import {forkJoin, Observable} from 'rxjs';
 import {environment} from '../environments/environment';
-import {Page, Product, ProductVariant} from '../models/products.model';
-import {of} from 'rxjs';
-import {delay} from 'rxjs/operators';
+import {Page, Product, ProductImageItem, ProductVariant} from '../models/products.model';
 import {map} from 'rxjs/operators';
-import {ProductCreateDTO, ProductUpdateDTO} from "../dtos/products/products.dto";
+import {ProductCreateDTO, ProductUpdateDTO, ProductVariantDTO} from "../dtos/products/products.dto";
 import {ProductImage, ProductImageBE} from "../models/product-image.model";
 
 export interface ProductListResponse {
     products: Product[];
     totalPages: number; // từ BE
+    totalElements?: number;
+    total?: number;
+    totalItems?: number;
 }
+
 type RawVariant = { sku?: string; code?: string; quantity?: number; qty?: number; stock?: number };
 
 type RawProduct = {
@@ -27,7 +29,7 @@ type RawProduct = {
     variants?: RawVariant[] | number | null;
     variantsCount?: number;
 
-    createdAt?: string;  CreatedAt?: string;
+    createdAt?: string; CreatedAt?: string;
     categoryName?: string;
     CategoryName?: string;
     category?: { id: number; name: string };
@@ -41,8 +43,6 @@ type RawProduct = {
     quantity?: number;
     totalQuantity?: number;
 };
-type ProductListResponseBE = { products: RawProduct[]; totalPages: number };
-
 
 @Injectable({providedIn: 'root'})
 export class ProductService {
@@ -52,6 +52,13 @@ export class ProductService {
     private readonly ATTACH_URL = (id: number) => `${this.base}/${id}/images`;
     private useMock = !!(environment as any).useMock; // true => dùng mock
     private toNum = (v: any) => (v == null ? 0 : Number(v));
+
+    private pickSku(raw: any, variantsArr: ProductVariant[]): string {
+        const s = (raw?.sku ?? raw?.code ?? '').toString().trim();
+        if (s) return s;
+        const v = variantsArr.find(x => (x.sku ?? '').toString().trim());
+        return (v?.sku ?? '').toString().trim();
+    }
 
     private mapRawProduct(p: any): Product {
         const toNum = this.toNum;
@@ -69,98 +76,87 @@ export class ProductService {
 
         const stockQty = variantsArr.length
             ? variantsArr.reduce((s, v) => s + toNum(v.quantity), 0)
-            : toNum(p?.totalQuantity ?? p?.quantity ?? p?.stockQty);
+            : toNum(p?.totalQuantity ?? p?.quantity ?? p?.stockQty ?? 0);
+
+        const imageItems: ProductImageItem[] = Array.isArray(p?.imageItems)
+            ? p.imageItems.map((it: any) => ({
+                id: Number(it.id),
+                url: String(it.url),
+            }))
+            : [];
+
+        const thumbnail = p?.thumbnail ?? p?.imageUrl ?? imageItems[0]?.url ?? '';
 
         return {
             id: Number(p?.id ?? p?.Id ?? p?.productId ?? 0),
             name: p?.name ?? p?.productName ?? '',
-            image: p?.thumbnail ?? p?.imageUrl ?? '',     // FE vẫn dùng 'image' cho thumbnail
-            thumbnail: p?.thumbnail ?? p?.imageUrl ?? '',
+            image: thumbnail,                // back-compat nếu UI cũ dùng 'image'
+            thumbnail,                       // ảnh đại diện
+            imageItems,
             type: p?.categoryName ?? p?.category?.name ?? (p?.CategoryId != null ? `#${p?.CategoryId}` : ''),
-            sku: p?.sku ?? p?.code ?? '',
+            sku: this.pickSku(p, variantsArr),
             price: toNum(p?.price ?? 0),
-            variants: variantsArr,                         // ⟵ mảng
-            variantCount: variantsArr.length ?? this.toNum(p?.variants ?? p?.variantCount ?? 0),
+            variants: variantsArr,
+            variantCount: variantsArr.length,
             stockQty,
-            inStock: Boolean(p?.status ?? stockQty > 0),
+            inStock: (p?.status ?? null) != null ? Boolean(p.status) : stockQty > 0,
             description: p?.description ?? '',
             createdAt: p?.createdAt ?? p?.createAt ?? p?.CreatedAt ?? '',
-            categoryId: p?.categoryId ?? p?.CategoryId,
-            categoryName: p?.categoryName ?? p?.category?.name,
+            categoryId: p?.categoryId ?? p?.CategoryId ?? p?.category?.id ?? null,
+            categoryName: p?.categoryName ?? p?.category?.name ?? null,
         } as Product;
     }
 
-    search({ page = 1, size = 8 } = {}) {
+    search({
+               page = 1,
+               size = 8,
+               keyword,
+               sku,
+               category_id,
+               min_price,
+               max_price,
+               sort,
+           }: {
+        page?: number;
+        size?: number;
+        keyword?: string;
+        sku?: string;
+        category_id?: number;
+        min_price?: number;
+        max_price?: number;
+        sort?: string;
+    } = {}) {
         const page0 = Math.max(0, page - 1);
-        const params = new HttpParams().set('page', String(page0)).set('limit', String(size));
-        const toNum = (v: any) => (v == null ? 0 : Number(v));
 
-        return this.http.get<ProductListResponseBE>(this.base, { params }).pipe(
+        let params = new HttpParams()
+            .set('page', String(page0))
+            .set('limit', String(size));
+
+        if (keyword)             params = params.set('keyword', keyword);
+        if (sku)                 params = params.set('sku', sku);
+        if (category_id != null && category_id > 0)
+            params = params.set('category_id', String(category_id));
+        if (min_price != null)   params = params.set('min_price', String(min_price));
+        if (max_price != null)   params = params.set('max_price', String(max_price));
+        if (sort)                params = params.set('sort', sort); // 👈 field_dir
+
+
+        return this.http.get<ProductListResponse>(this.base, {params}).pipe(
             map(res => {
-                const raw: RawProduct[] = res.products ?? [];
-                const items: Product[] = raw.map(p => {
-                    const variantsArr: ProductVariant[] = Array.isArray((p as any).variants)
-                        ? ((p as any).variants as any[]).map(v => ({
-                            id: v.id,
-                            color: v.color ?? '',
-                            size: v.size ?? '',
-                            quantity: toNum(v.quantity ?? v.qty ?? v.stock),
-                            price: toNum(v.price ?? 0),
-                            sku: v.sku ?? v.code ?? '',
-                        }))
-                        : [];
+                const raw = (res.products ?? []) as any[];
+                const items: Product[] = raw.map(p => this.mapRawProduct(p)); // 👈 dùng lại mapper đã đúng kiểu
 
-                    // 1) số biến thể: nhận cả number lẫn array
-                    const variantCount =
-                        variantsArr.length ||
-                        toNum((p as any).variantsCount ?? (p as any).variantCount ?? (p as any).variants ?? 0);
-
-                    // 2) tổng tồn kho: nếu có mảng biến thể thì cộng, nếu không lấy field tổng
-                    const stockQty = Array.isArray(p.variants)
-                        ? p.variants.reduce((s, v) => s + toNum(v.quantity ?? v.qty ?? v.stock), 0)
-                        : toNum(p.totalQuantity ?? p.quantity ?? p.stockQty);
-
-                    // 3) SKU: ưu tiên product-level; nếu không có thì lấy ở biến thể đầu
-                    const sku =
-                        p.sku ?? p.code ??
-                        (Array.isArray(p.variants) && p.variants[0]?.sku ? p.variants[0].sku : '');
-
-
-                    // 4) Loại: name nếu có, không thì hiển thị #ID cho đỡ trống
-                    const type =
-                        p.categoryName ?? p.category?.name ?? (p.CategoryId != null ? `#${p.CategoryId}` : '');
-                    const rawId = (p as any).id ?? (p as any).Id ?? (p as any).productId;
-                    const id = Number.isFinite(Number(rawId)) ? Number(rawId) : undefined;
-                    return {
-                        id,
-                        name: (p as any).name ?? (p as any).productName ?? '',
-                        image: (p as any).thumbnail ?? (p as any).imageUrl ?? '',
-                        thumbnail: (p as any).thumbnail ?? (p as any).imageUrl ?? '',
-                        type,
-                        sku,
-                        price: toNum((p as any).price ?? 0),
-                        variants: variantsArr,          // ✅ mảng
-                        variantCount,                   // ✅ số lượng (cho UI)
-                        stockQty,
-                        inStock: Boolean((p as any).status ?? stockQty > 0),
-                        description: (p as any).description ?? '',
-                        createdAt: (p as any).createdAt ?? (p as any).CreatedAt ?? '',
-                        categoryId: (p as any).categoryId ?? (p as any).CategoryId,
-                        categoryName: (p as any).categoryName ?? (p as any).category?.name,
-                    } as Product;
-                });
-
-                // total: tuỳ BE (đừng nhân totalPages * size nếu BE có totalItems)
                 const total =
                     (res as any).totalItems ??
                     (res as any).totalElements ??
                     (res as any).total ??
                     ((res as any).totalPages ?? 0) * size;
 
-                return { items, total, page, size };
+                return {items, total, page, size};
             })
         );
     }
+
 
     uploadImages(productId: number, files: File[]) {
         const fd = new FormData();
@@ -177,19 +173,22 @@ export class ProductService {
                 )
             );
     }
+
 // --- gắn list ảnh vào product (nếu BE tách 2 bước)
     attachImages(productId: number, images: ProductImage[]) {
         return this.http.post<void>(this.ATTACH_URL(productId), images);
     }
 
     setThumbnailFromImage(productId: number, imageId: number) {
-        return this.http.put(
-            `${this.base}/${productId}/thumbnail/from-image/${imageId}`,
-            {}
+        return this.http.put<{ productId: number; thumbnail: string }>(
+            `${this.base}/${productId}/thumbnail/from-image/${imageId}`, {}
         );
     }
+
     deleteImage(productId: number, imageId: number) {
-        return this.http.delete(`${this.base}/${productId}/images/${imageId}`);
+        return this.http.delete<{ message: string }>(
+            `${this.base}/${productId}/images/${imageId}`
+        );
     }
 
     get(id: number): Observable<Product> {
@@ -205,29 +204,37 @@ export class ProductService {
         );
     }
 
-    update(id: number, dto: ProductUpdateDTO): Observable<Product> {
-        return this.http.put<any>(`${this.base}/${id}`, dto).pipe(
-            map(p => this.mapRawProduct(p))
-        );
+    update(id: number, dto: ProductUpdateDTO) {
+        if (id == null) throw new Error('update() called without id');
+        return this.http.put<void>(`${this.base}/${id}`, dto);
     }
+
+    upsertVariant(productId: number, dto: ProductVariantDTO) {
+        return this.http.post<void>(`${this.base}/${productId}/variants`, dto);
+    }
+
+    deleteVariant(productId: number, variantId: number) {
+        return this.http.delete(`/api/v1/products/${productId}/variants/${variantId}`);
+    }
+
 
     delete(id: number): Observable<void> {
         return this.http.delete<void>(`${this.base}/${id}`);
     }
 
     bulkDelete(ids: number[]) {
-        return this.http.post<{deletedIds:number[]}>(
+        return this.http.post<{ deletedIds: number[] }>(
             `${this.base}/bulk-delete`,
-            { ids } // hoặc ids nếu BE nhận mảng
+            {ids} // hoặc ids nếu BE nhận mảng
         ).pipe(map(() => void 0));
     }
 
     setStock(id: number, inStock: boolean): Observable<Product> {
         // nếu BE có endpoint riêng, giữ như sau; nếu không, dùng update(...)
-        return this.http.patch<any>(`${this.base}/${id}/stock`, { inStock }).pipe(
+        return this.http.patch<any>(`${this.base}/${id}/stock`, {inStock}).pipe(
             map(p => this.mapRawProduct(p))
         );
     }
 
-    }
+}
 

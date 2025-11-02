@@ -145,3 +145,6 @@
         grid-template-columns:1fr
     }
 }
+
+.card-header .dr-btn{ height:36px; }
+

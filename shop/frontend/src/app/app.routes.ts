@@ -12,7 +12,7 @@ import { ownerGuard } from './guards/owner.guard';
 import { PaymentDetailComponent } from './components/paymentDetail/payment-detail.component';
 
 export const routes: Routes = [
-    { path: '', redirectTo: 'home', pathMatch: 'full' },
+    {path: '', redirectTo: 'home', pathMatch: 'full'},
 
     // ===== Payment =====
     {
@@ -39,22 +39,32 @@ export const routes: Routes = [
     // ===== Public =====
     { path: 'home', component: HomeComponent },
 
-    { path: 'login',  component: LoginComponent,  canActivate: [loginGuard], data: { hideChrome: true, title: 'Đăng nhập | TechNoX' } },
-    { path: 'signup', component: SignupComponent, canActivate: [loginGuard], data: { hideChrome: true, title: 'Đăng ký | TechNoX' } },
+    {
+        path: 'login',
+        component: LoginComponent,
+        canActivate: [loginGuard],
+        data: {hideChrome: true, title: 'Đăng nhập | TechNoX'}
+    },
+    {
+        path: 'signup',
+        component: SignupComponent,
+        canActivate: [loginGuard],
+        data: {hideChrome: true, title: 'Đăng ký | TechNoX'}
+    },
 
     {
         path: 'verify-email',
         loadComponent: () => import('./components/verify-email/verify-email.component').then(m => m.VerifyEmailComponent),
-        data: { hideChrome: true, title: 'Xác minh email | TechNoX' }
+        data: {hideChrome: true, title: 'Xác minh email | TechNoX'}
     },
     {
         path: 'verify-email/pending',
         loadComponent: () => import('./components/verify-pending/verify-pending.component').then(m => m.VerifyPendingComponent),
-        data: { hideChrome: true, title: 'Đang chờ xác minh | TechNoX' }
+        data: {hideChrome: true, title: 'Đang chờ xác minh | TechNoX'}
     },
 
     // Payment detail
-    { path: 'payment-detail', component: PaymentDetailComponent, data: { title: 'Chi tiết đơn hàng | TechNoX' } },
+    {path: 'payment-detail', component: PaymentDetailComponent, data: {title: 'Chi tiết đơn hàng | TechNoX'}},
 
     // Payment (lazy) — ĐÚNG path: components/payment/payment.component
     {
@@ -62,7 +72,7 @@ export const routes: Routes = [
         loadComponent: () => import('./components/payment/payment-component').then(m => m.PaymentComponent),
         title: 'Thanh toán | TechNoX'
     },
-    { path: 'checkout', redirectTo: 'payment', pathMatch: 'full' },
+    {path: 'checkout', redirectTo: 'payment', pathMatch: 'full'},
 
     { path: 'forgot-password', component: ForgotPasswordComponent, data: { hideChrome: true, title: 'Quên mật khẩu | TechNoX' } },
     {path: 'reset-password',
@@ -84,12 +94,32 @@ export const routes: Routes = [
         path: 'legal',
         loadComponent: () => import('./components/legal/legal-layout/legal-layout.component').then(m => m.LegalLayoutComponent),
         children: [
-            { path: 'about',          loadComponent: () => import('./components/legal/about/about.component').then(m => m.AboutComponent),                         title: 'Giới thiệu | TechNoX' },
-            { path: 'privacy-policy', loadComponent: () => import('./components/legal/privacy-policy/privacy-policy.component').then(m => m.PrivacyPolicyComponent), title: 'Chính sách bảo mật | TechNoX' },
-            { path: 'terms',          loadComponent: () => import('./components/legal/terms/terms.component').then(m => m.TermsComponent),                         title: 'Điều khoản sử dụng | TechNoX' },
-            { path: 'warranty',       loadComponent: () => import('./components/legal/warranty/warranty.component').then(m => m.WarrantyComponent),                 title: 'Chính sách bảo hành | TechNoX' },
-            { path: 'returns',        loadComponent: () => import('./components/legal/returns/returns.component').then(m => m.ReturnsComponent),                   title: 'Hủy giao dịch, đổi trả | TechNoX' },
-            { path: '', redirectTo: 'about', pathMatch: 'full' }
+            {
+                path: 'about',
+                loadComponent: () => import('./components/legal/about/about.component').then(m => m.AboutComponent),
+                title: 'Giới thiệu | TechNoX'
+            },
+            {
+                path: 'privacy-policy',
+                loadComponent: () => import('./components/legal/privacy-policy/privacy-policy.component').then(m => m.PrivacyPolicyComponent),
+                title: 'Chính sách bảo mật | TechNoX'
+            },
+            {
+                path: 'terms',
+                loadComponent: () => import('./components/legal/terms/terms.component').then(m => m.TermsComponent),
+                title: 'Điều khoản sử dụng | TechNoX'
+            },
+            {
+                path: 'warranty',
+                loadComponent: () => import('./components/legal/warranty/warranty.component').then(m => m.WarrantyComponent),
+                title: 'Chính sách bảo hành | TechNoX'
+            },
+            {
+                path: 'returns',
+                loadComponent: () => import('./components/legal/returns/returns.component').then(m => m.ReturnsComponent),
+                title: 'Hủy giao dịch, đổi trả | TechNoX'
+            },
+            {path: '', redirectTo: 'about', pathMatch: 'full'}
         ]
     },
 
@@ -101,7 +131,7 @@ export const routes: Routes = [
             import('./components/owner/layout/owner-layout.component')
                 .then(m => m.OwnerLayoutComponent),
         children: [
-            { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
+            {path: '', redirectTo: 'dashboard', pathMatch: 'full'},
             {
                 path: 'dashboard',
                 loadComponent: () =>
@@ -122,6 +152,11 @@ export const routes: Routes = [
                     import('./components/owner/products/products-detail/products-detail.component')
                         .then(m => m.ProductsDetailComponent),
                 title: 'Thêm sản phẩm | Owner'
+            },
+            {
+                path: 'owner/products/:id/edit', loadComponent: () =>
+                    import('./components/owner/products/products-detail/products-detail.component')
+                        .then(m => m.ProductsDetailComponent)
             },
             {
                 path: 'products/:id',

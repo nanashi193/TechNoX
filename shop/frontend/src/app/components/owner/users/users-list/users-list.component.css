@@ -250,3 +250,28 @@
 /* body hai cột số vẫn căn phải như cũ */
 .table.users .col-orders,
 .table.users .col-spent{ text-align:right; justify-content:flex-end; }
+
+.toolbar .search{
+    /* kích thước như bạn muốn */
+    width:280px; height:36px; padding:0 12px;
+    border:1px solid #e5e7eb; border-radius:8px;
+    background:#fff; outline:none; box-shadow:none;
+
+    /* QUAN TRỌNG: bỏ UA style của searchfield */
+    -webkit-appearance: none;
+    appearance: none;
+
+    /* nếu đặt trong flex */
+    flex:0 0 280px;
+}
+
+/* Ẩn đồ trang trí mặc định của search trên WebKit */
+.toolbar .search::-webkit-search-cancel-button,
+.toolbar .search::-webkit-search-decoration{
+    -webkit-appearance:none;
+    appearance:none;
+    display:none;
+}
+
+/* Khi focus vẫn không có shadow viền thứ 2 */
+.toolbar .search:focus{ box-shadow:none; }
