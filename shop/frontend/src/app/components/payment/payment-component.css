@@ -1,8 +1,8 @@
+/* ===== Root container ===== */
 :host {
     display: block;
     padding: clamp(12px, 2vw, 20px);
     background: #0b0b0d url('/assets/Adu.jpg') center/cover no-repeat fixed;
-    color: #eaeaea;
     font-family: 'Be Vietnam Pro', ui-sans-serif, system-ui, -apple-system,
     'Segoe UI', Roboto, Arial, 'Noto Sans', sans-serif;
 }
@@ -10,37 +10,50 @@
 .frame {
     max-width: 980px;
     margin: 0 auto;
+    /* Toàn bộ text bên trong khung là đen */
+    color: #111;
 }
 
+/* ===== Header ===== */
 .header {
     display: flex;
     align-items: baseline;
     justify-content: space-between;
     margin: 10px 0 16px;
 }
+
 .header h2 {
     margin: 0;
     font-size: clamp(22px, 3.4vw, 32px);
     font-weight: 800;
+    /* Nền sáng để chữ đen đọc được trên ảnh nền tối */
+    background: #fff;
+    color: #111;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    padding: 6px 10px;
 }
+
 .link {
-    background: none;
-    border: 1px solid #ffffff;
-    color: #eaeaea;
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    color: #111;
     border-radius: 10px;
     padding: 8px 12px;
     cursor: pointer;
 }
 .link:hover {
-    background: #17181c;
+    background: #f3f4f6;
 }
 
+/* ===== Card / Section ===== */
 .card {
-    background: #121316;
-    border: 1px solid #26272b;
+    background: #fff;
+    color: #111;
+    border: 1px solid #e5e7eb;
     border-radius: 16px;
     padding: clamp(14px, 2vw, 18px);
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
     margin-bottom: 14px;
 }
 
@@ -48,8 +61,10 @@
     margin: 0 0 10px;
     font-size: clamp(16px, 2.4vw, 22px);
     font-weight: 800;
+    color: #111;
 }
 
+/* ===== User grid ===== */
 .user-grid {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -59,95 +74,83 @@
     grid-column: 1 / -1;
 }
 .label {
-    color: #9aa0a6;
+    color: #555;
     margin-bottom: 6px;
     font-size: 13px;
 }
 .value {
-    background: #0f1013;
-    border: 1px solid #ffffff;
+    background: #fff;
+    color: #111;
+    border: 1px solid #e5e7eb;
     border-radius: 10px;
     padding: 10px 12px;
 }
 
+/* ===== Payment methods (support cả .methods và .pmethods) ===== */
+.methods,
 .pmethods {
     display: flex;
     gap: 10px;
     flex-wrap: wrap;
 }
+
 .pill {
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    background: #0f1013;
-    border: 1px solid #2b2d33;
+    background: #fff;
+    color: #111;
+    border: 1px solid #e5e7eb;
     border-radius: 999px;
     padding: 8px 12px;
     cursor: pointer;
 }
+
 .pill input {
-    accent-color: #eaeaea;
+    accent-color: #111;
 }
 
+/* ===== Cart table ===== */
 .row {
     display: grid;
     grid-template-columns: 1fr 90px 140px 160px;
     gap: 12px;
     align-items: center;
     padding: 10px 12px;
-    border-bottom: 1px dashed rgba(255, 255, 255, 0.18);
+    border-bottom: 1px dashed #e5e7eb;
     font-variant-numeric: tabular-nums;
+    color: #111;
 }
+
 .row.head {
-    font-weight: 600;
-    border-bottom: 1px solid rgb(255, 255, 255);
+    font-weight: 700;
+    border-bottom: 1px solid #111;
 }
+
 .row .name .title {
     font-size: 15px;
     font-weight: 700;
-}
-.row .name .sub {
-    font-size: 12px;
-    opacity: 0.9;
-    margin-top: 2px;
-}
-.col.center {
-    text-align: center;
-}
-.col.right {
-    text-align: right;
+    color: #111;
 }
 
+.row .name .sub {
+    font-size: 12px;
+    color: #666;
+    margin-top: 2px;
+}
+
+.col.center { text-align: center; }
+.col.right { text-align: right; }
+
+/* ===== Totals ===== */
 .summary {
     display: flex;
     justify-content: space-between;
     padding: 12px 2px 0;
+    color: #111;
 }
 
-.qrbox {
-    margin-top: 10px;
-    background: rgba(10, 16, 40, 0.92);
-    border: 1px dashed rgba(255, 255, 255, 0.22);
-    border-radius: 12px;
-    padding: 16px;
-    text-align: center;
-}
-.qrbox img {
-    width: 280px;
-    max-width: 100%;
-    display: block;
-    margin: 0 auto 10px;
-    background: #fff;
-    border-radius: 12px;
-    box-shadow: 0 8px 22px rgba(0, 0, 0, 0.35);
-}
-.meta {
-    display: flex;
-    gap: 12px;
-    justify-content: center;
-    margin-bottom: 10px;
-}
-
+/* ===== Generic actions row (download/print/copy/pay...) ===== */
 .actions {
     display: flex;
     gap: 10px;
@@ -155,38 +158,41 @@
     margin: 8px 0;
 }
 
+/* ===== Buttons ===== */
 .btn {
     border-radius: 10px;
     padding: 10px 14px;
-    border: 1px solid #2b2d33;
-    background: #1a1c21;
-    color: #eaeaea;
+    border: 1px solid #e5e7eb;
+    background: #fff;
+    color: #111;
     cursor: pointer;
 }
-.btn:hover {
-    background: #202329;
-}
+.btn:hover { background: #f9fafb; }
+
 .btn.primary {
-    background: #eaeaea;
-    color: #111;
-    border-color: #eaeaea;
-    font-weight: 800;
-    letter-spacing: 0.04em;
-}
-.btn.ghost {
-    background: #0f1013;
+    background: #111;
     color: #fff;
-    border-color: #2b2d33;
+    border-color: #111;
+    font-weight: 800;
+    letter-spacing: 0.02em;
 }
 
+.btn.ghost {
+    background: #f9fafb;
+    color: #111;
+    border-color: #e5e7eb;
+}
+
+/* ===== Helper text / states ===== */
 .hint {
-    color: #bfc3c9;
+    color: #555;
     font-size: 14px;
 }
 
 .empty {
-    background: #0f1013;
-    border: 1px dashed #ffffff;
+    background: #fafafa;
+    color: #111;
+    border: 1px dashed #e5e7eb;
     border-radius: 10px;
     padding: 12px;
     text-align: center;
@@ -194,18 +200,20 @@
 
 .success {
     margin-top: 10px;
-    background: #0f2e18;
-    border: 1px solid #1c7c3a;
-    color: #b2f1c3;
+    background: #f0fff4;           /* nền xanh nhạt */
+    border: 1px solid #22c55e;     /* viền xanh */
+    color: #111;                   /* text vẫn đen */
     padding: 10px 12px;
     border-radius: 10px;
 }
 
+/* ===== Responsive ===== */
 @media (max-width: 900px) {
     .row {
         grid-template-columns: 1fr 70px 120px 120px;
     }
 }
+
 @media (max-width: 600px) {
     .row {
         grid-template-columns: 1fr 60px 100px 100px;
@@ -218,46 +226,3 @@
         grid-template-columns: 1fr;
     }
 }
-/* === FORCE WHITE TEXT (inputs, placeholder, pill, v.v.) === */
-
-/* Tiêu đề + nhãn */
-:host .header h2,
-:host .card h3,
-:host .label { color: #fff !important; }
-
-/* Giá trị hiển thị & text trong input */
-:host .value,
-:host input[type="text"],
-:host input[type="tel"],
-:host input[type="number"] {
-    color: #fff !important;
-    border-color: #fff !important;   /* viền trắng như ảnh */
-}
-
-/* Placeholder cũng trắng (nhạt hơn chút để phân biệt) */
-:host input::placeholder {
-    color: rgba(255,255,255,0.75) !important;
-}
-
-/* Radio + nhãn lựa chọn phương thức thanh toán */
-:host .pmethods,
-:host .pill { color: #fff !important; border-color: #fff !important; }
-:host input[type="radio"] { accent-color: #fff !important; }
-
-/* Bảng giỏ hàng & phần tổng kết */
-:host .row,
-:host .row .name .title,
-:host .row .name .sub,
-:host .summary,
-:host .meta,
-:host .hint,
-:host .empty,
-:host .success {
-    color: #fff !important;
-}
-
-/* Nút */
-:host .btn,
-:host .btn.ghost,
-:host .link { color: #fff !important; }
-:host .btn.primary { color: #fff !important; } /* nếu muốn primary chữ đen thì bỏ dòng này */

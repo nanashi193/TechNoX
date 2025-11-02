@@ -95,7 +95,7 @@ public class CartService implements ICartService{
      */
     @Transactional
     @Override
-    public CartDTO removeProductFromCart(User user, Integer variantId) {
+    public CartDTO removeProductFromCart(User user, Long variantId) {
         Cart cart = getOrCreateCart(user);
         ProductVariant variant = variantRepository.findById(variantId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy phiên bản sản phẩm"));
@@ -112,7 +112,7 @@ public class CartService implements ICartService{
      */
     @Transactional
     @Override
-    public CartDTO updateProductQuantity(User user, Integer variantId, int quantity) {
+    public CartDTO updateProductQuantity(User user, Long variantId, int quantity) {
         if (quantity <= 0) {
             // Nếu số lượng là 0, gọi hàm xóa
             return removeProductFromCart(user, variantId);

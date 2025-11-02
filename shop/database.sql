@@ -487,3 +487,45 @@ GO
 GO
     ALTER TABLE ProductImages ADD PublicId NVARCHAR(255) NOT NULL DEFAULT N'';
     CREATE UNIQUE INDEX UQ_ProductImages_PublicId ON ProductImages (PublicId);
+GO
+IF OBJECT_ID('dbo.PayTransaction', 'U') IS NULL
+BEGIN
+CREATE TABLE dbo.PayTransaction (
+                                    Id           BIGINT IDENTITY(1,1) PRIMARY KEY,
+                                    OrderCode    BIGINT       NOT NULL UNIQUE,   -- từ PayOS
+                                    BillId       BIGINT       NOT NULL,          -- bill của bạn
+                                    Amount       DECIMAL(18,2) NOT NULL,         -- tổng tiền tại lúc tạo
+                                    Status       VARCHAR(20)  NOT NULL,          -- PENDING/PAID/CANCELLED/UNKNOWN
+                                    PayCode      VARCHAR(10)  NULL,              -- "00","07","09"
+                                    RawWebhook   NVARCHAR(MAX) NULL,             -- lưu body để trace
+                                    CreatedAt    DATETIME2    NOT NULL DEFAULT SYSDATETIME(),
+                                    UpdatedAt    DATETIME2    NOT NULL DEFAULT SYSDATETIME()
+);
+
+CREATE INDEX IX_PayTransaction_BillId ON dbo.PayTransaction(BillId);
+END
+GO
+
+-- trigger cập nhật UpdatedAt
+IF OBJECT_ID('dbo.trg_PayTransaction_UpdatedAt', 'TR') IS NULL
+BEGIN
+EXEC('CREATE TRIGGER dbo.trg_PayTransaction_UpdatedAt
+        ON dbo.PayTransaction AFTER UPDATE AS
+        BEGIN
+          SET NOCOUNT ON;
+          UPDATE t SET UpdatedAt = SYSDATETIME()
+          FROM dbo.PayTransaction t
+          JOIN inserted i ON i.Id = t.Id;
+        END');
+END
+GO
+--------------Test Data-------------------
+INSERT INTO dbo.Product (CategoryId, Name, Price, Description, Thumbnail)
+VALUES
+    (5, N'Iphone 19', 5000, N'Điện thoại đời mới nhất của Iphone với biệt danh là "Không thể bị Hack"', 'ip19.jpg'),
+    (5, N'Cục gạch Nokia', 5000, N'Cứng nhất thế giới. Ném chó chó chết, ném ruồi không bao giờ trúng', 'nokia1.jpg')
+GO
+INSERT INTO dbo.ProductVariant (ProductId, Color, Size, Quantity, Price, SKU)
+VALUES
+    (34, N'Galaxy', N'6.67 inch', 100, 5000, N'VIP-1123'),
+    (35, N'Đen', N'6.67 inch', 30, 5000, N'NKA-293')

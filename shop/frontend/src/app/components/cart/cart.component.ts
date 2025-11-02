@@ -20,6 +20,7 @@ export class CartComponent implements OnInit {
     cart: Cart | null = null;
     loading = true; // Thêm trạng thái loading
     error: string | null = null;
+    allSelected = false;
 
     ngOnInit(): void {
         this.loadCart();
@@ -29,11 +30,17 @@ export class CartComponent implements OnInit {
     loadCart(): void {
         this.loading = true;
         this.error = null;
+        this.allSelected = false;
 
         this.cartService.getCart().subscribe({
             next: (data) => {
+                // Khởi tạo trạng thái selected cho từng item
+                if (data && data.items) {
+                    data.items.forEach(item => item.selected = false);
+                }
                 this.cart = data;
                 this.loading = false;
+                this.updateAllSelectedState();
             },
             error: (err) => {
                 console.error('Lỗi khi tải giỏ hàng:', err);
@@ -44,13 +51,36 @@ export class CartComponent implements OnInit {
     }
 
     // ==== Computed (Tính toán) ====
-    get totalQuantity(): number {
-        if (!this.cart) return 0;
-        return this.cart.items.reduce((sum, item) => sum + item.quantity, 0);
+    get selectedItems(): CartItem[] {
+        return this.cart?.items.filter(item => item.selected) || [];
     }
 
-    get totalAmount(): number {
-        return this.cart?.totalPrice || 0;
+    get totalSelectedQuantity(): number {
+        return this.selectedItems.reduce((sum, item) => sum + item.quantity, 0);
+    }
+
+    get totalSelectedAmount(): number {
+        return this.selectedItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    }
+    //=====Check box=====
+    updateAllSelectedState(): void {
+        if (!this.cart || !this.cart.items || this.cart.items.length === 0) {
+            this.allSelected = false;
+            return;
+        }
+        this.allSelected = this.cart.items.every(item => item.selected);
+    }
+
+    toggleSelectAll(event: Event): void {
+        const checked = (event.target as HTMLInputElement).checked;
+        this.allSelected = checked;
+        if (this.cart && this.cart.items) {
+            this.cart.items.forEach(item => item.selected = checked);
+        }
+    }
+
+    onItemSelectChange(): void {
+        this.updateAllSelectedState();
     }
 
     /**
@@ -111,8 +141,27 @@ export class CartComponent implements OnInit {
             error: (err) => console.error('Lỗi khi xóa:', err)
         });
     }
+
     trackByItem = (_: number, it: CartItem) => it.variantId;
+
     goToPayment(): void {
-        this.router.navigate(['/payment']);
+        const itemsToCheckout = this.selectedItems;
+
+        if (itemsToCheckout.length === 0) {
+            alert("Vui lòng chọn ít nhất một sản phẩm để thanh toán.");
+            return;
+        }
+
+        const selectedVariantIds = itemsToCheckout.map(item => item.variantId);
+        sessionStorage.setItem('selectedCartItemIds', JSON.stringify(selectedVariantIds));
+        console.log("Các sản phẩm sẽ thanh toán:", itemsToCheckout);
+
+        // Ví dụ cách 3: Truyền state qua router
+        this.router.navigate(['/payment-detail'], {
+            state: { selectedItems: itemsToCheckout }
+        });
+
+        // Hoặc đơn giản chỉ điều hướng nếu trang Payment tự lấy lại giỏ hàng
+        // this.router.navigate(['/payment-detail']);
     }
 }

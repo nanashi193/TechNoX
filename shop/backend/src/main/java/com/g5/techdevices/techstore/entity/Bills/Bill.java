@@ -31,6 +31,9 @@ public class Bill {
     @Column(name = "Email", columnDefinition = "varchar(100)")
     private String Email;
 
+    @Column(name = "IsActive")
+    private Boolean IsActive;
+
     @Column(name = "Status", columnDefinition = "varchar(30)")
     private String Status;
 
@@ -49,6 +52,6 @@ public class Bill {
     @Column(name = "Phone", length = 20)
     private String phone;
 
-    @OneToMany(mappedBy = "bill")
+    @OneToMany(mappedBy = "bill", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<BillDetail> details;
 }
