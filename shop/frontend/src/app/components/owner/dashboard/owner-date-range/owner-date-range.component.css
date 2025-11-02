@@ -6,10 +6,6 @@
 }
 .dr-btn .chev{ opacity:.7; }
 
-.dr-menu{
-    position:absolute; z-index:1000; margin-top:8px; width:260px; padding:10px;
-    background:#fff; border-radius:16px; box-shadow:0 20px 40px rgba(0,0,0,.15);
-}
 
 .item{ width:100%; text-align:left; padding:12px 14px; border-radius:10px; font-size:15px; }
 .item:hover{ background:#f3f6ff; }
@@ -51,11 +47,7 @@
     --dr-label-col: 72px;
 }
 
-/* Menu */
-.dr-menu{
-    width: var(--dr-menu-width);
 
-}
 
 .custom{ padding: 8px; }
 .row{
@@ -141,12 +133,7 @@
     font-size:14px !important; color:currentColor !important; opacity:1 !important;
 }
 
-/* Menu */
-.dr-menu{
-    position:absolute; z-index:1000; margin-top:8px;
-    width:var(--dr-menu-width); padding:10px;
-    background:#fff; border-radius:16px; box-shadow:0 20px 40px rgba(0,0,0,.15);
-}
+
 .item{ width:100%; text-align:left; padding:12px 14px; border-radius:10px; font-size:15px; white-space:nowrap; }
 .item:hover{ background:#f3f6ff; } .item.active{ background:#eef3ff; color:#2563eb; font-weight:700; }
 .divider{ height:1px; background:#eef1f4; margin:8px 0; }
@@ -156,3 +143,76 @@
 .row input{ height:36px; border:1px solid #e5e7eb; border-radius:8px; padding:0 10px; }
 .apply{ height:38px; border:1px solid #d6e0ff; border-radius:10px; background:#eef3ff; font-weight:600; }
 
+/* === MENU CONTAINER: trắng, bo tròn, bóng đổ mềm === */
+.dr-menu{
+    position:absolute; z-index:1000; margin-top:8px;
+    width:var(--dr-menu-width, 320px);
+    padding:12px;
+    background:#fff;
+    border-radius:16px;
+    box-shadow:0 20px 40px rgba(0,0,0,.15);
+    /* bỏ border nếu trước đó có */
+    border: none;
+}
+
+/* === ITEM: bỏ viền mặc định của button, tăng padding, bo tròn nhẹ === */
+.dr-menu .item{
+    width:100%;
+    display:block;
+    text-align:left;
+    padding:12px 16px;
+    border:0;               /* 👈 loại bỏ viền đen */
+    outline:0;
+    background:transparent; /* nền trong suốt */
+    border-radius:12px;
+    font-size:16px;
+    color:#374151;          /* slate-700 */
+    cursor:pointer;
+}
+
+/* khoảng cách giữa các item */
+.dr-menu .item + .item{ margin-top:8px; }
+
+/* hover: nền xanh rất nhạt */
+.dr-menu .item:hover{
+    background:#f3f6ff;
+}
+
+/* active: giống mẫu – nền xanh nhạt + chữ xanh + đậm */
+.dr-menu .item.active{
+    background:#eef3ff;
+    color:#2563eb;
+    font-weight:700;
+}
+
+/* focus a11y nhưng mềm, không có viền đen */
+.dr-menu .item:focus-visible{
+    outline:2px solid rgba(37,99,235,.35);
+    outline-offset:2px;
+}
+
+/* === CUSTOM RANGE: dãn cách & style input tinh tế như mẫu === */
+.divider{ display:none; } /* không cần thanh chia đậm */
+.custom{
+    margin-top:10px;
+    padding-top:10px;
+    border-top:1px solid #eef1f6;  /* vạch mảnh */
+}
+.row{
+    display:grid; grid-template-columns:72px 1fr; gap:10px; align-items:center;
+}
+.row label{ white-space:nowrap; color:#6b7280; }
+.row input{
+    height:38px; padding:0 10px;
+    border:1px solid #e5e7eb; border-radius:10px;
+    background:#f9fafb;
+}
+.apply{
+    margin-top:6px;
+    height:40px;
+    border-radius:12px;
+    border:1px solid #d6e0ff;
+    background:#eef3ff;
+    font-weight:700;
+    color:#1f2937;
+}
