@@ -1,12 +1,127 @@
-
-<div class="frame" [attr.aria-busy]="qLoading ? 'true' : null">
+<div class="frame" [attr.aria-busy]="(loading || qLoading) ? 'true' : null">
+    <!-- Header -->
     <div class="header">
         <h2>Thanh toán</h2>
-        <button class="link" (click)="refresh()" [disabled]="qLoading">↻ Tải lại giỏ hàng</button>
+        <button class="link" type="button" (click)="refresh()" [disabled]="loading || qLoading">
+            ↻ Tải lại giỏ hàng
+        </button>
     </div>
 
-    <!-- Giỏ hàng -->
-    <div *ngIf="items.length; else empty" class="cart">
+    <!-- ===== Thông tin người dùng & giao dịch ===== -->
+    <section class="card user-card">
+        <h3>Thông tin người dùng & giao dịch</h3>
+        <div class="user-grid">
+            <div class="full">
+                <div class="label">User ID</div>
+                <div class="value">{{ currentUser?.id || '—' }}</div>
+            </div>
+
+            <div>
+                <div class="label">Họ tên</div>
+                <div class="value">{{ currentUser?.fullName || '—' }}</div>
+            </div>
+
+            <div>
+                <div class="label">CCCD</div>
+                <div class="value">{{ customer?.cccd || '—' }}</div>
+            </div>
+
+            <div class="full">
+                <div class="label">Địa chỉ</div>
+                <div class="value">{{ customer?.address || '—' }}</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== Chọn phương thức thanh toán ===== -->
+    <section class="card">
+        <h3>Phương thức thanh toán</h3>
+
+        <div class="methods" role="radiogroup" aria-label="Phương thức thanh toán">
+            <label class="pill">
+                <input
+                        type="radio"
+                        name="method"
+                        [checked]="method === 'COD'"
+                        (change)="onMethodChange('COD')"
+                />
+                <span>COD (Thanh toán khi nhận hàng)</span>
+            </label>
+
+            <label class="pill">
+                <input
+                        type="radio"
+                        name="method"
+                        [checked]="method === 'BANK'"
+                        (change)="onMethodChange('BANK')"
+                />
+                <span>Chuyển khoản ngân hàng (VietQR)</span>
+            </label>
+        </div>
+    </section>
+
+    <!-- ===== QR khi chọn BANK ===== -->
+    <section class="card" *ngIf="method === 'BANK'">
+        <h3>Quét VietQR</h3>
+
+        <ng-container *ngIf="!qLoading && qrSrc; else qrState">
+            <div class="qrbox">
+                <img
+                        [src]="qrSrc"
+                        [attr.alt]="'VietQR chuyển khoản ngân hàng cho đơn ' + (orderId || '')"
+                        loading="lazy"
+                        decoding="async"
+                />
+
+                <div class="meta">
+                    <span><b>{{ merchant.accountName }}</b></span>
+                    <span>{{ merchant.bank }} • {{ merchant.accountNumber }}</span>
+                </div>
+
+                <div class="actions">
+                    <a class="btn secondary" [href]="qrSrc" [attr.download]="'vietqr-' + (orderId || 'don') + '.png'">
+                        Tải ảnh
+                    </a>
+                    <button class="btn secondary" type="button" (click)="printQR()">In QR</button>
+                    <button class="btn secondary" type="button" (click)="copyAddInfo()">Sao chép nội dung</button>
+                </div>
+
+                <p class="hint">
+                    Nội dung chuyển khoản:
+                    <code>Thanh toan {{ orderId || 'DON' }}</code>
+                </p>
+                <p class="hint">Quét QR bằng app ngân hàng. Nội dung đã kèm mã đơn <b>{{ orderId || '—' }}</b>.</p>
+            </div>
+        </ng-container>
+
+        <ng-template #qrState>
+            <div *ngIf="qLoading" class="qr-loading">
+                <div class="skeleton qr"></div>
+                <div class="hint" role="status">Đang tạo QR…</div>
+            </div>
+
+            <div *ngIf="!qLoading && !qrSrc" class="empty">
+                Không tải được QR.
+                <div class="actions">
+                    <button class="btn secondary" type="button" (click)="refresh()">Thử lại</button>
+                </div>
+            </div>
+        </ng-template>
+    </section>
+
+    <!-- ===== Thông báo khi chọn COD ===== -->
+    <section class="card success" *ngIf="method === 'COD'">
+        <h3>Thanh toán khi nhận hàng (COD)</h3>
+        <p>Chúng tôi sẽ liên hệ giao hàng. Bạn thanh toán trực tiếp cho shipper.</p>
+        <button class="btn primary" type="button" (click)="confirmCOD()" [disabled]="loading">
+            Xác nhận COD
+        </button>
+    </section>
+
+    <!-- ===== Giỏ hàng ===== -->
+    <section class="card" *ngIf="items.length > 0; else emptyCart">
+        <h3>Giỏ hàng</h3>
+
         <div class="row head">
             <div class="col name">Sản phẩm</div>
             <div class="col center">SL</div>
@@ -23,63 +138,24 @@
             <div class="col right">{{ it.price | currency:'VND':'symbol':'1.0-0':'vi-VN' }}</div>
             <div class="col right">{{ (it.price * it.qty) | currency:'VND':'symbol':'1.0-0':'vi-VN' }}</div>
         </div>
+    </section>
 
-        <div class="sep"></div>
+    <ng-template #emptyCart>
+        <div class="card empty">Giỏ hàng đang trống.</div>
+    </ng-template>
 
+    <!-- ===== Tổng kết ===== -->
+    <section class="card totals" *ngIf="items.length > 0">
         <div class="summary">
             <div class="left">
-                <div class="order">Mã đơn hàng: <b>{{ orderId }}</b></div>
+                <div class="order">Mã đơn hàng: <b>{{ orderId || '—' }}</b></div>
             </div>
             <div class="right">
                 <div class="total">
-                    Tổng cộng: <b>{{ subtotal | currency:'VND':'symbol':'1.0-0':'vi-VN' }}</b>
+                    Tổng cộng:
+                    <b>{{ subtotal | currency:'VND':'symbol':'1.0-0':'vi-VN' }}</b>
                 </div>
             </div>
         </div>
-
-        <!-- QR -->
-        <div class="qrbox" [attr.aria-busy]="qLoading ? 'true' : null">
-            <ng-container *ngIf="!qLoading && qrSrc; else qrState">
-                <img
-                        [src]="qrSrc"
-                        [attr.alt]="'VietQR chuyển khoản ngân hàng cho đơn ' + orderId"
-                        loading="lazy"
-                        decoding="async"
-                />
-
-                <div class="meta">
-                    <span><b>{{ merchant.accountName }}</b></span>
-                    <span>MB • {{ merchant.accountNumber }}</span>
-                </div>
-
-                <div class="actions">
-                    <a class="btn secondary" [href]="qrSrc" [attr.download]="'vietqr-' + orderId + '.png'">Tải ảnh</a>
-                    <button class="btn secondary" (click)="printQR()">In QR</button>
-                    <button class="btn secondary" (click)="copyAddInfo()">Sao chép nội dung</button>
-
-                </div>
-
-                <p class="hint">Nội dung chuyển khoản: <code>Thanh toan {{ orderId }}</code></p>
-                <p class="hint">Quét QR bằng app ngân hàng. Nội dung đã kèm mã đơn <b>{{ orderId }}</b>.</p>
-            </ng-container>
-
-            <ng-template #qrState>
-                <div *ngIf="qLoading" class="qr-loading">
-                    <div class="skeleton qr"></div>
-                    <div class="hint" role="status">Đang tạo QR…</div>
-                </div>
-
-                <div *ngIf="!qLoading && !qrSrc" class="empty">
-                    {{ qError || 'Không tải được QR.' }}
-                    <div class="actions">
-                        <button class="btn secondary" (click)="refresh()">Thử lại</button>
-                    </div>
-                </div>
-            </ng-template>
-        </div>
-    </div>
-
-    <ng-template #empty>
-        <div class="empty">Giỏ hàng đang trống.</div>
-    </ng-template>
+    </section>
 </div>

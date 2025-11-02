@@ -2,6 +2,7 @@ package com.g5.techdevices.techstore.responses;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.g5.techdevices.techstore.entity.products.Product;
+import com.g5.techdevices.techstore.entity.products.ProductImages;
 import lombok.*;
 
 import java.math.BigDecimal;
@@ -22,8 +23,13 @@ public class ProductResponse extends BaseResponse {
 
     private List<ProductVariantResponse> variants;
 
+    private List<ImagesItemResponse> imageItems;
 
-    @JsonProperty("CategoryId")              // 👈 tên key trong JSON (tuỳ bạn: "category" / "CategoryName")
+    @JsonProperty("categoryId")
+    private Integer categoryId;
+
+
+    @JsonProperty("categoryName")              // 👈 tên key trong JSON (tuỳ bạn: "category" / "CategoryName")
     private String categoryName;
     public static ProductResponse fromProduct(Product product) {
         ProductResponse productResponse =  ProductResponse.builder()
@@ -31,9 +37,17 @@ public class ProductResponse extends BaseResponse {
                 .price(product.getPrice())
                 .thumbnail(product.getThumbnail())
                 .description(product.getDescription())
-                .categoryName(                                   // 👈 set theo tên
-                product.getCategory() != null ? product.getCategory().getName() : null)
+                // ✅ THÊM: set categoryId + categoryName
+                .categoryId(product.getCategory() != null ? product.getCategory().getId() : null)
+                .categoryName(product.getCategory() != null ? product.getCategory().getName() : null)
                 .status(product.isStatus())
+
+
+                // ✅ imageItems: List<ImageItemResponse>
+                .imageItems(product.getImages() == null ? List.of() :
+                        product.getImages().stream()
+                                .map(img -> new ImagesItemResponse(img.getId(), img.getImageUrl()))
+                                .collect(Collectors.toList()))
                 .build();
         productResponse.setId(product.getId());
         productResponse.setCreateAt(product.getCreatedAt());

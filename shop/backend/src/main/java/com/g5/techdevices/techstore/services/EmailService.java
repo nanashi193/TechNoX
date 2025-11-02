@@ -20,12 +20,12 @@ public class EmailService {
         switch (type) {
             case VERIFY_ACCOUNT -> {
                 subject = "Verify your account";
-                body = "Please click the link to verify your account:\n" +
+                body = "Hi! Please click the link to verify your account:\n" +
                         "http://localhost:4200/verify-email?token=" + token;
             }
             case RESET_PASSWORD -> {
                 subject = "Reset Password";
-                body = "Click below to reset your password:\n" +
+                body = "Hi! Click below to reset your password:\n" +
                         "http://localhost:4200/reset-password?token=" + token;
             }
             default -> throw new IllegalArgumentException("Unknown email type");

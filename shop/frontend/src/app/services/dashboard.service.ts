@@ -1,41 +1,51 @@
-import { Injectable } from '@angular/core';
+import {inject, Injectable} from '@angular/core';
 import { Observable, of } from 'rxjs';
-import {Kpi, TopProduct, NewProduct, OrderStat } from "../models/dashboard.models";
+import {Kpi, TopProduct, NewProduct, OrderStat, RevenueQuery, RevenueSeries} from "../models/dashboard.models";
+import {HttpClient, HttpParams} from "@angular/common/http";
+import {environment} from "../environments/environment";
 
 @Injectable({ providedIn: 'root' })
 export class DashboardService {
-// TODO : thay of(...) bằng this.http.get('/api/dashboard/kpi')
-    getKpi(): Observable<Kpi> {
-        return of({
-            revenueToday: 0,
-            ordersToday: 0,
-            newCustomersToday: 0
+    private http = inject(HttpClient);
+    private base = environment.apiBaseUrl;
+
+    getRevenue(q: RevenueQuery): Observable<RevenueSeries> {
+        return this.http.get<RevenueSeries>(`${this.base}/dashboard/revenue`, {
+            params: this.params({ from: q.from, to: q.to, bucket: q.bucket ?? 'day' })
         });
     }
 
-    getOrderStats(): Observable<OrderStat[]> {
-        return of([
-            { label: 'Chưa thanh toán', value: 0 },
-            { label: 'Chưa giao hàng', value: 14 },
-            { label: 'Đang giao', value: 2 },
-            { label: 'Đã hủy', value: 0 }
-        ]);
+    getKpi(q: RevenueQuery): Observable<Kpi> {
+        return this.http.get<Kpi>(`${this.base}/dashboard/kpi`, {
+            params: this.params({ from: q.from, to: q.to })
+        });
     }
 
-    getTopProducts(): Observable<TopProduct[]> {
-        return of([
-            { image: '/assets/demo/p1.jpg', name: 'Photive wireless speakers', changePct: -72, price: 65, sold: 7545, sales: 15302 },
-            { image: '/assets/demo/p2.jpg', name: 'Topman shoe in green', changePct: 69, price: 21, sold: 6643, sales: 12492 },
-            { image: '/assets/demo/p3.jpg', name: 'RayBan black sunglasses', changePct: -65, price: 37, sold: 5951, sales: 10351 },
-            { image: '/assets/demo/p4.jpg', name: "Mango Women's shoe", changePct: -53, price: 65, sold: 5002, sales: 9917 },
-        ]);
+    getOrderStats(q: RevenueQuery): Observable<OrderStat[]> {
+        return this.http.get<OrderStat[]>(`${this.base}/dashboard/order-stats`, {
+            params: this.params({ from: q.from, to: q.to })
+        });
     }
 
-    getNewProducts(): Observable<NewProduct[]> {
-        return of([
-            { image: '/assets/demo/new1.jpg', name: 'AirPods Max – Silver', date: '10/10/2025' },
-            { image: '/assets/demo/new2.jpg', name: 'MacBook Pro M4 – Space Black', date: '08/10/2025' },
-            { image: '/assets/demo/new3.jpg', name: 'iPhone 16 Pro – Natural Titanium', date: '06/10/2025' },
-        ]);
+    getTopProducts(q: RevenueQuery, limit = 4): Observable<TopProduct[]> {
+        return this.http.get<TopProduct[]>(`${this.base}/dashboard/top-products`, {
+            params: this.params({ from: q.from, to: q.to, limit })
+        })
+        // Nếu BE trả {items: [...]}, bỏ comment dòng dưới:
+        // .pipe(map((r: any) => r.items as TopProduct[]));
+    }
+
+    getNewProducts(limit = 6): Observable<NewProduct[]> {
+        return this.http.get<NewProduct[]>(`${this.base}/products/new`, {
+            params: this.params({ limit })
+        })
+        // .pipe(map((r:any)=> r.items as NewProduct[]));
+    }
+    private params(obj: Record<string, any>) {
+        let p = new HttpParams();
+        Object.entries(obj).forEach(([k, v]) => {
+            if (v !== undefined && v !== null) p = p.set(k, String(v));
+        });
+        return p;
     }
 }

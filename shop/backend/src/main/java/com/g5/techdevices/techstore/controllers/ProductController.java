@@ -175,31 +175,42 @@ public class ProductController {
 
     //search with id
 
-    @GetMapping("/{id}")
-    public ResponseEntity <?> getProductById(
-            @PathVariable("id") Long productId){
+    @GetMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> getProductById(@PathVariable Long id) {
         try {
-           Product existingProduct = productService.getProductById(productId);
-            return ResponseEntity.ok(ProductResponse.fromProduct(existingProduct));
+            Product product = productService.getProductById(id);
+            ProductResponse response = ProductResponse.fromProduct(product);
+            return ResponseEntity.ok()
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .body(response);
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
+            // Trả lỗi JSON để FE đọc được, không lỗi parse
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of("error", e.getMessage()));
         }
     }
+
+
 
 
     //Delete
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteProduct(
-            @PathVariable long id
-    ){
-        try {
-                productService.deleteProduct(id);
-                return ResponseEntity.ok(String.format("Product with id %d has been deleted", id));
-        } catch (Exception e) {
-                return ResponseEntity.badRequest().body(e.getMessage());
-        }
+    @DeleteMapping("/{id:\\d+}")
+    public ResponseEntity<Void> deleteProduct(@PathVariable long id) {
+        productService.deleteProduct(id);          // ném DataNotFoundException nếu không thấy
+        return ResponseEntity.noContent().build(); // ✅ 204, không body
     }
+
+    public record BulkIds(List<Long> ids) {}
+
+    @PostMapping("/bulk-delete")
+    public ResponseEntity<Map<String,Object>> bulkDelete(@RequestBody BulkIds body) {
+        var ids = body.ids();
+        ids.forEach(productService::deleteProduct);
+        return ResponseEntity.ok(Map.of("deletedIds", ids));
+    }
+
+
 
     //update
     @PutMapping("/{id}")
@@ -209,7 +220,7 @@ public class ProductController {
     ){
         try{
              Product updatedProduct = productService.updateProduct(id, productDTO);
-             return ResponseEntity.ok(updatedProduct);
+            return ResponseEntity.noContent().build();
         }catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
@@ -272,8 +283,4 @@ public class ProductController {
         }
     }
 
-
-
-
-
-}
+        }

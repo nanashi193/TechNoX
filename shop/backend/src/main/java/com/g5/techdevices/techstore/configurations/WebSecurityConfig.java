@@ -61,7 +61,13 @@ public class WebSecurityConfig {
                         .permitAll()
                         .requestMatchers(POST, apiPrefix + "/products/*/variants").hasAnyRole(Role.ADMIN, Role.OWNER)
                         .requestMatchers(POST, apiPrefix + "/products/*/variants/**").hasAnyRole(Role.ADMIN, Role.OWNER)
+                        // ✅ Xoá 1 sản phẩm
+                        .requestMatchers(DELETE, String.format("%s/products/*", apiPrefix))
+                        .hasAnyRole(Role.ADMIN, Role.OWNER)
 
+                        // ✅ Xoá nhiều sản phẩm (batch delete)
+                        .requestMatchers(POST, String.format("%s/products/bulk-delete", apiPrefix))
+                        .hasAnyRole(Role.ADMIN, Role.OWNER)
                         // đã có:
                         // ✅ Cho phép tạo sản phẩm (POST)
                         .requestMatchers(POST, String.format("%s/products", apiPrefix))
