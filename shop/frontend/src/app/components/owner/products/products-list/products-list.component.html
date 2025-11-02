@@ -20,26 +20,45 @@
         </div>
 
         <!-- TỒN KHO -->
-        <div class="fp-group">
+        <div class="filter-group">
             <div class="fp-label">Tồn kho</div>
             <label class="fp-row"><input type="radio" name="stk" [(ngModel)]="flt.stock" value="all"> All</label>
             <label class="fp-row"><input type="radio" name="stk" [(ngModel)]="flt.stock" value="in"> In stock</label>
             <label class="fp-row"><input type="radio" name="stk" [(ngModel)]="flt.stock" value="out"> Out of stock</label>
         </div>
 
-        <!-- SKU -->
-        <div class="fp-group">
-            <div class="fp-label">Mã SKU</div>
-            <input class="toolbar-input" [(ngModel)]="flt.sku" placeholder="VD: ABC-001">
-        </div>
 
         <!-- TYPE -->
         <div class="fp-group">
-            <div class="fp-label">Loại</div>
-            <select [(ngModel)]="flt.type" class="toolbar-select">
-                <option [ngValue]="null">All</option>
-                <option *ngFor="let t of types" [ngValue]="t">{{ t }}</option>
-            </select>
+            <div class="fg-title">Loại</div>
+
+            <ul class="radio-list">
+                <li>
+                    <label class="r">
+                        <input
+                                type="radio"
+                                name="type"
+                                [value]="''"
+                                [ngModel]="flt.categoryId ?? ''"
+                                (ngModelChange)="onChangeCategory($event)" />
+                        <span>All</span>
+                    </label>
+                </li>
+
+                <li>
+                    <label class="r" *ngFor="let c of categories">
+                        <input
+                                type="radio"
+                                name="type"
+                                [value]="c.id"
+                        [ngModel]="flt.categoryId ?? ''"
+                        (ngModelChange)="onChangeCategory($event)" />
+                        <span>{{ c.name }}</span>
+                    </label>
+                </li>
+            </ul>
+
+            <button type="button" class="link-clear" (click)="flt.categoryId = null">Clear</button>
         </div>
 
 
@@ -64,20 +83,18 @@
         </div>
 
         <div class="cell col-type th sortable"
-             (click)="sortBy('categoryName')" [attr.aria-sort]="ariaSort('categoryName')">
+          >
             Loại
-            <span class="sort-caret" [class.asc]="isAsc('categoryName')" [class.desc]="isDesc('categoryName')"
-            ></span>
+
         </div>
 
         <div class="cell col-stocks">Tồn kho</div>
 
 
         <div class="cell col-sku th sortable"
-             (click)="sortBy('sku')" [attr.aria-sort]="ariaSort('sku')">
+             (click)="sortBy('id')" [attr.aria-sort]="ariaSort('id')">
             Mã sản phẩm
-            <span class="sort-caret" [class.asc]="isAsc('sku')" [class.desc]="isDesc('sku')"
-            ></span>
+            <span class="sort-caret" [class.asc]="isAsc('id')" [class.desc]="isDesc('id')"></span>
         </div>
 
         <div class="cell col-price th sortable"
@@ -88,17 +105,15 @@
         </div>
 
         <div class="cell col-variants th sortable"
-             (click)="sortBy('variants')" [attr.aria-sort]="ariaSort('variants')">
+       >
             Biến thể
-            <span class="sort-caret" [class.asc]="isAsc('variants')" [class.desc]="isDesc('variants')"
-            ></span>
+
         </div>
 
         <div class="cell col-qty th sortable"
-             (click)="sortBy('stockQty')" [attr.aria-sort]="ariaSort('stockQty')">
+      >
             Số lượng
-            <span class="sort-caret" [class.asc]="isAsc('stockQty')" [class.desc]="isDesc('stockQty')"
-            ></span>
+
         </div>
     </div>
 
@@ -128,8 +143,17 @@
         </div>
 
         <div class="cell col-sku">#{{ p.sku }}</div>
-        <div class="cell col-price">{{ p.price | number:'1.0-0' }}₫</div>
-        <div class="cell col-variants">{{ p.variants }}</div>
+        <div class="cell col-price">
+            <ng-container *ngIf="!p.hasPriceRange; else priceRange">
+                {{ p.minPrice | currency:'VND':'symbol-narrow':'1.0-0' }}
+            </ng-container>
+            <ng-template #priceRange>
+                {{ p.minPrice | currency:'VND':'symbol-narrow':'1.0-0' }}
+                –
+                {{ p.maxPrice | currency:'VND':'symbol-narrow':'1.0-0' }}
+            </ng-template>
+        </div>
+        <div class="cell col-variants">{{ p.variants?.length || 0 }}</div>
         <div class="cell col-qty">{{ p.stockQty ?? 0 }}</div>
     </div>
 

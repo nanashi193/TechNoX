@@ -26,6 +26,7 @@ export interface Product {
     inStock?: boolean;
     stockQty?: number;
     image?: string;         // FE preview, map -> thumbnail khi gửi
+    imageItems: ProductImageItem[];
 
     variants?: ProductVariant[]; // ⟵ mảng biến thể, KHÔNG phải number
     variantCount?: number;       // (tuỳ chọn) nếu bạn cần đếm cho list
@@ -34,6 +35,20 @@ export interface Product {
     updatedAt?: string;
 
     [k: string]: any;
+}
+export type ProductListItem = Product & {
+    minPrice: number;
+    maxPrice: number;
+    hasPriceRange: boolean;
+};
+export interface ProductImageItem { id: number; url: string; }
+
+export interface MediaItem {
+    id: string;
+    previewUrl: string;
+    imageId?: number;   // <= id từ BE (nếu có)
+    file?: File|null;
+    isUrl?: boolean;
 }
 
 export interface Page<T> {

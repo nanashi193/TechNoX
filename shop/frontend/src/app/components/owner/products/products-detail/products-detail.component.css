@@ -369,53 +369,7 @@ textarea {
         flex: initial;
     }
 }
-
-/* === Sticky action bar for EDIT === */
-.sticky-actions {
-    position: fixed;
-    left: 24px;
-    right: 24px;
-    bottom: calc(16px + env(safe-area-inset-bottom));
-    z-index: 50;
-    background: #0f1b3a; /* navy */
-    color: #fff;
-    border-radius: 20px;
-    padding: 16px 18px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    box-shadow: 0 10px 30px rgba(7, 15, 41, .35);
-}
-
-.sticky-actions .btn {
-    height: 40px;
-    padding: 0 18px;
-    border-radius: 12px;
-    line-height: 1;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-}
-
-.sticky-actions .btn.primary {
-    background: #3b82f6;
-    color: #fff;
-    border: none;
-}
-
-.sticky-actions .btn.ghost.light {
-    background: transparent;
-    color: #e5e7eb;
-    border: 1px solid rgba(255, 255, 255, .25);
-}
-
-@media (max-width: 760px) {
-    .sticky-actions {
-        left: 12px;
-        right: 12px;
-    }
-}/* grid */
+/* grid */
 .v-grid { display: grid; gap: 8px; }
 .v-row  {
     display: grid;
@@ -456,5 +410,117 @@ textarea {
 /* icon xoá */
 .icon-btn { background: transparent; border: 0; cursor: pointer; }
 
+.page-head{
+    display:flex; justify-content:space-between; align-items:center;
+    /* giữ chiều cao ổn định như lúc có nút (~44–48px tuỳ nút của bạn) */
+    min-height: 48px;
+    margin:8px 0 16px;
+}
+
+.actions.invisible{
+    visibility: hidden;      /* vẫn chiếm chỗ, không click được */
+    /* hoặc dùng:
+       opacity: 0; pointer-events: none;
+    */
+}
+.media-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(120px,1fr)); gap:12px; }
+.media-item { position:relative; border:1px solid #e5e7eb; border-radius:10px; padding:6px; background:#fff; }
+.media-item.is-thumb { outline:2px solid #1a73e8; }
+.media-item img { width:100%; display:block; border-radius:8px; cursor: pointer; }
+.media-item .badge { position:absolute; top:6px; left:6px; background:#1a73e8; color:#fff; font-size:12px;
+    padding:2px 6px; border-radius:6px; }
+.media-item .make-thumb { position:absolute; left:6px; bottom:6px; font-size:12px; }
+.media-item .remove { position:absolute; right:6px; top:6px; }
+.media-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(120px,1fr)); gap:12px; }
+
+.media-item{
+    display:inline-flex;           /* xếp dọc */
+    flex-direction:column;
+    align-items:flex-end;          /* đẩy nút sang phải */
+    gap:6px;
+    border:1px solid #e5e7eb; border-radius:10px; padding:6px; background:#fff;
+}
+.media-item img{ width:100%; display:block; border-radius:8px; cursor:pointer; }
+.media-item .remove{
+    position:static;               /* quan trọng: KHÔNG absolute */
+    width:24px; height:24px; border-radius:999px;
+    background:#fff; border:1px solid #e5e7eb; display:grid; place-items:center;
+    font-size:14px; line-height:1; cursor:pointer;
+}
+.sticky-actions {
+    position: fixed;
+    left: 50%; /* Căn giữa */
+    transform: translateX(-50%); /* Căn giữa hoàn hảo */
+    bottom: calc(16px + env(safe-area-inset-bottom));
+    z-index: 50;
+    background: #0f1b3a;
+    color: #fff;
+    border-radius: 20px;
+    padding: 12px 16px; /* Giảm padding từ 16px 18px xuống */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    box-shadow: 0 10px 30px rgba(7, 15, 41, .35);
+    max-width: fit-content; /* Tự động co lại vừa với nội dung */
+    min-width: 200px; /* Đảm bảo không quá nhỏ */
+}
+
+.sticky-actions .btn {
+    height: 40px;
+    padding: 0 20px; /* Tăng padding ngang một chút cho nút */
+    border-radius: 12px;
+    line-height: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    white-space: nowrap; /* Không cho text xuống dòng */
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.sticky-actions .btn.primary {
+    background: #3b82f6;
+    color: #fff;
+    border: none;
+}
+
+.sticky-actions .btn.ghost {
+    background: transparent;
+    color: #e5e7eb;
+    border: 1px solid rgba(255, 255, 255, .25);
+}
+
+.sticky-actions .btn.primary:hover:not(:disabled) {
+    background: #2563eb;
+}
+
+.sticky-actions .btn.ghost:hover {
+    background: rgba(255, 255, 255, .1);
+}
+
+.sticky-actions .btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+@media (max-width: 760px) {
+    .sticky-actions {
+        left: 12px;
+        right: 12px;
+        transform: none; /* Bỏ transform trên mobile */
+        max-width: none; /* Full width trên mobile */
+    }
+}
+/* ví dụ */
+.v-row {
+    display: grid;
+    grid-template-columns: 1.2fr 1fr 0.8fr 0.8fr auto auto; /* color size qty price switch btn */
+    gap: 8px;
+    align-items: center;
+}
+.v-head { font-weight: 600; color: var(--muted); }
+.switch.center { display: inline-flex; justify-content: center; }
 
 
