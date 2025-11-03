@@ -69,11 +69,13 @@
                             class="card__media"
                             [style.background-image]="'url(' + p.image + ')'"
                             [attr.aria-label]="p.name"
-                            href="#"
+                            [routerLink]="['/product', p.id]"
                     ></a>
 
                     <div class="card__body">
-                        <h3 class="card__title">{{ p.name }}</h3>
+                        <h3 class="card__title">
+                            <a [routerLink]="['/product', p.id]">{{ p.name }}</a>
+                        </h3>
 
                         <div class="chip-row" *ngIf="p.tags?.length">
                             <span class="chip" *ngFor="let t of p.tags">{{ t }}</span>

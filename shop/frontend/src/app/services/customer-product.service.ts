@@ -17,10 +17,26 @@ export class CustomerProductService {
      * @param size Số lượng trên mỗi trang
      * @returns Observable chứa dữ liệu trang sản phẩm
      */
-    getProducts(page: number = 0, size: number = 12): Observable<CustomerProductPage> {
-        const params = new HttpParams()
+    getProducts(
+        page: number = 0,
+        size: number = 12,
+        keyword?: string,
+        category?: string, // Sẽ là 'all' hoặc một ID
+        sort?: string // Sẽ là 'relevance' hoặc 'priceAsc', 'priceDesc'
+    ): Observable<CustomerProductPage> {
+
+        let params = new HttpParams()
             .set('page', page.toString())
             .set('size', size.toString());
+        if (keyword) {
+            params = params.set('keyword', keyword);
+        }
+        if (category && category !== 'all') {
+            params = params.set('category', category);
+        }
+        if (sort && sort !== 'relevance') {
+            params = params.set('sort', sort);
+        }
 
         // Gọi API backend
         return this.http.get<CustomerProductPage>(this.baseUrl, { params }).pipe(

@@ -76,7 +76,7 @@
                 <div>
                     <span class="price">{{ formatPrice(p.price) }}</span> <span *ngIf="!p.inStock" class="chip chip--oos">Hết hàng</span> </div>
 
-                <button class="btn btn--accent btn--block" type="button" [disabled]="!p.inStock">
+                <button class="btn btn--accent btn--block" type="button" [disabled]="!p.inStock" >
                     Thêm vào giỏ
                 </button>
             </div>
