@@ -1,0 +1,223 @@
+
+.auth-layout .card a {
+    cursor: pointer !important;
+    color: #e74b45;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.auth-layout .card a:hover {
+    text-decoration: underline;
+}
+
+.auth-layout .card a:visited {
+    color: #e74b45;
+}
+
+/*link trên logo táo*/
+
+
+.brand-logo {
+    width: 200px; /* logo to hơn */
+    height: auto;
+    margin-bottom: 24px;
+    filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.3));
+    mix-blend-mode: screen
+}
+
+.note {
+    font-style: italic;
+    font-size: 14px;
+    text-align: left;
+    color: #555;
+    margin-top: 4px;
+    display: block;
+}
+
+.field {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    text-align: left;
+    gap: 6px;
+}
+
+.hotlines {
+    display: grid;
+    gap: 8px;
+}
+
+.hotlines a {
+    font-weight: 700;
+    text-decoration: none;
+    color: #fff;
+    border-bottom: 3px solid #e74b45;
+    width: fit-content;
+}
+@import url("https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;600;700;800&display=swap&subset=vietnamese");
+.socials {
+    margin-top: auto;
+    display: flex;
+    gap: 16px;
+}
+
+.socials a {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: #fff;
+    color: #111;
+    display: grid;
+    place-items: center;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.card input::placeholder {
+    font-size: 14px;
+    color: #aaa;
+}
+
+.alert {
+    text-align: left;
+}
+
+.had-account {
+    margin-top: 16px;
+    font-size: 14px;
+}
+
+.create-link {
+    color: #e74b45;
+    text-decoration: none;
+    font-weight: 500;
+}
+.card select {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 18px 20px;
+    border-radius: 14px;
+    border: 1px solid #ddd;
+    background: #fafafa;
+    font-size: 17px;
+    transition: all .2s ease;
+    display: block;
+}
+.card select:focus {
+    border-color: #e74b45;
+    background: #fff;
+    box-shadow: 0 0 0 3px rgba(231,75,69,.2);
+}
+.gender-field {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.gender-label {
+    font-size: 16px;
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+.radio-row {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+}
+
+.radio {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    user-select: none;
+    font-size: 16px;
+}
+
+
+.radio input[type="radio"] {
+    width: 18px;
+    height: 18px;
+}
+.notice {
+    margin-top: 8px;
+    font-size: 14px;
+    line-height: 1.45;
+    border-radius: 10px;
+    padding: 10px 12px;
+}
+.notice.success {
+    background-color: #e8f6ee;
+    color: #176a3a;
+    border: 1px solid #a7e0be;
+    border-radius: 10px;
+    padding: 10px 12px;
+    margin-top: 8px;
+    font-size: 14px;
+}
+
+.notice.error {
+    background: #fdecea;
+    border: 1px solid #f5c2c7;
+    color: #b4232c;
+}
+/*modal success*/
+.modal-backdrop{
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,.45);
+    z-index: 999;
+    backdrop-filter: blur(2px);
+}
+
+.modal{
+    position: fixed; inset: 0;
+    display: grid; place-items: center;
+    z-index: 1000;
+    padding: 16px;
+}
+.modal-card { text-align: center; }
+.modal-card dotlottie-wc {
+    display: block;
+    margin: 0 auto 12px;
+}
+.modal-card{
+    width: min(520px, 92vw);
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 20px 60px rgba(0,0,0,.25);
+    padding: 20px 22px 18px;
+    text-align: center;
+}
+
+.modal-card h3{
+    margin: 6px 0 8px; font-size: 22px;
+}
+
+.modal-card p{
+    margin: 0 0 14px; color:#176a3a;
+}
+
+.modal-card .actions{
+    margin-top: 6px;
+}
+
+.modal-card .primary-btn{
+    width: 100%;
+}
+/*-----------*/
+.anim-wrap{
+    width: 220px;               /* đổi 200–260 tùy modal */
+    aspect-ratio: 1/1;
+    margin: 0 auto 12px;
+    display: grid;
+    place-items: center;
+}
+
+.anim-wrap dotlottie-wc{
+    display: block;
+    width: 135%;
+    height: 135%;
+    transform: translateX(-13%);
+}
+

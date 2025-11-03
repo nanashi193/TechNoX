@@ -1,0 +1,206 @@
+<div class="oc-wrap">
+    <div class="oc-head">
+        <h2>Quản lí đơn hàng</h2>
+
+        <div class="oc-actions">
+            <div class="seg">
+                <button [class.active]="statusFilter() === 'all'"        (click)="setFilter('all')">Tất cả</button>
+                <button [class.active]="statusFilter() === 'processing'" (click)="setFilter('processing')">Đang xử lí</button>
+                <button [class.active]="statusFilter() === 'paid'"       (click)="setFilter('paid')">Đã thanh toán</button>
+                <button [class.active]="statusFilter() === 'completed'"  (click)="setFilter('completed')">Đã hoàn thành</button>
+            </div>
+
+            <input class="search"
+                   type="search"
+                   placeholder="Tìm theo mã, tên KH, SĐT, địa chỉ, loại đơn…"
+                   [ngModel]="search()"
+                   (ngModelChange)="search.set($event)">
+        </div>
+    </div>
+
+    <div *ngIf="loading" class="oc-banner info">Đang tải dữ liệu…</div>
+    <div *ngIf="errorMsg" class="oc-banner error">{{ errorMsg }}</div>
+    <div *ngIf="successMsg" class="oc-banner success">{{ successMsg }}</div>
+
+    <!-- ======= BẢNG 1: ĐƠN HIỆN TẠI ======= -->
+    <h3 style="margin:12px 0 6px;">Đơn hiện tại</h3>
+    <div class="table-wrap">
+        <table class="orders-table">
+            <thead>
+            <tr>
+                <th>Mã đơn</th>
+                <th>Khách hàng</th>
+                <th>Loại đơn</th>
+                <th>Tổng tiền</th>
+                <th>Trạng thái</th>
+                <th>Ngày tạo</th>
+                <th>Nhân viên giao</th>
+                <th></th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr *ngIf="activeOrders().length === 0">
+                <td colspan="8" class="muted">Không có đơn nào.</td>
+            </tr>
+
+            <ng-container *ngFor="let o of activeOrders(); trackBy: trackOrder">
+                <tr>
+                    <td class="mono">{{ o.id }}</td>
+                    <td>
+                        <div class="strong">{{ o.customerName }}</div>
+                        <div class="muted">{{ o.phone }}</div>
+                    </td>
+                    <td>
+              <span class="badge" [class.paid]="o.orderType === 'POS'" [class.processing]="o.orderType === 'COD'">
+                {{ o.orderType }}
+              </span>
+                    </td>
+                    <td class="strong">{{ o.total | currency:'VND':'symbol':'1.0-0' }}</td>
+                    <td>
+              <span class="badge"
+                    [class.processing]="meta(o).color === 'processing'"
+                    [class.paid]="meta(o).color === 'paid'"
+                    [class.delivered]="meta(o).color === 'delivered'">
+                {{ meta(o).label }}
+              </span>
+                    </td>
+                    <td class="muted">{{ o.createdAt | date:'short' }}</td>
+                    <td>
+                        <select [ngModel]="o.assignedStaffId || ''"
+                                (ngModelChange)="assignStaff(o, $event || null)"
+                                [disabled]="assigning[o.id]">
+                            <option value="">— Chưa phân công —</option>
+                            <option *ngFor="let s of staff(); trackBy: trackStaff" [value]="s.id">
+                                {{ s.name }} {{ s.phone ? '(' + s.phone + ')' : '' }}
+                            </option>
+                        </select>
+                    </td>
+                    <td class="right">
+                        <button class="link" (click)="toggleExpand(o)">{{ o._expanded ? 'Ẩn' : 'Chi tiết' }}</button>
+                    </td>
+                </tr>
+
+                <tr class="details-row" *ngIf="o._expanded">
+                    <td colspan="8">
+                        <div class="details-grid">
+                            <div>
+                                <div class="sub">Địa chỉ giao</div>
+                                <div>{{ o.address }}</div>
+                                <div *ngIf="o.note" class="muted">Ghi chú: {{ o.note }}</div>
+                            </div>
+                            <div>
+                                <div class="sub">Sản phẩm</div>
+                                <table class="mini">
+                                    <thead>
+                                    <tr>
+                                        <th>SKU</th><th>Tên</th><th>SL</th><th>Đơn giá</th><th>Tạm tính</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    <tr *ngFor="let it of o.items">
+                                        <td class="mono">{{ it.sku }}</td>
+                                        <td>{{ it.name }}</td>
+                                        <td>{{ it.qty }}</td>
+                                        <td>{{ it.price | currency:'VND':'symbol':'1.0-0' }}</td>
+                                        <td>{{ (it.price * it.qty) | currency:'VND':'symbol':'1.0-0' }}</td>
+                                    </tr>
+                                    </tbody>
+                                    <tfoot>
+                                    <tr>
+                                        <td colspan="4" class="right">Tổng</td>
+                                        <td class="strong">{{ o.total | currency:'VND':'symbol':'1.0-0' }}</td>
+                                    </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+            </ng-container>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- ======= BẢNG 2: ĐƠN HOÀN THÀNH ======= -->
+    <h3 style="margin:16px 0 6px;">Đơn hoàn thành</h3>
+    <div class="table-wrap">
+        <table class="orders-table">
+            <thead>
+            <tr>
+                <th>Mã đơn</th>
+                <th>Khách hàng</th>
+                <th>Loại đơn</th>
+                <th>Tổng tiền</th>
+                <th>Trạng thái</th>
+                <th>Ngày tạo</th>
+                <th>Nhân viên giao</th>
+                <th></th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr *ngIf="completedOrders().length === 0">
+                <td colspan="8" class="muted">Chưa có đơn hoàn thành.</td>
+            </tr>
+
+            <ng-container *ngFor="let o of completedOrders(); trackBy: trackOrder">
+                <tr>
+                    <td class="mono">{{ o.id }}</td>
+                    <td>
+                        <div class="strong">{{ o.customerName }}</div>
+                        <div class="muted">{{ o.phone }}</div>
+                    </td>
+                    <td>
+              <span class="badge" [class.paid]="o.orderType === 'POS'" [class.processing]="o.orderType === 'COD'">
+                {{ o.orderType }}
+              </span>
+                    </td>
+                    <td class="strong">{{ o.total | currency:'VND':'symbol':'1.0-0' }}</td>
+                    <td><span class="badge delivered">Đã hoàn thành đơn</span></td>
+                    <td class="muted">{{ o.createdAt | date:'short' }}</td>
+                    <td><span class="muted na">Không cần phân công</span></td>
+                    <td class="right">
+                        <button class="link" (click)="toggleExpand(o)">{{ o._expanded ? 'Ẩn' : 'Chi tiết' }}</button>
+                    </td>
+                </tr>
+
+                <tr class="details-row" *ngIf="o._expanded">
+                    <td colspan="8">
+                        <div class="details-grid">
+                            <div>
+                                <div class="sub">Địa chỉ giao</div>
+                                <div>{{ o.address }}</div>
+                                <div *ngIf="o.note" class="muted">Ghi chú: {{ o.note }}</div>
+                            </div>
+                            <div>
+                                <div class="sub">Sản phẩm</div>
+                                <table class="mini">
+                                    <thead>
+                                    <tr>
+                                        <th>SKU</th><th>Tên</th><th>SL</th><th>Đơn giá</th><th>Tạm tính</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    <tr *ngFor="let it of o.items">
+                                        <td class="mono">{{ it.sku }}</td>
+                                        <td>{{ it.name }}</td>
+                                        <td>{{ it.qty }}</td>
+                                        <td>{{ it.price | currency:'VND':'symbol':'1.0-0' }}</td>
+                                        <td>{{ (it.price * it.qty) | currency:'VND':'symbol':'1.0-0' }}</td>
+                                    </tr>
+                                    </tbody>
+                                    <tfoot>
+                                    <tr>
+                                        <td colspan="4" class="right">Tổng</td>
+                                        <td class="strong">{{ o.total | currency:'VND':'symbol':'1.0-0' }}</td>
+                                    </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+            </ng-container>
+            </tbody>
+        </table>
+    </div>
+</div>
