@@ -6,7 +6,7 @@ import { ForgotPasswordComponent } from './components/Component-login/forgot-pas
 import { ProductPageComponent } from './components/Component-product/product/product-page.component';
 import { CartComponent } from './components/Component-cart/cart/cart.component';
 import { loginGuard } from './guards/login.guard';
-import { ownerGuard } from './guards/owner.guard';
+import { ownerGuard } from './guards/owner.guard'; // << bật lại guard Owner
 
 // Payment detail (component thường)
 import { PaymentDetailComponent } from './components/Component-payment/paymentInfor/payment-detail.component';
@@ -144,16 +144,24 @@ export const routes: Routes = [
         ]
     },
 
-    // ===== Owner =====
+    // ===== Staff (Giao hàng) =====
+    {
+        path: 'staff/shipping',
+        loadComponent: () =>
+            import('./components/Component-Staff/Shipping/Order-shipping')
+                .then(m => m.OrderShippingComponent),
+        title: 'Giao hàng | Nhân viên',
+    },
+
+    // ===== Owner (bật guard) =====
     {
         path: 'owner',
-        canActivate: [ownerGuard],
+        canActivate: [ownerGuard], // << đã bật lại
         loadComponent: () =>
             import('./components/Component-owner/owner/layout/owner-layout.component')
                 .then(m => m.OwnerLayoutComponent),
         children: [
             { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
-
             {
                 path: 'dashboard',
                 loadComponent: () =>
