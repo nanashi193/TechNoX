@@ -3,6 +3,7 @@ package com.g5.techdevices.techstore.services;
 import com.g5.techdevices.techstore.dtos.UserDTO;
 import com.g5.techdevices.techstore.dtos.UserDetailDTO;
 import com.g5.techdevices.techstore.dtos.UserUpdateDTO;
+import com.g5.techdevices.techstore.entity.staff.StaffInfo;
 import com.g5.techdevices.techstore.entity.users.User;
 import com.g5.techdevices.techstore.exceptions.DataNotFoundException;
 import com.g5.techdevices.techstore.exceptions.InvalidTokenException;
@@ -29,4 +30,5 @@ public interface IUserService {
     UserDetailDTO updateUserDetails(String email, UserDetailDTO userUpdateDTO) throws DataNotFoundException;
     void resetPassword(String token, String newPassword) throws DataNotFoundException, InvalidTokenException;
     String createPasswordResetToken(String email) throws DataNotFoundException;
+    List<StaffInfo> getStaffList();
 }

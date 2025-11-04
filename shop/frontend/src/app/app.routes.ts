@@ -6,6 +6,7 @@ import { ForgotPasswordComponent } from './components/Component-login/forgot-pas
 import { ProductPageComponent } from './components/Component-product/product/product-page.component';
 import { CartComponent } from './components/Component-cart/cart/cart.component';
 import { loginGuard } from './guards/login.guard';
+import { ownerGuard } from './guards/owner.guard';
 
 // Payment detail (component thường)
 import { PaymentDetailComponent } from './components/Component-payment/paymentInfor/payment-detail.component';
@@ -66,7 +67,6 @@ export const routes: Routes = [
                 .then(m => m.VerifyPendingComponent),
         data: { hideChrome: true, title: 'Đang chờ xác minh | TechNoX' }
     },
-
     { path: 'forgot-password', component: ForgotPasswordComponent, data: { hideChrome: true, title: 'Quên mật khẩu | TechNoX' } },
     {
         path: 'reset-password',
@@ -144,10 +144,10 @@ export const routes: Routes = [
         ]
     },
 
-    // ===== Owner (MỞ CHO TEST, KHÔNG DÙNG GUARD) =====
+    // ===== Owner =====
     {
         path: 'owner',
-        // canActivate: [ownerGuard], // tắt để ai cũng truy cập được
+        canActivate: [ownerGuard],
         loadComponent: () =>
             import('./components/Component-owner/owner/layout/owner-layout.component')
                 .then(m => m.OwnerLayoutComponent),
@@ -162,7 +162,7 @@ export const routes: Routes = [
                 title: 'Tổng quan | Owner'
             },
 
-            // Quản lý đơn hàng (frontend-only)
+            // Quản lý đơn hàng (frontend-only, standalone)
             {
                 path: 'orders',
                 loadComponent: () =>
@@ -186,8 +186,8 @@ export const routes: Routes = [
                 title: 'Thêm sản phẩm | Owner'
             },
             {
-                // hiện sẽ ra '/owner/owner/products/:id/edit' vì đặt 'owner/...'
-                // nếu muốn '/owner/products/:id/edit', đổi path dưới đây thành 'products/:id/edit'
+                // lưu ý: đường dẫn này hiện là '/owner/owner/products/:id/edit' vì đang ở dưới 'owner'
+                // nếu bạn muốn '/owner/products/:id/edit', đổi 'owner/products/:id/edit' -> 'products/:id/edit'
                 path: 'owner/products/:id/edit',
                 loadComponent: () =>
                     import('./components/Component-owner/owner/products/products-detail/products-detail.component')

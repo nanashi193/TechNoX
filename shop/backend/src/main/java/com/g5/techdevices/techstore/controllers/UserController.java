@@ -3,6 +3,7 @@ package com.g5.techdevices.techstore.controllers;
 import com.g5.techdevices.techstore.dtos.*;
 import com.g5.techdevices.techstore.dtos.resetPassword.ForgotPasswordDTO;
 import com.g5.techdevices.techstore.dtos.resetPassword.ResetPasswordDTO;
+import com.g5.techdevices.techstore.entity.staff.StaffInfo;
 import com.g5.techdevices.techstore.entity.tokens.EmailType;
 import com.g5.techdevices.techstore.exceptions.DataNotFoundException;
 import com.g5.techdevices.techstore.exceptions.InvalidTokenException;
@@ -221,5 +222,11 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("An error occurred while resetting the password.");
         }
+    }
+
+    @GetMapping("/staff")
+    public ResponseEntity<List<StaffInfo>> getStaffList() {
+        List<StaffInfo> staffList = userService.getStaffList();
+        return ResponseEntity.ok(staffList);
     }
 }

@@ -61,11 +61,11 @@ public class PayTransactionService {
         try {
             if ("PAID".equals(newTxStatus)) {
                 log.info("[Webhook] Gọi confirmPayOSPayment cho Bill ID: {}", tx.getBillId());
-                billService.confirmPayOSPayment(tx.getBillId());
+                billService.confirmPayOSPayment((long) tx.getBillId());
 
             } else if ("CANCELLED".equals(newTxStatus)) {
                 log.info("[Webhook] Gọi updateStatus(CANCELLED) cho Bill ID: {}", tx.getBillId());
-                billService.updateStatus(tx.getBillId(), "CANCELLED");
+                billService.updateStatus((long) tx.getBillId(), "CANCELLED");
             }
 
         } catch (DataNotFoundException | InvalidOperationException | InsufficientStockException e) {

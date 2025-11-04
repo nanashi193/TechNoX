@@ -6,6 +6,7 @@ import com.g5.techdevices.techstore.dtos.AddressDTO;
 import com.g5.techdevices.techstore.dtos.UserDTO;
 import com.g5.techdevices.techstore.dtos.UserDetailDTO;
 import com.g5.techdevices.techstore.dtos.UserUpdateDTO;
+import com.g5.techdevices.techstore.entity.staff.StaffInfo;
 import com.g5.techdevices.techstore.entity.tokens.EmailType;
 import com.g5.techdevices.techstore.entity.tokens.PasswordResetToken;
 import com.g5.techdevices.techstore.entity.users.Address;
@@ -35,6 +36,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -292,6 +294,13 @@ public class UserService implements IUserService{
         userRepository.save(user);
         //Xóa token đã sử dụng
         passwordTokenRepository.delete(resetToken);
+    }
+    @Override
+    public List<StaffInfo> getStaffList() {
+        List<User> staffUsers = userRepository.findAllByRole_Name(Role.STAFF);
+        return staffUsers.stream()
+                .map(user -> new StaffInfo(user.getId(), user.getFullName(), user.getPhoneNumber()))
+                .collect(Collectors.toList());
     }
 }
 

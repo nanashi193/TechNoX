@@ -19,7 +19,7 @@ public class Bill {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "BillId")
-    private int id;
+    private Long id;
 
     @ManyToOne
     @JoinColumn(name = "UserId")
@@ -54,4 +54,8 @@ public class Bill {
 
     @OneToMany(mappedBy = "bill", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<BillDetail> details;
+
+    @ManyToOne
+    @JoinColumn(name = "StaffId")
+    private User staff;
 }

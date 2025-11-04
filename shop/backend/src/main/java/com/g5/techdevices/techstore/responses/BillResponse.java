@@ -12,7 +12,7 @@ import java.math.BigDecimal;
 @Setter
 public class BillResponse {
     @JsonProperty("BillId")
-    private int billId;
+    private Long billId;
 
     @JsonProperty("UserId")
     private int userId;

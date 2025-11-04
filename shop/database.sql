@@ -519,6 +519,13 @@ EXEC('CREATE TRIGGER dbo.trg_PayTransaction_UpdatedAt
         END');
 END
 GO
+ALTER TABLE Bill
+    ADD StaffId BIGINT NULL;
+GO
+ALTER TABLE Bill
+    ADD CONSTRAINT FK_Bill_Staff
+        FOREIGN KEY (StaffId) REFERENCES Users(UserId);
+GO
 --------------Test Data-------------------
 INSERT INTO dbo.Product (CategoryId, Name, Price, Description, Thumbnail)
 VALUES

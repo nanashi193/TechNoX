@@ -9,4 +9,5 @@ public interface PayTransactionRepository extends JpaRepository<PayTransaction, 
     Optional<PayTransaction> findByOrderCode(Long orderCode);
     Optional<PayTransaction> findByBillId(Long billId);
     boolean existsByOrderCode(Long orderCode);
+    Optional<PayTransaction> findFirstByBillIdOrderByCreatedAtDesc(Long billId);
 }

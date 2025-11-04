@@ -1,16 +1,17 @@
 package com.g5.techdevices.techstore.controllers;
 
+import com.g5.techdevices.techstore.dtos.AssignStaffRequest;
 import com.g5.techdevices.techstore.dtos.BillCreateRequestDTO;
 import com.g5.techdevices.techstore.entity.Bills.Bill;
-import com.g5.techdevices.techstore.entity.Bills.BillDetail;
 import com.g5.techdevices.techstore.entity.pay.PayTransaction;
-import com.g5.techdevices.techstore.entity.products.ProductVariant;
 import com.g5.techdevices.techstore.entity.users.User;
 import com.g5.techdevices.techstore.exceptions.DataNotFoundException;
 import com.g5.techdevices.techstore.exceptions.InsufficientStockException;
 import com.g5.techdevices.techstore.exceptions.InvalidOperationException;
 import com.g5.techdevices.techstore.repositories.BillRepository;
 import com.g5.techdevices.techstore.repositories.cart.ProductVariantRepository;
+import com.g5.techdevices.techstore.responses.AdminBillsResponse.BillAdminResponse;
+import com.g5.techdevices.techstore.responses.AdminBillsResponse.BillFullDetailResponse;
 import com.g5.techdevices.techstore.responses.BillResponse;
 import com.g5.techdevices.techstore.services.BillService;
 import com.g5.techdevices.techstore.services.PayTransactionService;
@@ -25,7 +26,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
@@ -219,5 +219,25 @@ public class BillController {
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An unexpected error occurred.");
         }
+    }
+    @GetMapping("/admin")
+    public ResponseEntity<List<BillAdminResponse>> getBillsForAdmin() {
+        List<BillAdminResponse> bills = billService.getBillsForAdmin();
+        return ResponseEntity.ok(bills);
+    }
+
+    @GetMapping("/{billId}")
+    public ResponseEntity<BillFullDetailResponse> getBillDetails(@PathVariable Long billId) {
+        BillFullDetailResponse billDetails = billService.getBillDetails(billId);
+        return ResponseEntity.ok(billDetails);
+    }
+
+    @PutMapping("/{billId}/assign-staff")
+    public ResponseEntity<BillAdminResponse> assignStaff(
+            @PathVariable Long billId,
+            @RequestBody AssignStaffRequest request) {
+        System.out.println(">>> ĐÃ VÀO CONTROLLER: BillID=" + billId + ", StaffID=" + request.getStaffId());
+        BillAdminResponse updatedBill = billService.assignStaff(billId, request.getStaffId());
+        return ResponseEntity.ok(updatedBill);
     }
 }

@@ -1,5 +1,6 @@
 package com.g5.techdevices.techstore.services;
 
+import com.g5.techdevices.techstore.components.BillAdminMapper;
 import com.g5.techdevices.techstore.components.BillMapper;
 import com.g5.techdevices.techstore.dtos.BillCreateRequestDTO;
 import com.g5.techdevices.techstore.dtos.BillDTO;
@@ -7,6 +8,7 @@ import com.g5.techdevices.techstore.dtos.BillDetailRequestDTO;
 import com.g5.techdevices.techstore.entity.Bills.Bill;
 import com.g5.techdevices.techstore.entity.Bills.BillDetail;
 import com.g5.techdevices.techstore.entity.products.ProductVariant;
+import com.g5.techdevices.techstore.entity.users.Role;
 import com.g5.techdevices.techstore.entity.users.User;
 import com.g5.techdevices.techstore.exceptions.DataNotFoundException;
 import com.g5.techdevices.techstore.exceptions.InsufficientStockException;
@@ -15,10 +17,12 @@ import com.g5.techdevices.techstore.repositories.BillDetailRepository;
 import com.g5.techdevices.techstore.repositories.BillRepository;
 import com.g5.techdevices.techstore.repositories.UserRepository;
 import com.g5.techdevices.techstore.repositories.cart.ProductVariantRepository;
+import com.g5.techdevices.techstore.responses.AdminBillsResponse.BillAdminResponse;
+import com.g5.techdevices.techstore.responses.AdminBillsResponse.BillFullDetailResponse;
 import com.g5.techdevices.techstore.responses.BillResponse;
-import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -30,6 +34,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class BillService implements IBillService {
@@ -39,17 +44,19 @@ public class BillService implements IBillService {
     private final UserRepository userRepository;
     private final EmailService emailService;
     private final BillMapper billMapper;
+    private final BillAdminMapper billAdminMapper;
 
     private static final Logger logger = LoggerFactory.getLogger(BillService.class);
 
     public BillService(BillRepository billRepository, BillDetailRepository billDetailRepository,
                        ProductVariantRepository variantRepository, UserRepository userRepository, EmailService emailService,
-                       BillMapper billMapper) {
+                       BillMapper billMapper,  BillAdminMapper billAdminMapper) {
         this.billRepository = billRepository;
         this.variantRepository = variantRepository;
         this.userRepository = userRepository;
         this.emailService = emailService;
         this.billMapper = billMapper;
+        this.billAdminMapper = billAdminMapper;
     }
     // ================== CREATE BILL ==================
     @Override
@@ -198,13 +205,10 @@ public class BillService implements IBillService {
         }
         this.deductStock(bill);
         this.sendConfirmationEmail(bill, paymentMethod);
-
-        // 5. Lưu lại bill (trong cùng 1 transaction)
         return billRepository.save(bill);
     }
 
     private void deductStock(Bill bill) throws InsufficientStockException, DataNotFoundException {
-        // Cần tải lại details nếu chúng là LAZY loading
         List<BillDetail> details = bill.getDetails();
 
         // Đoạn code này rất quan trọng nếu bạn dùng LAZY loading
@@ -238,5 +242,34 @@ public class BillService implements IBillService {
         // TODO: Implement logic gửi email (ví dụ: gọi emailService.send...)
         logger.info("Đang gửi email xác nhận cho Bill ID: {} (Thanh toán: {})", bill.getId(), paymentMethod);
          emailService.sendOrderConfirmationEmail(bill);
+    }
+
+    public List<BillAdminResponse> getBillsForAdmin() {
+        List<Bill> bills = billRepository.findAll(Sort.by(Sort.Direction.DESC, "orderDate"));
+        return bills.stream()
+                .map(billAdminMapper::mapToBillAdminResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public BillFullDetailResponse getBillDetails(Long billId) {
+        Bill bill = billRepository.findById(billId)
+                .orElseThrow(() -> new RuntimeException("Bill not found with id: " + billId));
+        return billAdminMapper.mapToBillFullDetailResponse(bill);
+    }
+
+    @Override
+    public BillAdminResponse assignStaff(Long billId, Long staffId) {
+        Bill bill = billRepository.findById(billId)
+                .orElseThrow(() -> new RuntimeException("Bill not found: " + billId));
+
+        User staff = userRepository.findById(staffId)
+                .orElseThrow(() -> new RuntimeException("Staff not found: " + staffId));
+        if (!Role.STAFF.equals(staff.getRole().getName())) {
+            throw new RuntimeException("User is not a staff member: " + staffId);
+        }
+        bill.setStaff(staff);
+        Bill savedBill = billRepository.save(bill);
+        return billAdminMapper.mapToBillAdminResponse(savedBill);
     }
 }
