@@ -8,9 +8,9 @@
     --footer-bump: 4px;
 
     /* Gridlines (hairline) */
-    --grid-w: .75px;                       /* 0.5–1px tuỳ mắt */
-    --grid-main: rgba(0,0,0,.12);          /* vách ngăn bảng chính */
-    --grid-mini: rgba(0,0,0,.10);          /* vách ngăn mini-table */
+    --grid-w: .75px;                     /* 0.5–1px tuỳ mắt */
+    --grid-main: rgb(48, 43, 43);        /* vách ngăn bảng chính */
+    --grid-mini: rgb(179, 176, 176);     /* vách ngăn mini-table */
     --grid-radius: 12px;
 }
 
@@ -43,27 +43,58 @@ app-site-footer{ position:relative; z-index:1; }
     .footer-grid{ gap: clamp(14px, 4vw, 24px); }
 }
 
-/* ===== GRIDLINES – chỉ áp cho bảng quản trị ===== */
-/* Bảng chính */
-.table-wrap table.orders-table{
-    border-collapse: collapse !important;
+/* =========================================================
+   GRIDLINES – tạo vách ngăn cho MỌI bảng nằm trong .table-wrap
+   (áp dụng cả .orders, .orders-table, .mini, …)
+   ========================================================= */
+
+/* Ép cơ chế vẽ vách ngăn mượt */
+.table-wrap{
+    border: 1px solid var(--grid-main);
+    border-radius: var(--grid-radius);
+    overflow: hidden;               /* bo góc thật */
+    background: #fff;
+}
+.table-wrap table{
+    width: 100%;
+    border-collapse: separate !important;   /* tách viền từng ô để kẻ vách */
     border-spacing: 0 !important;
 }
-.table-wrap table.orders-table > :is(thead,tbody,tfoot) > tr > :is(th,td){
-    border: var(--grid-w) solid var(--grid-main) !important;
+
+/* Vẽ vách ngăn: mỗi ô có 1 đường bên phải + 1 đường bên dưới */
+.table-wrap table > :is(thead,tbody,tfoot) > tr > :is(th,td){
+    border-right: var(--grid-w) solid var(--grid-main) !important;
+    border-bottom: var(--grid-w) solid var(--grid-main) !important;
     background-clip: padding-box;
 }
 
-/* Tắt viền ô colspan để dùng “khung nhỏ” bên trong */
-.table-wrap table.orders-table tr.details-row > td{
+/* Hàng đầu tiên của header kẻ thêm đường TRÊN */
+.table-wrap table thead tr:first-child > th{
+    border-top: var(--grid-w) solid var(--grid-main) !important;
+}
+
+/* Cột đầu tiên kẻ đường TRÁI (không phụ thuộc khung ngoài) */
+.table-wrap table > * > tr > :is(th,td):first-child{
+    border-left: var(--grid-w) solid var(--grid-main) !important;
+}
+
+/* Ô colspan dành cho hàng chi tiết (nếu có) dùng khung riêng → bỏ viền */
+.table-wrap table tr.details-row > td{
     border: 0 !important;
 }
 
-/* Mini table trong phần chi tiết */
+/* ===== Mini table trong phần chi tiết: dùng màu vách riêng ===== */
 .table-wrap table.mini{
-    border-collapse: collapse !important;
+    border-collapse: separate !important;
     border-spacing: 0 !important;
 }
 .table-wrap table.mini > :is(thead,tbody,tfoot) > tr > :is(th,td){
-    border: var(--grid-w) solid var(--grid-mini) !important;
+    border-right: var(--grid-w) solid var(--grid-mini) !important;
+    border-bottom: var(--grid-w) solid var(--grid-mini) !important;
+}
+.table-wrap table.mini thead tr:first-child > th{
+    border-top: var(--grid-w) solid var(--grid-mini) !important;
+}
+.table-wrap table.mini > * > tr > :is(th,td):first-child{
+    border-left: var(--grid-w) solid var(--grid-mini) !important;
 }
