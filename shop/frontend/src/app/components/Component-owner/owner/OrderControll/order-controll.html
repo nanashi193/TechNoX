@@ -12,17 +12,24 @@
 
             <input class="search"
                    type="search"
-                   placeholder="Tìm theo mã, tên KH, SĐT, địa chỉ, loại đơn…"
+                   placeholder="Tìm mã, tên KH, SĐT, địa chỉ, loại đơn…"
                    [ngModel]="search()"
                    (ngModelChange)="search.set($event)">
+
+            <button class="link" style="margin-left:8px" (click)="cleanupExpiredOrders()">
+                Dọn đơn quá 24h
+            </button>
         </div>
     </div>
 
+    <div *ngIf="autoPurgeCount() > 0" class="oc-banner success">
+        Đã tự xoá {{ autoPurgeCount() }} đơn quá 24 giờ chưa xử lí.
+    </div>
     <div *ngIf="loading" class="oc-banner info">Đang tải dữ liệu…</div>
     <div *ngIf="errorMsg" class="oc-banner error">{{ errorMsg }}</div>
     <div *ngIf="successMsg" class="oc-banner success">{{ successMsg }}</div>
 
-    <!-- ======= BẢNG 1: ĐƠN HIỆN TẠI ======= -->
+    <!-- ===== BẢNG 1: ĐƠN HIỆN TẠI ===== -->
     <h3 style="margin:12px 0 6px;">Đơn hiện tại</h3>
     <div class="table-wrap">
         <table class="orders-table">
@@ -50,31 +57,50 @@
                         <div class="strong">{{ o.customerName }}</div>
                         <div class="muted">{{ o.phone }}</div>
                     </td>
+
+                    <!-- Loại đơn -->
                     <td>
-              <span class="badge" [class.paid]="o.orderType === 'POS'" [class.processing]="o.orderType === 'COD'">
-                {{ o.orderType }}
-              </span>
+                        <ng-container *ngIf="o.orderType; else noType1">
+                <span class="badge" [class.paid]="o.orderType==='POS'" [class.processing]="o.orderType==='COD'">
+                  {{ o.orderType }}
+                </span>
+                        </ng-container>
+                        <ng-template #noType1><span class="muted">—</span></ng-template>
                     </td>
+
                     <td class="strong">{{ o.total | currency:'VND':'symbol':'1.0-0' }}</td>
+
+                    <!-- Trạng thái -->
                     <td>
-              <span class="badge"
-                    [class.processing]="meta(o).color === 'processing'"
-                    [class.paid]="meta(o).color === 'paid'"
-                    [class.delivered]="meta(o).color === 'delivered'">
-                {{ meta(o).label }}
-              </span>
+                        <ng-container [ngSwitch]="o.status">
+                            <span *ngSwitchCase="'processing'" class="badge processing">Đang xử lí</span>
+                            <span *ngSwitchCase="'paid'"       class="badge paid">Đã thanh toán</span>
+                            <span *ngSwitchCase="'completed'"  class="badge delivered">Đã hoàn thành</span>
+                        </ng-container>
                     </td>
+
                     <td class="muted">{{ o.createdAt | date:'short' }}</td>
+
+                    <!-- Phân công:
+                         - Nếu đã có assignedStaffId -> HIỆN TÊN NV (KHÔNG cho đổi)
+                         - Nếu chưa -> dropdown để phân công
+                    -->
                     <td>
-                        <select [ngModel]="o.assignedStaffId || ''"
-                                (ngModelChange)="assignStaff(o, $event || null)"
-                                [disabled]="assigning[o.id]">
-                            <option value="">— Chưa phân công —</option>
-                            <option *ngFor="let s of staff(); trackBy: trackStaff" [value]="s.id">
-                                {{ s.name }} {{ s.phone ? '(' + s.phone + ')' : '' }}
-                            </option>
-                        </select>
+                        <ng-container *ngIf="o.assignedStaffId; else canAssign">
+                            <div class="strong">{{ getStaffLabel(o.assignedStaffId) }}</div>
+                        </ng-container>
+                        <ng-template #canAssign>
+                            <select [ngModel]="''"
+                                    (ngModelChange)="assignStaff(o, $event || null)"
+                                    [disabled]="o.status==='completed'">
+                                <option value="">— Chọn nhân viên —</option>
+                                <option *ngFor="let s of staff(); trackBy: trackStaff" [value]="s.id">
+                                    {{ s.name }} {{ s.phone ? '(' + s.phone + ')' : '' }}
+                                </option>
+                            </select>
+                        </ng-template>
                     </td>
+
                     <td class="right">
                         <button class="link" (click)="toggleExpand(o)">{{ o._expanded ? 'Ẩn' : 'Chi tiết' }}</button>
                     </td>
@@ -121,7 +147,7 @@
         </table>
     </div>
 
-    <!-- ======= BẢNG 2: ĐƠN HOÀN THÀNH ======= -->
+    <!-- ===== BẢNG 2: ĐƠN HOÀN THÀNH ===== -->
     <h3 style="margin:16px 0 6px;">Đơn hoàn thành</h3>
     <div class="table-wrap">
         <table class="orders-table">
@@ -149,15 +175,28 @@
                         <div class="strong">{{ o.customerName }}</div>
                         <div class="muted">{{ o.phone }}</div>
                     </td>
+
                     <td>
-              <span class="badge" [class.paid]="o.orderType === 'POS'" [class.processing]="o.orderType === 'COD'">
-                {{ o.orderType }}
-              </span>
+                        <ng-container *ngIf="o.orderType; else noType2">
+                <span class="badge" [class.paid]="o.orderType==='POS'" [class.processing]="o.orderType==='COD'">
+                  {{ o.orderType }}
+                </span>
+                        </ng-container>
+                        <ng-template #noType2><span class="muted">—</span></ng-template>
                     </td>
+
                     <td class="strong">{{ o.total | currency:'VND':'symbol':'1.0-0' }}</td>
-                    <td><span class="badge delivered">Đã hoàn thành đơn</span></td>
+                    <td><span class="badge delivered">Đã hoàn thành</span></td>
                     <td class="muted">{{ o.createdAt | date:'short' }}</td>
-                    <td><span class="muted na">Không cần phân công</span></td>
+
+                    <!-- ĐÃ HOÀN THÀNH vẫn hiển thị tên NV nếu có -->
+                    <td>
+                        <ng-container *ngIf="o.assignedStaffId; else noStaffDone">
+                            <div class="strong">{{ getStaffLabel(o.assignedStaffId) }}</div>
+                        </ng-container>
+                        <ng-template #noStaffDone><span class="muted">—</span></ng-template>
+                    </td>
+
                     <td class="right">
                         <button class="link" (click)="toggleExpand(o)">{{ o._expanded ? 'Ẩn' : 'Chi tiết' }}</button>
                     </td>
