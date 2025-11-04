@@ -7,6 +7,7 @@ import { ForgotPasswordComponent } from './components/Component-login/forgot-pas
 import { ProductPageComponent } from './components/Component-product/product/product-page.component';
 import { CartComponent } from './components/Component-cart/cart/cart.component';
 import { loginGuard } from './guards/login.guard';
+import { ownerGuard } from './guards/owner.guard'; // << bật lại guard Owner
 
 // Component thường
 import { PaymentDetailComponent } from './components/Component-payment/paymentInfor/payment-detail.component';
@@ -160,10 +161,10 @@ export const routes: Routes = [
         title: 'Giao hàng | Nhân viên',
     },
 
-    // ===== Owner (MỞ CHO TEST) =====
+    // ===== Owner (bật guard) =====
     {
         path: 'owner',
-        // canActivate: [ownerGuard], // mở cho test nên tắt guard
+        canActivate: [ownerGuard], // << đã bật lại
         loadComponent: () =>
             import('./components/Component-owner/owner/layout/owner-layout.component')
                 .then(m => m.OwnerLayoutComponent),
