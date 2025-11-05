@@ -5,11 +5,12 @@ import {ActivatedRoute, Router, RouterLink} from '@angular/router';
 import {OwnerUsersService} from "../../../../../services/owner-users.service";
 import {User, UserDetail} from '../../../../../models/user.model';
 import {finalize} from "rxjs/operators";
+import {UserBillComponent} from "../users-bill/users-bill.component";
 
 @Component({
     standalone: true,
     selector: 'owner-user-detail',
-    imports: [CommonModule, ReactiveFormsModule, RouterLink],
+    imports: [CommonModule, ReactiveFormsModule, RouterLink, UserBillComponent],
     templateUrl: './users-detail.component.html',
     styleUrls: ['./users-detail.component.css', '../../owner-shared.css']
 })

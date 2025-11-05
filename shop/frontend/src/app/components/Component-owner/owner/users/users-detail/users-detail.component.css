@@ -111,3 +111,28 @@
 .ud-address{ margin:12px 0 0; font-style:normal; color:#374151; line-height:1.55; }
 .ud-flag{ font-size:18px; vertical-align:baseline; margin-left:6px; }
 .ud-muted{ color:#6b7280; margin-top:8px; }
+
+.icon{
+    width: 18px;
+    height: 18px;
+    display: inline-block;
+    flex: 0 0 18px;
+}
+
+.ico-mask{
+    background-color: currentColor;
+    -webkit-mask-image: var(--ico);
+    mask-image: var(--ico);
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+    -webkit-mask-position: center;
+    mask-position: center;
+    -webkit-mask-size: 100% 100%;
+    mask-size: 100% 100%;
+    opacity: .9;
+}
+.ico-img{
+    background: var(--ico) center/contain no-repeat;
+    -webkit-mask: none; /* tắt mask để không bóp màu */
+    mask: none;
+}

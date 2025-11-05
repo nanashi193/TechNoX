@@ -64,29 +64,35 @@
     <!-- RIGHT: CUSTOMER -->
     <section class="card">
         <div class="card-hdr">
-            <h3>Customer</h3>
+            <h3>Khách hàng</h3>
             <a class="link">Edit</a>
         </div>
 
         <div class="customer">
             <div class="avatar">{{ (bill()?.customerFullName || 'U')[0] }}</div>
             <div class="cname">{{ bill()?.customerFullName || '—' }}</div>
-            <a class="muted" routerLink="['/owner/users', bill()?.userId]">chi tiết khách hàng →</a>
+            <a class="muted" routerLink="['/owner/users', userId]">chi tiết khách hàng →</a>
         </div>
 
         <div class="block">
-            <div class="label">Contact info</div>
-            <div class="line">Email {{ bill()?.customerEmail || '—' }}</div>
-            <div class="line">📞 {{ bill()?.customerPhone || '—' }}</div>
+            <div class="label">Thông tin liên hệ</div>
+            <div class="line">
+                <span class="icon ico-img" style="--ico:url('assets/icons/gmail.png')"></span>
+                {{ bill()?.customerEmail || '—' }}
+            </div>
+            <div class="line">
+                <span class="icon ico-img" style="--ico:url('assets/icons/phone.png')"></span>
+                {{ bill()?.customerPhone || '—' }}
+            </div>
         </div>
 
         <div class="block">
-            <div class="label">Shipping address</div>
+            <div class="label">Địa chỉ giao hàng</div>
             <div class="addr">{{ bill()?.shippingAddress || '—' }}</div>
         </div>
 
         <div class="block">
-            <div class="label">Payment</div>
+            <div class="label">Hình thức thanh toán</div>
             <div class="line">
         <span class="badge" [ngClass]="bill()?.paymentMethod==='COD' ? '' : 'ok'">
           {{ bill()?.paymentMethod === 'COD' ? 'COD' : 'PayOS' }}

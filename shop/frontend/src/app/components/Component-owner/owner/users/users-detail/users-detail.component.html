@@ -34,7 +34,7 @@
                 <div class="card-head"><h3 class="card-title">Account</h3></div>
 
                 <div class="row-line">
-                    <div class="label">Active</div>
+                    <div class="label">Còn hoạt động</div>
 
                     <label class="switch" *ngIf="!editMode; else activeEdit">
                         <input type="checkbox" [checked]="user!.IsActive" (change)="toggleActive($event)">
@@ -50,30 +50,35 @@
                 </div>
 
                 <div class="row-line">
-                    <div class="label">Orders</div>
+                    <div class="label">Số đơn hàng</div>
                     <div class="value">{{ user!.stats.orders ?? 0 }}</div>
                 </div>
 
                 <div class="row-line">
-                    <div class="label">Total spent</div>
+                    <div class="label">Tổng chi tiêu</div>
                     <div class="value">{{ user!.stats.totalSpent | number:'1.0-0' }} đ</div>
                 </div>
 
                 <div class="row-line">
-                    <div class="label">Created</div>
+                    <div class="label">Thời gian gia nhập</div>
                     <div class="value">{{ user!.CreateAt | date:'medium' }}</div>
                 </div>
+
+                <owner-users-bill [userId]="user!.id"></owner-users-bill>
+
             </section>
 
             <section class="card ud-card">
                 <div class="ud-section">
-                    <header class="ud-head"><h3>Contact info</h3></header>
+                    <header class="ud-head"><h3>Thông tin liên hệ</h3></header>
 
                     <div class="ud-list" *ngIf="!editMode; else contactEdit">
-                        <div class="ud-row"><span class="ud-ico">email</span>
+                        <div class="ud-row">
+                            <span class="icon ico-img" style="--ico:url('assets/icons/gmail.png')"></span>
                             <a [href]="'mailto:'+user!.email">{{ user!.email }}</a>
                         </div>
-                        <div class="ud-row"><span class="ud-ico">📱</span>
+                        <div class="ud-row">
+                            <span class="icon ico-img" style="--ico:url('assets/icons/phone.png')"></span>
                             <a [href]="'tel:'+ (user!.PhoneNumber||'')">{{ user!.PhoneNumber || '—' }}</a>
                         </div>
                     </div>
@@ -93,7 +98,7 @@
 
                 <div class="ud-section">
                     <header class="ud-head">
-                        <h3>Shipping address</h3>
+                        <h3>Địa chỉ giao hàng</h3>
                     </header>
 
                     <div class="ud-map">
@@ -102,7 +107,7 @@
                             <button type="button">−</button>
                         </div>
                         <div class="ud-pin"></div>
-                        <div class="ud-badge">Leaflet</div>
+                        <div class="ud-badge">VietNam</div>
                     </div>
 
                     <address class="ud-address" *ngIf="user.shippingAddress; else noAddress">
@@ -116,7 +121,7 @@
                     </address>
 
                     <ng-template #noAddress>
-                        <p class="ud-text-muted">User has not provided a shipping address.</p>
+                        <p class="ud-text-muted">Người này chưa cung cấp địa chỉ.</p>
                     </ng-template>
                 </div>
 
