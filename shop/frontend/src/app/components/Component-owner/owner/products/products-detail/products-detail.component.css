@@ -522,5 +522,5 @@ textarea {
 }
 .v-head { font-weight: 600; color: var(--muted); }
 .switch.center { display: inline-flex; justify-content: center; }
-
+.back{ color:var(--muted); text-decoration:none; }
 

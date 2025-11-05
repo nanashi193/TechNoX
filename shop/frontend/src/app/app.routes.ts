@@ -178,6 +178,14 @@ export const routes: Routes = [
                         .then(m => m.OrderControllComponent),
                 title: 'Quản lý đơn hàng | Owner'
             },
+            {
+                path: 'orders/:id',
+                loadComponent: () =>
+                    import('./components/Component-owner/owner/OrderControll/orders-detail/orders-detail.component')
+                        .then(m => m.OrdersDetailComponent),
+                title: 'Quản lý đơn hàng | Owner'
+            },
+
 
             {
                 path: 'products',

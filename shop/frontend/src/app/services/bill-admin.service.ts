@@ -23,6 +23,11 @@ export class BillAdminService {
         return this.http.get<StaffInfo[]>(`${this.apiUrl2}/staff`);
     }
 
+    getById(id: number) {
+        return this.http.get<BillAdminResponse>(`${this.apiUrl1}/${id}`);
+    }
+
+
     assignStaff(billId: number, staffId: number): Observable<BillAdminResponse> {
 
         const requestBody: AssignStaffRequest = {
