@@ -19,8 +19,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -37,7 +39,8 @@ public class ProductService implements  IProductService {
     private final ProductRepository productRepository;
     private final CategoryRepository categoryRepository;
     private final ProductImageRepository productImageRepository;
-    private final ProductMapper productMapper; // <-- Tiêm Mapper
+    private final ProductMapper productMapper; // ✅ THÊM DÒNG NÀY
+
 
 
     @Override
@@ -48,14 +51,14 @@ public class ProductService implements  IProductService {
                         new DataNotFoundException(
                                 "Cannot find category with id: "+productDTO.getCategoryId()));
 
-            Product newProduct = Product.builder()
-                    .name(productDTO.getName())
-                    .price(productDTO.getPrice())
-                    .description(productDTO.getDescription())
-                    .thumbnail(productDTO.getThumbnail())
-                    .category(existingCategory)
-                    .status(true)
-                    .build();
+        Product newProduct = Product.builder()
+                .name(productDTO.getName())
+                .price(productDTO.getPrice())
+                .description(productDTO.getDescription())
+                .thumbnail(productDTO.getThumbnail())
+                .category(existingCategory)
+                .status(true)
+                .build();
         if (productDTO.getVariants() != null && !productDTO.getVariants().isEmpty()) {
             List<ProductVariant> variantEntities = productDTO.getVariants().stream()
                     .map(v -> ProductVariant.builder()
@@ -187,14 +190,14 @@ public class ProductService implements  IProductService {
                         new DataNotFoundException(
                                 "Cannot find product with id: "+productImageDTO.getProductId()));
 
-                //khong cho insert qua 5 anh cho 1 san pham
-                int size = productImageRepository.findByProductId(productId).size();
-                if(size >= ProductImages.MAXIMUM_IMAGES_PER_PRODUCT){
-                    throw new InvalidParamException("Number update must be <= "
+        //khong cho insert qua 5 anh cho 1 san pham
+        int size = productImageRepository.findByProductId(productId).size();
+        if(size >= ProductImages.MAXIMUM_IMAGES_PER_PRODUCT){
+            throw new InvalidParamException("Number update must be <= "
                     + ProductImages.MAXIMUM_IMAGES_PER_PRODUCT);
-                }
+        }
 
-                // 3) Validate tối thiểu để còn xoá Cloudinary về sau
+        // 3) Validate tối thiểu để còn xoá Cloudinary về sau
         if (productImageDTO.getPublicId() == null || productImageDTO.getPublicId().isBlank()) {
             throw new InvalidParamException("publicId is required");
         }
@@ -209,7 +212,7 @@ public class ProductService implements  IProductService {
                 .publicId(productImageDTO.getPublicId()) // ✅ thêm dòng này
                 .build();
 
-                return productImageRepository.save(newProductImages);
+        return productImageRepository.save(newProductImages);
     }
 
     @Override
@@ -265,7 +268,7 @@ public class ProductService implements  IProductService {
     }
 
 
-        // ---------------------------------Auto SKU----------------------------------
+    // ---------------------------------Auto SKU----------------------------------
 
     private String generateSku(String productName, String color, String size) {
         // Giữ toàn bộ tên sản phẩm, viết hoa và bỏ hết khoảng trắng
@@ -393,5 +396,35 @@ public class ProductService implements  IProductService {
         return variant;
     }
 
+    @Transactional(readOnly = true)
+    public List<ProductResponse> getNewestInLastMonth(int limit) {
+        if (limit <= 0) limit = 10;
 
+        LocalDateTime oneMonthAgo = LocalDateTime.now().minusDays(30);
+        PageRequest page = PageRequest.of(0, limit, Sort.by("createdAt").descending());
+
+        // dùng @Query:
+        List<Product> products = productRepository.findNewProductsInLastMonth(oneMonthAgo, page);
+
+        // nếu bạn dùng method name, đổi sang:
+        // List<Product> products = productRepository
+        //        .findByCreatedAtGreaterThanEqualOrderByCreatedAtDesc(oneMonthAgo, page);
+
+        return products.stream()
+                .map(ProductResponse::fromProduct)
+                .toList();
+    }
+
+    /** Tuỳ chọn: linh hoạt số ngày */
+    @Transactional(readOnly = true)
+    public List<ProductResponse> getNewestWithinDays(int days, int limit) {
+        if (limit <= 0) limit = 10;
+        if (days <= 0)  days  = 30;
+
+        LocalDateTime start = LocalDateTime.now().minusDays(days);
+        PageRequest page = PageRequest.of(0, limit, Sort.by("createdAt").descending());
+
+        List<Product> products = productRepository.findNewProductsInLastMonth(start, page);
+        return products.stream().map(ProductResponse::fromProduct).toList();
+    }
 }

@@ -10,6 +10,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -93,7 +94,8 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     @Query("SELECT p FROM Product p WHERE p.id IN :productIds")
     List<Product> findProductsByIds(@Param("productIds") List<Long> productIds);
 
-    // NOTE: XÓA method favorites vì entity Product hiện tại của bạn KHÔNG có quan hệ favorites
-    // @Query("SELECT p FROM Product p JOIN p.favorites f WHERE f.user.id = :userId")
-    // List<Product> findFavoriteProductsByUserId(@Param("userId") Long userId);
+    // 🔹 Dùng createdAt >= :startDate để lọc trong 1 tháng gần nhất
+    @Query("SELECT p FROM Product p WHERE p.createdAt >= :startDate")
+    List<Product> findNewProductsInLastMonth(LocalDateTime startDate, org.springframework.data.domain.Pageable pageable);
+
 }

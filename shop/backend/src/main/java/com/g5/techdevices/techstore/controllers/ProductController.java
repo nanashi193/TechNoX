@@ -61,7 +61,7 @@ public class ProductController {
             }
             Product newProduct = productService.createProduct(productDTO);
             return ResponseEntity.ok(newProduct);
-            }catch (Exception e) {
+        }catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
@@ -109,12 +109,12 @@ public class ProductController {
             }
             return ResponseEntity.ok().body(productImages);
         } catch (Exception e) {
-    return ResponseEntity.badRequest().body(e.getMessage());
+            return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
     private String storeFile(MultipartFile file) throws IOException {
         if(!isImageFile(file) || file.getOriginalFilename() == null){
-        throw new IOException("Invalid file format");
+            throw new IOException("Invalid file format");
         }
         String fileName = StringUtils.cleanPath(Objects.requireNonNull(file.getOriginalFilename()));
 
@@ -136,6 +136,7 @@ public class ProductController {
         Files.copy(file.getInputStream(), destination, StandardCopyOption.REPLACE_EXISTING);
         return uniqueFilename;
     }
+
     private boolean isImageFile(MultipartFile file){
         String contentType = file.getContentType();
         return contentType != null && contentType.startsWith("image/");
@@ -219,7 +220,7 @@ public class ProductController {
             @Valid @RequestBody ProductDTO productDTO
     ){
         try{
-             Product updatedProduct = productService.updateProduct(id, productDTO);
+            Product updatedProduct = productService.updateProduct(id, productDTO);
             return ResponseEntity.noContent().build();
         }catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
@@ -268,7 +269,7 @@ public class ProductController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
- //=============Delete Image==========================
+    //=============Delete Image==========================
     @DeleteMapping("/{productId}/images/{imageId}")
     public ResponseEntity<?> deleteImage(
             @PathVariable Long productId,
@@ -283,4 +284,17 @@ public class ProductController {
         }
     }
 
-        }
+    @GetMapping("/newest-month")
+    public ResponseEntity<List<ProductResponse>> newestInLastMonth(
+            @RequestParam(defaultValue = "10") int limit) {
+        return ResponseEntity.ok(productService.getNewestInLastMonth(limit));
+    }
+
+    // Tuỳ chọn: cho phép truyền days
+    @GetMapping("/newest")
+    public ResponseEntity<List<ProductResponse>> newestWithinDays(
+            @RequestParam(defaultValue = "30") int days,
+            @RequestParam(defaultValue = "10") int limit) {
+        return ResponseEntity.ok(productService.getNewestWithinDays(days, limit));
+    }
+}
