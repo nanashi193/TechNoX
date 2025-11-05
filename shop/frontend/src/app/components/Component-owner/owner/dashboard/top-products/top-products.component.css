@@ -14,7 +14,7 @@
     border-bottom: 1px solid rgba(0, 0, 0, .08);
 }
 
-.table-wrap {
+.tp-wrap {
     overflow: hidden;
     border-bottom-left-radius: 16px;
     border-bottom-right-radius: 16px;
@@ -55,3 +55,6 @@
     text-decoration: none;
     font-size: 13px
 }
+
+:host .table-wrap { box-shadow: none !important; }
+
