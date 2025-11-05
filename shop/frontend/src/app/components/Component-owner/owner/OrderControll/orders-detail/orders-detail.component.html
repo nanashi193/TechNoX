@@ -21,17 +21,17 @@
 
         <div class="items">
             <div class="item" *ngFor="let it of items(); trackBy: trackItem">
-                <img *ngIf="it.thumb" [src]="it.thumb" class="thumb" alt=""/>
+                <img [ngSrc]="it.thumbnail || 'assets/placeholder.png'" width="48" height="48" [alt]="it.productName">
                 <div class="meta">
-                    <div class="name">{{ it.name }}</div>
+                    <div class="name">{{ it.productName }}</div>
                     <div class="attrs" *ngIf="it.color || it.size">
                         <span *ngIf="it.color">Color: {{ it.color }}</span>
                         <span *ngIf="it.size">Size: {{ it.size }}</span>
                     </div>
                 </div>
                 <div class="price">{{ it.price | currency:'VND':'symbol-narrow':'1.0-0' }}</div>
-                <div class="qty">{{ it.qty }}</div>
-                <div class="amount">{{ it.amount | currency:'VND':'symbol-narrow':'1.0-0' }}</div>
+                <div class="qty">{{ it.quantity }}</div>
+                <div class="amount">{{ itemAmount(it) | currency:'VND':'symbol-narrow':'1.0-0' }}</div>
             </div>
         </div>
 
@@ -71,7 +71,7 @@
         <div class="customer">
             <div class="avatar">{{ (bill()?.customerFullName || 'U')[0] }}</div>
             <div class="cname">{{ bill()?.customerFullName || '—' }}</div>
-            <a class="muted" routerLink="/owner/users/{{bill()?.userId}}">chi tiết khách hàng →</a>
+            <a class="muted" routerLink="['/owner/users', bill()?.userId]">chi tiết khách hàng →</a>
         </div>
 
         <div class="block">

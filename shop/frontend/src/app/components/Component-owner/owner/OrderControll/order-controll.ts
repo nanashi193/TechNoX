@@ -1,11 +1,13 @@
-import { Component, OnInit, signal, computed, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import {Component, OnInit, signal, computed, inject} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {FormsModule} from '@angular/forms';
 
-import { BillAdminResponse } from '../../../../models/bill-admin.model';
-import { StaffInfo } from '../../../../models/staff-info.model';
-import { AssignStaffRequest } from '../../../../models/assign-staff-request.model';
+import {BillAdminResponse} from '../../../../models/bill-admin.model';
+import {StaffInfo} from '../../../../models/staff-info.model';
+import {AssignStaffRequest} from '../../../../models/assign-staff-request.model';
 import {BillAdminService} from "../../../../services/bill-admin.service";
+import {Router} from "@angular/router";
+
 export type OrderStatus = 'Processing' | 'Confirmed' | 'Shipping' | 'Completed' | 'Cancelled';
 export type PaymentMethod = 'COD' | 'POS';
 
@@ -20,8 +22,23 @@ interface BillAdminUI extends BillAdminResponse {
     templateUrl: './order-controll.html',
     styleUrls: ['./order-controll.css']
 })
+
 export class OrderControllComponent implements OnInit {
     private billAdminService = inject(BillAdminService);
+    private router = inject(Router);
+
+    //orders-detail
+    goDetail(o: BillAdminUI) {
+        this.router.navigate(['/owner/orders', o.billId]);
+    }
+
+    goDetailFromEvent(ev: MouseEvent, o: BillAdminUI) {
+        const el = ev.target as HTMLElement;
+        const tag = el.tagName;
+        if (['A', 'BUTTON', 'SELECT', 'OPTION', 'INPUT', 'TEXTAREA', 'LABEL'].includes(tag)) return;
+        this.goDetail(o);
+    }
+
 
     loading = false;
     errorMsg = signal('');   // Dùng signal để tự động cập nhật
@@ -33,13 +50,16 @@ export class OrderControllComponent implements OnInit {
     search = signal<string>('');
 
     readonly statusMeta: Record<OrderStatus, { label: string; color: string }> = {
-        Processing: { label: 'Đang xử lý',     color: 'processing' },
-        Confirmed:  { label: 'Đã xác nhận',   color: 'paid' },
-        Shipping:   { label: 'Đang vận chuyển', color: 'shipping' },
-        Completed:  { label: 'Hoàn thành',    color: 'delivered' },
-        Cancelled:  { label: 'Đã hủy',        color: 'cancelled' },
+        Processing: {label: 'Đang xử lý', color: 'processing'},
+        Confirmed: {label: 'Đã xác nhận', color: 'paid'},
+        Shipping: {label: 'Đang vận chuyển', color: 'shipping'},
+        Completed: {label: 'Hoàn thành', color: 'delivered'},
+        Cancelled: {label: 'Đã hủy', color: 'cancelled'},
     };
-    meta(o: BillAdminUI) { return this.statusMeta[o.status as OrderStatus]; }
+
+    meta(o: BillAdminUI) {
+        return this.statusMeta[o.status as OrderStatus];
+    }
 
     private matchSearch = (o: BillAdminUI, q: string) =>
         !q || [o.customerFullName, o.customerPhone, o.billId, o.shippingAddress, o.paymentMethod]
@@ -100,7 +120,7 @@ export class OrderControllComponent implements OnInit {
     async loadBills(): Promise<void> {
         const bills = (await this.billAdminService.getBillsForAdmin().toPromise()) || [];
         // Gán _expanded cho UI (Sửa lỗi 4: ép kiểu sang BillAdminUI)
-        const billsUI = bills.map(b => ({ ...b, _expanded: false } as BillAdminUI));
+        const billsUI = bills.map(b => ({...b, _expanded: false} as BillAdminUI));
         this.orders.set(billsUI);
     }
 
@@ -111,7 +131,9 @@ export class OrderControllComponent implements OnInit {
 
 
     // ====== Helpers / Actions (Cập nhật cho khớp) ======
-    setFilter(v: 'all' | OrderStatus): void { this.statusFilter.set(v); } // (Lỗi 1 đã được sửa)
+    setFilter(v: 'all' | OrderStatus): void {
+        this.statusFilter.set(v);
+    } // (Lỗi 1 đã được sửa)
 
     toggleExpand(order: BillAdminUI): void {
         const found = this.orders().find(o => o.billId === order.billId);
@@ -152,7 +174,7 @@ export class OrderControllComponent implements OnInit {
                 this.orders.update(currentOrders =>
                     currentOrders.map(o =>
                         o.billId === updatedBill.billId
-                            ? { ...o, ...updatedBill, _expanded: o._expanded } // (Lỗi 4 đã được sửa)
+                            ? {...o, ...updatedBill, _expanded: o._expanded} // (Lỗi 4 đã được sửa)
                             : o
                     )
                 );
@@ -172,6 +194,7 @@ export class OrderControllComponent implements OnInit {
         this.successMsg.set(msg);
         setTimeout(() => this.successMsg.set(''), 3000);
     }
+
     private showError(msg: string) {
         this.errorMsg.set(msg);
         setTimeout(() => this.errorMsg.set(''), 4000);

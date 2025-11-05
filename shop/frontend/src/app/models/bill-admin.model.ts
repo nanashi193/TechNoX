@@ -2,7 +2,7 @@ import { StaffInfo } from './staff-info.model';
 
 export interface BillAdminResponse {
     billId: number;
-    userId: number;
+    userId?: number;
     orderDate: string;
     status: string;
     total: number;
@@ -15,14 +15,14 @@ export interface BillAdminResponse {
 }
 
 export interface BillItem {
-    ProductId: number;
-    ProductName: string;
-    VariantId?: number;
-    Color?: string;
-    Size?: string;
-    Quantity: number;
-    Price: number;
-    Thumbnail?: string;
+    productId: number;
+    productName: string;
+    variantId?: number;
+    color?: string;
+    size?: string;
+    quantity: number;
+    price: number;
+    thumbnail?: string;
 }
 
 export interface BillAdminDetailResponse extends BillAdminResponse {

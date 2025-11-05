@@ -1,24 +1,14 @@
 import {Component, OnInit, inject, signal, computed} from '@angular/core';
-import {CommonModule, CurrencyPipe, DatePipe, NgIf, NgFor, NgClass} from '@angular/common';
+import {CommonModule, CurrencyPipe, DatePipe, NgIf, NgFor, NgClass, NgOptimizedImage} from '@angular/common';
 import {ActivatedRoute, RouterLink} from '@angular/router';
 import {BillAdminService} from '../../../../../services/bill-admin.service';
 import {BillAdminDetailResponse, BillAdminResponse, BillItem} from '../../../../../models/bill-admin.model';
 
-type ItemRow = {
-    id: number;
-    name: string;
-    color?: string;
-    size?: string;
-    qty: number;
-    price: number;
-    amount: number;
-    thumb?: string;
-};
 
 @Component({
     standalone: true,
     selector: 'owner-orders-detail',
-    imports: [CommonModule, NgIf, NgFor, NgClass, RouterLink, DatePipe, CurrencyPipe],
+    imports: [CommonModule, NgIf, NgFor, NgClass, RouterLink, DatePipe, CurrencyPipe, NgOptimizedImage],
     templateUrl: './orders-detail.component.html',
     styleUrl: './orders-detail.component.css'
 })export class OrdersDetailComponent implements OnInit {
@@ -39,22 +29,13 @@ type ItemRow = {
         return digits ? `#${digits}` : (id ? `#${id}` : '#—');
     });
 
-    items = computed<ItemRow[]>(() => {
-        const arr = this.bill()?.details ?? [];
-        return arr.map((d: BillItem) => ({
-            id: d.VariantId ?? d.ProductId,
-            name: d.ProductName,
-            color: d.Color,
-            size: d.Size,
-            qty: d.Quantity,
-            price: d.Price ?? 0,
-            amount: (d.Price ?? 0) * (d.Quantity ?? 0),
-            thumb: d.Thumbnail
-        }));
-    });
+    items = computed<BillItem[]>(() => this.bill()?.details ?? []);
+    //helper
+    itemId = (it: BillItem) => it.variantId ?? it.productId;
+    itemAmount = (it: BillItem) => (it.price ?? 0) * (it.quantity ?? 0);
 
     subtotal = computed(() =>
-        this.bill()?.subtotal ?? this.items().reduce((s, it) => s + it.amount, 0)
+        this.bill()?.subtotal ?? this.items().reduce((s, it) => s + this.itemAmount(it), 0)
     );
     shippingFee = computed(() => this.bill()?.shippingFee ?? 0);
     tax = computed(() => this.bill()?.tax ?? 0);
@@ -75,7 +56,7 @@ type ItemRow = {
 
     // ===== Lifecycle =====
     ngOnInit() {
-        const id = Number(this.route.snapshot.paramMap.get('id'));
+        const id = Number(this.route.snapshot.paramMap.get('billId'));
         if (!id) {
             this.err.set('Bill id không hợp lệ');
             this.loading.set(false);
@@ -88,7 +69,7 @@ type ItemRow = {
         });
     }
 
-    trackItem = (_: number, it: ItemRow) => it.id;
+    trackItem = (_: number, it: BillItem) => this.itemId(it);
 
     badgeClass(status?: string) {
         const s = (status ?? '').toUpperCase();

@@ -53,19 +53,16 @@
                 <td colspan="7" class="muted">Không có đơn nào.</td>
             </tr>
 
-            <!-- Sửa lỗi TS2339: Dùng tên biến mới từ API -->
             <ng-container *ngFor="let o of activeOrders(); trackBy: trackOrder">
-                <tr>
-                    <td class="mono">{{ o.billId }}</td> <!-- Sửa: id -> billId -->
+                <tr class="clickable" (click)="goDetailFromEvent($event, o)">
+                    <td class="mono">{{ o.billId }}</td>
+
                     <td>
-                        <!-- Sửa: customerName -> customerFullName -->
                         <div class="strong">{{ o.customerFullName }}</div>
-                        <div class="muted">{{ o.customerPhone }}</div> <!-- Sửa: phone -> customerPhone -->
+                        <div class="muted">{{ o.customerPhone }}</div>
                     </td>
 
-                    <!-- Loại đơn -->
                     <td>
-                        <!-- Sửa: orderType -> paymentMethod -->
                         <ng-container *ngIf="o.paymentMethod; else noType1">
                             <span class="badge" [class.paid]="o.paymentMethod==='PayOS'" [class.processing]="o.paymentMethod==='COD'">
                               {{ o.paymentMethod }}
@@ -76,38 +73,26 @@
 
                     <td class="strong">{{ o.total | currency:'VND':'symbol':'1.0-0' }}</td>
 
-                    <!-- Trạng thái (Sử dụng hàm meta() cho an toàn) -->
                     <td>
-                        <span class="badge" [class]="meta(o).color">
-                            {{ meta(o).label }}
-                        </span>
+                        <span class="badge" [class]="meta(o).color">{{ meta(o).label }}</span>
                     </td>
 
-                    <!-- Sửa: createdAt -> orderDate -->
                     <td class="muted">{{ o.orderDate | date:'dd/MM, HH:mm' }}</td>
 
-                    <!-- Phân công (Code này đã đúng theo lần sửa trước) -->
-                    <td>
+                    <td (click)="$event.stopPropagation()">
                         <ng-container *ngIf="o.staff; else canAssign">
                             <div class="strong">{{ getStaffLabel(o.staff) }}</div>
                         </ng-container>
                         <ng-template #canAssign>
-                            <select [ngModel]="''"
-                                    (change)="assignStaff(o, $event)">
+                            <select [ngModel]="''" (change)="assignStaff(o, $event)">
                                 <option value="">— Chọn nhân viên —</option>
-                                <!-- Sửa lỗi TS2339: s.name -> s.fullName -->
                                 <option *ngFor="let s of staff(); trackBy: trackStaff" [value]="s.id">
                                     {{ s.fullName }} {{ s.phone ? '(' + s.phone + ')' : '' }}
                                 </option>
                             </select>
                         </ng-template>
                     </td>
-
-                    <!-- Sửa lỗi TS2339: Xóa cột 'Chi tiết' vì _expanded, items... không tồn tại -->
                 </tr>
-
-                <!-- Sửa lỗi TS2339: Xóa toàn bộ <tr> chi tiết (o.address, o.note, o.items) -->
-
             </ng-container>
             </tbody>
         </table>
