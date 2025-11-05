@@ -20,6 +20,7 @@ export interface TopProduct {
 }
 
 export interface NewProduct {
+    id: number;
     image: string;
     name: string;
     date: string;   // có thể đổi sang Date nếu backend trả dạng ISO

@@ -60,3 +60,85 @@
     color: #666;
     font-size: 13px;
 }
+.link {
+    color: var(--accent);
+    text-decoration: none;
+    font-size: 13px
+}
+.np-list{ margin:0; padding:0; list-style:none; }
+
+.np-item{
+    display:grid;
+    grid-template-columns: 40px 1fr auto;  /* ảnh | info | nút */
+    gap:12px; align-items:center;
+    padding:10px 12px;
+    border-top:1px solid #eef1f4;
+}
+.np-item:first-child{ border-top:0; }
+
+.info{ min-width:0; }
+.name{ font-weight:700; margin:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.date{ color:#6b7280; font-size:12px; }
+
+.view{
+    padding:6px 10px;
+    border:1px solid #d6e0ff;
+    border-radius:10px;
+    background:#eef3ff;
+    font-weight:600;
+    font-size:12px;
+    color:#1a73e8; text-decoration:none;
+    white-space:nowrap;
+}
+.view:hover{ filter:brightness(0.98); }
+
+.np-list{ margin:0; padding:0; list-style:none; }
+
+.new-products .np-item{
+    display: grid;   !important;
+    grid-template-columns: 40px 1fr max-content;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 0;
+    border-top: 1px solid #eef1f4;
+}
+.np-item:first-child{ border-top:0; }
+
+/* info co giãn */
+.info{ min-width:0; }
+.name{ font-weight:700; margin:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.date{ color:#6b7280; font-size:12px; }
+
+/* Nút sát mép phải */
+.view{
+    justify-self: end;
+    white-space: nowrap;
+    padding: 6px 10px;
+    border: 1px solid #d6e0ff;
+    border-radius: 10px;
+    background: #eef3ff;
+    font-weight: 600;
+    font-size: 12px;
+    color: #1a73e8;
+    text-decoration: none;
+}
+.view:hover{ filter: brightness(0.98); }
+
+.new-products li{
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 0;
+}
+
+.new-products .info{
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.new-products .view{
+    margin-left: auto;
+    white-space: nowrap;
+}
+
+

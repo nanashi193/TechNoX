@@ -1,5 +1,5 @@
 import {
-    ApplicationConfig, importProvidersFrom,
+    ApplicationConfig, DEFAULT_CURRENCY_CODE, importProvidersFrom,
     LOCALE_ID,
     provideBrowserGlobalErrorListeners,
     provideZoneChangeDetection
@@ -13,6 +13,7 @@ import { registerLocaleData } from '@angular/common';
 import localeVi from '@angular/common/locales/vi';
 
 registerLocaleData(localeVi, 'vi-VN');
+registerLocaleData(localeVi);
 
 export const appConfig: ApplicationConfig = {
     providers: [
@@ -27,6 +28,8 @@ export const appConfig: ApplicationConfig = {
         importProvidersFrom(
             LucideAngularModule.pick({ TrendingUp, TrendingDown })
         ),
-        { provide: LOCALE_ID, useValue: 'vi-VN' }
+        { provide: LOCALE_ID, useValue: 'vi-VN' },
+        { provide: DEFAULT_CURRENCY_CODE, useValue: 'VND' },
+
     ],
 };

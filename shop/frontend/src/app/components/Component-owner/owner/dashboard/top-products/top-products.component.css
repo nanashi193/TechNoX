@@ -49,3 +49,9 @@
 .tp-table tr { display: table-row !important; }
 .tp-table td, .tp-table th { display: table-cell !important; }
 .change { white-space: nowrap; display: flex; align-items: center; gap: 6px; }
+
+.link {
+    color: var(--accent);
+    text-decoration: none;
+    font-size: 13px
+}

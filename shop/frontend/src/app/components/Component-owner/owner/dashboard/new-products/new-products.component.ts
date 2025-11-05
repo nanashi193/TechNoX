@@ -10,12 +10,11 @@ import {RouterLink} from "@angular/router";
     templateUrl: './new-products.component.html',
     styleUrls: ['./new-products.component.css']
 })
+
 export class NewProductsComponent {
-    newProducts = [
-        { image: '/assets/demo/new1.jpg', name: 'AirPods Max – Silver', date: '10/10/2025' },
-        { image: '/assets/demo/new2.jpg', name: 'MacBook Pro M4 – Space Black', date: '08/10/2025' },
-        { image: '/assets/demo/new3.jpg', name: 'iPhone 16 Pro – Natural Titanium', date: '06/10/2025' },
-    ];
+    @Input() newProducts: NewProduct[] = [];
+    placeholder = 'assets/placeholder.png';
+    track = (_: number, p: NewProduct) => p.id;
+
 }
-// @Input() newProducts: NewProduct[] = []; TODO
 

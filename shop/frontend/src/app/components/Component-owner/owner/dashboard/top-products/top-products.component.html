@@ -37,11 +37,16 @@
                     <span class="pct">{{ p.changePct | number:'1.0-0' }}%</span>
                 </td>
 
-                <td class="col-price num">${{ p.price }}</td>
+                <td class="col-price num">
+                    {{ p.price | currency: 'VND':'symbol':'1.0-0':'vi' }}
+                </td>
 
                 <td class="col-sold num muted">{{ p.sold | number }}</td>
 
-                <td class="col-sales num strong">${{ p.sales | number:'1.2-2' }}</td>
+                <td class="col-sales num strong">
+                    {{ p.sales | currency: 'VND':'symbol':'1.0-0':'vi' }}
+                </td>
+
             </tr>
             </tbody>
         </table>
