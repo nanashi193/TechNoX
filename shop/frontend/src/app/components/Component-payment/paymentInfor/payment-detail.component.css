@@ -1,33 +1,32 @@
 /* ===============================
-   TechNoX • Payment Detail (polish)
-   — đồng bộ token, bo góc, đổ bóng
+   TechNoX • Payment Detail (fresh CSS)
+   - Totals: chữ trắng
+   - Bảng sản phẩm: chữ đen, nền sáng
 =================================*/
+
+/* Tokens & base */
 :host{
-    /* Tokens */
     --bg:#0b0b0d;
     --img:url('/assets/Adu.jpg');
     --card:#121316;
     --line:#26272b;
     --line-soft:#2b2d33;
-    --text: #b0eef3;
-    /* --- SỬA: Tăng độ sáng màu xám --- */
+
+    --text: #fdf7f7;      /* màu chữ chính ở nền tối */
     --muted:#e0e0e0;
-    /* --- SỬA 2: Tăng độ sáng cho text phụ (variant) --- */
-    --muted-2:#cccccc;
+    --muted-2: #0e0e0e;
+
     --danger:#ffb4b4;
-    --accent:#eaeaea;         /* nút chính */
+    --accent:#eaeaea;    /* nút chính */
     --accent-ink:#111;
 
-    --r-lg:20px;
-    --r-md:16px;
-    --r-sm:12px;
+    --r-lg:20px; --r-md:16px; --r-sm:12px;
     --shadow:0 20px 60px rgba(0,0,0,.55);
-
     --pad:clamp(16px, 2.2vw, 24px);
     --gap:clamp(12px, 1.6vw, 18px);
 
     display:block;
-    padding: clamp(12px, 2vw, 20px);
+    padding:clamp(12px, 2vw, 20px);
     background:
             radial-gradient(80% 100% at 50% 0%, rgba(0,0,0,.45), transparent 60%),
             var(--bg) var(--img) center/cover no-repeat fixed;
@@ -41,7 +40,6 @@
 .container{
     width:min(1100px, 94vw);
     margin-inline:auto;
-
     background:rgba(18,19,22,.96);
     border:1px solid var(--line);
     border-radius:var(--r-lg);
@@ -50,20 +48,11 @@
 }
 
 /* Header */
-.header{
-    display:flex; align-items:baseline; justify-content:space-between;
-    margin: 4px 0 var(--gap);
-    gap:12px;
-}
-.header h1{
-    margin:0;
-    font-size:clamp(22px, 3.4vw, 34px);
-    font-weight:800;
-    letter-spacing:.2px;
-}
+.header{ display:flex; align-items:baseline; justify-content:space-between; margin:4px 0 var(--gap); gap:12px; }
+.header h1{ margin:0; font-size:clamp(22px, 3.4vw, 34px); font-weight:800; letter-spacing:.2px; }
 .order-id{ color:#cfcfcf; }
 
-/* Card base */
+/* Card */
 .card{
     background:var(--card);
     border:1px solid var(--line);
@@ -72,147 +61,75 @@
     box-shadow:0 12px 30px rgba(0,0,0,.35);
     margin-bottom:var(--gap);
 }
-.card h2{
-    margin:0 0 10px;
-    font-size:clamp(16px, 2.2vw, 22px);
-    font-weight:800;
-    /* --- SỬA 3: Thêm màu sáng cho tiêu đề card --- */
-    color: var(--text);
-}
+.card h2{ margin:0 0 10px; font-size:clamp(16px, 2.2vw, 22px); font-weight:800; color:var(--text); }
 
-/* User snapshot */
-.user-card .user-grid{
-    display:grid;
-    grid-template-columns:repeat(2, minmax(0,1fr));
-    gap:10px 16px;
-}
-.user-card .user-grid .full{ grid-column:1 / -1; }
+/* Form grids */
+.user-card .user-grid,
+.customer-grid{ display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:12px 16px; }
+.user-card .user-grid .full,
+.customer-grid .full-width{ grid-column:1 / -1; }
 .user-card .label{ color:var(--muted-2); margin-right:8px; }
 
-/* --- SỬA: Đổi tên .grid thành .customer-grid để khớp HTML --- */
-.customer-grid{
-    display:grid;
-    grid-template-columns:repeat(2, minmax(0,1fr));
-    gap:12px 16px;
-}
-/* --- SỬA: Đổi tên .full thành .full-width để khớp HTML --- */
-.customer-grid .full-width{ grid-column:1 / -1; }
+/* Address */
+.address-grid{ display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:12px 16px; padding:0; margin:0; border:0; }
+.address-grid legend{ color:var(--text); font-weight:700; margin-bottom:6px; padding:0; grid-column:1 / -1; }
 
-/* --- THÊM MỚI: Grid cho 3 trường địa chỉ --- */
-.address-grid{
-    /* Class này nằm trên <fieldset> */
-    display:grid;
-    grid-template-columns: repeat(3, minmax(0,1fr));
-    gap: 12px 16px;
-    padding: 0; /* Ghi đè padding mặc định của fieldset */
-    margin: 0;  /* Ghi đè margin mặc định của fieldset */
-    border: 0;  /* Ghi đè border mặc định của fieldset */
-}
-.address-grid legend {
-    color: var(--text); /* Màu trắng cho "Địa chỉ giao hàng" */
-    font-weight: 700;
-    margin-bottom: 6px;
-    padding: 0;
-    grid-column: 1 / -1; /* Legend nằm trọn 1 hàng */
-}
-
-
-label{
-    display:grid;
-    gap:6px;
-    font-size:14px;
-    /* --- SỬA 2: Đổi thành --text cho sáng hơn (sáng nhất) --- */
-    color:var(--text);
-}
-
-/* Inputs */
-input[type="text"],
-input[type="tel"],
-input[type="number"],
-input[type="email"] /* --- THÊM: Áp dụng style cho cả input email --- */
-{
-    background:#0f1013;
-    border:1px solid var(--line-soft);
-    color:#fff;
-    border-radius:var(--r-sm);
-    padding:10px 12px;
-    outline:none;
+/* Label + inputs */
+label{ display:grid; gap:6px; font-size:14px; color:var(--text); }
+input[type="text"], input[type="tel"], input[type="number"], input[type="email"]{
+    background:#0f1013; border:1px solid var(--line-soft); color:#fff;
+    border-radius:var(--r-sm); padding:10px 12px; outline:none;
     transition:border-color .15s ease, box-shadow .15s ease, background .15s ease;
 }
-input[type="text"]:focus,
-input[type="tel"]:focus,
-input[type="number"]:focus,
-input[type="email"]:focus /* --- THÊM: focus cho input email --- */
-{
-    border-color:#3a7afe;
-    box-shadow:0 0 0 3px rgba(58,122,254,.18);
-    background:#0e0f13;
+input[type="text"]:focus, input[type="tel"]:focus, input[type="number"]:focus, input[type="email"]:focus{
+    border-color:#3a7afe; box-shadow:0 0 0 3px rgba(58,122,254,.18); background:#0e0f13;
 }
 input[readonly]{ opacity:.92; }
 small{ color:var(--danger); }
 
-/* Table */
+/* Table – mặc định phù hợp nền tối */
 .table-wrap{ overflow-x:auto; }
 table{ width:100%; border-collapse:collapse; }
-th, td{
-    border-bottom:1px solid #24262b;
-    padding:10px 8px;
-    text-align:left;
-}
-/* --- THÊM MỚI: Ép màu chữ cho table data (td) --- */
-td {
-    color: var(--text); /* Dùng màu sáng nhất */
-}
-th{
-    font-weight:700; color:#dfe2e6; letter-spacing:.02em;
-    background:linear-gradient(180deg, rgba(255,255,255,.02), transparent);
-}
+th, td{ border-bottom:1px solid #24262b; padding:10px 8px; text-align:left; }
+th{ font-weight:700; color:#dfe2e6; letter-spacing:.02em; background:linear-gradient(180deg, rgba(255,255,255,.02), transparent); }
+td{ color:var(--text); }
 tbody tr:nth-child(even){ background:rgba(255,255,255,.02); }
 td.money{ text-align:right; }
+.item-variant{ color:var(--muted-2); font-size:13px; }
 
-/* --- THÊM MỚI: Style cho màu/size sản phẩm --- */
-.item-variant {
-    color: var(--muted-2); /* Biến này đã được làm sáng hơn ở trên */
-    font-size: 13px;
+/* ===== Chỉ BẢNG SẢN PHẨM (không đổi HTML) =====
+   chọn table đứng ngay sau h2 trong section card đó */
+.card h2 + .table-wrap table th,
+.card h2 + .table-wrap table td{ color:#000; }
+.card h2 + .table-wrap table thead th{
+    background:#ffffff;            /* header trắng */
+    border-bottom:1px solid #e5e7eb;
 }
+.card h2 + .table-wrap table tbody tr{ background:#ffffff; }
+.card h2 + .table-wrap table tbody tr:nth-child(even){ background:#f6f7f9; }
+.card h2 + .table-wrap table td.money{ font-weight:700; } /* tăng độ rõ cột tiền */
 
 /* States */
 .hint{ color:var(--muted); font-size:14px; }
 .empty{
-    background:#0f1013;
-    border:1px dashed var(--line-soft);
-    border-radius:12px;
-    padding:12px;
-    text-align:center;
+    background:#0f1013; border:1px dashed var(--line-soft);
+    border-radius:12px; padding:12px; text-align:center;
 }
 
-/* Totals */
+/* Totals – CHỮ TRẮNG */
 .totals{ padding-top:calc(var(--pad) - 6px); }
-.totals .row{
-    display:flex; justify-content:space-between; align-items:center;
-    padding:8px 2px;
-    /* --- SỬA 4: Thêm màu sáng cho các dòng tổng kết --- */
-    color: var(--text);
-}
+.totals .row{ display:flex; justify-content:space-between; align-items:center; padding:8px 2px; color:#fff; }
 .totals .grand{
-    font-size:18px; font-weight:900;
-    padding:8px 10px;
-    border-radius:10px;
-    background:rgba(255,255,255,.03);
+    font-size:18px; font-weight:900; padding:8px 10px; border-radius:10px;
+    background:rgba(255,255,255,.03); color:#fff;
 }
 
 /* Buttons */
 .btn.primary{
-    margin-top:12px;
-    width:100%;
-    background:var(--accent);
-    color:var(--accent-ink);
-    border:1px solid var(--accent);
-    border-radius:12px;
-    padding:12px 14px;
-    font-weight:800;
-    letter-spacing:.04em;
-    cursor:pointer;
+    margin-top:12px; width:100%;
+    background:var(--accent); color:var(--accent-ink);
+    border:1px solid var(--accent); border-radius:12px; padding:12px 14px;
+    font-weight:800; letter-spacing:.04em; cursor:pointer;
     transition:filter .15s ease, transform .06s ease, box-shadow .15s ease;
     box-shadow:0 6px 18px rgba(0,0,0,.25);
 }
@@ -220,31 +137,16 @@ td.money{ text-align:right; }
 .btn.primary:active{ transform:translateY(1px); }
 .btn.primary:disabled{ opacity:.6; cursor:not-allowed; box-shadow:none; }
 
-/* --- THÊM MỚI: Hiển thị lỗi tạo đơn hàng --- */
-.error-message {
-    display: block;
-    color: var(--danger);
-    text-align: center;
-    margin-top: 10px;
-}
+/* Error */
+.error-message{ display:block; color:var(--danger); text-align:center; margin-top:10px; }
 
 /* Responsive */
-@media (max-width: 900px){
-    .header{ flex-direction:column; align-items:flex-start; }
-}
-@media (max-width: 720px){
-    /* --- SỬA: Đổi tên .grid thành .customer-grid --- */
+@media (max-width:900px){ .header{ flex-direction:column; align-items:flex-start; } }
+@media (max-width:720px){
     .customer-grid, .user-card .user-grid{ grid-template-columns:1fr; }
     .totals .grand{ font-size:17px; }
-
-    /* --- THÊM MỚI: Chuyển .address-grid thành 1 cột trên di động --- */
-    .address-grid { grid-template-columns: 1fr; }
+    .address-grid{ grid-template-columns:1fr; }
 }
 
 /* Motion safe */
-@media (prefers-reduced-motion: reduce){
-    *{ transition:none !important; }
-}
-
-/* --- XÓA BỎ: Toàn bộ khối "FORCE WHITE TEXT" và .address-grid thừa ở cuối --- */
-
+@media (prefers-reduced-motion:reduce){ *{ transition:none !important; } }
