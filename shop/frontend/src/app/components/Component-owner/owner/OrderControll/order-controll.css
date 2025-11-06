@@ -39,7 +39,7 @@
 .oc-banner.success{ background:#e7f8ee; color:#105c2c; border: var(--grid-w) solid #bfe6cc; }
 
 /* ===== Table wrap (bo góc + hairline outer) ===== */
-.table-wrap{
+.oc-table-wrap{
     background: var(--card-bg);
     border-radius: var(--grid-radius);
     overflow: hidden;                     /* để bo góc ăn hết */
