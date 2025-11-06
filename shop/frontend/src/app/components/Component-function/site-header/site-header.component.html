@@ -1,37 +1,47 @@
-<!-- HEADER -->
 <header class="site-header">
     <div class="container header-inner">
-        <!-- Nút menu -->
+        <!-- Menu button -->
         <button
                 class="icon-btn"
                 type="button"
                 (click)="toggleMenu()"
                 aria-label="Mở menu"
                 aria-controls="mobileMenu"
-                [attr.aria-expanded]="mobileMenuOpen ? 'true' : 'false'">
-            ☰
-        </button>
+                [attr.aria-expanded]="mobileMenuOpen ? 'true' : 'false'">☰</button>
 
-        <!-- LOGO -->
+        <!-- Logo (ngSrc) -->
         <a class="brand" routerLink="/" aria-label="Trang chủ TechNoX">
-            <img
-                    class="brand__logo"
-                    src="../../../../assets/Phone/Logo.png"
-                    alt="TechNoX"
-                    width="200"
-                    height="40"
-                    decoding="async"
-                    fetchpriority="high" />
+            <img class="brand__logo"
+                 ngSrc="../../../../assets/Phone/Logo.png"
+                 alt="TechNoX" width="200" height="40" priority />
             <span class="brand__name">TechNoX</span>
         </a>
 
-        <!-- Actions bên phải -->
+        <!-- Right actions -->
         <div class="header-actions">
             @if (currentUser$ | async; as user) {
-                <a class="welcome" [routerLink]="['/profile']">
-                    Xin chào, {{ user.fullName || user.sub }}
-                </a>
-                <button class="btn btn--accent btn-auth" (click)="logout()">Đăng xuất</button>
+                <div class="user-menu">
+                    <button class="user-trigger" type="button"
+                            (click)="toggleUserMenu($event)"
+                            aria-haspopup="menu"
+                            [attr.aria-expanded]="userMenuOpen ? 'true' : 'false'">
+                        {{ user.fullName || user.sub }} ▾
+                    </button>
+
+                    <ul class="user-dropdown" *ngIf="userMenuOpen"
+                        role="menu" aria-label="Tài khoản"
+                        (click)="$event.stopPropagation()">
+                        <li role="none">
+                            <a role="menuitem" routerLink="/profile" (click)="closeUserMenu($event)">Chỉnh sửa hồ sơ</a>
+                        </li>
+                        <li role="none">
+                            <a role="menuitem" routerLink="/my-orders" (click)="closeUserMenu($event)">Đơn hàng của tôi</a>
+                        </li>
+                        <li role="none">
+                            <button role="menuitem" type="button" (click)="logout($event)">Đăng xuất</button>
+                        </li>
+                    </ul>
+                </div>
             } @else {
                 <a class="link-auth" routerLink="/login">Đăng nhập</a>
                 <a class="btn btn--accent btn-auth" routerLink="/signup">Đăng ký</a>
@@ -46,15 +56,13 @@
 </header>
 
 <!-- MOBILE MENU -->
-<nav
-        class="mobile-menu"
-        id="mobileMenu"
-        [class.open]="mobileMenuOpen"
-        (click)="closeMenu()"
-        aria-label="Menu di động">
-    <!-- Ngăn click xuyên -->
+<nav class="mobile-menu" id="mobileMenu"
+     [class.open]="mobileMenuOpen"
+     (click)="closeMenu(); closeUserMenu()"
+     aria-label="Menu di động">
     <div class="mobile-menu__panel" (click)="$event.stopPropagation()">
-        <button class="mobile-menu__close" type="button" (click)="closeMenu()" aria-label="Đóng menu">✕</button>
+        <button class="mobile-menu__close" type="button"
+                (click)="closeMenu()" aria-label="Đóng menu">✕</button>
 
         <ul>
             <li><a routerLink="/shop" (click)="closeMenu()">Điện thoại</a></li>
@@ -64,8 +72,9 @@
 
             <li class="divider" role="separator" aria-hidden="true"></li>
 
-            <!-- 🔥 RÀNG BUỘC TRẠNG THÁI ĐĂNG NHẬP -->
             @if (currentUser$ | async) {
+                <li><a routerLink="/profile" (click)="closeMenu()">Chỉnh sửa hồ sơ</a></li>
+                <li><a routerLink="/my-orders" (click)="closeMenu()">Đơn hàng của tôi</a></li>
                 <li>
                     <button class="btn btn--outline w-100" type="button" (click)="logout(); closeMenu()">Đăng xuất</button>
                 </li>

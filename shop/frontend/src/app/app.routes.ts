@@ -6,7 +6,7 @@ import { ForgotPasswordComponent } from './components/Component-login/forgot-pas
 import { ProductPageComponent } from './components/Component-product/product/product-page.component';
 import { CartComponent } from './components/Component-cart/cart/cart.component';
 import { loginGuard } from './guards/login.guard';
-import { ownerGuard } from './guards/owner.guard'; // << bật lại guard Owner
+import { ownerGuard } from './guards/owner.guard';
 
 // Payment detail (component thường)
 import { PaymentDetailComponent } from './components/Component-payment/paymentInfor/payment-detail.component';
@@ -98,6 +98,15 @@ export const routes: Routes = [
                 .then(m => m.DetailUserComponent)
     },
 
+    // ===== My Orders (KHÁCH HÀNG) =====
+    {
+        path: 'my-orders',
+        loadComponent: () =>
+            import('./components/Component-CustomerOrder/Component-MyOrder/Component-MyOrder')
+                .then(m => m.ComponentMyOrderComponent),
+        title: 'Đơn hàng của tôi | TechNoX'
+    },
+
     // ===== Legal =====
     {
         path: 'legal',
@@ -156,7 +165,7 @@ export const routes: Routes = [
     // ===== Owner (bật guard) =====
     {
         path: 'owner',
-        canActivate: [ownerGuard], // << đã bật lại
+        canActivate: [ownerGuard],
         loadComponent: () =>
             import('./components/Component-owner/owner/layout/owner-layout.component')
                 .then(m => m.OwnerLayoutComponent),
@@ -185,7 +194,6 @@ export const routes: Routes = [
                         .then(m => m.OrdersDetailComponent),
                 title: 'Chi tiết đơn hàng | Owner'
             },
-
 
             {
                 path: 'products',
