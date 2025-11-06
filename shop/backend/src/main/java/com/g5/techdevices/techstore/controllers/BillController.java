@@ -233,7 +233,7 @@ public class BillController {
     }
 
     @PutMapping("/{billId}/assign-staff")
-    public ResponseEntity<BillAdminResponse> assignStaff(
+    public ResponseEntity<?> assignStaff(
             @PathVariable Long billId,
             @RequestBody AssignStaffRequest request) {
         System.out.println(">>> ĐÃ VÀO CONTROLLER: BillID=" + billId + ", StaffID=" + request.getStaffId());

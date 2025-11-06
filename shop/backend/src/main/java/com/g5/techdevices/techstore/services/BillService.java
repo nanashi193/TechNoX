@@ -262,13 +262,18 @@ public class BillService implements IBillService {
     public BillAdminResponse assignStaff(Long billId, Long staffId) {
         Bill bill = billRepository.findById(billId)
                 .orElseThrow(() -> new RuntimeException("Bill not found: " + billId));
-
+        if (!"Confirmed".equalsIgnoreCase(bill.getStatus())) {
+            throw new InvalidOperationException(
+                    "Chỉ có thể gán nhân viên cho đơn hàng ở trạng thái 'Confirmed'. Trạng thái hiện tại: " + bill.getStatus()
+            );
+        }
         User staff = userRepository.findById(staffId)
                 .orElseThrow(() -> new RuntimeException("Staff not found: " + staffId));
-        if (!Role.STAFF.equals(staff.getRole().getName())) {
+        if (!Role.STAFF.equals(staff.getRole().getName().toUpperCase())) {
             throw new RuntimeException("User is not a staff member: " + staffId);
         }
         bill.setStaff(staff);
+        bill.setStatus("Delivering");
         Bill savedBill = billRepository.save(bill);
         return billAdminMapper.mapToBillAdminResponse(savedBill);
     }

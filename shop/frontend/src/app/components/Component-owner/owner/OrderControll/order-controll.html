@@ -8,7 +8,7 @@
                 <button [class.active]="statusFilter() === 'all'"        (click)="setFilter('all')">Tất cả</button>
                 <button [class.active]="statusFilter() === 'Processing'" (click)="setFilter('Processing')">Đang xử lí</button>
                 <button [class.active]="statusFilter() === 'Confirmed'"  (click)="setFilter('Confirmed')">Đã xác nhận</button>
-                <button [class.active]="statusFilter() === 'Shipping'"   (click)="setFilter('Shipping')">Đang vận chuyển</button>
+                <button [class.active]="statusFilter() === 'Delivering'"   (click)="setFilter('Delivering')">Đang vận chuyển</button>
                 <button [class.active]="statusFilter() === 'Completed'"  (click)="setFilter('Completed')">Hoàn thành</button>
                 <button [class.active]="statusFilter() === 'Cancelled'"  (click)="setFilter('Cancelled')">Đã hủy</button>
             </div>
@@ -34,7 +34,7 @@
 
     <!-- ===== BẢNG 1: ĐƠN HIỆN TẠI ===== -->
     <h3 style="margin:12px 0 6px;">Đơn hiện tại</h3>
-    <div class="table-wrap">
+    <div class="oc-table-wrap">
         <table class="orders-table">
             <thead>
             <tr>
@@ -100,7 +100,7 @@
 
     <!-- ===== BẢNG 2: ĐƠN HOÀN THÀNH & ĐÃ HỦY ===== -->
     <h3 style="margin:16px 0 6px;">Đơn đã xử lý (Hoàn thành / Đã hủy)</h3>
-    <div class="table-wrap">
+    <div class="oc-table-wrap">
         <table class="orders-table">
             <thead>
             <tr>
