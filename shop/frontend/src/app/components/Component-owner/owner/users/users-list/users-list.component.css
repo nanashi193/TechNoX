@@ -275,3 +275,33 @@
 
 /* Khi focus vẫn không có shadow viền thứ 2 */
 .toolbar .search:focus{ box-shadow:none; }
+/* nền toolbar giống product-list */
+.toolbar{
+    display: flex;            /* QUAN TRỌNG: đẩy .right lên cùng hàng */
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+/* giới hạn ô search, tránh chiếm 100% làm .right bị rơi dòng */
+.toolbar .search{
+    flex: 0 0 260px;          /* hoặc 300px tuỳ bạn */
+    max-width: 320px;
+}
+
+.toolbar .right{
+    margin-left: auto;        /* đẩy sang phải */
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.bulk{ display:flex; align-items:center; gap:12px; }
+.bulk .muted{ color:#6b7280; }
+
+.btn.danger{ background:#fee2e2; color:#b91c1c; border-color:#fecaca; }
+
+@media (max-width:760px){
+    .toolbar{ flex-wrap: wrap; }
+    .toolbar .right{ width:100%; justify-content:flex-end; }
+}

@@ -6,7 +6,7 @@ import {OwnerUsersService} from '../../../../../services/owner-users.service';
 import {User} from '../../../../../models/user.model';
 import {forkJoin} from 'rxjs';
 
-type SortField = 'name' | 'email' | 'phone'|'isActive' | 'ordersCount' | 'totalSpent';
+type SortField = 'orders' | 'totalSpent';
 
 @Component({
     selector: 'owner-users-list',
@@ -27,10 +27,9 @@ export class UsersListComponent implements OnInit {
     loading = false;
 
     users: User[] = [];    // trang hiện tại
-    filtered: User[] = []; // nếu bạn có filter client thì dùng biến này như product
+    sort: { field: SortField; dir: 'asc' | 'desc' } = { field: 'orders', dir: 'asc' };
     selected = new Set<number>();
 
-    sort: { field: SortField; dir: 'asc' | 'desc' } | null = null;
 
     // ===== derived =====
     get totalPages(): number {
@@ -45,61 +44,27 @@ export class UsersListComponent implements OnInit {
         return Array.from(s).sort((a, b) => a - b);
     }
 
-    get showPager() {
-        return !this.loading && (this.totalPages > 1 || (this.page > 1 && this.users.length > 0));
-    }
-
     ngOnInit() {
-        this.load();
+        this.load();                 // gọi BE /users?q=&page=&size=&sort=
     }
 
     // ===== data =====
     load() {
         this.loading = true;
-        const params: any = {q: this.q, page: this.page, size: this.size};
-        if (this.sort) params.sort = `${this.sort.field},${this.sort.dir}`;
-
+        const params = { q: this.q || '', page: this.page, size: this.size, sort: `${this.sort.field},${this.sort.dir}` };
         this.svc.search(params).subscribe({
-            next: (res) => {
-                const items = res.items ?? [];
-                this.users = items;
-                this.filtered = [...items];
-                this.total = res.total ?? items.length;
-
-                const tp = this.totalPages;
-                if (this.page > tp) {
-                    this.page = tp;
-                    if (tp > 0) this.load(); else this.loading = false;
-                    return;
-                }
-
-                // GIỮ selection đa trang: không clear() toàn bộ.
-                // Nếu chỉ muốn giữ trong trang, bỏ comment dòng dưới:
-                // this.selected.clear();
-
-                this.loading = false;
-            },
+            next: (res) => { this.users = res.items ?? []; this.total = res.total ?? this.users.length; this.loading = false; },
             error: () => this.loading = false
         });
     }
-
-    onSearch() {
-        this.page = 1;
-        this.load();
-    }
-
     // ===== sort =====
     sortBy(field: SortField) {
-        if (!this.sort || this.sort.field !== field) {
-            this.sort = {field, dir: 'asc'};
-        } else if (this.sort.dir === 'asc') {
-            this.sort = {field, dir: 'desc'};
-        } else {
-            this.sort = null;
-        }
+        if (this.sort.field === field) this.sort.dir = this.sort.dir === 'asc' ? 'desc' : 'asc';
+        else this.sort = { field, dir: 'asc' };
         this.page = 1;
         this.load();
     }
+    onSearch() { this.page = 1; this.load(); }
 
     isAsc = (f: SortField) => this.sort?.field === f && this.sort?.dir === 'asc';
     isDesc = (f: SortField) => this.sort?.field === f && this.sort?.dir === 'desc';
@@ -111,40 +76,24 @@ export class UsersListComponent implements OnInit {
     // ===== selection =====
     trackById = (_: number, u: User) => u.id;
     isSelected = (id: number) => this.selected.has(id);
-
-    selectedCount() {
-        return this.selected.size;
-    }
-
+    selectedCount() { return this.selected.size; }
     toggle(id: number, e: Event) {
         (e.target as HTMLInputElement).checked ? this.selected.add(id) : this.selected.delete(id);
     }
-
-    allSelected() {
-        return this.filtered.length > 0 && this.filtered.every(u => this.selected.has(u.id));
-    }
-
-    someSelected() {
-        const any = this.filtered.some(u => this.selected.has(u.id));
-        return any && !this.allSelected();
-    }
-
+    allSelected() { return this.users.length > 0 && this.users.every(u => this.selected.has(u.id)); }
+    someSelected() { const any = this.users.some(u => this.selected.has(u.id)); return any && !this.allSelected(); }
     toggleAll(e: Event) {
         const on = (e.target as HTMLInputElement).checked;
-        if (on) this.filtered.forEach(u => this.selected.add(u.id));
-        else this.filtered.forEach(u => this.selected.delete(u.id));
+        if (on) this.users.forEach(u => this.selected.add(u.id));
+        else this.users.forEach(u => this.selected.delete(u.id));
     }
 
-    // ===== actions =====
-    edit(id: number) {
-        this.router.navigate(['/owner/users', id]);
-    }
-
+    edit(id: number) { this.router.navigate(['/owner/users', id]); }
     toggleActive(u: User) {
-        const prev = u.IsActive;
-        u.IsActive = !prev;
+        const prev = u.IsActive; u.IsActive = !prev;
         this.svc.toggleActive(u.id, u.IsActive).subscribe({ error: () => (u.IsActive = prev) });
     }
+
 
     bulk(action: 'delete') {
         const ids = [...this.selected];
@@ -157,24 +106,7 @@ export class UsersListComponent implements OnInit {
         }
     }
 
-    goto(n: number) {
-        if (n >= 1 && n <= this.totalPages && n !== this.page) {
-            this.page = n;
-            this.load();
-        }
-    }
-
-    prev() {
-        if (this.page > 1) {
-            this.page--;
-            this.load();
-        }
-    }
-
-    next() {
-        if (this.page < this.totalPages) {
-            this.page++;
-            this.load();
-        }
-    }
+    goto(n: number) { if (n !== this.page && n >= 1 && n <= this.totalPages) { this.page = n; this.load(); } }
+    prev() { if (this.page > 1) { this.page--; this.load(); } }
+    next() { if (this.page < this.totalPages) { this.page++; this.load(); } }
 }
