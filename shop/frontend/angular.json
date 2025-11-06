@@ -85,7 +85,7 @@
             "ngrok": {
               "buildTarget": "App:build:ngrok",
               "allowedHosts": [
-                "2c48f49d004c.ngrok-free.app"
+                "runty-sonya-composedly.ngrok-free.dev"
               ]
             }
           },

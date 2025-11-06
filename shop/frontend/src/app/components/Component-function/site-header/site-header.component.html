@@ -1,15 +1,14 @@
 <!-- HEADER -->
 <header class="site-header">
     <div class="container header-inner">
-        <!-- Nút menu: thêm aria-controls/expanded -->
+        <!-- Nút menu -->
         <button
                 class="icon-btn"
                 type="button"
                 (click)="toggleMenu()"
                 aria-label="Mở menu"
                 aria-controls="mobileMenu"
-                [attr.aria-expanded]="mobileMenuOpen ? 'true' : 'false'"
-        >
+                [attr.aria-expanded]="mobileMenuOpen ? 'true' : 'false'">
             ☰
         </button>
 
@@ -22,15 +21,11 @@
                     width="200"
                     height="40"
                     decoding="async"
-                    fetchpriority="high"
-            />
+                    fetchpriority="high" />
             <span class="brand__name">TechNoX</span>
         </a>
-<!--        <div class="header-actions">-->
-<!--            <a class="link-auth" routerLink="/login">Đăng nhập</a>-->
-<!--            <a class="btn btn&#45;&#45;accent btn-auth" routerLink="/signup">Đăng ký</a>-->
-<!--            <a class="cart" routerLink="/cart" aria-label="Giỏ hàng">Giỏ hàng (0)</a>-->
-<!--        </div>-->
+
+        <!-- Actions bên phải -->
         <div class="header-actions">
             @if (currentUser$ | async; as user) {
                 <a class="welcome" [routerLink]="['/profile']">
@@ -42,11 +37,11 @@
                 <a class="btn btn--accent btn-auth" routerLink="/signup">Đăng ký</a>
             }
 
-            <a routerLink="/cart" routerLinkActive="active" class="cart">
+            <a routerLink="/cart" routerLinkActive="active" class="cart" aria-label="Giỏ hàng">
                 <i class="fas fa-shopping-cart" style="font-size: 16px;"></i>
-                <span style="margin-left: 6px;">({{ itemCount$ | async }})</span> </a>
+                <span style="margin-left: 6px;">({{ itemCount$ | async }})</span>
+            </a>
         </div>
-
     </div>
 </header>
 
@@ -56,22 +51,28 @@
         id="mobileMenu"
         [class.open]="mobileMenuOpen"
         (click)="closeMenu()"
-        aria-label="Menu di động"
->
+        aria-label="Menu di động">
     <!-- Ngăn click xuyên -->
     <div class="mobile-menu__panel" (click)="$event.stopPropagation()">
         <button class="mobile-menu__close" type="button" (click)="closeMenu()" aria-label="Đóng menu">✕</button>
+
         <ul>
             <li><a routerLink="/shop" (click)="closeMenu()">Điện thoại</a></li>
             <li><a routerLink="/accessories" (click)="closeMenu()">Phụ kiện</a></li>
             <li><a routerLink="/laptop" (click)="closeMenu()">Laptop</a></li>
             <li><a routerLink="/legal/privacy-policy" (click)="closeMenu()">Chính Sách</a></li>
 
-            <!-- FIX: thiếu dấu () trong closeMenu -->
-
             <li class="divider" role="separator" aria-hidden="true"></li>
-            <li><a routerLink="/login" (click)="closeMenu()">Đăng nhập</a></li>
-            <li><a routerLink="/signup" (click)="closeMenu()">Đăng ký</a></li>
+
+            <!-- 🔥 RÀNG BUỘC TRẠNG THÁI ĐĂNG NHẬP -->
+            @if (currentUser$ | async) {
+                <li>
+                    <button class="btn btn--outline w-100" type="button" (click)="logout(); closeMenu()">Đăng xuất</button>
+                </li>
+            } @else {
+                <li><a routerLink="/login"  (click)="closeMenu()">Đăng nhập</a></li>
+                <li><a routerLink="/signup" (click)="closeMenu()">Đăng ký</a></li>
+            }
         </ul>
     </div>
 </nav>

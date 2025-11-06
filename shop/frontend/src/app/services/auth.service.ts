@@ -1,7 +1,7 @@
 import {inject, Injectable} from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
-import { BehaviorSubject, Observable, tap } from 'rxjs';
+import { BehaviorSubject, Observable, tap, map, distinctUntilChanged, shareReplay } from 'rxjs';
 import { jwtDecode } from 'jwt-decode';
 import { environment } from '../environments/environment';
 
@@ -24,6 +24,14 @@ export class AuthService {
 
     private currentUserSubject = new BehaviorSubject<JwtPayload | null>(this.getUserFromToken());
     currentUser$ = this.currentUserSubject.asObservable();
+
+    // ✅ Stream trạng thái đăng nhập cho template (| async)
+    readonly isLoggedIn$: Observable<boolean> = this.currentUser$.pipe(
+        map(p => !!p && (!p.exp || Date.now() < p.exp * 1000)),
+        distinctUntilChanged(),
+        shareReplay({ bufferSize: 1, refCount: true })
+    );
+
     private router = inject(Router);
 
     constructor(private http: HttpClient) {}
@@ -65,16 +73,15 @@ export class AuthService {
     }
 
     // ====== 🟢 Trạng thái & Quyền ======
+    // (Vẫn giữ để dùng trong Guard)
     isLoggedIn(): boolean {
         const t = this.token;
         if (!t) return false;
         try {
             const p = this.decodeToken(t);
-            // Nếu JWT có exp (giây), kiểm tra hết hạn
             if (p?.exp && typeof p.exp === 'number') {
                 return Date.now() < p.exp * 1000;
             }
-            // Không có exp thì coi như đã đăng nhập (tuỳ yêu cầu)
             return true;
         } catch {
             return false;
@@ -85,18 +92,10 @@ export class AuthService {
         const p = this.getUserFromToken();
         if (!p) return false;
 
-        // Gom tất cả khả năng đặt tên claim của backend
-        let rawRoles: unknown =
-            p.roles ?? p.authorities ?? p.role ?? p.scope ?? null;
-
-        // Chuẩn hoá về mảng string
+        let rawRoles: unknown = p.roles ?? p.authorities ?? p.role ?? p.scope ?? null;
         let roles: string[] = [];
-        if (Array.isArray(rawRoles)) {
-            roles = rawRoles.map(String);
-        } else if (typeof rawRoles === 'string') {
-            // scope: 'ROLE_USER ROLE_OWNER' hoặc 'USER,OWNER'
-            roles = rawRoles.split(/[,\s]+/).filter(Boolean);
-        }
+        if (Array.isArray(rawRoles)) roles = rawRoles.map(String);
+        else if (typeof rawRoles === 'string') roles = rawRoles.split(/[,\s]+/).filter(Boolean);
 
         const needle = role.toUpperCase();
         return roles.map(r => r.toUpperCase()).includes(needle);
@@ -104,19 +103,16 @@ export class AuthService {
 
     // ====== 🔎 Decode & đọc user từ token ======
     private decodeToken(token: string): JwtPayload | null {
-        try {
-            return jwtDecode<JwtPayload>(token);
-        } catch {
-            return null;
-        }
+        try { return jwtDecode<JwtPayload>(token); }
+        catch { return null; }
     }
 
     private getUserFromToken(): JwtPayload | null {
         const t = this.token;
         return t ? this.decodeToken(t) : null;
     }
+
     // ===== Forgot Password =====
-    /** Gửi yêu cầu quên mật khẩu (BE sẽ gửi email có link đặt lại mật khẩu) */
     forgotPassword(email: string): Observable<string> {
         return this.http.post(
             `${this.baseUrl}/forgot-password`,
@@ -125,7 +121,6 @@ export class AuthService {
         );
     }
 
-    /** (Tuỳ chọn) Đặt lại mật khẩu khi người dùng click link từ email và có token */
     resetPassword(token: string, newPassword: string): Observable<string> {
         return this.http.post(
             `${this.baseUrl}/reset-password`,
@@ -133,6 +128,7 @@ export class AuthService {
             { responseType: 'text' }
         );
     }
+
     verifyEmail(token: string) {
         return this.http.get<{ message: string; error: any }>(
             `${this.baseUrl}/verify-email?token=${token}`
@@ -141,8 +137,5 @@ export class AuthService {
 
     resendVerification(email: string) {
         return this.http.post(`${this.baseUrl}/resend-verification`, { email });
-
     }
-
 }
-
