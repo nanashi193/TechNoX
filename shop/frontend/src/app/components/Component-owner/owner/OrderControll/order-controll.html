@@ -8,7 +8,7 @@
                 <button [class.active]="statusFilter() === 'all'"        (click)="setFilter('all')">Tất cả</button>
                 <button [class.active]="statusFilter() === 'Processing'" (click)="setFilter('Processing')">Đang xử lí</button>
                 <button [class.active]="statusFilter() === 'Confirmed'"  (click)="setFilter('Confirmed')">Đã xác nhận</button>
-                <button [class.active]="statusFilter() === 'Shipping'"   (click)="setFilter('Shipping')">Đang vận chuyển</button>
+                <button [class.active]="statusFilter() === 'Delivering'"   (click)="setFilter('Delivering')">Đang vận chuyển</button>
                 <button [class.active]="statusFilter() === 'Completed'"  (click)="setFilter('Completed')">Hoàn thành</button>
                 <button [class.active]="statusFilter() === 'Cancelled'"  (click)="setFilter('Cancelled')">Đã hủy</button>
             </div>

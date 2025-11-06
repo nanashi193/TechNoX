@@ -69,6 +69,9 @@ export class LoginComponent {
                         // 3. KIỂM TRA VÀ ĐIỀU HƯỚNG
                         if (role && (role.toUpperCase() === 'ADMIN' || role.toUpperCase() === 'OWNER')) {
                             this.router.navigate(['/owner']);
+                        }
+                        else if (role && (role.toUpperCase() === 'STAFF')) {
+                            this.router.navigate(['/staff/shipping']);
                         } else {
                             this.router.navigate(['/home']);
                         }

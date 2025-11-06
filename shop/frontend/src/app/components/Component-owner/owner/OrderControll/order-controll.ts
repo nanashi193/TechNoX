@@ -8,7 +8,7 @@ import {AssignStaffRequest} from '../../../../models/assign-staff-request.model'
 import {BillAdminService} from "../../../../services/bill-admin.service";
 import {Router} from "@angular/router";
 
-export type OrderStatus = 'Processing' | 'Confirmed' | 'Shipping' | 'Completed' | 'Cancelled';
+export type OrderStatus = 'Processing' | 'Confirmed' | 'Delivering' | 'Completed' | 'Cancelled';
 export type PaymentMethod = 'COD' | 'POS';
 
 interface BillAdminUI extends BillAdminResponse {
@@ -52,7 +52,7 @@ export class OrderControllComponent implements OnInit {
     readonly statusMeta: Record<OrderStatus, { label: string; color: string }> = {
         Processing: {label: 'Đang xử lý', color: 'processing'},
         Confirmed: {label: 'Đã xác nhận', color: 'paid'},
-        Shipping: {label: 'Đang vận chuyển', color: 'shipping'},
+        Delivering: {label: 'Đang vận chuyển', color: 'Delivering'},
         Completed: {label: 'Hoàn thành', color: 'delivered'},
         Cancelled: {label: 'Đã hủy', color: 'cancelled'},
     };
@@ -71,7 +71,7 @@ export class OrderControllComponent implements OnInit {
         const sf = this.statusFilter();
         return this.orders().filter(o => {
             // Đơn hiện tại = Đang xử lý, Đã xác nhận, Đang vận chuyển
-            const isActive = o.status === 'Processing' || o.status === 'Confirmed' || o.status === 'Shipping';
+            const isActive = o.status === 'Processing' || o.status === 'Confirmed' || o.status === 'Delivering';
             const pass = (sf === 'all' && isActive) || (sf === o.status);
             return isActive && pass && this.matchSearch(o, q);
         });

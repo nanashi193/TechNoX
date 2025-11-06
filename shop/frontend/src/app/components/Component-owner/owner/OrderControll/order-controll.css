@@ -89,6 +89,19 @@
 .badge.paid{ background:#eff6ff; color:#2563eb; border-color: rgba(59,130,246,.25); }
 .badge.delivered{ background:#ecfdf5; color:#059669; border-color: rgba(16,163,127,.25); }
 
+.badge.Delivering{
+    background: #f5f3ff;
+    color: #5b21b6;
+    border-color: rgba(109, 40, 217, .25);
+}
+
+/* MÀU ĐỎ (CHO "ĐÃ HỦY") */
+.badge.cancelled{
+    background: #fee2e2;
+    color: #b91c1c;
+    border-color: rgba(220, 38, 38, .25);
+}
+
 /* Buttons (viền mảnh) */
 .seg button{
     background: #fff;
