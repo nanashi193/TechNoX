@@ -41,6 +41,7 @@ public class WebSecurityConfig {
 
                 // Ủy quyền
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers(POST, apiPrefix + "/auth/me").authenticated()
                         // Health/Probe (để kiểm tra nhanh)
                         .requestMatchers(GET, apiPrefix + "/_health/**").permitAll()
                         .requestMatchers(GET, apiPrefix + "/_probe/**").permitAll()
@@ -55,18 +56,18 @@ public class WebSecurityConfig {
                         .requestMatchers(POST, apiPrefix + "/users/forgot-password").permitAll()
                         .requestMatchers(POST, apiPrefix + "/users/reset-password").permitAll()
                         .requestMatchers(POST, apiPrefix + "/users/resend-verification").permitAll()
-                        .requestMatchers(GET,  apiPrefix + "/users/verify-email").permitAll()
+                        .requestMatchers(GET, apiPrefix + "/users/verify-email").permitAll()
 
                         // Sản phẩm/public GET
-                        .requestMatchers(GET,  apiPrefix + "/categories").permitAll()
-                        .requestMatchers(GET,  apiPrefix + "/products/**").permitAll()
-                        .requestMatchers(GET,  apiPrefix + "/customer/products/**").permitAll()
+                        .requestMatchers(GET, apiPrefix + "/categories").permitAll()
+                        .requestMatchers(GET, apiPrefix + "/products/**").permitAll()
+                        .requestMatchers(GET, apiPrefix + "/customer/products/**").permitAll()
 
                         // PayOS endpoints
-                        .requestMatchers(POST, apiPrefix + "/bills/{billId}/pay").authenticated()  // tạo link thanh toán
+                        .requestMatchers(POST, apiPrefix + "/bills/{billId}/pay").authenticated() // tạo link thanh toán
                         .requestMatchers(POST, apiPrefix + "/bills/pay/webhook").permitAll() // PayOS gọi vào
                         .requestMatchers(GET, apiPrefix + "/bills/pay/webhook").permitAll()
-                        .requestMatchers(GET,  apiPrefix + "/bills/status/**").permitAll() // FE tra cứu
+                        .requestMatchers(GET, apiPrefix + "/bills/status/**").permitAll() // FE tra cứu
 
                         // Quản trị sản phẩm
                         .requestMatchers(POST, apiPrefix + "/products").hasAnyRole(Role.ADMIN, Role.OWNER)
@@ -75,10 +76,11 @@ public class WebSecurityConfig {
                         .requestMatchers(POST, apiPrefix + "/products/*/variants/**").hasAnyRole(Role.ADMIN, Role.OWNER)
                         .requestMatchers(DELETE, apiPrefix + "/products/*").hasAnyRole(Role.ADMIN, Role.OWNER)
                         .requestMatchers(DELETE, apiPrefix + "/products/*/images/**").hasAnyRole(Role.ADMIN, Role.OWNER)
-                        .requestMatchers(PUT, apiPrefix + "/products/*/thumbnail/from-image/*").hasAnyRole(Role.ADMIN, Role.OWNER)
+                        .requestMatchers(PUT, apiPrefix + "/products/*/thumbnail/from-image/*")
+                        .hasAnyRole(Role.ADMIN, Role.OWNER)
                         .requestMatchers(PUT, apiPrefix + "/products/**").hasAnyRole(Role.ADMIN, Role.OWNER)
 
-                        //Bills
+                        // Bills
                         .requestMatchers(POST, apiPrefix + "/bills").authenticated()
                         .requestMatchers(POST, apiPrefix + "/bills/*/confirm-cod").authenticated()
                         .requestMatchers(POST, apiPrefix + "/bills/*/confirm-payos").authenticated()
@@ -96,27 +98,27 @@ public class WebSecurityConfig {
                         .requestMatchers(DELETE, apiPrefix + "/categories/**").hasAnyRole(Role.ADMIN, Role.OWNER)
 
                         // Mặc định: cần auth
-                        .anyRequest().authenticated()
-                )
+                        .anyRequest().authenticated())
 
                 // Gắn JWT filter
                 .addFilterBefore(jwtTokenFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
-        @Bean
-        public CorsConfigurationSource corsConfigurationSource () {
-            CorsConfiguration configuration = new CorsConfiguration();
-            configuration.addAllowedOrigin("http://localhost:4200");
-            configuration.addAllowedOrigin("https://45e5237ba232.ngrok-free.app"); //Thay link day = frontend
-            configuration.addAllowedHeader("*");
-            configuration.addAllowedMethod("*");
-            configuration.setAllowCredentials(true);
-            configuration.setExposedHeaders(List.of("Authorization"));
 
-            UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-            source.registerCorsConfiguration("/**", configuration);
-            return source;
-        }
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+        configuration.addAllowedOrigin("http://localhost:4200");
+        configuration.addAllowedOrigin("https://45e5237ba232.ngrok-free.app"); // Thay link day = frontend
+        configuration.addAllowedHeader("*");
+        configuration.addAllowedMethod("*");
+        configuration.setAllowCredentials(true);
+        configuration.setExposedHeaders(List.of("Authorization"));
 
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+        return source;
     }
+
+}

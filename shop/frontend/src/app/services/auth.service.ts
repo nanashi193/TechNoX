@@ -7,6 +7,7 @@ import { environment } from '../environments/environment';
 
 export interface LoginRequest  { email: string; password: string; }
 export interface SignupRequest { username: string; email: string; password: string; }
+export interface Me { id: number | string; name: string; email: string; role?: string; avatar?: string; }
 
 type JwtPayload = {
     sub?: string;
@@ -21,9 +22,14 @@ type JwtPayload = {
 @Injectable({ providedIn: 'root' })
 export class AuthService {
     private baseUrl = `${environment.apiBaseUrl}/users`;
+    private authBaseUrl = `${environment.apiBaseUrl}/auth`; // <-- thêm cho /me
 
     private currentUserSubject = new BehaviorSubject<JwtPayload | null>(this.getUserFromToken());
     currentUser$ = this.currentUserSubject.asObservable();
+
+    private profileSubject = new BehaviorSubject<Me | null>(this.getProfileFromStorage());
+    profile$ = this.profileSubject.asObservable();
+
     private router = inject(Router);
 
     constructor(private http: HttpClient) {}
@@ -40,7 +46,9 @@ export class AuthService {
 
     clearToken() {
         localStorage.removeItem('token');
+        localStorage.removeItem('auth.user');
         this.currentUserSubject.next(null);
+        this.profileSubject.next(null);
     }
 
     // Đăng nhập (ví dụ backend trả về { token } hoặc { accessToken })
@@ -143,6 +151,19 @@ export class AuthService {
         return this.http.post(`${this.baseUrl}/resend-verification`, { email });
 
     }
+    me(): Observable<Me> {
+        return this.http.get<Me>(`${this.authBaseUrl}/me`).pipe(
+            tap(me => {
+                localStorage.setItem('auth.user', JSON.stringify(me));
+                this.profileSubject.next(me);
+            })
+        );
+    }
+    private getProfileFromStorage(): Me | null {
+        try { return JSON.parse(localStorage.getItem('auth.user') || 'null'); }
+        catch { return null; }
+    }
+
 
 }
 
