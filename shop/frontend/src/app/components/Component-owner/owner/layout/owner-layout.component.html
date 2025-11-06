@@ -5,8 +5,10 @@
         <div class="aside-head">
             <img class="avatar" src="assets/icons/x-logo-circle.png" alt="">
             <div class="who">
-                <div class="role">SHOP OWNER</div>
-                <div class="name">nanashi</div>
+                <div class="role">Chủ cửa hàng</div>
+                <div class="name" [title]="(me$ | async)?.name || '—'">
+                    {{ (me$ | async)?.name || '—' }}
+                </div>
             </div>
             <button class="collapse" (click)="mini = !mini" aria-label="Toggle sidebar">⟨⟩</button>
         </div>

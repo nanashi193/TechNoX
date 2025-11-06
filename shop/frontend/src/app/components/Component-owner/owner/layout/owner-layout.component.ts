@@ -12,9 +12,10 @@ import {AuthService} from "../../../../services/auth.service";
 })
 
 export class OwnerLayoutComponent {
-    constructor(private auth: AuthService) {
-    }
+    constructor() {}
     private router = inject(Router);
+    private auth = inject(AuthService);
+    me$ = this.auth.profile$;
 
     mini = false;                   // thu gọn sidebar
     open = { dash: true };
