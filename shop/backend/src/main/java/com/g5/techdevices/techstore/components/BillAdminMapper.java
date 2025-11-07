@@ -91,13 +91,20 @@ public class BillAdminMapper {
                 .stream()
                 .map(this::mapToBillDetailProductResponse)
                 .collect(Collectors.toList());
+
+        User user = bill.getUser();
+        long userId = (user != null ? user.getId() : null);
+        String email = (user != null ? user.getEmail() : null);
+
         return BillFullDetailResponse.builder()
                 .billId(bill.getId())
+                .userId(userId)
                 .orderDate(bill.getOrderDate())
                 .status(bill.getStatus())
                 .total(bill.getTotal())
                 .paymentMethod(bill.getPaymentMethod())
                 .customerFullName(bill.getFullName())
+                .email(email)
                 .customerPhone(bill.getPhone())
                 .shippingAddress(bill.getShippingAddress())
                 .paymentStatus(paymentStatus)
