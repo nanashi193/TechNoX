@@ -1,7 +1,7 @@
 <section class="card">
     <div class="card-hdr">
-        <h3>Orders <span class="muted" *ngIf="totalItems()">({{ totalItems() }})</span></h3>
-        <a class="btn ghost" [routerLink]="['/owner/orders']" [queryParams]="{ userId: userId }">View all</a>
+        <h3>Đơn hàng đã đặt <span class="muted" *ngIf="totalItems()">({{ totalItems() }})</span></h3>
+        <a class="btn ghost" [routerLink]="['/owner/orders']" [queryParams]="{ userId: userId }">Xem tất cả</a>
     </div>
 
     <div class="table" *ngIf="!loading() && rows().length; else stateTpl">

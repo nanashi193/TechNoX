@@ -160,7 +160,7 @@
 </div>
 
 <nav class="pagination" aria-label="Pagination">
-    <button class="pg prev" [disabled]="page === 1" (click)="prev()">Prev</button>
+    <button class="pg prev" [disabled]="page === 1" (click)="prev()">Trang trước</button>
 
     <ng-container *ngFor="let n of pages; let i = index">
         <ng-container *ngIf="i === 0 || n - pages[i-1] === 1; else dots">
@@ -172,5 +172,5 @@
         </ng-template>
     </ng-container>
 
-    <button class="pg next" [disabled]="page === totalPages" (click)="next()">Next</button>
+    <button class="pg next" [disabled]="page === totalPages" (click)="next()">Trang sau</button>
 </nav>
