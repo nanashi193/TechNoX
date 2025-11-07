@@ -83,7 +83,7 @@
 
     <!-- ĐƠN ĐÃ GIAO -->
     <div class="section-card">
-        <div class="section-card__head">Đơn đã giao (Trạng thái: Succeed)</div>
+        <div class="section-card__head">Đơn đã giao (Trạng thái: Delivered)</div>
 
         <div class="table-wrap section-card__body">
             <table class="orders">
@@ -100,7 +100,6 @@
                 </thead>
 
                 <tbody>
-                <!-- Sửa: Dùng computed signal 'succeedOrders()' -->
                 <tr *ngFor="let o of succeedOrders()">
                     <td class="mono">{{ o.billId }}</td>
                     <td>
@@ -108,21 +107,27 @@
                         <div class="muted mono">{{ o.customerPhone }}</div>
                     </td>
                     <td>
-                        <span class="badge"
-                              [class.processing]="o.paymentMethod==='COD'"
-                              [class.paid]="o.paymentMethod==='PayOS'">
-                            {{ o.paymentMethod }}
-                        </span>
+            <span class="badge"
+                  [class.processing]="o.paymentMethod==='COD'"
+                  [class.paid]="o.paymentMethod==='PayOS'">
+                {{ o.paymentMethod }}
+            </span>
                     </td>
                     <td class="right mono">
                         {{ o.total | currency:'VND':'symbol':'1.0-0' }}
                     </td>
-                    <td><span class="badge delivered">Đã giao</span></td>
+
+                    <td>
+            <span *ngIf="o.status === 'Delivered'" class="badge warn">
+                Đã giao (Waiting)
+            </span>
+                        <span *ngIf="o.status === 'Succeed'" class="badge delivered">
+                Đã hoàn tất
+            </span>
+                    </td>
                     <td class="mono">{{ o.orderDate | date:'HH:mm, dd/MM/yyyy' }}</td>
-                    <!-- Sửa: Dùng hàm getStaffLabel(o.staff) -->
                     <td>{{ getStaffLabel(o.staff) }}</td>
                 </tr>
-
                 <tr *ngIf="succeedOrders().length === 0">
                     <td colspan="7" class="muted">Chưa có đơn nào đã giao.</td>
                 </tr>

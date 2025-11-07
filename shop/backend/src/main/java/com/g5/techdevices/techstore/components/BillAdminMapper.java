@@ -20,9 +20,28 @@ public class BillAdminMapper {
 
     private final PayTransactionRepository payTransactionRepository;
 
-    /**
-     * Hàm chính: Chuyển đổi 1 Entity Bill sang 1 DTO BillAdminResponse
-     */
+    private StaffInfo getStaffInfo(Bill bill) {
+        User staff = bill.getStaff();
+        if (staff != null) {
+            return new StaffInfo(
+                    staff.getId(),
+                    staff.getFullName(),
+                    staff.getPhoneNumber()
+            );
+        }
+        return null;
+    }
+
+    private String getPaymentStatusForBill(Bill bill) {
+        if ("COD".equalsIgnoreCase(bill.getPaymentMethod())) {
+            return "N/A";
+        }
+        return payTransactionRepository
+                .findFirstByBillIdOrderByCreatedAtDesc(bill.getId())
+                .map(PayTransaction::getStatus)
+                .orElse("UNKNOWN");
+    }
+//---------------------------------------------------------------------------------------------------------//
     public BillAdminResponse mapToBillAdminResponse(Bill bill) {
 
         StaffInfo staffInfo = null;
@@ -105,6 +124,30 @@ public class BillAdminMapper {
                 .paymentMethod(bill.getPaymentMethod())
                 .customerFullName(bill.getFullName())
                 .email(email)
+                .customerPhone(bill.getPhone())
+                .shippingAddress(bill.getShippingAddress())
+                .paymentStatus(paymentStatus)
+                .staff(staffInfo)
+                .products(productResponses)
+                .build();
+    }
+
+    public BillFullDetailResponse mapToBillFullDetailResponse(Bill bill, String paymentStatus) {
+        StaffInfo staffInfo = getStaffInfo(bill);
+
+        List<BillDetailProductResponse> productResponses = bill
+                .getDetails()
+                .stream()
+                .map(this::mapToBillDetailProductResponse)
+                .collect(Collectors.toList());
+
+        return BillFullDetailResponse.builder()
+                .billId(bill.getId())
+                .orderDate(bill.getOrderDate())
+                .status(bill.getStatus())
+                .total(bill.getTotal())
+                .paymentMethod(bill.getPaymentMethod())
+                .customerFullName(bill.getFullName())
                 .customerPhone(bill.getPhone())
                 .shippingAddress(bill.getShippingAddress())
                 .paymentStatus(paymentStatus)

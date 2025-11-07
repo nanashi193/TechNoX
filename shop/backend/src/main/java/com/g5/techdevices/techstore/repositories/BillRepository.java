@@ -58,4 +58,5 @@ public interface BillRepository extends JpaRepository<Bill,Long> {
 
     Optional<User> findById(int id);
     List<Bill> findByStaffIdAndStatusIn(int staffId, List<String> statuses, Sort sort);
+    List<Bill> findByUserId(int userId, Sort sort);
 }

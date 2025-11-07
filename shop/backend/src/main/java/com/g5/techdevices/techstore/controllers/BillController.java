@@ -248,10 +248,28 @@ public class BillController {
         List<BillAdminResponse> bills = billService.getOrdersForCurrentStaff();
         return ResponseEntity.ok(bills);
     }
-    //staff cap nhat don
+    //staff cap nhat don thành đã giao tới - phía staff
     @PutMapping("/staff/complete/{billId}")
     public ResponseEntity<BillAdminResponse> setBillToSucceed(@PathVariable Long billId) {
         BillAdminResponse updatedBill = billService.completeBillForStaff(billId);
+        return ResponseEntity.ok(updatedBill);
+    }
+    //Lấy danh sách đơn hàng cho customer đang đăng nhập
+    @GetMapping("/my-orders")
+    public ResponseEntity<List<BillFullDetailResponse>> getMyOrders() {
+        List<BillFullDetailResponse> myOrders = billService.getOrdersForCurrentCustomer();
+        return ResponseEntity.ok(myOrders);
+    }
+    //Hủy đơn - Xử bắn
+    @PutMapping("/my-orders/{billId}/cancel")
+    public ResponseEntity<?> cancelMyOrder(@PathVariable Long billId) {
+        billService.cancelOrderForCustomer(billId);
+        return ResponseEntity.ok(Map.of("message", "Đã hủy đơn hàng thành công."));
+    }
+    //Cập nhật đơn thành đã nhận - phía customer
+    @PutMapping("/my-orders/{billId}/confirm-received")
+    public ResponseEntity<BillAdminResponse> confirmOrderReceived(@PathVariable Long billId) {
+        BillAdminResponse updatedBill = billService.confirmOrderReceived(billId);
         return ResponseEntity.ok(updatedBill);
     }
 }

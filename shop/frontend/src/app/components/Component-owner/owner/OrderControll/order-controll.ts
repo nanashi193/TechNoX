@@ -8,7 +8,7 @@ import {AssignStaffRequest} from '../../../../models/assign-staff-request.model'
 import {BillAdminService} from "../../../../services/bill-admin.service";
 import {Router} from "@angular/router";
 
-export type OrderStatus = 'Processing' | 'Confirmed' | 'Delivering' | 'Succeed' | 'Cancelled';
+export type OrderStatus = 'Processing' | 'Confirmed' | 'Delivering' | 'Delivered' | 'Succeed' | 'Cancelled';
 export type PaymentMethod = 'COD' | 'POS';
 
 interface BillAdminUI extends BillAdminResponse {
@@ -50,11 +50,12 @@ export class OrderControllComponent implements OnInit {
     search = signal<string>('');
 
     readonly statusMeta: Record<OrderStatus, { label: string; color: string }> = {
-        Processing: {label: 'Đang xử lý', color: 'processing'},
-        Confirmed: {label: 'Đã xác nhận', color: 'paid'},
+        Processing: {label: 'Đang xử lý',     color: 'processing'},
+        Confirmed:  {label: 'Đã xác nhận',   color: 'paid'},
         Delivering: {label: 'Đang vận chuyển', color: 'Delivering'},
-        Succeed: {label: 'Hoàn thành', color: 'delivered'},
-        Cancelled: {label: 'Đã hủy', color: 'cancelled'},
+        Delivered:  {label: 'Đã giao (Chờ KH)', color: 'processing'},
+        Succeed:    {label: 'Hoàn tất',      color: 'delivered'},
+        Cancelled:  {label: 'Đã hủy',        color: 'cancelled'},
     };
 
     meta(o: BillAdminUI) {
@@ -70,8 +71,9 @@ export class OrderControllComponent implements OnInit {
         const q = this.search().trim().toLowerCase();
         const sf = this.statusFilter();
         return this.orders().filter(o => {
-            // Đơn hiện tại = Đang xử lý, Đã xác nhận, Đang vận chuyển
-            const isActive = o.status === 'Processing' || o.status === 'Confirmed' || o.status === 'Delivering';
+            // SỬA: Bỏ 'Delivered' ra khỏi Đơn hiện tại
+            const isActive = o.status === 'Processing' || o.status === 'Confirmed' ||
+                o.status === 'Delivering';
             const pass = (sf === 'all' && isActive) || (sf === o.status);
             return isActive && pass && this.matchSearch(o, q);
         });
@@ -81,7 +83,8 @@ export class OrderControllComponent implements OnInit {
         const q = this.search().trim().toLowerCase();
         const sf = this.statusFilter();
         return this.orders().filter(o => {
-            const isDone = o.status === 'Succeed' || o.status === 'Cancelled';
+            // SỬA: Thêm 'Delivered' vào Đơn đã xử lý
+            const isDone = o.status === 'Delivered' || o.status === 'Succeed' || o.status === 'Cancelled';
             const pass = (sf === 'all' && isDone) || (sf === o.status);
             return isDone && pass && this.matchSearch(o, q);
         });

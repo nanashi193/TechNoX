@@ -41,7 +41,7 @@ export class OrderShippingComponent implements OnInit {
     });
 
     succeedOrders = computed(() => {
-        const succeed = this.allOrders().filter(o => o.status === 'Succeed');
+        const succeed = this.allOrders().filter(o => o.status === 'Delivered' || o.status === 'Succeed');
         return this.filterOrders(succeed);
     });
 

@@ -105,18 +105,31 @@
 .right{ text-align:right; }
 
 /* Chip loại đơn */
-.tag{
+.badge{
     display:inline-block; padding: 2px 8px; font-size:12px;
     border-radius:999px; border:1px solid rgba(0,0,0,.08); background:#f3f4f6;
+    text-transform: uppercase;
+    letter-spacing: .02em;
 }
-.tag.cod{ color:#b45309; background:#fff7ed; border-color: rgba(245,158,11,.25); }
-.tag.pos{ color:#1d4ed8; background:#eff6ff; border-color: rgba(59,130,246,.25); }
-
-/* Trạng thái */
-.badge{ padding:2px 8px; border-radius:999px; font-size:12px; border:1px solid transparent; }
 .badge.processing{ background:#fff7ed; color:#b45309; border-color: rgba(245,158,11,.25); }
 .badge.paid{ background:#eff6ff; color:#2563eb; border-color: rgba(59,130,246,.25); }
 .badge.delivered{ background:#ecfdf5; color:#059669; border-color: rgba(16,163,127,.25); }
+.badge.warn {
+    background:#fff7ed;
+    color:#b45309;
+    border-color: rgba(245,158,11,.25);
+}
+
+.badge.shipping {
+    background: #f5f3ff;
+    color: #7c3aed;
+    border-color: rgba(124, 58, 237, .25);
+}
+.badge.cancelled {
+    background: #f3f4f6;
+    color: #6b7280;
+    border-color: rgba(107, 114, 128, .25);
+}
 
 /* Buttons */
 .btns{ display:flex; gap:8px; justify-content:flex-end; }

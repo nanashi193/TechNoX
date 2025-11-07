@@ -7,6 +7,7 @@ import com.g5.techdevices.techstore.dtos.BillDTO;
 import com.g5.techdevices.techstore.dtos.BillDetailRequestDTO;
 import com.g5.techdevices.techstore.entity.Bills.Bill;
 import com.g5.techdevices.techstore.entity.Bills.BillDetail;
+import com.g5.techdevices.techstore.entity.pay.PayTransaction;
 import com.g5.techdevices.techstore.entity.products.ProductVariant;
 import com.g5.techdevices.techstore.entity.users.Role;
 import com.g5.techdevices.techstore.entity.users.User;
@@ -15,6 +16,7 @@ import com.g5.techdevices.techstore.exceptions.InsufficientStockException;
 import com.g5.techdevices.techstore.exceptions.InvalidOperationException;
 import com.g5.techdevices.techstore.repositories.BillDetailRepository;
 import com.g5.techdevices.techstore.repositories.BillRepository;
+import com.g5.techdevices.techstore.repositories.PayTransactionRepository;
 import com.g5.techdevices.techstore.repositories.UserRepository;
 import com.g5.techdevices.techstore.repositories.cart.ProductVariantRepository;
 import com.g5.techdevices.techstore.responses.AdminBillsResponse.BillAdminResponse;
@@ -33,6 +35,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -45,18 +48,21 @@ public class BillService implements IBillService {
     private final EmailService emailService;
     private final BillMapper billMapper;
     private final BillAdminMapper billAdminMapper;
+    private final PayTransactionRepository payTransactionRepository;
 
     private static final Logger logger = LoggerFactory.getLogger(BillService.class);
 
     public BillService(BillRepository billRepository, BillDetailRepository billDetailRepository,
                        ProductVariantRepository variantRepository, UserRepository userRepository, EmailService emailService,
-                       BillMapper billMapper,  BillAdminMapper billAdminMapper) {
+                       BillMapper billMapper,  BillAdminMapper billAdminMapper,
+                       PayTransactionRepository payTransactionRepository) {
         this.billRepository = billRepository;
         this.variantRepository = variantRepository;
         this.userRepository = userRepository;
         this.emailService = emailService;
         this.billMapper = billMapper;
         this.billAdminMapper = billAdminMapper;
+        this.payTransactionRepository = payTransactionRepository;
     }
     // ================== CREATE BILL ==================
     @Override
@@ -281,7 +287,7 @@ public class BillService implements IBillService {
     public List<BillAdminResponse> getOrdersForCurrentStaff() {
         User currentStaff = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         int currentStaffId = currentStaff.getId();
-        List<String> statuses = List.of("Delivering", "Succeed");
+        List<String> statuses = List.of("Delivering", "Delivered", "Succeed");
         List<Bill> bills = billRepository.findByStaffIdAndStatusIn(
                 currentStaffId,
                 statuses,
@@ -304,6 +310,80 @@ public class BillService implements IBillService {
         }
         if (!bill.getStatus().equals("Delivering")) {
             throw new RuntimeException("Đơn hàng này không ở trạng thái 'Chờ giao'.");
+        }
+        bill.setStatus("Delivered");
+        Bill savedBill = billRepository.save(bill);
+        return billAdminMapper.mapToBillAdminResponse(savedBill);
+    }
+
+    public List<BillFullDetailResponse> getOrdersForCurrentCustomer() {
+        User currentUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        int currentUserId = currentUser.getId();
+        List<Bill> bills = billRepository.findByUserId(
+                currentUserId,
+                Sort.by(Sort.Direction.DESC, "orderDate")
+        );
+        List<Long> nonCodBillIds = bills.stream()
+                .filter(b -> !"COD".equalsIgnoreCase(b.getPaymentMethod()))
+                .map(Bill::getId)
+                .collect(Collectors.toList());
+
+        Map<Long, String> paymentStatusMap = payTransactionRepository
+                .findLatestStatusForBillIds(nonCodBillIds)
+                .stream()
+                .collect(Collectors.toMap(
+                        PayTransaction::getBillId,
+                        PayTransaction::getStatus
+                ));
+        return bills.stream().map(bill -> {
+            String paymentStatus;
+            if ("COD".equalsIgnoreCase(bill.getPaymentMethod())) {
+                paymentStatus = "N/A";
+            } else {
+                paymentStatus = paymentStatusMap.getOrDefault(bill.getId(), "UNKNOWN");
+            }
+            return billAdminMapper.mapToBillFullDetailResponse(bill, paymentStatus);
+        }).collect(Collectors.toList());
+    }
+
+    @Transactional
+    public void cancelOrderForCustomer(Long billId) {
+        User currentUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Bill bill = billRepository.findById(billId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy đơn hàng: " + billId));
+        if (bill.getUser().getId() != currentUser.getId()) {
+            throw new AccessDeniedException("Bạn không có quyền hủy đơn hàng này.");
+        }
+        List<String> uncancellableStatuses = List.of("Delivering", "Succeed", "Cancelled");
+
+        if (uncancellableStatuses.contains(bill.getStatus())) {
+            throw new RuntimeException("Không thể hủy đơn hàng khi đã ở trạng thái: " + bill.getStatus());
+        }
+        if (bill.getStatus().equals("Confirmed")) {
+            for (BillDetail detail : bill.getDetails()) {
+                ProductVariant variant = detail.getVariant();
+                if (variant != null) {
+                    ProductVariant variantFromDb = variantRepository.findById(variant.getId())
+                            .orElseThrow(() -> new RuntimeException("Không tìm thấy sản phẩm (variant) để hoàn kho: " + variant.getId()));
+                    variantFromDb.setQuantity(variantFromDb.getQuantity() + detail.getQuantity());
+                    variantRepository.save(variantFromDb);
+                }
+            }
+        }
+        bill.setStatus("Cancelled");
+        billRepository.save(bill);
+    }
+
+    @Transactional
+    public BillAdminResponse confirmOrderReceived(Long billId) {
+        User currentUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Bill bill = billRepository.findById(billId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy đơn hàng: " + billId));
+        if (bill.getUser().getId() != currentUser.getId()) {
+            throw new AccessDeniedException("Bạn không có quyền xác nhận đơn hàng này.");
+        }
+        if (!"Delivered".equals(bill.getStatus())) {
+            throw new RuntimeException("Đơn hàng này chưa được nhân viên giao hàng xác nhận.");
         }
         bill.setStatus("Succeed");
         Bill savedBill = billRepository.save(bill);

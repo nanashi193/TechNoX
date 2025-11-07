@@ -1,7 +1,14 @@
-:host { display: block; color: #eaeaea; }
+:host {
+    display: block;
+    color: #eaeaea;
+}
 
 /* Layout */
-.container { width: 92%; max-width: 1180px; margin: 0 auto; }
+.container {
+    width: 92%;
+    max-width: 1180px;
+    margin: 0 auto;
+}
 .section-pad { padding-block: 36px; }
 .title { margin: 0 0 18px; font-size: 26px; font-weight: 800; opacity: .9; }
 
@@ -13,6 +20,36 @@
 }
 
 .order-list { display: grid; gap: 16px; }
+
+/* ===== CSS CHO THANH LỌC (MỚI) ===== */
+.order-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 24px;
+    justify-content: flex-end; /* Sửa: Di chuyển thanh lọc qua phải */
+}
+.btn--filter {
+    /* Dùng chung .btn styles (padding, font, v.v) */
+    background: #2a2b2e; /* Nền tối, hơi sáng hơn card */
+    border-color: #444;
+    color: #ccc;
+    font-weight: 500;
+}
+.btn--filter:hover {
+    background: #3a3b3e;
+    border-color: #555;
+    color: #fff;
+}
+.btn--filter.active {
+    background: transparent; /* Sửa: Nền trong suốt */
+    border-color: #4a90e2;   /* Sửa: Giữ viền xanh */
+    color: #8ec3f3;         /* Sửa: Chữ màu xanh nhạt (hợp theme tối) */
+    font-weight: 600;
+    box-shadow: inset 0 0 0 1px #4a90e2; /* Thêm viền trong cho rõ */
+}
+/* ===== KẾT THÚC CSS THANH LỌC ===== */
+
 
 /* Card */
 .order-card {
@@ -55,12 +92,16 @@
     background: #1a1b1d;
     text-transform: uppercase;
     letter-spacing: .04em;
+    white-space: nowrap; /* Thêm */
 }
-.status-pill.ok    { background: #163824; border-color: #1f6a3f; color: #8ef5ba; }
-.status-pill.warn  { background: #3a3716; border-color: #6d6321; color: #ffe69b; }
-.status-pill.bad   { background: #3a1616; border-color: #6d2121; color: #ff9b9b; }
-.pay-pill.ok       { background: #163824; border-color: #1f6a3f; color: #b7ffd7; }
-.pay-pill.warn     { background: #3a3716; border-color: #6d6321; color: #ffe69b; }
+.status-pill.ok    { background: #163824; border-color: #1f6a3f; color: #8ef5ba; } /* Succeed */
+.status-pill.warn  { background: #3a3716; border-color: #6d6321; color: #ffe69b; } /* Delivering */
+.status-pill.bad   { background: #3a1616; border-color: #6d2121; color: #ff9b9b; } /* Cancelled */
+
+/* Sửa: CSS cho paymentMethod (COD/PayOS) */
+.pay-pill.cod { background: #3a3716; border-color: #6d6321; color: #ffe69b; }
+.pay-pill.pos { background: #163824; border-color: #1f6a3f; color: #b7ffd7; }
+
 
 /* Lines (products in order) */
 .order-lines { padding: 12px 16px; }
@@ -140,7 +181,8 @@
     .line-price { justify-self: end; grid-column: 1 / -1; }
     .thumb { width: 48px; height: 48px; }
 }
-.title--black {
-    color: #000 !important;
-}
 
+/* Sửa: Đổi màu tiêu đề thành màu đen để hiển thị trên nền trắng */
+.title--black {
+    color: #111 !important;
+}
