@@ -8,7 +8,7 @@ import {AssignStaffRequest} from '../../../../models/assign-staff-request.model'
 import {BillAdminService} from "../../../../services/bill-admin.service";
 import {Router} from "@angular/router";
 
-export type OrderStatus = 'Processing' | 'Confirmed' | 'Delivering' | 'Completed' | 'Cancelled';
+export type OrderStatus = 'Processing' | 'Confirmed' | 'Delivering' | 'Succeed' | 'Cancelled';
 export type PaymentMethod = 'COD' | 'POS';
 
 interface BillAdminUI extends BillAdminResponse {
@@ -53,7 +53,7 @@ export class OrderControllComponent implements OnInit {
         Processing: {label: 'Đang xử lý', color: 'processing'},
         Confirmed: {label: 'Đã xác nhận', color: 'paid'},
         Delivering: {label: 'Đang vận chuyển', color: 'Delivering'},
-        Completed: {label: 'Hoàn thành', color: 'delivered'},
+        Succeed: {label: 'Hoàn thành', color: 'delivered'},
         Cancelled: {label: 'Đã hủy', color: 'cancelled'},
     };
 
@@ -81,7 +81,7 @@ export class OrderControllComponent implements OnInit {
         const q = this.search().trim().toLowerCase();
         const sf = this.statusFilter();
         return this.orders().filter(o => {
-            const isDone = o.status === 'Completed' || o.status === 'Cancelled';
+            const isDone = o.status === 'Succeed' || o.status === 'Cancelled';
             const pass = (sf === 'all' && isDone) || (sf === o.status);
             return isDone && pass && this.matchSearch(o, q);
         });
@@ -158,7 +158,7 @@ export class OrderControllComponent implements OnInit {
         const selectElement = event.target as HTMLSelectElement;
         const staffId = selectElement.value ? parseInt(selectElement.value, 10) : null;
 
-        if (order.status === 'Completed' || order.status === 'Cancelled') return; // Đơn đã xong -> không đổi
+        if (order.status === 'Succeed' || order.status === 'Cancelled') return; // Đơn đã xong -> không đổi
         if (order.staff) { // Đã phân công rồi -> chặn (backend trả về staff object)
             this.showError('Đơn đã phân công, không thể thay đổi.');
             // Reset dropdown về giá trị cũ

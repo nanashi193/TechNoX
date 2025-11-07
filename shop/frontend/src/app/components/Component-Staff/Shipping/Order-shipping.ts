@@ -1,146 +1,93 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, signal, computed, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { BillService } from '../../../services/bill.service';
+import { BillAdminResponse} from '../../../models/bill-admin.model';
+import { StaffInfo } from '../../../models/staff-info.model';
 
-type OrderType = 'COD' | 'POS';
-type OrderStatus = 'processing' | 'paid' | 'delivered';
-
-interface Staff {
-    id: string;
-    label: string; // Tên + SĐT hiển thị
-}
-
-interface Order {
-    id: string;
-    customerName: string;
-    phone: string;
-    orderType: OrderType;
-    total: number;
-    status: OrderStatus;
-    createdAt: Date | string;
-    staffId?: string; // nhân viên được giao
+interface BillAdminUI extends BillAdminResponse {
+    _expanded?: boolean;
 }
 
 @Component({
-    selector: 'app-order-shipping',
+    selector: 'app-staff-delivery',
     standalone: true,
-    imports: [CommonModule],
-    templateUrl: './Order-shipping.html',
-    styleUrls: ['./Order-shipping.css'],
+    imports: [CommonModule, FormsModule],
+    templateUrl: 'Order-shipping.html',
+    styleUrls: ['Order-shipping.css']
 })
-export class OrderShippingComponent {
-    // ====== Data mẫu ======
-    staffList: Staff[] = [
-        { id: 's1', label: 'Trần Bình (0902 345 678)' },
-        { id: 's2', label: 'Nguyễn An (0901 234 567)' },
-    ];
+export class OrderShippingComponent implements OnInit {
 
-    selectedStaffId = this.staffList[0].id;
-    query = '';
+    private billService = inject(BillService);
 
-    private orders: Order[] = [
-        // Cần giao (đã phân công cho s1)
-        {
-            id: 'DH-1001',
-            customerName: 'Phạm Minh',
-            phone: '0987 111 222',
-            orderType: 'COD',
-            total: 690000,
-            status: 'processing',
-            createdAt: new Date('2025-11-04T00:19:00'),
-            staffId: 's1',
-        },
-        {
-            id: 'DH-8231',
-            customerName: 'Sample Khoa',
-            phone: '09620284943',
-            orderType: 'COD',
-            total: 350000,
-            status: 'paid',
-            createdAt: new Date('2025-11-04T11:42:00'),
-            staffId: 's1',
-        },
-        // Cần giao (đã phân công cho s2)
-        {
-            id: 'DH-3663',
-            customerName: 'Sample An',
-            phone: '09925001142',
-            orderType: 'COD',
-            total: 120000,
-            status: 'processing',
-            createdAt: new Date('2025-11-04T11:42:00'),
-            staffId: 's2',
-        },
-        {
-            id: 'DH-5132',
-            customerName: 'Sample Ngọc',
-            phone: '09290872554',
-            orderType: 'COD',
-            total: 99000,
-            status: 'processing',
-            createdAt: new Date('2025-11-04T11:42:00'),
-            staffId: 's2',
-        },
-        // ĐÃ GIAO (cho s1 – để demo bảng “Đơn đã giao”)
-        {
-            id: 'DH-1003',
-            customerName: 'Đặng Ly',
-            phone: '0912 888 999',
-            orderType: 'COD',
-            total: 1200000,
-            status: 'delivered',
-            createdAt: new Date('2025-11-02T12:19:00'),
-            staffId: 's1',
-        },
-    ];
+    loading = signal(false);
+    errorMsg = signal('');
+    query = signal('');
 
-    // ====== Derived lists (lọc theo nhân viên + search) ======
-    private matchQuery(o: Order): boolean {
-        const q = this.query.trim().toLowerCase();
-        if (!q) return true;
-        const blob =
-            `${o.id} ${o.customerName} ${o.phone} ${o.orderType}`.toLowerCase();
-        return blob.includes(q);
+    allOrders = signal<BillAdminUI[]>([]);
+
+    private filterOrders(orders: BillAdminUI[]): BillAdminUI[] {
+        const q = this.query().trim().toLowerCase();
+        if (!q) return orders;
+
+        return orders.filter(o =>
+            [o.customerFullName, o.customerPhone, o.billId, o.shippingAddress, o.paymentMethod]
+                .some(v => (v ?? '').toString().toLowerCase().includes(q))
+        );
+    }
+    deliveringOrders = computed(() => {
+        const delivering = this.allOrders().filter(o => o.status === 'Delivering');
+        return this.filterOrders(delivering);
+    });
+
+    succeedOrders = computed(() => {
+        const succeed = this.allOrders().filter(o => o.status === 'Succeed');
+        return this.filterOrders(succeed);
+    });
+
+    ngOnInit(): void {
+        this.loadMyOrders();
     }
 
-    get toDeliver(): Order[] {
-        return this.orders
-            .filter(
-                (o) =>
-                    o.staffId === this.selectedStaffId &&
-                    o.status !== 'delivered' &&
-                    this.matchQuery(o)
-            )
-            .sort((a, b) => +new Date(b.createdAt) - +new Date(a.createdAt));
+    loadMyOrders(): void {
+        this.loading.set(true);
+        this.errorMsg.set('');
+
+        this.billService.getMyAssignedOrders().subscribe({
+            next: (orders) => {
+                this.allOrders.set(orders as BillAdminUI[]);
+                this.loading.set(false);
+            },
+            error: (err) => {
+                this.errorMsg.set('Không thể tải danh sách đơn hàng. Vui lòng thử lại.');
+                this.loading.set(false);
+                console.error(err);
+            }
+        });
     }
 
-    get delivered(): Order[] {
-        return this.orders
-            .filter(
-                (o) =>
-                    o.staffId === this.selectedStaffId &&
-                    o.status === 'delivered' &&
-                    this.matchQuery(o)
-            )
-            .sort((a, b) => +new Date(b.createdAt) - +new Date(a.createdAt));
+    markAsCompleted(order: BillAdminUI): void {
+        if (order.status !== 'Delivering') return;
+
+        this.loading.set(true);
+        this.billService.completeOrder(order.billId).subscribe({
+            next: (updatedBill) => {
+                this.allOrders.update(currentOrders =>
+                    currentOrders.map(o =>
+                        o.billId === updatedBill.billId ? (updatedBill as BillAdminUI) : o
+                    )
+                );
+                this.loading.set(false);
+            },
+            error: (err) => {
+                this.errorMsg.set('Cập nhật thất bại: ' + (err.error?.message || 'Lỗi máy chủ'));
+                this.loading.set(false);
+            }
+        });
     }
 
-    // ====== Actions / UI handlers ======
-    onSelectStaff(ev: Event): void {
-        const value = (ev.target as HTMLSelectElement).value;
-        this.selectedStaffId = value;
-    }
-
-    onInputQuery(ev: Event): void {
-        const value = (ev.target as HTMLInputElement).value ?? '';
-        this.query = value;
-    }
-
-    markDelivered(o: Order): void {
-        if (o.status !== 'delivered') o.status = 'delivered';
-    }
-
-    staffLabel(id?: string): string {
-        const s = this.staffList.find((x) => x.id === id);
-        return s ? s.label : '—';
+    getStaffLabel(staff: StaffInfo | null): string {
+        if (!staff) return '—';
+        return `${staff.fullName}${staff.phone ? ' (' + staff.phone + ')' : ''}`;
     }
 }

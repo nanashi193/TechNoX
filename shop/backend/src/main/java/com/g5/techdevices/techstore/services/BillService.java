@@ -277,4 +277,36 @@ public class BillService implements IBillService {
         Bill savedBill = billRepository.save(bill);
         return billAdminMapper.mapToBillAdminResponse(savedBill);
     }
+
+    public List<BillAdminResponse> getOrdersForCurrentStaff() {
+        User currentStaff = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        int currentStaffId = currentStaff.getId();
+        List<String> statuses = List.of("Delivering", "Succeed");
+        List<Bill> bills = billRepository.findByStaffIdAndStatusIn(
+                currentStaffId,
+                statuses,
+                Sort.by(Sort.Direction.DESC, "orderDate")
+        );
+        return bills.stream()
+                .map(billAdminMapper::mapToBillAdminResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Transactional
+    public BillAdminResponse completeBillForStaff(Long billId) {
+        User currentStaff = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        int currentStaffId = currentStaff.getId();
+
+        Bill bill = billRepository.findById(billId)
+                .orElseThrow(() -> new RuntimeException("Bill not found: " + billId));
+        if (bill.getStaff() == null || bill.getStaff().getId() != currentStaffId) {
+            throw new AccessDeniedException("Bạn không có quyền cập nhật đơn hàng này.");
+        }
+        if (!bill.getStatus().equals("Delivering")) {
+            throw new RuntimeException("Đơn hàng này không ở trạng thái 'Chờ giao'.");
+        }
+        bill.setStatus("Succeed");
+        Bill savedBill = billRepository.save(bill);
+        return billAdminMapper.mapToBillAdminResponse(savedBill);
+    }
 }

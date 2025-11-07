@@ -3,20 +3,25 @@
         <h2>Đơn giao của nhân viên</h2>
 
         <div class="controls">
+            <!-- Sửa: Nối vào signal 'query' -->
             <input
                     class="search"
                     type="text"
                     placeholder="Tìm mã, tên KH, SĐT, địa chỉ, loại đơn…"
-                    [value]="query"
-                    (input)="onInputQuery($event)"
+                    [ngModel]="query()"
+                    (ngModelChange)="query.set($event)"
                     aria-label="Tìm kiếm đơn"
             />
         </div>
     </div>
 
+    <!-- Thông báo lỗi/loading -->
+    <div *ngIf="loading()" class="oc-banner info">Đang tải dữ liệu…</div>
+    <div *ngIf="errorMsg()" class="oc-banner error">{{ errorMsg() }}</div>
+
     <!-- ĐƠN CẦN GIAO -->
     <div class="section-card">
-        <div class="section-card__head">Đơn cần giao</div>
+        <div class="section-card__head">Đơn cần giao (Trạng thái: Delivering)</div>
 
         <div class="table-wrap section-card__body">
             <table class="orders">
@@ -33,40 +38,42 @@
                 </thead>
 
                 <tbody>
-                <tr *ngFor="let o of toDeliver">
-                    <td class="mono">{{ o.id }}</td>
+                <!-- Sửa: Dùng computed signal 'deliveringOrders()' -->
+                <tr *ngFor="let o of deliveringOrders()">
+                    <!-- Sửa: Dùng tên field của DTO (billId, customerFullName, ...) -->
+                    <td class="mono">{{ o.billId }}</td>
                     <td>
-                        <div class="strong">{{ o.customerName }}</div>
-                        <div class="muted mono">{{ o.phone }}</div>
+                        <div class="strong">{{ o.customerFullName }}</div>
+                        <div class="muted mono">{{ o.customerPhone }}</div>
                     </td>
                     <td>
-              <span class="badge"
-                    [class.processing]="o.orderType==='COD'"
-                    [class.paid]="o.orderType==='POS'">
-                {{ o.orderType }}
-              </span>
+                        <!-- Sửa: Dùng paymentMethod và check 'PayOS' -->
+                        <span class="badge"
+                              [class.processing]="o.paymentMethod==='COD'"
+                              [class.paid]="o.paymentMethod==='PayOS'">
+                            {{ o.paymentMethod }}
+                        </span>
                     </td>
                     <td class="right mono">
                         {{ o.total | currency:'VND':'symbol':'1.0-0' }}
                     </td>
                     <td>
-              <span class="badge"
-                    [class.processing]="o.status==='processing'"
-                    [class.paid]="o.status==='paid'">
-                {{ o.status==='processing' ? 'Đang xử lí' : 'Đã thanh toán' }}
-              </span>
+                        <!-- Bảng này chỉ có trạng thái 'Delivering' -->
+                        <span class="badge shipping">Đang giao</span>
                     </td>
-                    <td class="mono">{{ o.createdAt | date:'HH:mm, dd/MM/yyyy' }}</td>
+                    <!-- Sửa: Dùng orderDate -->
+                    <td class="mono">{{ o.orderDate | date:'HH:mm, dd/MM/yyyy' }}</td>
                     <td>
                         <div class="btns">
-                            <button class="link" (click)="markDelivered(o)">
+                            <!-- Sửa: Dùng tên hàm đúng 'markAsCompleted' -->
+                            <button class="link" (click)="markAsCompleted(o)">
                                 Đánh dấu đã giao
                             </button>
                         </div>
                     </td>
                 </tr>
 
-                <tr *ngIf="toDeliver.length === 0">
+                <tr *ngIf="deliveringOrders().length === 0">
                     <td colspan="7" class="muted">Không có đơn cần giao.</td>
                 </tr>
                 </tbody>
@@ -76,7 +83,7 @@
 
     <!-- ĐƠN ĐÃ GIAO -->
     <div class="section-card">
-        <div class="section-card__head">Đơn đã giao</div>
+        <div class="section-card__head">Đơn đã giao (Trạng thái: Succeed)</div>
 
         <div class="table-wrap section-card__body">
             <table class="orders">
@@ -93,28 +100,30 @@
                 </thead>
 
                 <tbody>
-                <tr *ngFor="let o of delivered">
-                    <td class="mono">{{ o.id }}</td>
+                <!-- Sửa: Dùng computed signal 'succeedOrders()' -->
+                <tr *ngFor="let o of succeedOrders()">
+                    <td class="mono">{{ o.billId }}</td>
                     <td>
-                        <div class="strong">{{ o.customerName }}</div>
-                        <div class="muted mono">{{ o.phone }}</div>
+                        <div class="strong">{{ o.customerFullName }}</div>
+                        <div class="muted mono">{{ o.customerPhone }}</div>
                     </td>
                     <td>
-              <span class="badge"
-                    [class.processing]="o.orderType==='COD'"
-                    [class.paid]="o.orderType==='POS'">
-                {{ o.orderType }}
-              </span>
+                        <span class="badge"
+                              [class.processing]="o.paymentMethod==='COD'"
+                              [class.paid]="o.paymentMethod==='PayOS'">
+                            {{ o.paymentMethod }}
+                        </span>
                     </td>
                     <td class="right mono">
                         {{ o.total | currency:'VND':'symbol':'1.0-0' }}
                     </td>
                     <td><span class="badge delivered">Đã giao</span></td>
-                    <td class="mono">{{ o.createdAt | date:'HH:mm, dd/MM/yyyy' }}</td>
-                    <td>{{ staffLabel(o.staffId) }}</td>
+                    <td class="mono">{{ o.orderDate | date:'HH:mm, dd/MM/yyyy' }}</td>
+                    <!-- Sửa: Dùng hàm getStaffLabel(o.staff) -->
+                    <td>{{ getStaffLabel(o.staff) }}</td>
                 </tr>
 
-                <tr *ngIf="delivered.length === 0">
+                <tr *ngIf="succeedOrders().length === 0">
                     <td colspan="7" class="muted">Chưa có đơn nào đã giao.</td>
                 </tr>
                 </tbody>

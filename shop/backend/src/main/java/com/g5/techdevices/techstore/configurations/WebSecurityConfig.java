@@ -87,6 +87,8 @@ public class WebSecurityConfig {
                         // Quản trị Users/Categories
                         .requestMatchers(GET, apiPrefix + "/bills/admin").hasAnyRole(Role.ADMIN, Role.OWNER)
                         .requestMatchers(PATCH, apiPrefix + "/bills/*/assign-staff").hasAnyRole(Role.ADMIN, Role.OWNER)
+                        .requestMatchers(GET, apiPrefix + "/bills/staff/my-orders").hasAnyRole(Role.STAFF)
+                        .requestMatchers(PUT, apiPrefix + "/bills/staff/complete/*").hasAnyRole(Role.STAFF)
                         .requestMatchers(PUT, apiPrefix + "/users/**").authenticated()
                         .requestMatchers(GET, apiPrefix + "/users").hasAnyRole(Role.ADMIN, Role.OWNER)
                         .requestMatchers(DELETE, apiPrefix + "/users/**").hasAnyRole(Role.ADMIN, Role.OWNER)

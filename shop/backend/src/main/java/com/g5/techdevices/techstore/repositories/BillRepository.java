@@ -3,6 +3,7 @@ package com.g5.techdevices.techstore.repositories;
 import com.g5.techdevices.techstore.entity.Bills.Bill;
 import com.g5.techdevices.techstore.entity.Bills.BillDetail;
 import com.g5.techdevices.techstore.entity.users.User;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -56,4 +57,5 @@ public interface BillRepository extends JpaRepository<Bill,Long> {
 
 
     Optional<User> findById(int id);
+    List<Bill> findByStaffIdAndStatusIn(int staffId, List<String> statuses, Sort sort);
 }

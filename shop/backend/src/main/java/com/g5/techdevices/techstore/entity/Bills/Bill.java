@@ -35,7 +35,7 @@ public class Bill {
     private Boolean IsActive;
 
     @Column(name = "Status", columnDefinition = "varchar(30)")
-    private String Status;
+    private String status;
 
     @Column(name = "Total", precision = 18, scale = 2)
     private BigDecimal total;

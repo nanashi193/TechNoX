@@ -240,4 +240,18 @@ public class BillController {
         BillAdminResponse updatedBill = billService.assignStaff(billId, request.getStaffId());
         return ResponseEntity.ok(updatedBill);
     }
+
+    //Staff lay don Delevering & Succeed
+    @GetMapping("/staff/my-orders")
+    public ResponseEntity<List<BillAdminResponse>> getMyAssignedOrders() {
+        System.out.println(">>> ĐÃ VÀO CONTROLLER");
+        List<BillAdminResponse> bills = billService.getOrdersForCurrentStaff();
+        return ResponseEntity.ok(bills);
+    }
+    //staff cap nhat don
+    @PutMapping("/staff/complete/{billId}")
+    public ResponseEntity<BillAdminResponse> setBillToSucceed(@PathVariable Long billId) {
+        BillAdminResponse updatedBill = billService.completeBillForStaff(billId);
+        return ResponseEntity.ok(updatedBill);
+    }
 }
