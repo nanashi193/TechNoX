@@ -21,8 +21,7 @@ import com.g5.techdevices.techstore.repositories.UserRepository;
 import com.g5.techdevices.techstore.repositories.AddressRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -191,7 +190,7 @@ public class UserService implements IUserService{
         if(existingUser.getFacebookAccountId() == null &&
                 existingUser.getGoogleAccountId() == null){
             if(!passwordEncoder.matches(password, existingUser.getPassword())){
-                 throw new BadCredentialsException("Invalid email or password");
+                throw new BadCredentialsException("Invalid email or password");
             }
         }
         try {
@@ -296,6 +295,46 @@ public class UserService implements IUserService{
         passwordTokenRepository.delete(resetToken);
     }
     @Override
+    public Page<User> getAllUsersSortByRealName(boolean asc, int page, int limit) {
+        // 1) lấy tất cả (không sort DB)
+        List<User> all = userRepository.findAll();
+
+        // 2) sort theo chữ cuối cùng của FullName
+        Comparator<User> cmp = Comparator.comparing(u -> {
+            String name = Optional.ofNullable(u.getFullName()).orElse("").trim();
+            if (name.isEmpty()) return "";                   // để null/empty lên đầu
+            String[] parts = name.split("\\s+");             // tách theo khoảng trắng
+            return parts[parts.length - 1].toLowerCase();    // lấy tên cuối
+        });
+        if (!asc) cmp = cmp.reversed();
+        all.sort(cmp);
+
+        // 3) tự phân trang
+        int from = Math.max(0, (page - 1) * limit);
+        int to   = Math.min(all.size(), from + limit);
+        List<User> slice = from >= to ? List.of() : all.subList(from, to);
+
+        return new PageImpl<>(slice, PageRequest.of(page - 1, limit), all.size());
+    }
+
+    private UserDTO convertToDTO(User user) {
+        return UserDTO.builder()
+                .id(user.getId()) // id là int
+                .fullName(user.getFullName())
+                .email(user.getEmail())
+                .password(user.getPassword())
+                // Nếu gender là Boolean hoặc int trong entity -> ép sang String
+                .gender(String.valueOf(user.getGender()))
+                .phoneNumber(user.getPhoneNumber())
+                .active(Boolean.TRUE.equals(user.getIsActive()))
+                .facebookAccountId(user.getFacebookAccountId())
+                .googleAccountId(user.getGoogleAccountId())
+                .roleId(user.getRole() != null ? user.getRole().getId() : 3L)
+                .createdAt(user.getCreatedAt())
+                .addressId(user.getAddress()) // nếu là object Address
+                .build();
+    }
+    @Override
     public List<StaffInfo> getStaffList() {
         List<User> staffUsers = userRepository.findAllByRole_Name(Role.STAFF);
         return staffUsers.stream()
@@ -303,4 +342,3 @@ public class UserService implements IUserService{
                 .collect(Collectors.toList());
     }
 }
-

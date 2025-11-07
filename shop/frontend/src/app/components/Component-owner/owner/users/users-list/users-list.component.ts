@@ -51,7 +51,7 @@ export class UsersListComponent implements OnInit {
     // ===== data =====
     load() {
         this.loading = true;
-        const params = { q: this.q || '', page: this.page, size: this.size, sort: `${this.sort.field},${this.sort.dir}` };
+        const params = { q: this.q || '', page: this.page, size: this.size, sort: `${this.sort.field}_${this.sort.dir}` };
         this.svc.search(params).subscribe({
             next: (res) => { this.users = res.items ?? []; this.total = res.total ?? this.users.length; this.loading = false; },
             error: () => this.loading = false

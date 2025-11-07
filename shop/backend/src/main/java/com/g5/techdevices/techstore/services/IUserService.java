@@ -30,5 +30,6 @@ public interface IUserService {
     UserDetailDTO updateUserDetails(String email, UserDetailDTO userUpdateDTO) throws DataNotFoundException;
     void resetPassword(String token, String newPassword) throws DataNotFoundException, InvalidTokenException;
     String createPasswordResetToken(String email) throws DataNotFoundException;
+    Page<User> getAllUsersSortByRealName(boolean ascending, int page, int limit);
     List<StaffInfo> getStaffList();
 }

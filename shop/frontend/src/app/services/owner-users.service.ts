@@ -63,7 +63,7 @@ export class OwnerUsersService {
             list = list.filter(u => u.IsActive === opts.isActive);
         }
         if (opts.sort) {
-            const [field, dir] = opts.sort.split(',') as [keyof User, 'asc' | 'desc'];
+            const [field, dir] = opts.sort.split('_') as [keyof User, 'asc' | 'desc'];
             list.sort((a:any,b:any) => {
                 const av = a[field] ?? '', bv = b[field] ?? '';
                 const cmp = (typeof av==='number' && typeof bv==='number')

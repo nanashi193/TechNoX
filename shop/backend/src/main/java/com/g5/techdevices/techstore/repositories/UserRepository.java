@@ -30,6 +30,31 @@ public interface UserRepository extends JpaRepository<User, Long> {
     Page<User> findAll(Pageable pageable);
     List<User> findAllByRole_Name(String roleName);
     Optional<User> findStaffById(int id);
+
+    @Query(
+            value = """
+    SELECT u.*
+    FROM [Users] u
+    LEFT JOIN (
+        SELECT b.[UserId] AS UserId,
+               COUNT(*) AS orders,
+               SUM(CASE WHEN b.[Status] <> 'Cancelled' THEN ISNULL(b.[Total], 0) ELSE 0 END) AS totalSpent
+        FROM [Bill] b
+        GROUP BY b.[UserId]
+    ) agg ON agg.[UserId] = u.[UserId]
+    ORDER BY
+        CASE WHEN :sort = 'orders_asc'  THEN ISNULL(agg.orders, 0)     END ASC,
+        CASE WHEN :sort = 'orders_desc' THEN ISNULL(agg.orders, 0)     END DESC,
+        CASE WHEN :sort = 'totalSpent_asc'   THEN ISNULL(agg.totalSpent, 0) END ASC,
+        CASE WHEN :sort = 'totalSpent_desc'  THEN ISNULL(agg.totalSpent, 0) END DESC,
+        u.[FullName] ASC
+    """,
+            countQuery = "SELECT COUNT(*) FROM [Users] u",
+            nativeQuery = true
+    )
+    Page<User> findUsersOrderByAggregate(@Param("sort") String sort, Pageable pageable);
+
 }
+
 
 
