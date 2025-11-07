@@ -41,18 +41,17 @@ export class BillAdminService {
             .set('limit', String(limit))
             .set('sort', sort);
 
-        return this.http
-            .get<any>(`${this.apiUrl2}/${userId}/bills`, { params })
-            .pipe(
-                map(res => {
-                    // chấp nhận cả 2 dạng payload:
-                    // 1) { items: BillAdminResponse[], totalItems: number }
-                    // 2) BillAdminResponse[]
-                    const items: BillAdminResponse[] = Array.isArray(res) ? res : (res.items ?? []);
-                    const totalItems: number = Array.isArray(res) ? items.length : (res.totalItems ?? items.length);
-                    return { items, totalItems };
-                })
-            );
+        return this.http.get<any>(`${this.apiUrl2}/${userId}/bills`, { params }).pipe(
+            map(res => {
+                const items: BillAdminResponse[] = Array.isArray(res)
+                    ? res
+                    : (res?.items ?? res?.content ?? []);
+                const totalItems: number = Array.isArray(res)
+                    ? items.length
+                    : (res?.totalItems ?? res?.totalElements ?? res?.page?.totalElements ?? items.length);
+                return { items, totalItems };
+            })
+        );
     }
 
     /** Nếu BE không có /users/{id}/bills mà dùng /bills/admin?userId=... thì dùng hàm này thay thế:

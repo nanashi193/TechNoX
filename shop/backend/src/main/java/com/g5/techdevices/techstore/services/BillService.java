@@ -28,6 +28,9 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.PageRequest;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -308,5 +311,22 @@ public class BillService implements IBillService {
         bill.setStatus("Succeed");
         Bill savedBill = billRepository.save(bill);
         return billAdminMapper.mapToBillAdminResponse(savedBill);
+    }
+    @Transactional
+    @Override
+    public Page<BillAdminResponse> getBillsByUser(Long userId, int page, int limit, String sort) {
+        int p = Math.max(0, page - 1); // client 1-based -> Spring 0-based
+        Pageable pageable = PageRequest.of(p, limit, toSort(sort));
+        return billRepository.findByUser_Id(userId.intValue(), pageable)
+                .map(billAdminMapper::mapToBillAdminResponse);
+    }
+    private Sort toSort(String sort) {
+        String s = (sort == null ? "" : sort.toLowerCase());
+        return switch (s) {
+            case "date_asc"   -> Sort.by("orderDate").ascending();
+            case "total_desc" -> Sort.by("total").descending();
+            case "total_asc"  -> Sort.by("total").ascending();
+            default           -> Sort.by("orderDate").descending(); // date_desc (mặc định)
+        };
     }
 }
