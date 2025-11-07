@@ -22,6 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -75,10 +76,29 @@ public class UserController {
     @GetMapping("")
     public ResponseEntity<UserPageResponse<UserListResponse>> getAllUsers(
             @RequestParam(defaultValue = "1") int page,
-            @RequestParam(defaultValue = "10") int limit
+            @RequestParam(defaultValue = "10") int limit,
+            @RequestParam(defaultValue = "name_asc") String sort
     ) throws DataNotFoundException {
-        Pageable pageable = PageRequest.of(page - 1, limit);
-        Page<User> userPage = userService.getAllUsers(pageable);
+        boolean sortByRealNameAsc  = "name_asc".equalsIgnoreCase(sort);
+        boolean sortByRealNameDesc = "name_desc".equalsIgnoreCase(sort);
+        boolean sortByOrdersAsc    = "orders_asc".equalsIgnoreCase(sort);
+        boolean sortByOrdersDesc   = "orders_desc".equalsIgnoreCase(sort);
+        boolean sortByTotalAsc     = "totalSpent_asc".equalsIgnoreCase(sort);
+        boolean sortByTotalDesc    = "totalSpent_desc".equalsIgnoreCase(sort);
+
+        Page<User> userPage;
+        if (sortByRealNameAsc || sortByRealNameDesc) {
+            // ✅ GIỮ NGUYÊN: sort theo “tên thật” (chữ cuối) bằng Java trong service
+            userPage = userService.getAllUsersSortByRealName(sortByRealNameAsc, page, limit);
+        } else if (sortByOrdersAsc || sortByOrdersDesc || sortByTotalAsc || sortByTotalDesc) {
+            // ✅ MỚI: sort theo tổng đơn / tổng tiền ở DB (đúng phân trang)
+            Pageable pageable = PageRequest.of(page - 1, limit);
+            userPage = userRepository.findUsersOrderByAggregate(sort.toLowerCase(), pageable);
+        } else {
+            // ✅ Fallback: sort theo trường entity (nếu cần)
+            Pageable pageable = PageRequest.of(page - 1, limit);
+            userPage = userService.getAllUsers(pageable);
+        }
         List<UserListResponse> userResponses = userPage.getContent().stream()
                 .map(user -> {
                     int orders = billRepository.countOrdersByUserId(user.getId());

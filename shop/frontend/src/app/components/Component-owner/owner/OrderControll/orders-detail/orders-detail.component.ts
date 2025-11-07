@@ -2,7 +2,7 @@ import {Component, OnInit, inject, signal, computed} from '@angular/core';
 import {CommonModule, CurrencyPipe, DatePipe, NgIf, NgFor, NgClass, NgOptimizedImage} from '@angular/common';
 import {ActivatedRoute, RouterLink} from '@angular/router';
 import {BillAdminService} from '../../../../../services/bill-admin.service';
-import {BillAdminDetailResponse, BillAdminResponse, BillItem} from '../../../../../models/bill-admin.model';
+import {BillAdminDetailResponse, BillItem} from '../../../../../models/bill-admin.model';
 
 
 @Component({
@@ -29,10 +29,10 @@ import {BillAdminDetailResponse, BillAdminResponse, BillItem} from '../../../../
         return digits ? `#${digits}` : (id ? `#${id}` : '#—');
     });
 
-    items = computed<BillItem[]>(() => this.bill()?.details ?? []);
+    items = computed<BillItem[]>(() => (this.bill()?.details ?? (this.bill() as any)?.products ?? []));
     //helper
     itemId = (it: BillItem) => it.variantId ?? it.productId;
-    itemAmount = (it: BillItem) => (it.price ?? 0) * (it.quantity ?? 0);
+    itemAmount = (it: any) => (it.Price ?? it.unitPrice ?? 0) * (it.Quantity ?? it.quantity ?? 0);
 
     subtotal = computed(() =>
         this.bill()?.subtotal ?? this.items().reduce((s, it) => s + this.itemAmount(it), 0)

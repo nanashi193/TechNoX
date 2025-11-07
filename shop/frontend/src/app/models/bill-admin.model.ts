@@ -12,6 +12,7 @@ export interface BillAdminResponse {
     shippingAddress: string;
     paymentStatus: string;
     staff: StaffInfo | null;
+    email?: string;
 }
 
 export interface BillItem {
@@ -33,7 +34,6 @@ export interface BillAdminDetailResponse extends BillAdminResponse {
     discount?: number;
     paidAmount?: number;
 
-    customerEmail?: string;
     billingAddress?: string;
     code?: string;
     shippingCode?: string;

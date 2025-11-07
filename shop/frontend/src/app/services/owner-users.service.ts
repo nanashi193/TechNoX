@@ -10,9 +10,6 @@ export type Page<T> = { items: T[]; total: number; };
 export class OwnerUsersService {
     private base = `${environment.apiBaseUrl}/users`;
     private useMock = false;  //noi BE, doi thanh false.
-
-    private detailCache = new Map<number, UserDetail>();
-
     private fakeAddress(seed: number): Address {
         const cities = ['London', 'Paris', 'Berlin', 'Madrid', 'Rome'];
         const city = cities[seed % cities.length];
@@ -63,7 +60,7 @@ export class OwnerUsersService {
             list = list.filter(u => u.IsActive === opts.isActive);
         }
         if (opts.sort) {
-            const [field, dir] = opts.sort.split(',') as [keyof User, 'asc' | 'desc'];
+            const [field, dir] = opts.sort.split('_') as [keyof User, 'asc' | 'desc'];
             list.sort((a:any,b:any) => {
                 const av = a[field] ?? '', bv = b[field] ?? '';
                 const cmp = (typeof av==='number' && typeof bv==='number')
