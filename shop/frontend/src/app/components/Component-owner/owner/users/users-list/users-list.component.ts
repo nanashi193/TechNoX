@@ -27,7 +27,10 @@ export class UsersListComponent implements OnInit {
     loading = false;
 
     users: User[] = [];    // trang hiện tại
-    sort: { field: SortField; dir: 'asc' | 'desc' } = { field: 'orders', dir: 'asc' };
+    sort: { field: SortField; dir: 'asc' | 'desc' } = {
+        field: 'totalSpent',
+        dir: 'desc'
+    };
     selected = new Set<number>();
 
 
@@ -51,20 +54,34 @@ export class UsersListComponent implements OnInit {
     // ===== data =====
     load() {
         this.loading = true;
-        const params = { q: this.q || '', page: this.page, size: this.size, sort: `${this.sort.field}_${this.sort.dir}` };
+        const params = {
+            q: this.q || '',
+            page: this.page,
+            size: this.size,
+            sort: `${this.sort.field}_${this.sort.dir}`
+        };
         this.svc.search(params).subscribe({
-            next: (res) => { this.users = res.items ?? []; this.total = res.total ?? this.users.length; this.loading = false; },
+            next: (res) => {
+                this.users = res.items ?? [];
+                this.total = res.total ?? this.users.length;
+                this.loading = false;
+            },
             error: () => this.loading = false
         });
     }
+
     // ===== sort =====
     sortBy(field: SortField) {
         if (this.sort.field === field) this.sort.dir = this.sort.dir === 'asc' ? 'desc' : 'asc';
-        else this.sort = { field, dir: 'asc' };
+        else this.sort = {field, dir: 'asc'};
         this.page = 1;
         this.load();
     }
-    onSearch() { this.page = 1; this.load(); }
+
+    onSearch() {
+        this.page = 1;
+        this.load();
+    }
 
     isAsc = (f: SortField) => this.sort?.field === f && this.sort?.dir === 'asc';
     isDesc = (f: SortField) => this.sort?.field === f && this.sort?.dir === 'desc';
@@ -76,22 +93,38 @@ export class UsersListComponent implements OnInit {
     // ===== selection =====
     trackById = (_: number, u: User) => u.id;
     isSelected = (id: number) => this.selected.has(id);
-    selectedCount() { return this.selected.size; }
+
+    selectedCount() {
+        return this.selected.size;
+    }
+
     toggle(id: number, e: Event) {
         (e.target as HTMLInputElement).checked ? this.selected.add(id) : this.selected.delete(id);
     }
-    allSelected() { return this.users.length > 0 && this.users.every(u => this.selected.has(u.id)); }
-    someSelected() { const any = this.users.some(u => this.selected.has(u.id)); return any && !this.allSelected(); }
+
+    allSelected() {
+        return this.users.length > 0 && this.users.every(u => this.selected.has(u.id));
+    }
+
+    someSelected() {
+        const any = this.users.some(u => this.selected.has(u.id));
+        return any && !this.allSelected();
+    }
+
     toggleAll(e: Event) {
         const on = (e.target as HTMLInputElement).checked;
         if (on) this.users.forEach(u => this.selected.add(u.id));
         else this.users.forEach(u => this.selected.delete(u.id));
     }
 
-    edit(id: number) { this.router.navigate(['/owner/users', id]); }
+    edit(id: number) {
+        this.router.navigate(['/owner/users', id]);
+    }
+
     toggleActive(u: User) {
-        const prev = u.IsActive; u.IsActive = !prev;
-        this.svc.toggleActive(u.id, u.IsActive).subscribe({ error: () => (u.IsActive = prev) });
+        const prev = u.IsActive;
+        u.IsActive = !prev;
+        this.svc.toggleActive(u.id, u.IsActive).subscribe({error: () => (u.IsActive = prev)});
     }
 
 
@@ -106,7 +139,24 @@ export class UsersListComponent implements OnInit {
         }
     }
 
-    goto(n: number) { if (n !== this.page && n >= 1 && n <= this.totalPages) { this.page = n; this.load(); } }
-    prev() { if (this.page > 1) { this.page--; this.load(); } }
-    next() { if (this.page < this.totalPages) { this.page++; this.load(); } }
+    goto(n: number) {
+        if (n !== this.page && n >= 1 && n <= this.totalPages) {
+            this.page = n;
+            this.load();
+        }
+    }
+
+    prev() {
+        if (this.page > 1) {
+            this.page--;
+            this.load();
+        }
+    }
+
+    next() {
+        if (this.page < this.totalPages) {
+            this.page++;
+            this.load();
+        }
+    }
 }
