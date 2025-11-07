@@ -71,14 +71,14 @@
         <div class="customer">
             <div class="avatar">{{ (bill()?.customerFullName || 'U')[0] }}</div>
             <div class="cname">{{ bill()?.customerFullName || '—' }}</div>
-            <a class="muted" routerLink="['/owner/users', userId]">chi tiết khách hàng →</a>
+            <a class="muted" [routerLink]="['/owner/users', bill()?.userId]">chi tiết khách hàng →</a>
         </div>
 
         <div class="block">
             <div class="label">Thông tin liên hệ</div>
             <div class="line">
                 <span class="icon ico-img" style="--ico:url('assets/icons/gmail.png')"></span>
-                {{ bill()?.customerEmail || '—' }}
+                {{ bill()?.email || '—' }}
             </div>
             <div class="line">
                 <span class="icon ico-img" style="--ico:url('assets/icons/phone.png')"></span>

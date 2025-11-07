@@ -13,6 +13,8 @@ import java.util.List;
 public class BillFullDetailResponse {
     private Long billId;
     private LocalDateTime orderDate;
+    private Long userId;
+    private String email;
     private String status;
     private BigDecimal total;
     private String paymentMethod;

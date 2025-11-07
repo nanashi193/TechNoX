@@ -17,6 +17,9 @@ public class BillAdminResponse {
     private BigDecimal total;
     private String paymentMethod; // COD / POS
 
+    private Long userId;
+    private String email;
+
     private String customerFullName;
     private String customerPhone;
     private String shippingAddress;
