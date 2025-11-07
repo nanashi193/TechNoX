@@ -2,7 +2,7 @@ import {Component, OnInit, inject, signal, computed} from '@angular/core';
 import {CommonModule, CurrencyPipe, DatePipe, NgIf, NgFor, NgClass, NgOptimizedImage} from '@angular/common';
 import {ActivatedRoute, RouterLink} from '@angular/router';
 import {BillAdminService} from '../../../../../services/bill-admin.service';
-import {BillAdminDetailResponse, BillAdminResponse, BillItem} from '../../../../../models/bill-admin.model';
+import {BillAdminDetailResponse, BillItem} from '../../../../../models/bill-admin.model';
 
 
 @Component({

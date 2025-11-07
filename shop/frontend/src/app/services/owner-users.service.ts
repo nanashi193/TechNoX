@@ -10,9 +10,6 @@ export type Page<T> = { items: T[]; total: number; };
 export class OwnerUsersService {
     private base = `${environment.apiBaseUrl}/users`;
     private useMock = false;  //noi BE, doi thanh false.
-
-    private detailCache = new Map<number, UserDetail>();
-
     private fakeAddress(seed: number): Address {
         const cities = ['London', 'Paris', 'Berlin', 'Madrid', 'Rome'];
         const city = cities[seed % cities.length];
