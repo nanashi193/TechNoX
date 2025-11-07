@@ -536,3 +536,18 @@ INSERT INTO dbo.ProductVariant (ProductId, Color, Size, Quantity, Price, SKU)
 VALUES
     (34, N'Galaxy', N'6.67 inch', 100, 5000, N'VIP-1123'),
     (35, N'Đen', N'6.67 inch', 30, 5000, N'NKA-293')
+ALTER TABLE dbo.Bill
+    DROP CONSTRAINT CK_Bill_Status;
+GO
+
+ALTER TABLE dbo.Bill
+    ADD CONSTRAINT CK_Bill_Status
+        CHECK (Status IN (
+                          'Processing',
+                          'Confirmed',
+                          'Delivering',
+                          'Delivered',
+                          'Succeed',
+                          'Cancelled'
+            ));
+GO
