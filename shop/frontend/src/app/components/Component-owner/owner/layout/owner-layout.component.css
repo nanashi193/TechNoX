@@ -390,4 +390,15 @@ html, body {
 .promo{ margin: 12px 14px; }
 .aside-foot{ margin: 8px 14px 12px; }
 
+.aside-foot{
+    display:flex; align-items:center; gap:12px;
+    margin-top:12px; font-size:14px; color:var(--owner-muted, #6b7280);
+}
+.aside-foot .sep{ opacity:.6; }
+.aside-foot .link,
+.aside-foot button.link{
+    background:none; border:0; padding:0; cursor:pointer;
+    color:inherit; text-decoration:none;
+}
+.aside-foot .link:hover{ color:var(--owner-accent, #1a73e8); }
 

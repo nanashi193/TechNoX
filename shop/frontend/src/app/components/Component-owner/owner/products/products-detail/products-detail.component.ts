@@ -344,13 +344,12 @@ export class ProductsDetailComponent implements OnInit {
         return this.editing;            // bỏ f.dirty
     }
     cancel() {
-        if (this.f.dirty && !confirm('Discard all unsaved changes?')) return;
         this.discard();
         this.setEditMode(false);
     }
 
     discard() {
-        if (this.f.dirty && !confirm('Discard all unsaved changes?')) return;
+        if (this.f.dirty && !confirm('Hủy tất cả các thay đổi?')) return;
 
         const { variants, ...rest } = this.original;
 

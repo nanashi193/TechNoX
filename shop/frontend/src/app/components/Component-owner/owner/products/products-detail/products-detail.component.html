@@ -85,7 +85,9 @@
                                    [disabled]="!editing">
                             <span class="track"></span>
                         </label>
-                        <button type="button" class="icon-btn" (click)="removeVariant(i)" *ngIf="editing">🗑️</button>
+                        <button type="button" class="icon-btn" (click)="removeVariant(i)" *ngIf="editing">
+                            <span class="icon ico-img" style="--ico:url('assets/icons/Delete-Icon.png'); --size:22px"></span>
+                        </button>
                     </div>
 
                     <div class="muted" *ngIf="variantsFA.length === 0">Chưa có biến thể.</div>
@@ -150,7 +152,7 @@
                     </div>
 
                     <div class="media-actions" *ngIf="editing">
-                        <button type="button" class="btn" (click)="fileInput.click()">Add more</button>
+                        <button type="button" class="btn" (click)="fileInput.click()">Thêm ảnh</button>
                         <input #fileInput type="file" accept="image/*" multiple hidden (change)="onFileSelect($event)">
                     </div>
                 </ng-template>

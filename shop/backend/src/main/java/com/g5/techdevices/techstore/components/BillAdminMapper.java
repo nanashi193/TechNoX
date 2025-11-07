@@ -45,12 +45,18 @@ public class BillAdminMapper {
                     .orElse("UNKNOWN");
         }
 
+        User user = bill.getUser();
+        long userId = (user != null ? user.getId() : null);
+        String email = (user != null ? user.getEmail() : null);
+
         return BillAdminResponse.builder()
                 .billId(bill.getId())
                 .orderDate(bill.getOrderDate())
                 .status(bill.getStatus())
                 .total(bill.getTotal())
                 .paymentMethod(bill.getPaymentMethod())
+                .userId(userId)
+                .email(email)
                 .customerFullName(bill.getFullName())
                 .customerPhone(bill.getPhone())
                 .shippingAddress(bill.getShippingAddress())
@@ -85,13 +91,20 @@ public class BillAdminMapper {
                 .stream()
                 .map(this::mapToBillDetailProductResponse)
                 .collect(Collectors.toList());
+
+        User user = bill.getUser();
+        long userId = (user != null ? user.getId() : null);
+        String email = (user != null ? user.getEmail() : null);
+
         return BillFullDetailResponse.builder()
                 .billId(bill.getId())
+                .userId(userId)
                 .orderDate(bill.getOrderDate())
                 .status(bill.getStatus())
                 .total(bill.getTotal())
                 .paymentMethod(bill.getPaymentMethod())
                 .customerFullName(bill.getFullName())
+                .email(email)
                 .customerPhone(bill.getPhone())
                 .shippingAddress(bill.getShippingAddress())
                 .paymentStatus(paymentStatus)
