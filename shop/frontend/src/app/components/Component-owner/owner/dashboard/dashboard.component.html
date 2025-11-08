@@ -73,7 +73,9 @@
     <div class="card orders">
         <h3>Trạng thái đơn hàng</h3>
         <ul>
-            <li *ngFor="let s of orderStats">
+            <li *ngFor="let s of orderStats"
+                (click)="navigateToOrderList(s.status)"
+                style="cursor: pointer">
                 <span>{{ s.label }}</span>
                 <b>{{ s.value }}</b>
             </li>

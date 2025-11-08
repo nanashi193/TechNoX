@@ -70,11 +70,11 @@ export class DashboardService {
                 });
 
                 return [
-                    {label: 'Đã xác nhận', value: statsMap['CONFIRMED'] ?? 0},
-                    {label: 'Đang giao', value: statsMap['DELIVERING'] ?? 0},
-                    {label: 'Đã giao', value: statsMap['DELIVERED'] ?? 0},
-                    {label: 'Đã hoàn thành', value: statsMap['SUCCEED'] ?? 0},
-                    {label: 'Đã hủy', value: statsMap['CANCELLED'] ?? 0}
+                    {label: 'Đã xác nhận', value: statsMap['CONFIRMED'] ?? 0, status: "Confirmed"},
+                    {label: 'Đang giao', value: statsMap['DELIVERING'] ?? 0, status: "Delivering"},
+                    {label: 'Đã giao', value: statsMap['DELIVERED'] ?? 0, status: "Delivered"},
+                    {label: 'Đã hoàn thành', value: statsMap['SUCCEED'] ?? 0, status: "Succeed"},
+                    {label: 'Đã hủy', value: statsMap['CANCELLED'] ?? 0, status: "Cancelled"},
                 ] as OrderStat[];
             })
         );
