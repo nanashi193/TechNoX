@@ -1,8 +1,12 @@
 package com.g5.techdevices.techstore.services;
 
+import com.g5.techdevices.techstore.entity.Cart.CartItem;
 import com.g5.techdevices.techstore.components.ProductMapper;
 import com.g5.techdevices.techstore.dtos.ProductDTO;
 import com.g5.techdevices.techstore.dtos.ProductImageDTO;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
+import com.g5.techdevices.techstore.repositories.cart.CartItemRepository;
 import com.g5.techdevices.techstore.dtos.ProductVariantDTO;
 import com.g5.techdevices.techstore.dtos.customer.CustomerProductDTO;
 import com.g5.techdevices.techstore.entity.products.Category;
@@ -38,6 +42,8 @@ public class ProductService implements  IProductService {
     private final CategoryRepository categoryRepository;
     private final ProductImageRepository productImageRepository;
     private final ProductMapper productMapper; // ✅ THÊM DÒNG NÀY
+    @Autowired
+    private final CartItemRepository cartItemRepository;
 
 
 
@@ -134,10 +140,21 @@ public class ProductService implements  IProductService {
 
 
     @Override
-    public void deleteProduct(Long id) { // SỬA
-        Product p = productRepository.findById(id)
-                .orElseThrow(() -> new DataNotFoundException("Cannot find product with id = " + id)); // SỬA
-        productRepository.delete(p); // nếu bạn dùng soft delete qua @SQLDelete thì đây vẫn là update cờ
+    @Transactional
+    public void deleteProduct(Long id) {
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new DataNotFoundException(
+                        "Cannot find product with id = " + id
+                ));
+        // Kiểm tra cart item tham chiếu
+        List<CartItem> cartItems = cartItemRepository.findByVariant_Product_Id(id);
+        if (!cartItems.isEmpty()) {
+            throw new DataIntegrityViolationException(
+                    "Không thể xóa sản phẩm: đang có trong " + cartItems.size() + " giỏ hàng. " +
+                            "Vui lòng đợi khách mua hoặc liên hệ admin để xử lý."
+            );
+        }
+        productRepository.delete(product);
     }
 
     // THÊM: DTO kết quả xoá hàng loạt (đếm & danh sách id không tồn tại)

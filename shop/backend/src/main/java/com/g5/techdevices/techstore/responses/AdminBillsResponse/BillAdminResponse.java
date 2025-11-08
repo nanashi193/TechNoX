@@ -1,4 +1,5 @@
 package com.g5.techdevices.techstore.responses.AdminBillsResponse;
+import com.g5.techdevices.techstore.entity.Bills.Bill;
 
 
 import com.g5.techdevices.techstore.entity.staff.StaffInfo;
@@ -27,4 +28,16 @@ public class BillAdminResponse {
     private String paymentStatus;
 
     private StaffInfo staff;
+
+    public static BillAdminResponse fromBill(Bill bill) {
+        return BillAdminResponse.builder()
+                .billId(bill.getId())
+                .status(bill.getStatus())
+                .paymentMethod(bill.getPaymentMethod())
+                .total(bill.getTotal())
+                .orderDate(bill.getOrderDate())
+                .customerFullName(bill.getFullName())
+                .customerPhone(bill.getPhone())
+                .build();
+    }
 }

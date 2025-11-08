@@ -72,4 +72,6 @@ export class UserBillComponent implements OnChanges {
     badgeClass(ps: Row['paymentStatus']) {
         return ps === 'Paid' ? 'ok' : (ps === 'Pending' ? 'warn' : 'danger');
     }
+    trackRow = (_: number, r: Row) => r.id;
+
 }

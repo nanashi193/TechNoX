@@ -31,6 +31,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
+import com.g5.techdevices.techstore.services.BillService;
+import com.g5.techdevices.techstore.responses.AdminBillsResponse.BillAdminResponse;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -45,6 +47,8 @@ public class UserController {
     private final ITokenService tokenService;
     private final EmailService emailService;
     private final UserRepository userRepository;
+    private final BillService billService;
+
     @Autowired
     private BillRepository billRepository;
 
@@ -248,5 +252,16 @@ public class UserController {
     public ResponseEntity<List<StaffInfo>> getStaffList() {
         List<StaffInfo> staffList = userService.getStaffList();
         return ResponseEntity.ok(staffList);
+    }
+    //lay bill
+    @GetMapping("/{userId}/bills")
+    public ResponseEntity<Page<BillAdminResponse>> getBillsByUser(
+            @PathVariable Long userId,
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "10") int limit,
+            @RequestParam(defaultValue = "created_desc") String sort
+    ) {
+        Page<BillAdminResponse> bills = billService.getBillsByUser(userId, page, limit, sort);
+        return ResponseEntity.ok(bills);
     }
 }
