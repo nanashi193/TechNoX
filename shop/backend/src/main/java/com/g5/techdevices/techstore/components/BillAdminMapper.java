@@ -165,6 +165,7 @@ public class BillAdminMapper {
                 .color(detail.getColor())
                 .quantity(detail.getQuantity())
                 .unitPrice(detail.getUnitPrice())
+                .thumbnail(detail.getProduct().getThumbnail())
                 .build();
     }
 }
