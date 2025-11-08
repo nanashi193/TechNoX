@@ -1,15 +1,15 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable, map } from 'rxjs';
-
+import { environment } from '../environments/environment';
 import { BillAdminResponse } from '../models/bill-admin.model';
 import { StaffInfo } from '../models/staff-info.model';
 import { AssignStaffRequest } from '../models/assign-staff-request.model';
 
 @Injectable({ providedIn: 'root' })
 export class BillAdminService {
-    private apiUrl1 = 'http://localhost:8080/api/v1/bills';
-    private apiUrl2 = 'http://localhost:8080/api/v1/users';
+    private apiUrl1 = `${environment.apiBaseUrl}/bills`;
+    private apiUrl2 = `${environment.apiBaseUrl}/users`;
 
     constructor(private http: HttpClient) {}
 
