@@ -1,3 +1,4 @@
+import {OrderStatus} from "../components/Component-owner/owner/OrderControll/order-controll";
 
 export interface Kpi {
     revenueToday: number;
@@ -8,6 +9,7 @@ export interface Kpi {
 export interface OrderStat {
     label: string;
     value: number;
+    status: OrderStatus;
 }
 
 export interface TopProduct {

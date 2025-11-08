@@ -1,15 +1,16 @@
-import {Component, Input, OnInit, ViewChild} from '@angular/core';
+import {Component, OnInit, ViewChild} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {DashboardService} from "../../../../services/dashboard.service";
-import {Kpi, TopProduct, NewProduct, OrderStat, RevenueQuery, RevenuePoint} from "../../../../models/dashboard.models";
+import {Kpi, TopProduct, NewProduct, OrderStat, RevenueQuery} from "../../../../models/dashboard.models";
 import {TopProductsComponent} from './top-products/top-products.component';
 import {NewProductsComponent} from './new-products/new-products.component';
 import {BaseChartDirective} from "ng2-charts";
-import {RouterLink} from "@angular/router";
-import {Chart, ChartConfiguration, ChartOptions} from 'chart.js';
+import {Router, RouterLink} from "@angular/router";
+import {ChartConfiguration, ChartOptions} from 'chart.js';
 import {DateRange, OwnerDateRangeComponent} from "./owner-date-range/owner-date-range.component";
 import {catchError, forkJoin, of} from "rxjs";
 import 'chart.js/auto';
+import {OrderStatus} from "../OrderControll/order-controll";
 
 type RevPoint = { date: string; revenue: number };
 type OrdPoint = { date: string; orders: number };
@@ -100,7 +101,7 @@ export class DashboardComponent implements OnInit {
         }
     };
 
-    constructor(private ds: DashboardService) {
+    constructor(private ds: DashboardService, private router: Router) {
     }
 
     ngOnInit(): void {
@@ -111,6 +112,7 @@ export class DashboardComponent implements OnInit {
             .pipe(catchError(() => of([] as NewProduct[])))
             .subscribe(res => this.newProducts = res);
     }
+
     onRangeChanged(r: DateRange) {
         this.range = r;
         this.reload();
@@ -128,12 +130,11 @@ export class DashboardComponent implements OnInit {
 
         // các case đặc biệt
         if (p === 0 && c === 0) return 0;       // không đổi
-        if (p === 0 && c > 0)  return 100;      // tăng từ 0 -> có
-        if (c === 0 && p > 0)  return -100;     // rơi về 0
+        if (p === 0 && c > 0) return 100;      // tăng từ 0 -> có
+        if (c === 0 && p > 0) return -100;     // rơi về 0
 
         return ((c - p) / p) * 100;
     }
-
 
 
     private prevOf(r: DateRange): DateRange {
@@ -152,12 +153,9 @@ export class DashboardComponent implements OnInit {
         return rows.reduce((s, p) => s + (p.revenue || 0), 0);
     }
 
-    private sumOrders(rows: RowPoint[]) {
-        return rows.reduce((s, p) => s + (p.orders || 0), 0);
-    }
     private loadKpiToday() {
         const today = this.dateOnlyLocal(new Date());
-        const q: RevenueQuery = { from: today, to: today, bucket: 'day' };
+        const q: RevenueQuery = {from: today, to: today, bucket: 'day'};
 
         this.ds.getKpi(q)
             .pipe(catchError(() => of(this.kpi)))
@@ -217,7 +215,7 @@ export class DashboardComponent implements OnInit {
             };
 
             this.deltaRev = this.calcDelta(this.totalsNow.revenue, this.totalsPrev.revenue);
-            this.deltaOrd = this.calcDelta(this.totalsNow.orders,  this.totalsPrev.orders);
+            this.deltaOrd = this.calcDelta(this.totalsNow.orders, this.totalsPrev.orders);
 
         });
 
@@ -259,5 +257,11 @@ export class DashboardComponent implements OnInit {
         const m = String(d.getMonth() + 1).padStart(2, '0');
         const day = String(d.getDate()).padStart(2, '0');
         return `${y}-${m}-${day}`;
+    }
+
+    navigateToOrderList(status: OrderStatus): void {
+        this.router.navigate(['/owner/orders'], {
+            queryParams: {status: status}
+        });
     }
 }

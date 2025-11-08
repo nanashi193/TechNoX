@@ -12,8 +12,8 @@
         <!-- Logo (ngSrc) -->
         <a class="brand" routerLink="/" aria-label="Trang chủ TechNoX">
             <img class="brand__logo"
-                 ngSrc="../../../../assets/Phone/Logo.png"
-                 alt="TechNoX" width="200" height="40" priority />
+                 ngSrc="assets/icons/x-logo-circle.png"
+                 alt="TechNoX" width="200" height="200" priority />
             <span class="brand__name">TechNoX</span>
         </a>
 
@@ -27,7 +27,6 @@
                             [attr.aria-expanded]="userMenuOpen ? 'true' : 'false'">
                         {{ user.fullName || user.sub }} ▾
                     </button>
-
                     <ul class="user-dropdown" *ngIf="userMenuOpen"
                         role="menu" aria-label="Tài khoản"
                         (click)="$event.stopPropagation()">
@@ -37,6 +36,11 @@
                         <li role="none">
                             <a role="menuitem" routerLink="/my-orders" (click)="closeUserMenu($event)">Đơn hàng của tôi</a>
                         </li>
+                        @if (isOwner(user)) {
+                            <li role="none">
+                                <a role="menuitem" routerLink="/owner" (click)="closeUserMenu($event)">Về trang quản lý</a>
+                            </li>
+                        }
                         <li role="none">
                             <button role="menuitem" type="button" (click)="logout($event)">Đăng xuất</button>
                         </li>

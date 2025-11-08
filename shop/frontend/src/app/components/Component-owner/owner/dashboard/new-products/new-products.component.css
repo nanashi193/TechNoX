@@ -140,5 +140,16 @@
     margin-left: auto;
     white-space: nowrap;
 }
+.image-wrapper {
+    position: relative;
+    width: 40px;
+    height: 40px;
+    overflow: hidden;
+    border-radius: 4px;
+}
+
+.image-wrapper img {
+    object-fit: cover;
+}
 
 
