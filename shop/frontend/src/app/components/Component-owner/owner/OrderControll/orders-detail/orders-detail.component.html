@@ -25,8 +25,8 @@
                 <div class="meta">
                     <div class="name">{{ it.productName }}</div>
                     <div class="attrs" *ngIf="it.color || it.size">
-                        <span *ngIf="it.color">Color: {{ it.color }}</span>
-                        <span *ngIf="it.size">Size: {{ it.size }}</span>
+                        <span *ngIf="it.color">Màu sắc: {{ it.color }}</span>
+                        <span *ngIf="it.size">Kích cỡ: {{ it.size }}</span>
                     </div>
                 </div>
                 <div class="price">{{ it.price | currency:'VND':'symbol-narrow':'1.0-0' }}</div>
@@ -101,31 +101,4 @@
         </div>
     </section>
 
-    <!-- RIGHT: SHIPPING -->
-    <section class="card">
-        <div class="card-hdr">
-            <h3>Shipping activity</h3>
-            <span class="badge"
-                  [ngClass]="badgeClass(bill()?.status)">{{ bill()?.status || '—' }}</span>
-        </div>
-
-        <div class="block">
-            <div class="line">Carrier: <b>{{ bill()?.shippingCarrier || '—' }}</b></div>
-            <div class="line">Tracking: <b>{{ bill()?.shippingCode || '—' }}</b></div>
-        </div>
-
-        <ul class="timeline" *ngIf="bill()?.shippingTimeline?.length; else noTl">
-            <li *ngFor="let ev of bill()!.shippingTimeline!">
-                <span class="dot" [ngClass]="badgeClass(ev.status)"></span>
-                <div class="tmeta">
-                    <div class="tstatus">{{ ev.status }}</div>
-                    <div class="twhen">{{ ev.time | date:'EEEE, dd MMMM • HH:mm' }}</div>
-                    <div class="tnote" *ngIf="ev.note">{{ ev.note }}</div>
-                </div>
-            </li>
-        </ul>
-        <ng-template #noTl>
-            <div class="muted">Chưa có lịch sử giao hàng.</div>
-        </ng-template>
-    </section>
 </div>
