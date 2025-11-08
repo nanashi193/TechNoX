@@ -4,7 +4,6 @@ import {FormsModule} from '@angular/forms';
 
 import {BillAdminResponse} from '../../../../models/bill-admin.model';
 import {StaffInfo} from '../../../../models/staff-info.model';
-import {AssignStaffRequest} from '../../../../models/assign-staff-request.model';
 import {BillAdminService} from "../../../../services/bill-admin.service";
 import {ActivatedRoute, Router} from "@angular/router";
 import {combineLatest} from "rxjs";

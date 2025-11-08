@@ -1,5 +1,5 @@
 import {inject, Injectable} from '@angular/core';
-import {forkJoin, Observable, of, tap} from 'rxjs';
+import {forkJoin, Observable} from 'rxjs';
 import {
     Kpi,
     TopProduct,
