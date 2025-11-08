@@ -59,14 +59,22 @@ export class DashboardService {
 
     /** Trạng thái đơn hàng (BE hiện tại không có from/to) */
     getOrderStats(_: RevenueQuery): Observable<OrderStat[]> {
-        return this.http.get<{ statusStats: any }>(`${this.DASH}/orders/status`).pipe(
+        return this.http.get<{ statusStats: any[] }>(`${this.DASH}/orders/status`).pipe(
             map(res => {
-                const s = res?.statusStats ?? {};
+                const statsArray = res?.statusStats ?? [];
+
+                const statsMap: { [key: string]: number } = {};
+                statsArray.forEach((stat: any) => {
+                    const status = stat.status?.toUpperCase();
+                    statsMap[status] = stat.total ?? 0;
+                });
+
                 return [
-                    {label: 'Chưa thanh toán', value: s.unpaid ?? s.UNPAID ?? 0},
-                    {label: 'Chưa giao hàng', value: s.pendingShipment ?? s.PENDING_SHIPMENT ?? 0},
-                    {label: 'Đang giao', value: s.shipping ?? s.SHIPPING ?? 0},
-                    {label: 'Đã hủy', value: s.canceled ?? s.CANCELED ?? 0}
+                    {label: 'Đã xác nhận', value: statsMap['CONFIRMED'] ?? 0},
+                    {label: 'Đang giao', value: statsMap['DELIVERING'] ?? 0},
+                    {label: 'Đã giao', value: statsMap['DELIVERED'] ?? 0},
+                    {label: 'Đã hoàn thành', value: statsMap['SUCCEED'] ?? 0},
+                    {label: 'Đã hủy', value: statsMap['CANCELLED'] ?? 0}
                 ] as OrderStat[];
             })
         );
