@@ -409,25 +409,18 @@ html, body {
 }
 
 .avatar-wrap{
-    --avatar-size: 56px;      /* chỉnh nhanh kích thước ở đây */
+    --avatar-size: 56px;
     width: var(--avatar-size);
     height: var(--avatar-size);
-
-    background: #fff;         /* nền trắng */
-    border-radius: 50%;       /* khung tròn */
-    padding: 4px;             /* tạo "viền" trắng giữa khung và ảnh */
+    border-radius: 50%;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.12);
-    flex-shrink: 0;
+
+    background: transparent;
+    border: 2px solid rgba(255,255,255,0.12); /* vòng mảnh */
+    box-shadow: 0 4px 12px rgba(0,0,0,0.45);
+    padding: 2px;
 }
 
-.avatar{
-    width: 100%;
-    height: 100%;
-    border-radius: 50%;
-    object-fit: cover;        /* giữ tỉ lệ và crop vừa khung */
-    display: block;
-}
-
+.avatar{ border-radius:50%; width:100%; height:100%; object-fit:cover; display:block; }
