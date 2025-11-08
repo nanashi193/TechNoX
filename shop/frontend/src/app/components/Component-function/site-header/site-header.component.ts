@@ -34,6 +34,9 @@ export class SiteHeaderComponent implements OnDestroy {
         this.currentUser$ = this.authService.currentUser$;
         this.itemCount$   = this.cartService.itemCount$;
     }
+    isOwner(user: any): boolean {
+        return user?.roleName === 'Owner' || user?.authorities?.includes('OWNER');
+    }
 
     // ===== Mobile menu =====
     toggleMenu() { this.mobileMenuOpen = !this.mobileMenuOpen; }

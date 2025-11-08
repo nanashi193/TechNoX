@@ -27,7 +27,6 @@
                             [attr.aria-expanded]="userMenuOpen ? 'true' : 'false'">
                         {{ user.fullName || user.sub }} ▾
                     </button>
-
                     <ul class="user-dropdown" *ngIf="userMenuOpen"
                         role="menu" aria-label="Tài khoản"
                         (click)="$event.stopPropagation()">
@@ -37,6 +36,11 @@
                         <li role="none">
                             <a role="menuitem" routerLink="/my-orders" (click)="closeUserMenu($event)">Đơn hàng của tôi</a>
                         </li>
+                        @if (isOwner(user)) {
+                            <li role="none">
+                                <a role="menuitem" routerLink="/owner" (click)="closeUserMenu($event)">Về trang quản lý</a>
+                            </li>
+                        }
                         <li role="none">
                             <button role="menuitem" type="button" (click)="logout($event)">Đăng xuất</button>
                         </li>
