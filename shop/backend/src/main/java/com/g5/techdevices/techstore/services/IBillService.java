@@ -8,6 +8,8 @@ import com.g5.techdevices.techstore.exceptions.InsufficientStockException;
 import com.g5.techdevices.techstore.responses.AdminBillsResponse.BillAdminResponse;
 import com.g5.techdevices.techstore.responses.AdminBillsResponse.BillFullDetailResponse;
 import com.g5.techdevices.techstore.responses.BillResponse;
+import org.springframework.data.domain.Page;
+
 
 import java.util.List;
 
@@ -21,4 +23,5 @@ public interface IBillService {
     BillFullDetailResponse getBillDetails(Long billId);
 
     BillAdminResponse assignStaff(Long billId, Long staffId);
+    Page<BillAdminResponse> getBillsByUser(Long userId, int page, int limit, String sort);
 }

@@ -402,3 +402,32 @@ html, body {
 }
 .aside-foot .link:hover{ color:var(--owner-accent, #1a73e8); }
 
+.aside-head{
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.avatar-wrap{
+    --avatar-size: 56px;      /* chỉnh nhanh kích thước ở đây */
+    width: var(--avatar-size);
+    height: var(--avatar-size);
+
+    background: #fff;         /* nền trắng */
+    border-radius: 50%;       /* khung tròn */
+    padding: 4px;             /* tạo "viền" trắng giữa khung và ảnh */
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.12);
+    flex-shrink: 0;
+}
+
+.avatar{
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;        /* giữ tỉ lệ và crop vừa khung */
+    display: block;
+}
+

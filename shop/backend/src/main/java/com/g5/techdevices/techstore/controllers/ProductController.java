@@ -1,6 +1,6 @@
 package com.g5.techdevices.techstore.controllers;
 
-
+import org.springframework.dao.DataIntegrityViolationException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.g5.techdevices.techstore.dtos.ProductDTO;
 import com.g5.techdevices.techstore.dtos.ProductImageDTO;
@@ -197,9 +197,16 @@ public class ProductController {
     //Delete
 
     @DeleteMapping("/{id:\\d+}")
-    public ResponseEntity<Void> deleteProduct(@PathVariable long id) {
-        productService.deleteProduct(id);          // ném DataNotFoundException nếu không thấy
-        return ResponseEntity.noContent().build(); // ✅ 204, không body
+    public ResponseEntity<?> deleteProduct(@PathVariable Long id) {
+        try {
+            productService.deleteProduct(id);
+            return ResponseEntity.noContent().build();
+        } catch (DataIntegrityViolationException e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body(Map.of("error", "Cannot delete", "message", e.getMessage()));
+        } catch (DataNotFoundException e) {
+            return ResponseEntity.notFound().build();
+        }
     }
 
     public record BulkIds(List<Long> ids) {}
@@ -207,11 +214,27 @@ public class ProductController {
     @PostMapping("/bulk-delete")
     public ResponseEntity<Map<String,Object>> bulkDelete(@RequestBody BulkIds body) {
         var ids = body.ids();
-        ids.forEach(productService::deleteProduct);
-        return ResponseEntity.ok(Map.of("deletedIds", ids));
+        List<Long> deleted = new ArrayList<>();
+        List<Long> notFound = new ArrayList<>();
+        List<Long> conflicted = new ArrayList<>();
+
+        for (Long id : ids) {
+            try {
+                productService.deleteProduct(id);
+                deleted.add(id);
+            } catch (DataNotFoundException e) {
+                notFound.add(id);
+            } catch (DataIntegrityViolationException e) {
+                conflicted.add(id);
+            }
+        }
+
+        return ResponseEntity.ok(Map.of(
+                "deletedIds", deleted,
+                "notFoundIds", notFound,
+                "conflictedIds", conflicted
+        ));
     }
-
-
 
     //update
     @PutMapping("/{id}")

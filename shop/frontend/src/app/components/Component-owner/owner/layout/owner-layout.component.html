@@ -3,15 +3,18 @@
     <aside class="owner-aside" [class.mini]="mini">
         <!-- TOP: profile + collapse -->
         <div class="aside-head">
-            <img class="avatar" src="assets/icons/x-logo-circle.png" alt="">
+            <div class="avatar-wrap" aria-hidden="true">
+                <img class="avatar" src="assets/icons/owner-avatar.png" alt="Avatar chủ cửa hàng">
+            </div>
+
             <div class="who">
                 <div class="role">Chủ cửa hàng</div>
-                <div class="name" [title]="(me$ | async)?.name || '—'">
+                <div class="name" title="{{ (me$ | async)?.name || '—' }}">
                     {{ (me$ | async)?.name || '—' }}
                 </div>
             </div>
-            <button class="collapse" (click)="mini = !mini" aria-label="Toggle sidebar">⟨⟩</button>
         </div>
+
 
         <!-- MAIN -->
         <div class="aside-section">

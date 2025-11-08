@@ -204,7 +204,12 @@ export class ProductsListComponent implements OnInit {
                 // hoặc gọi this.load() nếu bạn muốn refresh từ BE
                 this.load();
             },
-            error: e => alert(`Xóa thất bại: ${e?.status || ''}`),
+            error: (err) => {
+                if (err.status === 409) {
+                    alert(err.error?.message ||
+                        'Không thể xóa: sản phẩm đang trong giỏ hàng của khách. Hãy đợi khách mua hoặc liên hệ admin.');
+                }
+            },
             complete: () => this.loading = false
         });
     }

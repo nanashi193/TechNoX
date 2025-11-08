@@ -1,5 +1,8 @@
 package com.g5.techdevices.techstore.repositories;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
 import com.g5.techdevices.techstore.entity.Bills.Bill;
 import com.g5.techdevices.techstore.entity.Bills.BillDetail;
 import com.g5.techdevices.techstore.entity.users.User;
@@ -16,6 +19,7 @@ import java.util.Optional;
 
 public interface BillRepository extends JpaRepository<Bill,Long> {
     List<Bill> findByUserId(Integer userId);
+    Page<Bill> findByUser_Id(Integer userId, Pageable pageable);
     /**
      * Đếm tổng số đơn hàng của một user
      */

@@ -13,19 +13,18 @@
             <div class="cell col-invoice">Invoice</div>
         </div>
 
-        <a class="row body-row" *ngFor="let r of rows()" [routerLink]="['/owner/orders', r.id]">
-            <div class="cell col-order link">{{ r.id }}</div>
-            <div class="cell col-date">{{ r.date | date:'MMM d, y' }}</div>
+        <a class="row body-row" *ngFor="let r of rows(); trackBy: trackRow"
+           [routerLink]="['/owner/orders', r.id]">
+            <div class="cell col-order link">#{{ r.id }}</div>
+            <div class="cell col-date">{{ r.date ? (r.date | date:'MMM d, y') : '—' }}</div>
             <div class="cell col-pay">
-        <span class="pill" [class.ok]="badgeClass(r.paymentStatus)==='ok'"
-              [class.warn]="badgeClass(r.paymentStatus)==='warn'"
-              [class.danger]="badgeClass(r.paymentStatus)==='danger'">
-          <i class="dot"></i>{{ r.paymentStatus }}
-        </span>
+                <span [ngClass]="['pill', badgeClass(r.paymentStatus)]">
+                     <i class="dot"></i>{{ r.paymentStatus }}
+                </span>
             </div>
-            <div class="cell col-total">{{ r.total | currency:'VND':'symbol-narrow':'1.0-0' }}</div>
+            <div class="cell col-total">{{ (r.total ?? 0) | currency:'VND':'symbol-narrow':'1.0-0' }}</div>
             <div class="cell col-invoice">
-                <span class="btn small">Invoice</span>
+                <button class="btn small" type="button">Invoice</button>
             </div>
         </a>
     </div>
