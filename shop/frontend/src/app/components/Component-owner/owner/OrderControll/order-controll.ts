@@ -4,9 +4,9 @@ import {FormsModule} from '@angular/forms';
 
 import {BillAdminResponse} from '../../../../models/bill-admin.model';
 import {StaffInfo} from '../../../../models/staff-info.model';
-import {AssignStaffRequest} from '../../../../models/assign-staff-request.model';
 import {BillAdminService} from "../../../../services/bill-admin.service";
-import {Router} from "@angular/router";
+import {ActivatedRoute, Router} from "@angular/router";
+import {combineLatest} from "rxjs";
 
 export type OrderStatus = 'Processing' | 'Confirmed' | 'Delivering' | 'Delivered' | 'Succeed' | 'Cancelled';
 export type PaymentMethod = 'COD' | 'POS';
@@ -26,6 +26,7 @@ interface BillAdminUI extends BillAdminResponse {
 export class OrderControllComponent implements OnInit {
     private billAdminService = inject(BillAdminService);
     private router = inject(Router);
+    private route = inject(ActivatedRoute);
 
     //orders-detail
     goDetail(o: BillAdminUI) {
@@ -92,7 +93,19 @@ export class OrderControllComponent implements OnInit {
 
     // ====== Lifecycle (Gọi API) ======
     ngOnInit(): void {
-        this.loadData();
+        combineLatest([
+            this.billAdminService.getBillsForAdmin(),
+            this.route.queryParams
+        ]).subscribe(([bills, params]) => {
+            this.orders.set(bills);
+
+            const status = params['status'] as OrderStatus;
+            if (status) {
+                this.statusFilter.set(status);
+            } else {
+                this.statusFilter.set('all');
+            }
+        });
     }
 
     loadData(): void {
@@ -134,9 +147,16 @@ export class OrderControllComponent implements OnInit {
 
 
     // ====== Helpers / Actions (Cập nhật cho khớp) ======
-    setFilter(v: 'all' | OrderStatus): void {
-        this.statusFilter.set(v);
-    } // (Lỗi 1 đã được sửa)
+    setFilter(status: OrderStatus | 'all'): void {
+        this.statusFilter.set(status);
+
+        // Update URL với query params
+        this.router.navigate([], {
+            relativeTo: this.route,
+            queryParams: { status: status === 'all' ? null : status },
+            queryParamsHandling: 'merge' // Giữ các query params khác nếu có
+        });
+    }
 
     toggleExpand(order: BillAdminUI): void {
         const found = this.orders().find(o => o.billId === order.billId);
