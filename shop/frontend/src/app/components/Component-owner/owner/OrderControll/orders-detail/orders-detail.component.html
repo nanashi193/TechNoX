@@ -71,7 +71,9 @@
         <div class="customer">
             <div class="avatar">{{ (bill()?.customerFullName || 'U')[0] }}</div>
             <div class="cname">{{ bill()?.customerFullName || '—' }}</div>
-            <a class="muted" [routerLink]="['/owner/users', bill()?.userId]">chi tiết khách hàng →</a>
+            <a class="line" [routerLink]="['/owner/users', bill()?.userId]">
+                <span class="icon ico-img" style="--ico:url('assets/icons/user-avatar.png')"></span>
+            </a>
         </div>
 
         <div class="block">
