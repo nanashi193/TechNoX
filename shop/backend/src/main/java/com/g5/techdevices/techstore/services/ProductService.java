@@ -4,6 +4,7 @@ import com.g5.techdevices.techstore.entity.Cart.CartItem;
 import com.g5.techdevices.techstore.components.ProductMapper;
 import com.g5.techdevices.techstore.dtos.ProductDTO;
 import com.g5.techdevices.techstore.dtos.ProductImageDTO;
+import jakarta.persistence.criteria.Predicate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import com.g5.techdevices.techstore.repositories.cart.CartItemRepository;
@@ -24,6 +25,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -231,8 +233,22 @@ public class ProductService implements  IProductService {
     }
 
     @Override
-    public Page<CustomerProductDTO> getProductsForCustomer(Pageable pageable) {
-        Page<Product> productPage = productRepository.findAll(pageable);
+    public Page<CustomerProductDTO> getProductsForCustomer(
+            Pageable pageable,
+            String categoryName,
+            String searchTerm
+    ) {
+        Specification<Product> spec = (root, query, cb) -> {
+            Predicate p = cb.conjunction();
+            if (categoryName != null && !categoryName.isEmpty()) {
+                p = cb.and(p, cb.equal(root.get("category").get("name"), categoryName));
+            }
+            if (searchTerm != null && !searchTerm.isEmpty()) {
+                p = cb.and(p, cb.like(root.get("name"), "%" + searchTerm + "%"));
+            }
+            return p;
+        };
+        Page<Product> productPage = productRepository.findAll(spec, pageable);
         return productPage.map(productMapper::mapToCustomerProductDTO);
     }
 

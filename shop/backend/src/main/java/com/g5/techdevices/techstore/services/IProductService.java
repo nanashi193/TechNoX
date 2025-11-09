@@ -38,6 +38,12 @@ public interface IProductService {
     boolean existsByName(String name);
     ProductImages createProductImages(Long productId
             , ProductImageDTO productImageDTO) throws Exception;
-    Page<CustomerProductDTO> getProductsForCustomer(Pageable pageable);
+
+    Page<CustomerProductDTO> getProductsForCustomer(
+            Pageable pageable,
+            String categoryName, // <-- THÊM 1: Nhận categoryName
+            String searchTerm    // <-- (Thêm cả searchTerm cho tương lai)
+    );
+
     CustomerProductDTO getCustomerProductById(Long id) throws DataNotFoundException; // <-- THÊM HÀM NÀY
 }

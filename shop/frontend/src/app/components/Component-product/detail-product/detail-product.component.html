@@ -6,11 +6,51 @@
         <div class="detail-card">
             <div class="detail-grid">
                 <div class="detail-left">
-                    <figure class="gallery">
+
+                    <!-- Kiểm tra product và mảng ảnh như cũ -->
+                    <figure class="gallery"
+                            *ngIf="product && product.imageUrls && product.imageUrls.length > 0; else noImageDetail">
+
+                        <!--
+                          KHỐI 1: Sân khấu (gallery__stage)
+                          Bây giờ chứa cả ảnh VÀ các nút bấm
+                        -->
                         <div class="gallery__stage">
-                            <img class="gallery__img" [src]="product.image" [alt]="product.name" />
+
+                            <!-- Ảnh chính -->
+                            <img class="gallery__img"
+                                 [src]="product.imageUrls[currentImageIndex]"
+                                 [alt]="product.name + ' ' + (currentImageIndex + 1)">
+
+                            <!--
+                              CÁC NÚT BẤM (Đã di chuyển vào trong)
+                              Chỉ hiển thị khi có nhiều hơn 1 ảnh
+                            -->
+                            <ng-container *ngIf="product.imageUrls.length > 1">
+                                <!-- Nút Lùi (gọi hàm prevImage() từ file .ts) -->
+                                <button (click)="prevImage()" class="gallery-nav-btn prev" aria-label="Ảnh trước">
+                                    &#10094;
+                                </button>
+
+                                <!-- Nút Tiến (gọi hàm nextImage() từ file .ts) -->
+                                <button (click)="nextImage()" class="gallery-nav-btn next" aria-label="Ảnh kế tiếp">
+                                    &#10095;
+                                </button>
+                            </ng-container>
+
                         </div>
+                        <!-- ĐÃ XÓA BỎ KHỐI .gallery__controls VÀ BỘ ĐẾM SỐ ẢNH -->
+
                     </figure>
+
+                    <!-- Template dự phòng nếu sản phẩm không có ảnh -->
+                    <ng-template #noImageDetail>
+                        <figure class="gallery">
+                            <div class="gallery__stage">
+                                <img class="gallery__img" src="https://placehold.co/500x500/eee/ccc?text=No+Image" alt="Không có ảnh">
+                            </div>
+                        </figure>
+                    </ng-template>
                 </div>
 
                 <aside class="detail-right">

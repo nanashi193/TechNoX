@@ -1,128 +1,117 @@
 import { Component, AfterViewInit, ElementRef, ViewChild, OnDestroy, OnInit, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, CurrencyPipe } from '@angular/common'; // Import CurrencyPipe
 import { RouterModule } from '@angular/router';
 import { finalize } from 'rxjs';
 import { CustomerProductService } from '../../../services/customer-product.service';
-import { CustomerProduct } from '../../../models/customer-product.model';
-
-interface FeaturedProductVM {
-    id: number;
-    name: string;
-    price: number;
-    image: string;
-    tags: string[];
-}
+import { CustomerProduct } from '../../../models/customer-product.model'; // Import interface chính
 
 @Component({
     selector: 'app-home',
     standalone: true,
-    imports: [CommonModule, RouterModule],
+    imports: [CommonModule, RouterModule, CurrencyPipe], // Thêm CurrencyPipe vào imports
     templateUrl: './home.component.html',
     styleUrls: ['./home.component.css'],
 })
-export class HomeComponent implements AfterViewInit, OnDestroy, OnInit { // <-- Thêm OnInit
-    // ===== Header/Menu/Cookies =====
+export class HomeComponent implements AfterViewInit, OnDestroy, OnInit {
+    // ===== Header/Menu/Cookies (GIỮ NGUYÊN) =====
     mobileMenuOpen = false;
     cookieOpen = true;
 
-    // ===== Poster cover =====
+    // ===== Poster cover (GIỮ NGUYÊN) =====
     showCover = true;
     forceOff  = false;
 
-    // ===== Video refs & state =====
+    // ===== Video refs & state (GIỮ NGUYÊN) =====
     @ViewChild('heroVideo') heroVideo!: ElementRef<HTMLVideoElement>;
     isMuted = true;
-
     private _timeouts: any[] = [];
 
-    // ===== BƯỚC 2: INJECT SERVICE ===
+    // ===== Service (GIỮ NGUYÊN) =====
     private productSvc = inject(CustomerProductService);
 
-    // ===== Accessories + paging (PHỤ KIỆN) =====
-    // (Tạm thời giữ nguyên mảng static này. Nếu bạn muốn tải cả phụ kiện từ API
-    // (ví dụ: theo category 'Phụ kiện'), chúng ta có thể cập nhật sau)
-    accessories = [
-        { name: 'Tai nghe Bluetooth', price: 1_290_000, tags: ['Âm thanh HD'],    image: 'assets/accessories/headphone.jpg' },
-        { name: 'Sạc nhanh 65W',     price:   690_000, tags: ['Type-C PD'],       image: 'assets/accessories/charger.jpg' },
-        { name: 'Ốp lưng iPhone 15', price:   390_000, tags: ['Silicon bảo vệ'],  image: 'assets/accessories/case.jpg' },
-        // ... (phần còn lại của accessories) ...
-    ];
-    page = 1;
-    pageSize = 3;
-    get totalPages() { return Math.max(1, Math.ceil(this.accessories.length / this.pageSize)); }
-    private get pagedAccessories() {
-        const start = (this.page - 1) * this.pageSize;
-        return this.accessories.slice(start, start + this.pageSize);
-    }
-    get paged() { return this.pagedAccessories; }
-    nextPage(){ if (this.page < this.totalPages) this.page++; }
-    prevPage(){ if (this.page > 1) this.page--; }
+    // ===== BƯỚC 1: Thay thế logic "Featured" bằng 3 danh mục =====
+    phoneProducts: CustomerProduct[] = [];
+    laptopProducts: CustomerProduct[] = [];
+    accessoryProducts: CustomerProduct[] = [];
 
-    featuredProducts: FeaturedProductVM[] = [];
-    featuredLoading = true;
-    featuredCurrentPage = 1;
-    featuredPageSize = 3;
-    featuredTotalPages = 1;
+    // Thêm 3 cờ loading riêng biệt
+    phonesLoading = true;
+    laptopsLoading = true;
+    accessoriesLoading = true;
 
+    // Số lượng sản phẩm hiển thị cho mỗi mục (bạn có thể đổi số này)
+    private readonly productsPerCategory = 3;
+
+    // ===== BƯỚC 2: Cập nhật ngOnInit =====
     ngOnInit(): void {
-        this.loadFeaturedProducts(this.featuredCurrentPage);
+        // Tải cả 3 danh mục
+        this.loadCategoryProducts('Điện thoại');
+        this.loadCategoryProducts('Laptop');
+        this.loadCategoryProducts('Phụ kiện');
     }
 
-    loadFeaturedProducts(page: number): void {
-        this.featuredLoading = true;
-        const pageIndex = page - 1;
+    // ===== BƯỚC 3: Thêm hàm tải theo danh mục =====
+    loadCategoryProducts(categoryName: 'Điện thoại' | 'Laptop' | 'Phụ kiện'): void {
 
-        this.productSvc.getProducts(pageIndex, this.featuredPageSize)
-            .pipe(finalize(() => this.featuredLoading = false))
+        let loadingFlag: 'phonesLoading' | 'laptopsLoading' | 'accessoriesLoading';
+        switch (categoryName) {
+            case 'Điện thoại':
+                loadingFlag = 'phonesLoading';
+                this.phonesLoading = true;
+                break;
+            case 'Laptop':
+                loadingFlag = 'laptopsLoading';
+                this.laptopsLoading = true;
+                break;
+            case 'Phụ kiện':
+                loadingFlag = 'accessoriesLoading';
+                this.accessoriesLoading = true;
+                break;
+        }
+
+        /**
+         * Giả định: hàm getProducts chấp nhận (pageIndex, pageSize, categoryName)
+         * Chúng ta lấy trang 0 (trang đầu tiên) và số lượng 3 sản phẩm
+         */
+        this.productSvc.getProducts(0, this.productsPerCategory, categoryName)
+            .pipe(finalize(() => {
+                // Tắt cờ loading khi hoàn tất
+                this[loadingFlag] = false;
+            }))
             .subscribe(response => {
+                // Gán dữ liệu, đảm bảo imageUrls luôn là một mảng
+                const products = response.content.map(p => ({
+                    ...p,
+                    imageUrls: p.imageUrls || []
+                }));
 
-                // Cập nhật thông tin paging
-                this.featuredTotalPages = response.page.totalPages;
-                this.featuredCurrentPage = response.page.number + 1;
-
-                // QUAN TRỌNG: Map dữ liệu API -> Dữ liệu Template
-                this.featuredProducts = response.content.map(product => {
-                    return {
-                        id: product.id,
-                        name: product.name,
-                        price: product.price,
-                        image: product.image,
-                        tags: [product.categoryName]
-                    };
-                });
+                switch (categoryName) {
+                    case 'Điện thoại':
+                        this.phoneProducts = products;
+                        break;
+                    case 'Laptop':
+                        this.laptopProducts = products;
+                        break;
+                    case 'Phụ kiện':
+                        this.accessoryProducts = products;
+                        break;
+                }
             });
     }
 
-    // Alias trỏ đến các thuộc tính mới
-    get heroPaged() { return this.featuredProducts; }
-    get heroPage() { return this.featuredCurrentPage; }
-    get heroTotalPages() { return this.featuredTotalPages; }
-
-    // Sửa lại hàm Next/Prev để gọi API
-    heroNext(){
-        if (this.featuredCurrentPage < this.featuredTotalPages) {
-            this.loadFeaturedProducts(this.featuredCurrentPage + 1);
-        }
-    }
-    heroPrev(){
-        if (this.featuredCurrentPage > 1) {
-            this.loadFeaturedProducts(this.featuredCurrentPage - 1);
-        }
+    // ===== BƯỚC 4: Cập nhật trackById (để gõ chữ mạnh hơn) =====
+    trackById(index: number, item: CustomerProduct): number {
+        return item.id;
     }
 
-    // Template dùng trackBy: trackById
-    trackById(index: number, item: any): number | string {
-        return (item && item.id) ?? index;
-    }
-
-    // ===== Menu / cookies =====
+    // ===== Menu / cookies (GIỮ NGUYÊN) =====
     toggleMenu(){ this.mobileMenuOpen = !this.mobileMenuOpen; }
     closeMenu(){ this.mobileMenuOpen = false; }
     acceptCookies(){ this.cookieOpen = false; }
     refuseCookies(){ this.cookieOpen = false; }
     customCookies(){ this.cookieOpen = false; }
 
-    // ===== Lifecycle =====
+    // ===== Lifecycle (GIỮ NGUYÊN) =====
     ngAfterViewInit(): void {
         this._timeouts.push(setTimeout(() => { this.showCover = false; }, 2300));
         this._timeouts.push(setTimeout(() => { this.forceOff = true; this.showCover = false; }, 3500));
@@ -144,7 +133,7 @@ export class HomeComponent implements AfterViewInit, OnDestroy, OnInit { // <-- 
         this._timeouts.forEach(t => clearTimeout(t));
     }
 
-    // ===== Poster cover anim handler =====
+    // ===== Poster cover anim handler (GIỮ NGUYÊN) =====
     onCoverAnimEnd(e: AnimationEvent) {
         if (e.target !== e.currentTarget) return;
         if (e.animationName === 'cover-out-up' || e.animationName === 'cover-out') {
@@ -155,7 +144,7 @@ export class HomeComponent implements AfterViewInit, OnDestroy, OnInit { // <-- 
         console.log('Thêm vào giỏ hàng:', product);
     }
 
-    // ===== Video handlers used in template =====
+    // ===== Video handlers (GIỮ NGUYÊN) =====
     toggleMute(videoEl: HTMLVideoElement) {
         this.isMuted = !this.isMuted;
         videoEl.muted = this.isMuted;
@@ -170,4 +159,11 @@ export class HomeComponent implements AfterViewInit, OnDestroy, OnInit { // <-- 
     onVideoCanPlay() {
         // Hook khi video đã đủ dữ liệu để play
     }
+
+    // ===== CÁC HÀM CŨ ĐÃ BỊ XÓA =====
+    // - Mảng `accessories` tĩnh (giờ tải từ API)
+    // - các hàm `page`, `pageSize`, `totalPages`, `pagedAccessories`, `paged`, `nextPage`, `prevPage`
+    // - `featuredProducts`
+    // - `loadFeaturedProducts`
+    // - `heroPaged`, `heroPage`, `heroTotalPages`, `heroNext`, `heroPrev`
 }

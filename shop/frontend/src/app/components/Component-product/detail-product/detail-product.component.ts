@@ -3,8 +3,6 @@ import { CommonModule, CurrencyPipe } from '@angular/common';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { finalize } from 'rxjs';
 import { FormsModule } from '@angular/forms';
-
-// --- Sử dụng Model và Service mới ---
 import { CustomerProduct, CustomerVariant } from '../../../models/customer-product.model';
 import { CustomerProductService } from '../../../services/customer-product.service';
 import { CartService } from '../../../services/cart.service'; // Import CartService
@@ -26,6 +24,7 @@ export class DetailProductComponent implements OnInit {
     loading = true;
     selectedVariant: CustomerVariant | null = null;
     quantity = 1;
+    currentImageIndex: number = 0;
 
     ngOnInit(): void {
         const productIdString = this.route.snapshot.paramMap.get('id');
@@ -56,6 +55,7 @@ export class DetailProductComponent implements OnInit {
                         this.selectedVariant = this.product.variants.find(v => v.quantity > 0) || this.product.variants[0];
                     }
                     this.quantity = 1;
+                    this.currentImageIndex = 0;
                 },
                 error: (err) => {
                     console.error('Error loading product:', err);
@@ -87,40 +87,32 @@ export class DetailProductComponent implements OnInit {
         }
     }
 
-    // --- SỬA HÀM addToCart để dùng CartService ---
+    // --- Logic Giỏ hàng (Cart) ---
     addToCart(){
         if (!this.product) return;
 
-        // Xác định ID của variant cần thêm
         const variantToAddId = this.selectedVariant?.variantId;
 
-        // Nếu sản phẩm CÓ variant nhưng chưa chọn -> báo lỗi
         if (this.product.variants && this.product.variants.length > 0 && !variantToAddId) {
             alert('Vui lòng chọn phiên bản (màu sắc/kích thước).');
             return;
         }
 
-        // Nếu variant đã chọn hết hàng
         if (this.selectedVariant && this.selectedVariant.quantity < this.quantity) {
             alert('Số lượng tồn kho không đủ.');
             return;
         }
 
-        // Nếu không có variant (mảng rỗng), tạm thời báo lỗi (cần logic backend để thêm theo productId)
         if (!this.product.variants || this.product.variants.length === 0) {
             alert('Chức năng thêm sản phẩm không có biến thể chưa được hỗ trợ.');
-            // console.warn('Adding product without variant - requires backend logic for productId');
-            // this.cartService.addItem(this.product.id, this.quantity)... // Ví dụ (cần API hỗ trợ)
             return;
         }
 
-        // Nếu có variant và đã chọn hợp lệ
         if (variantToAddId) {
             console.log(`Adding to cart: Variant ID = ${variantToAddId}, Quantity = ${this.quantity}`);
             this.cartService.addItem(variantToAddId, this.quantity).subscribe({
                 next: () => {
                     alert('Đã thêm vào giỏ hàng!');
-                    // TODO: Cập nhật số lượng trên icon giỏ hàng (nếu cần)
                 },
                 error: (err) => {
                     console.error("Lỗi thêm vào giỏ:", err);
@@ -130,11 +122,9 @@ export class DetailProductComponent implements OnInit {
         }
     }
 
-    // Hàm mua ngay (thêm vào giỏ rồi chuyển trang checkout)
     buyNow(){
         if (!this.product) return;
 
-        // Logic kiểm tra variant và số lượng tương tự addToCart
         const variantToAddId = this.selectedVariant?.variantId;
         if (this.product.variants && this.product.variants.length > 0 && !variantToAddId) {
             alert('Vui lòng chọn phiên bản (màu sắc/kích thước).');
@@ -163,6 +153,29 @@ export class DetailProductComponent implements OnInit {
     }
 
     goBack(){
-        this.router.navigate(['/products']);
+        this.router.navigate(['/home']);
+    }
+
+    // --- HÀM MỚI: Logic chuyển ảnh ---
+
+    /**
+     * Chuyển đến ảnh tiếp theo.
+     * Nếu đang ở ảnh cuối, quay lại ảnh đầu tiên.
+     */
+    nextImage(): void {
+        if (this.product && this.product.imageUrls && this.product.imageUrls.length > 0) {
+            this.currentImageIndex = (this.currentImageIndex + 1) % this.product.imageUrls.length;
+        }
+    }
+
+    /**
+     * Quay lại ảnh trước đó.
+     * Nếu đang ở ảnh đầu, chuyển đến ảnh cuối cùng.
+     */
+    prevImage(): void {
+        if (this.product && this.product.imageUrls && this.product.imageUrls.length > 0) {
+            const totalImages = this.product.imageUrls.length;
+            this.currentImageIndex = (this.currentImageIndex - 1 + totalImages) % totalImages;
+        }
     }
 }

@@ -66,8 +66,17 @@
         </div>
 
         <div #catalogGrid class="card-grid" *ngIf="!loading"> <article class="card" *ngFor="let p of products; trackBy: trackById">
-            <a class="card__media"
-               [routerLink]="['/product', p.id]" [ngStyle]="bgImg(p.image)"        aria-label="{{ p.name }}">       </a>
+            <a class="card__media" [routerLink]="['/product', p.id]" aria-label="{{ p.name }}">
+                <img *ngIf="p.imageUrls && p.imageUrls.length > 0; else noImageList"
+                     [src]="p.imageUrls[0]"
+                     [alt]="p.name"
+                     class="card__img">
+                <ng-template #noImageList>
+                    <img src="https://placehold.co/300x300/eee/ccc?text=No+Image"
+                         [alt]="p.name"
+                         class="card__img">
+                </ng-template>
+            </a>
 
             <div class="card__body">
                 <h3 class="card__title">

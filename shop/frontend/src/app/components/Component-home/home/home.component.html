@@ -50,8 +50,6 @@
                         loading="lazy"
                         decoding="async"
                 />
-                <!-- (tuỳ chọn) thêm ảnh thứ 3 để đủ bộ 3 -->
-                <!-- <img src="assets/Phone/Iphone2.jpg" alt="Flagship phone" loading="lazy" decoding="async" /> -->
             </div>
         </div>
     </section>
@@ -61,64 +59,51 @@
         <div class="container selected__inner">
             <p class="eyebrow eyebrow--gold">Dòng sản phẩm nổi bật</p>
             <h2 class="section-title">ĐIỆN THOẠI<br />ĐƯỢC CHỌN LỌC</h2>
+            <div *ngIf="phonesLoading" class="loading-indicator" aria-live="polite">
+                Đang tải sản phẩm điện thoại...
+            </div>
+            <div *ngIf="!phonesLoading && phoneProducts.length === 0" class="no-products">
+                Không có sản phẩm trong mục này.
+            </div>
+            <div class="card-grid" *ngIf="!phonesLoading && phoneProducts.length > 0">
+                <article class="card" *ngFor="let p of phoneProducts; trackBy: trackById">
 
-            <!-- #heroGrid: TS ước lượng cột -> heroPageSize -->
-            <div #heroGrid class="card-grid">
-                <article class="card" *ngFor="let p of heroPaged; trackBy: trackById">
-                    <a
-                            class="card__media"
-                            [style.background-image]="'url(' + p.image + ')'"
-                            [attr.aria-label]="p.name"
-                            [routerLink]="['/product', p.id]"
-                    ></a>
+                    <a class="card__media" [routerLink]="['/product', p.id]" aria-label="{{ p.name }}">
+                        <!-- Logic ảnh giữ nguyên, đổi tên #noHomeImage -> #noPhoneImg -->
+                        <img *ngIf="p.imageUrls && p.imageUrls.length > 0; else noPhoneImg"
+                             [src]="p.imageUrls[0]"
+                             [alt]="p.name"
+                             class="card__img">
+                        <ng-template #noPhoneImg>
+                            <img src="https://placehold.co/300x300/eee/ccc?text=No+Image"
+                                 [alt]="p.name"
+                                 class="card__img">
+                        </ng-template>
+                    </a>
 
                     <div class="card__body">
+                        <span class="product-tag" *ngIf="p.categoryName">
+                            {{ p.categoryName }}
+                        </span>
                         <h3 class="card__title">
                             <a [routerLink]="['/product', p.id]">{{ p.name }}</a>
                         </h3>
-
-                        <div class="chip-row" *ngIf="p.tags?.length">
-                            <span class="chip" *ngFor="let t of p.tags">{{ t }}</span>
-                        </div>
-
-                        <p class="price">Từ {{ p.price | number:'1.0-0' }}đ</p>
+                        <p class="product-price">
+                            {{ p.price | currency:'VND':'symbol':'1.0-0' }}
+                        </p>
                     </div>
-
-                    <button
-                            class="btn btn--block"
-                            type="button"
-                            (click)="add(p)"
-                            [attr.aria-label]="'Thêm ' + p.name + ' vào giỏ hàng'"
-                    >
-                        THÊM VÀO GIỎ
-                    </button>
                 </article>
             </div>
 
-            <!-- PHẦN PAGER + NÚT XEM THÊM -->
+            <!--
+              CẬP NHẬT: Xóa Pager (heroPrev/heroNext)
+              Cập nhật link "Xem tất cả" để trỏ đúng danh mục
+            -->
             <div class="section-cta">
-                <nav class="pager" role="navigation" aria-label="Phân trang sản phẩm nổi bật">
-                    <button
-                            class="pager__btn"
-                            type="button"
-                            (click)="heroPrev()"
-                            [disabled]="heroPage === 1"
-                            [attr.aria-disabled]="heroPage === 1"
-                    >←</button>
-
-                    <span class="pager__info">Trang {{ heroPage }} / {{ heroTotalPages }}</span>
-
-                    <button
-                            class="pager__btn"
-                            type="button"
-                            (click)="heroNext()"
-                            [disabled]="heroPage === heroTotalPages"
-                            [attr.aria-disabled]="heroPage === heroTotalPages"
-                    >→</button>
-                </nav>
-
-                <a class="btn btn--black view-all" [routerLink]="['/products']">
-                    XEM TOÀN BỘ SẢN PHẨM
+                <a class="btn btn--black view-all"
+                   [routerLink]="['/products']"
+                   [queryParams]="{ category: 'Điện thoại' }">
+                    XEM TOÀN BỘ ĐIỆN THOẠI
                 </a>
             </div>
         </div>
@@ -162,63 +147,90 @@
         </div>
     </section>
 
+    <section class="selected section-pad" style="padding-top: 0;">
+        <div class="container">
+            <div *ngIf="laptopsLoading" class="loading-indicator" aria-live="polite">
+                Đang tải sản phẩm laptop...
+            </div>
+            <div *ngIf="!laptopsLoading && laptopProducts.length === 0" class="no-products">
+                Không có sản phẩm trong mục này.
+            </div>
+            <div class="card-grid" *ngIf="!laptopsLoading && laptopProducts.length > 0">
+                <article class="card" *ngFor="let p of laptopProducts; trackBy: trackById">
+
+                    <a class="card__media" [routerLink]="['/product', p.id]" aria-label="{{ p.name }}">
+                        <img *ngIf="p.imageUrls && p.imageUrls.length > 0; else noLaptopImg"
+                             [src]="p.imageUrls[0]"
+                             [alt]="p.name"
+                             class="card__img">
+                        <ng-template #noLaptopImg>
+                            <img src="https://placehold.co/300x300/eee/ccc?text=No+Image"
+                                 [alt]="p.name"
+                                 class="card__img">
+                        </ng-template>
+                    </a>
+
+                    <div class="card__body">
+                        <span class="product-tag" *ngIf="p.categoryName">
+                            {{ p.categoryName }}
+                        </span>
+                        <h3 class="card__title">
+                            <a [routerLink]="['/product', p.id]">{{ p.name }}</a>
+                        </h3>
+                        <p class="product-price">
+                            {{ p.price | currency:'VND':'symbol':'1.0-0' }}
+                        </p>
+                    </div>
+                </article>
+            </div>
+        </div>
+    </section>
+
     <!-- PHỤ KIỆN -->
     <section class="journal section-pad accessories">
         <div class="container">
             <p class="eyebrow eyebrow--gold">Sản phẩm kèm theo</p>
             <h2 class="section-title">PHỤ KIỆN</h2>
+            <div *ngIf="accessoriesLoading" class="loading-indicator" aria-live="polite">
+                Đang tải sản phẩm phụ kiện...
+            </div>
+            <div *ngIf="!accessoriesLoading && accessoryProducts.length === 0" class="no-products">
+                Không có sản phẩm trong mục này.
+            </div>
+            <div class="card-grid" *ngIf="!accessoriesLoading && accessoryProducts.length > 0">
+                <article class="card" *ngFor="let p of accessoryProducts; trackBy: trackById">
 
-            <!-- #catalogGrid: TS ước lượng cột -> pageSize -->
-            <div #catalogGrid class="journal-grid">
-                <article class="story" *ngFor="let it of paged; trackBy: trackById">
-                    <a
-                            class="story__media"
-                            [style.background-image]="'url(' + it.image + ')'"
-                            href="#"
-                            [attr.aria-label]="it.name">
+                    <a class="card__media" [routerLink]="['/product', p.id]" aria-label="{{ p.name }}">
+                        <!-- Dùng logic ảnh giống các mục trên -->
+                        <img *ngIf="p.imageUrls && p.imageUrls.length > 0; else noAccessoryImg"
+                             [src]="p.imageUrls[0]"
+                             [alt]="p.name"
+                             class="card__img">
+                        <ng-template #noAccessoryImg>
+                            <img src="https://placehold.co/300x300/eee/ccc?text=No+Image"
+                                 [alt]="p.name"
+                                 class="card__img">
+                        </ng-template>
                     </a>
-
-                    <div class="story__body">
-                        <h3 class="story__title">{{ it.name }}</h3>
-                        <p class="story__meta">
-                            {{ it.price | number:'1.0-0' }}đ — {{ it.tags[0] || 'Accessory' }}
+                    <div class="card__body">
+                        <span class="product-tag" *ngIf="p.categoryName">
+                            {{ p.categoryName }}
+                        </span>
+                        <h3 class="card__title">
+                            <a [routerLink]="['/product', p.id]">{{ p.name }}</a>
+                        </h3>
+                        <p class="product-price">
+                            {{ p.price | currency:'VND':'symbol':'1.0-0' }}
                         </p>
                     </div>
-
-                    <!-- Nút thêm vào giỏ cho phụ kiện -->
-                    <button
-                            class="btn btn--block story__btn"
-                            type="button"
-                            (click)="add(it)"
-                            [attr.aria-label]="'Thêm ' + it.name + ' vào giỏ hàng'">
-                        THÊM VÀO GIỎ
-                    </button>
                 </article>
             </div>
-
-            <!-- PAGER + NÚT XEM THÊM PHỤ KIỆN -->
             <div class="section-cta">
-                <nav class="pager" role="navigation" aria-label="Phân trang phụ kiện">
-                    <button
-                            class="pager__btn"
-                            type="button"
-                            (click)="prevPage()"
-                            [disabled]="page === 1"
-                            [attr.aria-disabled]="page === 1"
-                    >←</button>
-
-                    <span class="pager__info">Trang {{ page }} / {{ totalPages }}</span>
-
-                    <button
-                            class="pager__btn"
-                            type="button"
-                            (click)="nextPage()"
-                            [disabled]="page === totalPages"
-                            [attr.aria-disabled]="page === totalPages"
-                    >→</button>
-                </nav>
-
-                <a class="btn btn--black view-all" routerLink="/products">XEM THÊM</a>
+                <a class="btn btn--black view-all"
+                   [routerLink]="['/products']"
+                   [queryParams]="{ category: 'Phụ kiện' }">
+                    XEM THÊM PHỤ KIỆN
+                </a>
             </div>
         </div>
     </section>

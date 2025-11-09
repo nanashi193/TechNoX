@@ -21,18 +21,17 @@ public class CustomerProductController {
 
     @GetMapping("")
     public ResponseEntity<Page<CustomerProductDTO>> getProductsForCustomer(
-            // Tham số page (0-based) và size từ frontend
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "12") int size
-            // (Thêm các @RequestParam khác cho lọc, tìm kiếm nếu cần)
+            @RequestParam(defaultValue = "12") int size,
+            @RequestParam(name = "categoryName", required = false) String categoryName,
+            @RequestParam(name = "search", required = false) String searchTerm
     ) {
-        // Tạo đối tượng Pageable cho Service
         Pageable pageable = PageRequest.of(page, size);
-
-        // Gọi Service
-        Page<CustomerProductDTO> productPage = productService.getProductsForCustomer(pageable);
-
-        // Trả về Page object (Spring Boot tự chuyển thành JSON)
+        Page<CustomerProductDTO> productPage = productService.getProductsForCustomer(
+                pageable,
+                categoryName,
+                searchTerm
+        );
         return ResponseEntity.ok(productPage);
     }
 

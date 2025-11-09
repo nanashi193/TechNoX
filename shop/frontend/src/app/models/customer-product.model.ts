@@ -13,6 +13,7 @@ export interface CustomerProduct {
     name: string;
     price: number;       // Giá gốc / giá hiển thị chính
     image: string;       // URL ảnh chính
+    imageUrls: string[];
     description: string;
     categoryName: string;
     inStock: boolean;    // Còn hàng hay không (tổng thể)
