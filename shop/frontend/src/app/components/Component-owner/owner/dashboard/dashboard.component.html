@@ -24,16 +24,27 @@
             <owner-date-range (changed)="onRangeChanged($event)"></owner-date-range>
         </div>
 
-        <div class="chart-wrap">
-            <div class="card-body" style="height: 320px">
-                <canvas
-                        baseChart
-                        [type]="'bar'"
-                        [data]="barData"
-                        [options]="barOpts">
-                </canvas>
+        <div class="grid-2" style="gap: 14px; margin-bottom: 20px;">
+            <!-- Chart 1: Revenue -->
+            <div class="card">
+                <h3>Doanh thu</h3>
+                <div style="height: 200px">
+                    <canvas baseChart [type]="'line'" [data]="revenueChartData" [options]="revenueOpts"></canvas>
+                </div>
+            </div>
+
+            <!-- Chart 2: Orders -->
+            <div class="card">
+                <h3>Đơn hàng</h3>
+                <div style="height: 200px">
+                    <canvas baseChart [type]="'bar'" [data]="ordersChartData" [options]="ordersOpts"></canvas>
+                </div>
             </div>
         </div>
+
+    </div>
+
+    <div class="right-column">
         <!-- Summary card -->
         <div class="card summary">
             <div class="metric">
@@ -68,20 +79,22 @@
                 </ng-template>
             </div>
         </div>
-    </div>
 
-    <div class="card orders">
-        <h3>Trạng thái đơn hàng</h3>
-        <ul>
-            <li *ngFor="let s of orderStats"
-                (click)="navigateToOrderList(s.status)"
-                style="cursor: pointer">
-                <span>{{ s.label }}</span>
-                <b>{{ s.value }}</b>
-            </li>
-        </ul>
+        <!-- Orders card -->
+        <div class="card orders">
+            <h3>Trạng thái đơn hàng</h3>
+            <ul>
+                <li *ngFor="let s of orderStats"
+                    (click)="navigateToOrderList(s.status)"
+                    style="cursor: pointer">
+                    <span>{{ s.label }}</span>
+                    <b>{{ s.value }}</b>
+                </li>
+            </ul>
+        </div>
     </div>
 </section>
+
 
 <section class="grid-2-1">
     <app-top-products [items]="topProducts"></app-top-products>
