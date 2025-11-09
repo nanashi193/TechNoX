@@ -20,11 +20,21 @@
 <section class="charts-2col">
     <div class="card chart">
         <div class="card-header">
-            <h3>Doanh thu của TechNoX </h3>
+            <h3>Doanh thu của TechNoX</h3>
             <owner-date-range (changed)="onRangeChanged($event)"></owner-date-range>
         </div>
 
-        <div class="grid-2" style="gap: 14px; margin-bottom: 20px;">
+        <!-- Loading spinner khi đang tải -->
+        <div *ngIf="loading" class="dashboard-loading">
+            <dotlottie-wc
+                    src="https://lottie.host/1aec0949-7143-49da-8ab3-dc606ec6abe2/o0OsDmy0Yh.lottie"
+                    style="width: 80px; height: 80px"
+                    autoplay loop>
+            </dotlottie-wc>
+        </div>
+
+        <!-- Charts khi không loading -->
+        <div *ngIf="!loading" class="grid-2" style="gap: 14px; margin-bottom: 20px;">
             <!-- Chart 1: Revenue -->
             <div class="card">
                 <h3>Doanh thu</h3>
@@ -41,7 +51,6 @@
                 </div>
             </div>
         </div>
-
     </div>
 
     <div class="right-column">

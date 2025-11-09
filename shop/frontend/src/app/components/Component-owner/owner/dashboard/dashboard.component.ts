@@ -1,4 +1,4 @@
-import {Component, OnInit, ViewChild} from '@angular/core';
+import {Component, CUSTOM_ELEMENTS_SCHEMA, OnInit, ViewChild} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {DashboardService} from "../../../../services/dashboard.service";
 import {Kpi, TopProduct, NewProduct, OrderStat, RevenueQuery} from "../../../../models/dashboard.models";
@@ -22,7 +22,8 @@ type RangeTotals = { revenue: number; orders: number };
     standalone: true,
     imports: [CommonModule, TopProductsComponent, NewProductsComponent, BaseChartDirective, RouterLink, OwnerDateRangeComponent],
     templateUrl: './dashboard.component.html',
-    styleUrls: ['./dashboard.component.css', '../../owner/owner-shared.css']
+    styleUrls: ['./dashboard.component.css', '../../owner/owner-shared.css'],
+    schemas: [CUSTOM_ELEMENTS_SCHEMA]
 })
 export class DashboardComponent implements OnInit {
     @ViewChild(BaseChartDirective) chart?: BaseChartDirective;
@@ -31,9 +32,10 @@ export class DashboardComponent implements OnInit {
     orderStats: OrderStat[] = [];
     topProducts: TopProduct[] = [];
     newProducts: NewProduct[] = [];
+    loading: boolean = false;
 
     // mặc định là hôm nay; có thể đổi sang 7 ngày gần nhất nếu muốn
-    range: DateRange = {start: new Date(), end: new Date()};
+    range: DateRange = new OwnerDateRangeComponent().lastNDays(3);
 
     /** DATA cho cột */
     revenueChartData: ChartConfiguration<'line'>['data'] = {
@@ -165,6 +167,7 @@ export class DashboardComponent implements OnInit {
     /** ---- LOAD DỮ LIỆU TỪ BE ---- */
     private reload() {
         const token = ++this.loadToken;
+        this.loading = true;
 
         const qNow: RevenueQuery = {
             from: this.dateOnlyLocal(this.range.start),
@@ -192,7 +195,6 @@ export class DashboardComponent implements OnInit {
                 revNow.points.map(p => ({date: p.date, revenue: p.revenue})),        // RevPoint
                 (ordNow.points ?? []).map(p => ({date: p.date, orders: p.orders}))    // OrdPoint
             );
-
             this.renderBars(rowsNow);
 
             // totals cho cards
@@ -214,7 +216,8 @@ export class DashboardComponent implements OnInit {
 
             this.deltaRev = this.calcDelta(this.totalsNow.revenue, this.totalsPrev.revenue);
             this.deltaOrd = this.calcDelta(this.totalsNow.orders, this.totalsPrev.orders);
-
+            this.loading = false;
+            this.chart?.update();
         });
 
         this.ds.getOrderStats(qNow)
@@ -238,39 +241,33 @@ export class DashboardComponent implements OnInit {
         }
         return Array.from(m.values()).sort((a, b) => a.date.localeCompare(b.date));
     }
+    private renderBars(rows: RowPoint[], isHourly: boolean = false): void {
+        // Giả sử bạn có this.range start/end
+        console.log('renderBars input:', rows);
 
-    private renderBars(rows: RowPoint[]): void {
-        // Nếu chỉ có 1 data point, thêm 6 ngày trước đó
-        if (rows.length === 1) {
-            const currentDate = new Date(rows[0].date);
-            const extendedRows: RowPoint[] = [];
+        const daysBetween = Math.floor((this.range.end.getTime() - this.range.start.getTime()) / (1000 * 3600 * 24)) + 1;
 
-            for (let i = 6; i >= 0; i--) {
-                const date = new Date(currentDate);
-                date.setDate(date.getDate() - i);
-
-                extendedRows.push({
-                    date: date.toISOString().split('T')[0],
-                    revenue: i === 0 ? rows[0].revenue : 0,
-                    orders: i === 0 ? rows[0].orders : 0
-                });
-            }
-            rows = extendedRows;
+        // Nếu range < số ngày data thì cắt bớt cho đúng
+        if (daysBetween > 0 && rows.length > daysBetween) {
+            rows = rows.slice(rows.length - daysBetween);
         }
 
-        this.revenueChartData.labels = rows.map(p =>
-            new Date(p.date).toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit' })
-        );
-        this.ordersChartData.labels = rows.map(p =>
-            new Date(p.date).toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit' })
-        );
+        this.revenueChartData.labels = rows.map(p => {
+            if (isHourly) {
+                const date = new Date(p.date);
+                return date.getHours() + 'h';
+            }
+            return new Date(p.date).toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit' });
+        });
+
+        this.ordersChartData.labels = this.revenueChartData.labels;
 
         this.revenueChartData.datasets[0].data = rows.map(p => p.revenue);
         this.ordersChartData.datasets[0].data = rows.map(p => p.orders);
-        console.log('labels:', this.ordersChartData.labels);
-        console.log('orders data:', this.ordersChartData.datasets[0].data);
+        console.log('labels:', rows.map(p => new Date(p.date).toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit' })));
 
     }
+
 
 
     /** Tránh lệch timezone khi gửi lên BE */

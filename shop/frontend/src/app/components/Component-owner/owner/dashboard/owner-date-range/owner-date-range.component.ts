@@ -15,10 +15,10 @@ export class OwnerDateRangeComponent {
     @Output() changed = new EventEmitter<DateRange>();
 
     open = false;
-    active = 'today';
+    active = 'last3';
     showCustom = false;
 
-    range: DateRange = this.today();
+    range: DateRange = this.lastNDays(3);
     customStart = this.toInput(this.range.start);
     customEnd = this.toInput(this.range.end);
 
@@ -49,12 +49,9 @@ export class OwnerDateRangeComponent {
         if (id === 'custom') return;
 
         const map: Record<string, () => DateRange> = {
-            today: this.today.bind(this),
-            yesterday: this.yesterday.bind(this),
+            last3: () => this.lastNDays(3),
             last7: () => this.lastNDays(7),
             last30: () => this.lastNDays(30),
-            thisMonth: this.thisMonth.bind(this),
-            lastMonth: this.lastMonth.bind(this)
         };
         this.range = map[id]();
         this.syncInputs();
@@ -70,6 +67,7 @@ export class OwnerDateRangeComponent {
 
     // helpers
     private emitClose() {
+        console.log('Emitting range:', this.range);
         this.changed.emit(this.range);
         this.open = false;
     }
@@ -91,32 +89,10 @@ export class OwnerDateRangeComponent {
         return x;
     }
 
-    private today(): DateRange {
-        const t = this.atStart(new Date());
-        return {start: t, end: this.atEnd(t)};
-    }
 
-    private yesterday(): DateRange {
-        const y = this.atStart(new Date(Date.now() - 86400000));
-        return {start: y, end: this.atEnd(y)};
-    }
-
-    private lastNDays(n: number): DateRange {
+     lastNDays(n: number): DateRange {
         const end = this.atEnd(new Date());
         const start = this.atStart(new Date(end.getTime() - (n - 1) * 86400000));
-        return {start, end};
-    }
-
-    private thisMonth(): DateRange {
-        const now = new Date();
-        const start = this.atStart(new Date(now.getFullYear(), now.getMonth(), 1));
-        return {start, end: this.atEnd(new Date())};
-    }
-
-    private lastMonth(): DateRange {
-        const now = new Date();
-        const start = this.atStart(new Date(now.getFullYear(), now.getMonth() - 1, 1));
-        const end = this.atEnd(new Date(now.getFullYear(), now.getMonth(), 0));
         return {start, end};
     }
 
@@ -130,7 +106,4 @@ export class OwnerDateRangeComponent {
         if (isNaN(+x)) return '—';
         return x.toLocaleDateString('vi-VN', { day:'2-digit', month:'short', year:'numeric' });
     }
-
-
-
 }
