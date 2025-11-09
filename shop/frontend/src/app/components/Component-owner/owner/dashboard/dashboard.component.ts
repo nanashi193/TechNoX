@@ -67,10 +67,10 @@ export class DashboardComponent implements OnInit {
         responsive: true,
         maintainAspectRatio: false,
         plugins: {
-            legend: { display: false }
+            legend: {display: false}
         },
         scales: {
-            x: { grid: { display: false } },
+            x: {grid: {display: false}},
             y: {
                 beginAtZero: true,
                 ticks: {
@@ -84,7 +84,7 @@ export class DashboardComponent implements OnInit {
         responsive: true,
         maintainAspectRatio: false,
         plugins: {
-            legend: { display: false },
+            legend: {display: false},
             tooltip: {
                 callbacks: {
                     title: (items) => items?.[0]?.label ? `Ngày ${items[0].label}` : '',
@@ -93,10 +93,10 @@ export class DashboardComponent implements OnInit {
             }
         },
         scales: {
-            x: { grid: { display: false }},
+            x: {grid: {display: false}},
             y: {
                 beginAtZero: true,
-                ticks: { stepSize: 1, precision: 0 }
+                ticks: {stepSize: 1, precision: 0}
             }
         }
     };
@@ -213,11 +213,13 @@ export class DashboardComponent implements OnInit {
                 revenue: revPrev.totals?.revenue ?? this.sumRevenue(rowsPrev),
                 orders: (ordPrev.points ?? []).reduce((s, p) => s + (p.orders || 0), 0)
             };
+            setTimeout(() => {
+                this.deltaRev = this.calcDelta(this.totalsNow.revenue, this.totalsPrev.revenue);
+                this.deltaOrd = this.calcDelta(this.totalsNow.orders, this.totalsPrev.orders);
+                this.loading = false;
+                this.chart?.update();
+            }, 1200);
 
-            this.deltaRev = this.calcDelta(this.totalsNow.revenue, this.totalsPrev.revenue);
-            this.deltaOrd = this.calcDelta(this.totalsNow.orders, this.totalsPrev.orders);
-            this.loading = false;
-            this.chart?.update();
         });
 
         this.ds.getOrderStats(qNow)
@@ -241,6 +243,7 @@ export class DashboardComponent implements OnInit {
         }
         return Array.from(m.values()).sort((a, b) => a.date.localeCompare(b.date));
     }
+
     private renderBars(rows: RowPoint[], isHourly: boolean = false): void {
         // Giả sử bạn có this.range start/end
         console.log('renderBars input:', rows);
@@ -257,17 +260,19 @@ export class DashboardComponent implements OnInit {
                 const date = new Date(p.date);
                 return date.getHours() + 'h';
             }
-            return new Date(p.date).toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit' });
+            return new Date(p.date).toLocaleDateString('vi-VN', {day: '2-digit', month: '2-digit'});
         });
 
         this.ordersChartData.labels = this.revenueChartData.labels;
 
         this.revenueChartData.datasets[0].data = rows.map(p => p.revenue);
         this.ordersChartData.datasets[0].data = rows.map(p => p.orders);
-        console.log('labels:', rows.map(p => new Date(p.date).toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit' })));
+        console.log('labels:', rows.map(p => new Date(p.date).toLocaleDateString('vi-VN', {
+            day: '2-digit',
+            month: '2-digit'
+        })));
 
     }
-
 
 
     /** Tránh lệch timezone khi gửi lên BE */
