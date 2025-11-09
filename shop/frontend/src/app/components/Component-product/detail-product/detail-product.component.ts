@@ -39,11 +39,13 @@ export class DetailProductComponent implements OnInit {
             } else {
                 console.error('Invalid product ID in URL');
                 this.loading = false;
+                alert('Liên kết sản phẩm không hợp lệ.');
                 this.router.navigate(['/products']);
             }
         } else {
             console.error('No product ID found in URL');
             this.loading = false;
+            alert('Không tìm thấy sản phẩm.');
             this.router.navigate(['/products']);
         }
     }
@@ -63,7 +65,6 @@ export class DetailProductComponent implements OnInit {
                             this.product!.variants.some(v => v.color === color && v.quantity > 0)
                         );
                         this.onColorSelect(firstAvailableColor || this.uniqueColors[0]);
-
                     } else {
                         this.resetSelections();
                     }
@@ -72,9 +73,11 @@ export class DetailProductComponent implements OnInit {
                     console.error('Error loading product:', err);
                     this.product = null;
                     this.resetSelections();
+                    alert(err?.error?.message || 'Không tải được thông tin sản phẩm. Vui lòng thử lại.');
                 }
             });
     }
+
     resetSelections(): void {
         this.selectedColor = null;
         this.selectedSize = null;
@@ -82,25 +85,32 @@ export class DetailProductComponent implements OnInit {
         this.uniqueColors = [];
         this.sizesForSelectedColor = [];
     }
+
     updateColorOptions(): void {
         if (!this.product?.variants) return;
-
         const colors = this.product.variants
             .map(v => v.color)
             .filter((color): color is string => color != null);
-
         this.uniqueColors = [...new Set(colors)];
     }
 
     onColorSelect(color: string): void {
         if (this.selectedColor === color) return;
         this.selectedColor = color;
+
         const sizes = this.product!.variants
             .filter(v => v.color === color)
             .map(v => v.size)
             .filter((size): size is string => size != null);
 
-        this.sizesForSelectedColor = [...new Set(sizes)]; // OK
+        this.sizesForSelectedColor = [...new Set(sizes)];
+
+        // Alert nếu màu được chọn không còn size nào còn hàng
+        const hasStockForColor = this.product!.variants.some(v => v.color === color && v.quantity > 0);
+        if (!hasStockForColor) {
+            alert('Màu này hiện đã hết hàng.');
+        }
+
         const firstAvailableSize = this.sizesForSelectedColor.find(size =>
             this.product!.variants.some(v => v.color === color && v.size === size && v.quantity > 0)
         );
@@ -110,13 +120,18 @@ export class DetailProductComponent implements OnInit {
     onSizeSelect(size: string): void {
         this.selectedSize = size;
         this.updateSelectedVariant();
+
+        // Alert nếu biến thể (màu+size) hết hàng
+        if (this.selectedVariant && this.selectedVariant.quantity <= 0) {
+            alert('Kích thước này hiện đã hết hàng.');
+        }
     }
+
     updateSelectedVariant(): void {
         if (!this.product || !this.selectedColor || !this.selectedSize) {
             this.selectedVariant = null;
             return;
         }
-
         this.selectedVariant = this.product.variants.find(v =>
             v.color === this.selectedColor && v.size === this.selectedSize
         ) || null;
@@ -127,21 +142,20 @@ export class DetailProductComponent implements OnInit {
         if (variant.quantity > 0) {
             this.selectedVariant = variant;
             this.quantity = 1;
+        } else {
+            alert('Biến thể này hiện đã hết hàng.');
         }
     }
+
     isColorOutOfStock(color: string): boolean {
-        if (!this.product?.variants) {
-            return true; // Nếu không có variant, coi như hết hàng
-        }
+        if (!this.product?.variants) return true;
         return !this.product.variants.some(v => v.color === color && v.quantity > 0);
     }
+
     isSizeOutOfStock(size: string): boolean {
-        if (!this.product?.variants || !this.selectedColor) {
-            return true; // Nếu chưa chọn màu, coi như hết
-        }
+        if (!this.product?.variants || !this.selectedColor) return true;
         const variant = this.product.variants.find(v =>
-            v.color === this.selectedColor &&
-            v.size === size
+            v.color === this.selectedColor && v.size === size
         );
         return !variant || variant.quantity <= 0;
     }
@@ -153,17 +167,20 @@ export class DetailProductComponent implements OnInit {
     }
 
     // --- Actions ---
-    decQty(){ if (this.quantity > 1) this.quantity--; }
-    incQty(){
+    decQty() { if (this.quantity > 1) this.quantity--; }
+
+    incQty() {
         // Giới hạn số lượng tối đa theo variant đang chọn (nếu có)
         const maxQty = this.selectedVariant?.quantity;
         if (maxQty === undefined || this.quantity < maxQty) {
             this.quantity++;
+        } else {
+            alert(`Tối đa ${maxQty} sản phẩm cho biến thể này.`);
         }
     }
 
     // --- Logic Giỏ hàng (Cart) ---
-    addToCart(){
+    addToCart() {
         if (!this.product) return;
 
         const variantToAddId = this.selectedVariant?.variantId;
@@ -197,7 +214,7 @@ export class DetailProductComponent implements OnInit {
         }
     }
 
-    buyNow(){
+    buyNow() {
         if (!this.product) return;
 
         const variantToAddId = this.selectedVariant?.variantId;
@@ -217,6 +234,7 @@ export class DetailProductComponent implements OnInit {
         if (variantToAddId) {
             this.cartService.addItem(variantToAddId, this.quantity).subscribe({
                 next: () => {
+                    alert('Đã thêm vào giỏ hàng! Chuyển sang thanh toán.');
                     this.router.navigate(['/payment-detail']);
                 },
                 error: (err) => {
@@ -227,26 +245,19 @@ export class DetailProductComponent implements OnInit {
         }
     }
 
-    goBack(){
+    goBack() {
         this.router.navigate(['/home']);
     }
 
     // --- HÀM MỚI: Logic chuyển ảnh ---
-
-    /**
-     * Chuyển đến ảnh tiếp theo.
-     * Nếu đang ở ảnh cuối, quay lại ảnh đầu tiên.
-     */
+    /** Chuyển đến ảnh tiếp theo. Nếu đang ở ảnh cuối, quay lại ảnh đầu tiên. */
     nextImage(): void {
         if (this.product && this.product.imageUrls && this.product.imageUrls.length > 0) {
             this.currentImageIndex = (this.currentImageIndex + 1) % this.product.imageUrls.length;
         }
     }
 
-    /**
-     * Quay lại ảnh trước đó.
-     * Nếu đang ở ảnh đầu, chuyển đến ảnh cuối cùng.
-     */
+    /** Quay lại ảnh trước đó. Nếu đang ở ảnh đầu, chuyển đến ảnh cuối cùng. */
     prevImage(): void {
         if (this.product && this.product.imageUrls && this.product.imageUrls.length > 0) {
             const totalImages = this.product.imageUrls.length;
