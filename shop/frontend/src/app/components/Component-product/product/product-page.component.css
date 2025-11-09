@@ -313,4 +313,28 @@ a:focus-visible, button:focus-visible, .btn:focus-visible {
     width: 100%;
     height: 100%;
     object-fit: cover;
+}.filter-grid {
+     display: grid;
+     grid-template-columns: repeat(3, minmax(220px, 1fr));
+     gap: 16px 24px;
+     align-items: end;
+ }
+
+.field { display: grid; grid-template-rows: auto auto; }
+.field > label {
+    font-size: 0.9rem;
+    color: #666;
+    margin-bottom: 6px;
+    display: block;
+}
+.field .control {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #d7d7d7;
+    border-radius: 6px;
+    outline: none;
+}
+
+@media (max-width: 768px) {
+    .filter-grid { grid-template-columns: 1fr; }
 }
