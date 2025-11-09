@@ -15,4 +15,5 @@ public class BillDetailProductResponse {
     private String color;
     private int quantity;
     private BigDecimal unitPrice;
+    private String thumbnail;
 }

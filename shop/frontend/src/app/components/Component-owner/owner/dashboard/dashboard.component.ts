@@ -1,4 +1,4 @@
-import {Component, OnInit, ViewChild} from '@angular/core';
+import {Component, CUSTOM_ELEMENTS_SCHEMA, OnInit, ViewChild} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {DashboardService} from "../../../../services/dashboard.service";
 import {Kpi, TopProduct, NewProduct, OrderStat, RevenueQuery} from "../../../../models/dashboard.models";
@@ -22,7 +22,8 @@ type RangeTotals = { revenue: number; orders: number };
     standalone: true,
     imports: [CommonModule, TopProductsComponent, NewProductsComponent, BaseChartDirective, RouterLink, OwnerDateRangeComponent],
     templateUrl: './dashboard.component.html',
-    styleUrls: ['./dashboard.component.css', '../../owner/owner-shared.css']
+    styleUrls: ['./dashboard.component.css', '../../owner/owner-shared.css'],
+    schemas: [CUSTOM_ELEMENTS_SCHEMA]
 })
 export class DashboardComponent implements OnInit {
     @ViewChild(BaseChartDirective) chart?: BaseChartDirective;
@@ -31,72 +32,71 @@ export class DashboardComponent implements OnInit {
     orderStats: OrderStat[] = [];
     topProducts: TopProduct[] = [];
     newProducts: NewProduct[] = [];
+    loading: boolean = false;
 
     // mặc định là hôm nay; có thể đổi sang 7 ngày gần nhất nếu muốn
-    range: DateRange = {start: new Date(), end: new Date()};
+    range: DateRange = new OwnerDateRangeComponent().lastNDays(3);
 
     /** DATA cho cột */
-    barData: ChartConfiguration<'bar'>['data'] = {
+    revenueChartData: ChartConfiguration<'line'>['data'] = {
         labels: [],
-        datasets: [
-            {
-                label: 'Doanh thu',
-                yAxisID: 'yRevenue',
-                data: [],
-                backgroundColor: 'rgba(148, 163, 184, 0.45)', // xám nhạt (giống mẫu)
-                hoverBackgroundColor: 'rgba(148, 163, 184, 0.75)',
-                borderRadius: 6,
-                barPercentage: 0.9,
-                categoryPercentage: 0.6
-            },
-            {
-                label: 'Đơn hàng',
-                yAxisID: 'yOrders',
-                data: [],
-                backgroundColor: '#4f46e5',                  // xanh dương (giống mẫu)
-                hoverBackgroundColor: '#4338ca',
-                borderRadius: 6,
-                barPercentage: 0.9,
-                categoryPercentage: 0.6
-            }
-        ]
+        datasets: [{
+            label: 'Doanh thu',
+            data: [],
+            borderColor: '#94a3b8',
+            backgroundColor: 'rgba(148, 163, 184, 0.1)',
+            borderWidth: 2,
+            tension: 0.4,
+            fill: true
+        }]
     };
-    /** OPTIONS cho cột */
-    barOpts: ChartOptions<'bar'> = {
+
+    ordersChartData: ChartConfiguration<'bar'>['data'] = {
+        labels: [],
+        datasets: [{
+            label: 'Đơn hàng',
+            data: [],
+            backgroundColor: '#5046e5',
+            borderRadius: 6,
+            barPercentage: 0.8,
+            categoryPercentage: 0.7
+        }]
+    };
+
+    revenueOpts: ChartOptions<'line'> = {
         responsive: true,
         maintainAspectRatio: false,
         plugins: {
-            legend: {position: 'bottom', labels: {usePointStyle: true, pointStyle: 'circle'}},
+            legend: {display: false}
+        },
+        scales: {
+            x: {grid: {display: false}},
+            y: {
+                beginAtZero: true,
+                ticks: {
+                    callback: v => Number(v).toLocaleString('vi-VN') + ' ₫'
+                }
+            }
+        }
+    };
+
+    ordersOpts: ChartOptions<'bar'> = {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {display: false},
             tooltip: {
                 callbacks: {
                     title: (items) => items?.[0]?.label ? `Ngày ${items[0].label}` : '',
-                    label: (ctx) => {
-                        const v = Number(ctx.raw ?? 0);
-                        const axis = (ctx.dataset as any).yAxisID;
-                        if (axis === 'yRevenue') {
-                            return `Doanh thu: ${v.toLocaleString('vi-VN')} ₫`;
-                        }
-                        return `Đơn hàng: ${v.toLocaleString('vi-VN')}`;
-                    }
+                    label: (ctx) => `Đơn hàng: ${ctx.raw}`
                 }
             }
         },
         scales: {
-            x: {grid: {display: false}, ticks: {maxRotation: 0}},
-
-            yRevenue: {
-                type: 'linear',
-                position: 'left',
-                grid: {color: 'rgba(0,0,0,.06)'},
-                border: {display: false},
-                ticks: {callback: v => Number(v).toLocaleString('vi-VN') + ' ₫'}
-            },
-
-            yOrders: {
-                type: 'linear',
-                position: 'right',
-                grid: {drawOnChartArea: false},
-                ticks: {precision: 0} // số nguyên
+            x: {grid: {display: false}},
+            y: {
+                beginAtZero: true,
+                ticks: {stepSize: 1, precision: 0}
             }
         }
     };
@@ -167,6 +167,7 @@ export class DashboardComponent implements OnInit {
     /** ---- LOAD DỮ LIỆU TỪ BE ---- */
     private reload() {
         const token = ++this.loadToken;
+        this.loading = true;
 
         const qNow: RevenueQuery = {
             from: this.dateOnlyLocal(this.range.start),
@@ -194,7 +195,6 @@ export class DashboardComponent implements OnInit {
                 revNow.points.map(p => ({date: p.date, revenue: p.revenue})),        // RevPoint
                 (ordNow.points ?? []).map(p => ({date: p.date, orders: p.orders}))    // OrdPoint
             );
-
             this.renderBars(rowsNow);
 
             // totals cho cards
@@ -213,9 +213,12 @@ export class DashboardComponent implements OnInit {
                 revenue: revPrev.totals?.revenue ?? this.sumRevenue(rowsPrev),
                 orders: (ordPrev.points ?? []).reduce((s, p) => s + (p.orders || 0), 0)
             };
-
-            this.deltaRev = this.calcDelta(this.totalsNow.revenue, this.totalsPrev.revenue);
-            this.deltaOrd = this.calcDelta(this.totalsNow.orders, this.totalsPrev.orders);
+            setTimeout(() => {
+                this.deltaRev = this.calcDelta(this.totalsNow.revenue, this.totalsPrev.revenue);
+                this.deltaOrd = this.calcDelta(this.totalsNow.orders, this.totalsPrev.orders);
+                this.loading = false;
+                this.chart?.update();
+            }, 1200);
 
         });
 
@@ -241,15 +244,36 @@ export class DashboardComponent implements OnInit {
         return Array.from(m.values()).sort((a, b) => a.date.localeCompare(b.date));
     }
 
-    private renderBars(rows: RowPoint[]) {
-        this.barData.labels = rows.map(p =>
-                new Date(p.date).toLocaleDateString('vi-VN', {day: '2-digit', month: '2-digit'})
-            // Nếu bucket='hour': dùng { hour: 'numeric' } để hiện 1AM, 2AM...
-        );
-        this.barData.datasets[0].data = rows.map(p => p.revenue);
-        this.barData.datasets[1].data = rows.map(p => p.orders);
-        this.chart?.update();
+    private renderBars(rows: RowPoint[], isHourly: boolean = false): void {
+        // Giả sử bạn có this.range start/end
+        console.log('renderBars input:', rows);
+
+        const daysBetween = Math.floor((this.range.end.getTime() - this.range.start.getTime()) / (1000 * 3600 * 24)) + 1;
+
+        // Nếu range < số ngày data thì cắt bớt cho đúng
+        if (daysBetween > 0 && rows.length > daysBetween) {
+            rows = rows.slice(rows.length - daysBetween);
+        }
+
+        this.revenueChartData.labels = rows.map(p => {
+            if (isHourly) {
+                const date = new Date(p.date);
+                return date.getHours() + 'h';
+            }
+            return new Date(p.date).toLocaleDateString('vi-VN', {day: '2-digit', month: '2-digit'});
+        });
+
+        this.ordersChartData.labels = this.revenueChartData.labels;
+
+        this.revenueChartData.datasets[0].data = rows.map(p => p.revenue);
+        this.ordersChartData.datasets[0].data = rows.map(p => p.orders);
+        console.log('labels:', rows.map(p => new Date(p.date).toLocaleDateString('vi-VN', {
+            day: '2-digit',
+            month: '2-digit'
+        })));
+
     }
+
 
     /** Tránh lệch timezone khi gửi lên BE */
     private dateOnlyLocal(d: Date) {
