@@ -12,12 +12,9 @@
 </button>
 
 <div class="dr-menu" *ngIf="open" (click)="$event.stopPropagation()">
-    <button class="item" [class.active]="active==='today'" (click)="pick('today')">Hôm nay</button>
-    <button class="item" [class.active]="active==='yesterday'" (click)="pick('yesterday')">Hôm qua</button>
+    <button class="item" [class.active]="active==='last3'" (click)="pick('last3')">3 ngày qua</button>
     <button class="item" [class.active]="active==='last7'" (click)="pick('last7')">7 ngày qua</button>
     <button class="item" [class.active]="active==='last30'" (click)="pick('last30')">30 ngày qua</button>
-    <button class="item" [class.active]="active==='thisMonth'" (click)="pick('thisMonth')">Tháng này</button>
-    <button class="item" [class.active]="active==='lastMonth'" (click)="pick('lastMonth')">Tháng trước</button>
 
     <div class="divider"></div>
     <button class="item" [class.active]="active==='custom'" (click)="pick('custom')">Tùy chọn</button>
