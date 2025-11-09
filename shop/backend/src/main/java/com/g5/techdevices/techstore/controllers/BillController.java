@@ -22,6 +22,7 @@ import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
@@ -45,7 +46,8 @@ import java.util.concurrent.ConcurrentHashMap;
 @RequestMapping("${api.prefix}/bills")
 @RequiredArgsConstructor
 public class BillController {
-
+    @Value("${app.frontend.url}")
+    private String frontendUrl;
     private final BillService billService;
     private final PayOS payOS;               // bean từ PayOSConfig
     private final PayTransactionService payTransactionService;
@@ -81,8 +83,8 @@ public class BillController {
         payTransactionService.createPending(billId, total, orderCode);
 
         // 3. Tạo link PayOS
-        String returnUrl = "http://localhost:4200/payment/success?billId=" + billId;
-        String cancelUrl = "http://localhost:4200/payment/cancel?billId=" + billId;
+        String returnUrl = frontendUrl + "/payment/success?billId=" + billId;
+        String cancelUrl = frontendUrl + "/payment/cancel?billId=" + billId;
 
         CreatePaymentLinkRequest req = CreatePaymentLinkRequest.builder()
                 .orderCode(orderCode)
