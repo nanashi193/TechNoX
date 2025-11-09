@@ -7,6 +7,7 @@ import com.g5.techdevices.techstore.entity.staff.StaffInfo;
 import com.g5.techdevices.techstore.entity.users.User;
 import com.g5.techdevices.techstore.exceptions.DataNotFoundException;
 import com.g5.techdevices.techstore.exceptions.InvalidTokenException;
+import jakarta.mail.MessagingException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -29,7 +30,7 @@ public interface IUserService {
     UserDetailDTO getUserDetailsByEmail(String email);
     UserDetailDTO updateUserDetails(String email, UserDetailDTO userUpdateDTO) throws DataNotFoundException;
     void resetPassword(String token, String newPassword) throws DataNotFoundException, InvalidTokenException;
-    String createPasswordResetToken(String email) throws DataNotFoundException;
+    String createPasswordResetToken(String email) throws DataNotFoundException, MessagingException;
     Page<User> getAllUsersSortByRealName(boolean ascending, int page, int limit);
     List<StaffInfo> getStaffList();
 }

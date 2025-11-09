@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -29,6 +30,8 @@ public class WebSecurityConfig {
 
     @Value("${api.prefix}")
     private String apiPrefix; // ví dụ: /api/v1
+    @Value("${app.frontend.url}")
+    private String publicFrontendUrl;
 
     @Bean
     public SecurityFilterChain SecurityFilterChain(HttpSecurity http) throws Exception {
@@ -48,7 +51,7 @@ public class WebSecurityConfig {
                         .requestMatchers(GET, "/actuator/**").permitAll()
 
                         // Cho preflight
-                        .requestMatchers(OPTIONS, "/**").permitAll()
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 
                         // Auth public
                         .requestMatchers(POST, apiPrefix + "/users/register").permitAll()
@@ -94,6 +97,7 @@ public class WebSecurityConfig {
                         .requestMatchers(PUT, apiPrefix + "/bills/staff/complete/*").hasAnyRole(Role.STAFF)
                         .requestMatchers(PUT, apiPrefix + "/users/**").authenticated()
                         .requestMatchers(GET, apiPrefix + "/users").hasAnyRole(Role.ADMIN, Role.OWNER)
+                        .requestMatchers(GET, apiPrefix + "/users/staff").hasAnyRole(Role.ADMIN, Role.OWNER)
                         .requestMatchers(DELETE, apiPrefix + "/users/**").hasAnyRole(Role.ADMIN, Role.OWNER)
                         .requestMatchers(PATCH, apiPrefix + "/users/**").hasAnyRole(Role.ADMIN, Role.OWNER)
                         .requestMatchers(PUT, apiPrefix + "/users/restore/**").hasAnyRole(Role.ADMIN, Role.OWNER)
@@ -115,7 +119,7 @@ public class WebSecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.addAllowedOrigin("http://localhost:4200");
-        configuration.addAllowedOrigin("https://45e5237ba232.ngrok-free.app"); // Thay link day = frontend
+        configuration.addAllowedOrigin(publicFrontendUrl);
         configuration.addAllowedHeader("*");
         configuration.addAllowedMethod("*");
         configuration.setAllowCredentials(true);
@@ -125,5 +129,4 @@ public class WebSecurityConfig {
         source.registerCorsConfiguration("/**", configuration);
         return source;
     }
-
 }

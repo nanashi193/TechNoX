@@ -16,6 +16,7 @@ import com.g5.techdevices.techstore.services.EmailService;
 import com.g5.techdevices.techstore.services.ITokenService;
 import com.g5.techdevices.techstore.services.IUserService;
 import com.g5.techdevices.techstore.entity.users.User;
+import jakarta.mail.MessagingException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -71,8 +72,15 @@ public class UserController {
             }
             User user = userService.createUser(userDTO);
             String token = tokenService.createVeificationToken(user);
-            emailService.sendEmail(user.getEmail(), EmailType.VERIFY_ACCOUNT, token);
+            emailService.sendEmail(
+                    user.getEmail(),
+                    user.getFullName(),
+                    EmailType.VERIFY_ACCOUNT,
+                    token
+            );
             return ResponseEntity.ok(user);
+        } catch (MessagingException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Lỗi: Không thể gửi email xác nhận. " + e.getMessage());
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }

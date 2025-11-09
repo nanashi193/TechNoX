@@ -19,6 +19,7 @@ import com.g5.techdevices.techstore.repositories.PasswordTokenRepository;
 import com.g5.techdevices.techstore.repositories.RoleRepository;
 import com.g5.techdevices.techstore.repositories.UserRepository;
 import com.g5.techdevices.techstore.repositories.AddressRepository;
+import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.*;
@@ -255,17 +256,22 @@ public class UserService implements IUserService{
     }
 
     @Override
-    public String createPasswordResetToken(String email) throws DataNotFoundException {
+    public String createPasswordResetToken(String email)
+            throws DataNotFoundException, MessagingException, MessagingException {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new DataNotFoundException("User not found"));
-
         List<PasswordResetToken> oldTokens = passwordTokenRepository.findByUserAndExpireDateAfter(user, new Date());
         oldTokens.forEach(passwordTokenRepository::delete);
-
         String token = UUID.randomUUID().toString();
         PasswordResetToken newToken = new PasswordResetToken(token, user);
         passwordTokenRepository.save(newToken);
-        emailService.sendEmail(user.getEmail(), EmailType.RESET_PASSWORD, token);
+        emailService.sendEmail(
+                user.getEmail(),
+                user.getFullName(),
+                EmailType.RESET_PASSWORD,
+                token
+        );
+
         return token;
     }
 
