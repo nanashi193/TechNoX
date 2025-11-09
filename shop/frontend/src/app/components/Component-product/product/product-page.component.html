@@ -4,7 +4,6 @@
         <h2 class="section-title" style="font-size:clamp(28px,6vw,44px)">Tất cả sản phẩm</h2>
 
         <!-- FILTER BAR -->
-        <!-- style inline để “đè” mọi overlay vô tình khác (nếu có) -->
         <div class="filter-grid" style="position:relative; z-index: 5;">
             <!-- Search -->
             <div class="field">
@@ -21,7 +20,7 @@
                 />
             </div>
 
-            <!-- Device filter (dropdown) -->
+            <!-- Device filter -->
             <div class="field">
                 <label for="deviceSelect">Thiết bị</label>
                 <select
@@ -38,7 +37,7 @@
                 </select>
             </div>
 
-            <!-- Sort -->
+            <!-- Sort (FE-only by price) -->
             <div class="field">
                 <label for="sortSelect">Sắp xếp</label>
                 <select
@@ -49,9 +48,8 @@
                         aria-label="Sắp xếp"
                 >
                     <option value="relevance">Mặc định</option>
-                    <option value="price_asc">Giá tăng dần</option>
-                    <option value="price_desc">Giá giảm dần</option>
-                    <option value="name_asc">Tên A → Z</option>
+                    <option value="priceAsc">Giá ↑ (tăng dần)</option>
+                    <option value="priceDesc">Giá ↓ (giảm dần)</option>
                 </select>
             </div>
         </div>
