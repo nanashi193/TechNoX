@@ -48,3 +48,11 @@ cloudinary:
   cloud_name: dqegrlmu5
   api_key: 221414681247595
   api_secret: fGpSsgYohp9viyPq-iEpb18cNf0
+payos:
+  client-id: "99a29df5-118e-422f-9787-84cace775a72"
+  api-key: "93e32e86-5361-4068-a341-5c7a29b68595"
+  checksum-key: "9b29f7a3c6e22b89de0a5ec080f949a03c16ee96a0401604adfc90e8ebabd94b"
+app:
+  frontend:
+    url: "http://localhost:4200" #Thay ngrok frontend ở đây!!!
+

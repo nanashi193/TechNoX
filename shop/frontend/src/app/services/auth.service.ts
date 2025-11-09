@@ -1,11 +1,13 @@
 import {inject, Injectable} from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
-import { BehaviorSubject, Observable, tap } from 'rxjs';
+import { BehaviorSubject, Observable, tap, map, distinctUntilChanged, shareReplay } from 'rxjs';
 import { jwtDecode } from 'jwt-decode';
+import { environment } from '../environments/environment';
 
 export interface LoginRequest  { email: string; password: string; }
 export interface SignupRequest { username: string; email: string; password: string; }
+export interface Me { id: number | string; name: string; email: string; role?: string; avatar?: string; }
 
 type JwtPayload = {
     sub?: string;
@@ -19,10 +21,15 @@ type JwtPayload = {
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
-    private baseUrl = 'http://localhost:8080/api/v1/users'; // đổi theo backend
+    private baseUrl = `${environment.apiBaseUrl}/users`;
+    private authBaseUrl = `${environment.apiBaseUrl}/auth`; // <-- thêm cho /me
 
     private currentUserSubject = new BehaviorSubject<JwtPayload | null>(this.getUserFromToken());
     currentUser$ = this.currentUserSubject.asObservable();
+
+    private profileSubject = new BehaviorSubject<Me | null>(this.getProfileFromStorage());
+    profile$ = this.profileSubject.asObservable();
+
     private router = inject(Router);
 
     constructor(private http: HttpClient) {}
@@ -39,7 +46,9 @@ export class AuthService {
 
     clearToken() {
         localStorage.removeItem('token');
+        localStorage.removeItem('auth.user');
         this.currentUserSubject.next(null);
+        this.profileSubject.next(null);
     }
 
     // Đăng nhập (ví dụ backend trả về { token } hoặc { accessToken })
@@ -64,16 +73,15 @@ export class AuthService {
     }
 
     // ====== 🟢 Trạng thái & Quyền ======
+    // (Vẫn giữ để dùng trong Guard)
     isLoggedIn(): boolean {
         const t = this.token;
         if (!t) return false;
         try {
             const p = this.decodeToken(t);
-            // Nếu JWT có exp (giây), kiểm tra hết hạn
             if (p?.exp && typeof p.exp === 'number') {
                 return Date.now() < p.exp * 1000;
             }
-            // Không có exp thì coi như đã đăng nhập (tuỳ yêu cầu)
             return true;
         } catch {
             return false;
@@ -84,18 +92,10 @@ export class AuthService {
         const p = this.getUserFromToken();
         if (!p) return false;
 
-        // Gom tất cả khả năng đặt tên claim của backend
-        let rawRoles: unknown =
-            p.roles ?? p.authorities ?? p.role ?? p.scope ?? null;
-
-        // Chuẩn hoá về mảng string
+        let rawRoles: unknown = p.roles ?? p.authorities ?? p.role ?? p.scope ?? null;
         let roles: string[] = [];
-        if (Array.isArray(rawRoles)) {
-            roles = rawRoles.map(String);
-        } else if (typeof rawRoles === 'string') {
-            // scope: 'ROLE_USER ROLE_OWNER' hoặc 'USER,OWNER'
-            roles = rawRoles.split(/[,\s]+/).filter(Boolean);
-        }
+        if (Array.isArray(rawRoles)) roles = rawRoles.map(String);
+        else if (typeof rawRoles === 'string') roles = rawRoles.split(/[,\s]+/).filter(Boolean);
 
         const needle = role.toUpperCase();
         return roles.map(r => r.toUpperCase()).includes(needle);
@@ -103,19 +103,16 @@ export class AuthService {
 
     // ====== 🔎 Decode & đọc user từ token ======
     private decodeToken(token: string): JwtPayload | null {
-        try {
-            return jwtDecode<JwtPayload>(token);
-        } catch {
-            return null;
-        }
+        try { return jwtDecode<JwtPayload>(token); }
+        catch { return null; }
     }
 
     private getUserFromToken(): JwtPayload | null {
         const t = this.token;
         return t ? this.decodeToken(t) : null;
     }
+
     // ===== Forgot Password =====
-    /** Gửi yêu cầu quên mật khẩu (BE sẽ gửi email có link đặt lại mật khẩu) */
     forgotPassword(email: string): Observable<string> {
         return this.http.post(
             `${this.baseUrl}/forgot-password`,
@@ -124,7 +121,6 @@ export class AuthService {
         );
     }
 
-    /** (Tuỳ chọn) Đặt lại mật khẩu khi người dùng click link từ email và có token */
     resetPassword(token: string, newPassword: string): Observable<string> {
         return this.http.post(
             `${this.baseUrl}/reset-password`,
@@ -132,6 +128,7 @@ export class AuthService {
             { responseType: 'text' }
         );
     }
+
     verifyEmail(token: string) {
         return this.http.get<{ message: string; error: any }>(
             `${this.baseUrl}/verify-email?token=${token}`
@@ -140,8 +137,19 @@ export class AuthService {
 
     resendVerification(email: string) {
         return this.http.post(`${this.baseUrl}/resend-verification`, { email });
-
+    }
+    me(): Observable<Me> {
+        return this.http.get<Me>(`${this.authBaseUrl}/me`).pipe(
+            tap(me => {
+                localStorage.setItem('auth.user', JSON.stringify(me));
+                this.profileSubject.next(me);
+            })
+        );
+    }
+    private getProfileFromStorage(): Me | null {
+        try { return JSON.parse(localStorage.getItem('auth.user') || 'null'); }
+        catch { return null; }
     }
 
-}
 
+}

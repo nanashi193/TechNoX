@@ -1,8 +1,13 @@
 package com.g5.techdevices.techstore.services;
 
+import com.g5.techdevices.techstore.entity.Cart.CartItem;
 import com.g5.techdevices.techstore.components.ProductMapper;
 import com.g5.techdevices.techstore.dtos.ProductDTO;
 import com.g5.techdevices.techstore.dtos.ProductImageDTO;
+import jakarta.persistence.criteria.Predicate;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
+import com.g5.techdevices.techstore.repositories.cart.CartItemRepository;
 import com.g5.techdevices.techstore.dtos.ProductVariantDTO;
 import com.g5.techdevices.techstore.dtos.customer.CustomerProductDTO;
 import com.g5.techdevices.techstore.entity.products.Category;
@@ -19,14 +24,15 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal; // ADD
-import org.springframework.data.domain.Page; // nếu chưa có
 //Them rollback
 
 
@@ -37,7 +43,10 @@ public class ProductService implements  IProductService {
     private final ProductRepository productRepository;
     private final CategoryRepository categoryRepository;
     private final ProductImageRepository productImageRepository;
-    private final ProductMapper productMapper; // <-- Tiêm Mapper
+    private final ProductMapper productMapper; // ✅ THÊM DÒNG NÀY
+    @Autowired
+    private final CartItemRepository cartItemRepository;
+
 
 
     @Override
@@ -48,14 +57,14 @@ public class ProductService implements  IProductService {
                         new DataNotFoundException(
                                 "Cannot find category with id: "+productDTO.getCategoryId()));
 
-            Product newProduct = Product.builder()
-                    .name(productDTO.getName())
-                    .price(productDTO.getPrice())
-                    .description(productDTO.getDescription())
-                    .thumbnail(productDTO.getThumbnail())
-                    .category(existingCategory)
-                    .status(true)
-                    .build();
+        Product newProduct = Product.builder()
+                .name(productDTO.getName())
+                .price(productDTO.getPrice())
+                .description(productDTO.getDescription())
+                .thumbnail(productDTO.getThumbnail())
+                .category(existingCategory)
+                .status(true)
+                .build();
         if (productDTO.getVariants() != null && !productDTO.getVariants().isEmpty()) {
             List<ProductVariant> variantEntities = productDTO.getVariants().stream()
                     .map(v -> ProductVariant.builder()
@@ -133,10 +142,21 @@ public class ProductService implements  IProductService {
 
 
     @Override
-    public void deleteProduct(Long id) { // SỬA
-        Product p = productRepository.findById(id)
-                .orElseThrow(() -> new DataNotFoundException("Cannot find product with id = " + id)); // SỬA
-        productRepository.delete(p); // nếu bạn dùng soft delete qua @SQLDelete thì đây vẫn là update cờ
+    @Transactional
+    public void deleteProduct(Long id) {
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new DataNotFoundException(
+                        "Cannot find product with id = " + id
+                ));
+        // Kiểm tra cart item tham chiếu
+        List<CartItem> cartItems = cartItemRepository.findByVariant_Product_Id(id);
+        if (!cartItems.isEmpty()) {
+            throw new DataIntegrityViolationException(
+                    "Không thể xóa sản phẩm: đang có trong " + cartItems.size() + " giỏ hàng. " +
+                            "Vui lòng đợi khách mua hoặc liên hệ admin để xử lý."
+            );
+        }
+        productRepository.delete(product);
     }
 
     // THÊM: DTO kết quả xoá hàng loạt (đếm & danh sách id không tồn tại)
@@ -187,14 +207,14 @@ public class ProductService implements  IProductService {
                         new DataNotFoundException(
                                 "Cannot find product with id: "+productImageDTO.getProductId()));
 
-                //khong cho insert qua 5 anh cho 1 san pham
-                int size = productImageRepository.findByProductId(productId).size();
-                if(size >= ProductImages.MAXIMUM_IMAGES_PER_PRODUCT){
-                    throw new InvalidParamException("Number update must be <= "
+        //khong cho insert qua 5 anh cho 1 san pham
+        int size = productImageRepository.findByProductId(productId).size();
+        if(size >= ProductImages.MAXIMUM_IMAGES_PER_PRODUCT){
+            throw new InvalidParamException("Number update must be <= "
                     + ProductImages.MAXIMUM_IMAGES_PER_PRODUCT);
-                }
+        }
 
-                // 3) Validate tối thiểu để còn xoá Cloudinary về sau
+        // 3) Validate tối thiểu để còn xoá Cloudinary về sau
         if (productImageDTO.getPublicId() == null || productImageDTO.getPublicId().isBlank()) {
             throw new InvalidParamException("publicId is required");
         }
@@ -209,12 +229,26 @@ public class ProductService implements  IProductService {
                 .publicId(productImageDTO.getPublicId()) // ✅ thêm dòng này
                 .build();
 
-                return productImageRepository.save(newProductImages);
+        return productImageRepository.save(newProductImages);
     }
 
     @Override
-    public Page<CustomerProductDTO> getProductsForCustomer(Pageable pageable) {
-        Page<Product> productPage = productRepository.findAll(pageable);
+    public Page<CustomerProductDTO> getProductsForCustomer(
+            Pageable pageable,
+            String categoryName,
+            String searchTerm
+    ) {
+        Specification<Product> spec = (root, query, cb) -> {
+            Predicate p = cb.conjunction();
+            if (categoryName != null && !categoryName.isEmpty()) {
+                p = cb.and(p, cb.equal(root.get("category").get("name"), categoryName));
+            }
+            if (searchTerm != null && !searchTerm.isEmpty()) {
+                p = cb.and(p, cb.like(root.get("name"), "%" + searchTerm + "%"));
+            }
+            return p;
+        };
+        Page<Product> productPage = productRepository.findAll(spec, pageable);
         return productPage.map(productMapper::mapToCustomerProductDTO);
     }
 
@@ -265,7 +299,7 @@ public class ProductService implements  IProductService {
     }
 
 
-        // ---------------------------------Auto SKU----------------------------------
+    // ---------------------------------Auto SKU----------------------------------
 
     private String generateSku(String productName, String color, String size) {
         // Giữ toàn bộ tên sản phẩm, viết hoa và bỏ hết khoảng trắng
@@ -393,5 +427,35 @@ public class ProductService implements  IProductService {
         return variant;
     }
 
+    @Transactional(readOnly = true)
+    public List<ProductResponse> getNewestInLastMonth(int limit) {
+        if (limit <= 0) limit = 10;
 
+        LocalDateTime oneMonthAgo = LocalDateTime.now().minusDays(30);
+        PageRequest page = PageRequest.of(0, limit, Sort.by("createdAt").descending());
+
+        // dùng @Query:
+        List<Product> products = productRepository.findNewProductsInLastMonth(oneMonthAgo, page);
+
+        // nếu bạn dùng method name, đổi sang:
+        // List<Product> products = productRepository
+        //        .findByCreatedAtGreaterThanEqualOrderByCreatedAtDesc(oneMonthAgo, page);
+
+        return products.stream()
+                .map(ProductResponse::fromProduct)
+                .toList();
+    }
+
+    /** Tuỳ chọn: linh hoạt số ngày */
+    @Transactional(readOnly = true)
+    public List<ProductResponse> getNewestWithinDays(int days, int limit) {
+        if (limit <= 0) limit = 10;
+        if (days <= 0)  days  = 30;
+
+        LocalDateTime start = LocalDateTime.now().minusDays(days);
+        PageRequest page = PageRequest.of(0, limit, Sort.by("createdAt").descending());
+
+        List<Product> products = productRepository.findNewProductsInLastMonth(start, page);
+        return products.stream().map(ProductResponse::fromProduct).toList();
+    }
 }

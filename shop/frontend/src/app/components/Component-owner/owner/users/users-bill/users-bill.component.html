@@ -1,0 +1,38 @@
+<section class="card">
+    <div class="card-hdr">
+        <h3>Đơn hàng đã đặt <span class="muted" *ngIf="totalItems()">({{ totalItems() }})</span></h3>
+        <a class="btn ghost" [routerLink]="['/owner/orders']" [queryParams]="{ userId: userId }">Xem tất cả</a>
+    </div>
+
+    <div class="table" *ngIf="!loading() && rows().length; else stateTpl">
+        <div class="thead row">
+            <div class="cell col-order">Order</div>
+            <div class="cell col-date">Date</div>
+            <div class="cell col-pay">Payment status</div>
+            <div class="cell col-total">Total</div>
+            <div class="cell col-invoice">Invoice</div>
+        </div>
+
+        <a class="row body-row" *ngFor="let r of rows(); trackBy: trackRow"
+           [routerLink]="['/owner/orders', r.id]">
+            <div class="cell col-order link">#{{ r.id }}</div>
+            <div class="cell col-date">{{ r.date ? (r.date | date:'MMM d, y') : '—' }}</div>
+            <div class="cell col-pay">
+                <span [ngClass]="['pill', badgeClass(r.paymentStatus)]">
+                     <i class="dot"></i>{{ r.paymentStatus }}
+                </span>
+            </div>
+            <div class="cell col-total">{{ (r.total ?? 0) | currency:'VND':'symbol-narrow':'1.0-0' }}</div>
+            <div class="cell col-invoice">
+                <button class="btn small" type="button">Invoice</button>
+            </div>
+        </a>
+    </div>
+
+    <ng-template #stateTpl>
+        <div class="state" *ngIf="loading(); else emptyTpl">Đang tải…</div>
+    </ng-template>
+    <ng-template #emptyTpl>
+        <div class="state">Chưa có đơn hàng.</div>
+    </ng-template>
+</section>

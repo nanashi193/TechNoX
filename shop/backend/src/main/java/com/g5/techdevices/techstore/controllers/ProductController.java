@@ -1,6 +1,6 @@
 package com.g5.techdevices.techstore.controllers;
 
-
+import org.springframework.dao.DataIntegrityViolationException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.g5.techdevices.techstore.dtos.ProductDTO;
 import com.g5.techdevices.techstore.dtos.ProductImageDTO;
@@ -61,7 +61,7 @@ public class ProductController {
             }
             Product newProduct = productService.createProduct(productDTO);
             return ResponseEntity.ok(newProduct);
-            }catch (Exception e) {
+        }catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
@@ -109,12 +109,12 @@ public class ProductController {
             }
             return ResponseEntity.ok().body(productImages);
         } catch (Exception e) {
-    return ResponseEntity.badRequest().body(e.getMessage());
+            return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
     private String storeFile(MultipartFile file) throws IOException {
         if(!isImageFile(file) || file.getOriginalFilename() == null){
-        throw new IOException("Invalid file format");
+            throw new IOException("Invalid file format");
         }
         String fileName = StringUtils.cleanPath(Objects.requireNonNull(file.getOriginalFilename()));
 
@@ -136,6 +136,7 @@ public class ProductController {
         Files.copy(file.getInputStream(), destination, StandardCopyOption.REPLACE_EXISTING);
         return uniqueFilename;
     }
+
     private boolean isImageFile(MultipartFile file){
         String contentType = file.getContentType();
         return contentType != null && contentType.startsWith("image/");
@@ -196,9 +197,16 @@ public class ProductController {
     //Delete
 
     @DeleteMapping("/{id:\\d+}")
-    public ResponseEntity<Void> deleteProduct(@PathVariable long id) {
-        productService.deleteProduct(id);          // ném DataNotFoundException nếu không thấy
-        return ResponseEntity.noContent().build(); // ✅ 204, không body
+    public ResponseEntity<?> deleteProduct(@PathVariable Long id) {
+        try {
+            productService.deleteProduct(id);
+            return ResponseEntity.noContent().build();
+        } catch (DataIntegrityViolationException e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body(Map.of("error", "Cannot delete", "message", e.getMessage()));
+        } catch (DataNotFoundException e) {
+            return ResponseEntity.notFound().build();
+        }
     }
 
     public record BulkIds(List<Long> ids) {}
@@ -206,11 +214,27 @@ public class ProductController {
     @PostMapping("/bulk-delete")
     public ResponseEntity<Map<String,Object>> bulkDelete(@RequestBody BulkIds body) {
         var ids = body.ids();
-        ids.forEach(productService::deleteProduct);
-        return ResponseEntity.ok(Map.of("deletedIds", ids));
+        List<Long> deleted = new ArrayList<>();
+        List<Long> notFound = new ArrayList<>();
+        List<Long> conflicted = new ArrayList<>();
+
+        for (Long id : ids) {
+            try {
+                productService.deleteProduct(id);
+                deleted.add(id);
+            } catch (DataNotFoundException e) {
+                notFound.add(id);
+            } catch (DataIntegrityViolationException e) {
+                conflicted.add(id);
+            }
+        }
+
+        return ResponseEntity.ok(Map.of(
+                "deletedIds", deleted,
+                "notFoundIds", notFound,
+                "conflictedIds", conflicted
+        ));
     }
-
-
 
     //update
     @PutMapping("/{id}")
@@ -219,7 +243,7 @@ public class ProductController {
             @Valid @RequestBody ProductDTO productDTO
     ){
         try{
-             Product updatedProduct = productService.updateProduct(id, productDTO);
+            Product updatedProduct = productService.updateProduct(id, productDTO);
             return ResponseEntity.noContent().build();
         }catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
@@ -268,7 +292,7 @@ public class ProductController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
- //=============Delete Image==========================
+    //=============Delete Image==========================
     @DeleteMapping("/{productId}/images/{imageId}")
     public ResponseEntity<?> deleteImage(
             @PathVariable Long productId,
@@ -283,4 +307,17 @@ public class ProductController {
         }
     }
 
-        }
+    @GetMapping("/newest-month")
+    public ResponseEntity<List<ProductResponse>> newestInLastMonth(
+            @RequestParam(defaultValue = "10") int limit) {
+        return ResponseEntity.ok(productService.getNewestInLastMonth(limit));
+    }
+
+    // Tuỳ chọn: cho phép truyền days
+    @GetMapping("/newest")
+    public ResponseEntity<List<ProductResponse>> newestWithinDays(
+            @RequestParam(defaultValue = "30") int days,
+            @RequestParam(defaultValue = "10") int limit) {
+        return ResponseEntity.ok(productService.getNewestWithinDays(days, limit));
+    }
+}

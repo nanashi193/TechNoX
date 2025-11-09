@@ -12,7 +12,7 @@ public class CustomerProductDTO {
     private Long id;
     private String name;
     private BigDecimal price;
-    private String image;
+    private List<String> imageUrls;
     private String description;
     private String categoryName;
     private boolean inStock;

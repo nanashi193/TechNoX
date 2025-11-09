@@ -3,6 +3,7 @@ package com.g5.techdevices.techstore.controllers;
 import com.g5.techdevices.techstore.dtos.*;
 import com.g5.techdevices.techstore.dtos.resetPassword.ForgotPasswordDTO;
 import com.g5.techdevices.techstore.dtos.resetPassword.ResetPasswordDTO;
+import com.g5.techdevices.techstore.entity.staff.StaffInfo;
 import com.g5.techdevices.techstore.entity.tokens.EmailType;
 import com.g5.techdevices.techstore.exceptions.DataNotFoundException;
 import com.g5.techdevices.techstore.exceptions.InvalidTokenException;
@@ -15,12 +16,14 @@ import com.g5.techdevices.techstore.services.EmailService;
 import com.g5.techdevices.techstore.services.ITokenService;
 import com.g5.techdevices.techstore.services.IUserService;
 import com.g5.techdevices.techstore.entity.users.User;
+import jakarta.mail.MessagingException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -29,6 +32,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
+import com.g5.techdevices.techstore.services.BillService;
+import com.g5.techdevices.techstore.responses.AdminBillsResponse.BillAdminResponse;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -43,6 +48,8 @@ public class UserController {
     private final ITokenService tokenService;
     private final EmailService emailService;
     private final UserRepository userRepository;
+    private final BillService billService;
+
     @Autowired
     private BillRepository billRepository;
 
@@ -65,8 +72,15 @@ public class UserController {
             }
             User user = userService.createUser(userDTO);
             String token = tokenService.createVeificationToken(user);
-            emailService.sendEmail(user.getEmail(), EmailType.VERIFY_ACCOUNT, token);
+            emailService.sendEmail(
+                    user.getEmail(),
+                    user.getFullName(),
+                    EmailType.VERIFY_ACCOUNT,
+                    token
+            );
             return ResponseEntity.ok(user);
+        } catch (MessagingException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Lỗi: Không thể gửi email xác nhận. " + e.getMessage());
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
@@ -74,10 +88,29 @@ public class UserController {
     @GetMapping("")
     public ResponseEntity<UserPageResponse<UserListResponse>> getAllUsers(
             @RequestParam(defaultValue = "1") int page,
-            @RequestParam(defaultValue = "10") int limit
+            @RequestParam(defaultValue = "10") int limit,
+            @RequestParam(defaultValue = "name_asc") String sort
     ) throws DataNotFoundException {
-        Pageable pageable = PageRequest.of(page - 1, limit);
-        Page<User> userPage = userService.getAllUsers(pageable);
+        boolean sortByRealNameAsc  = "name_asc".equalsIgnoreCase(sort);
+        boolean sortByRealNameDesc = "name_desc".equalsIgnoreCase(sort);
+        boolean sortByOrdersAsc    = "orders_asc".equalsIgnoreCase(sort);
+        boolean sortByOrdersDesc   = "orders_desc".equalsIgnoreCase(sort);
+        boolean sortByTotalAsc     = "totalSpent_asc".equalsIgnoreCase(sort);
+        boolean sortByTotalDesc    = "totalSpent_desc".equalsIgnoreCase(sort);
+
+        Page<User> userPage;
+        if (sortByRealNameAsc || sortByRealNameDesc) {
+            // ✅ GIỮ NGUYÊN: sort theo “tên thật” (chữ cuối) bằng Java trong service
+            userPage = userService.getAllUsersSortByRealName(sortByRealNameAsc, page, limit);
+        } else if (sortByOrdersAsc || sortByOrdersDesc || sortByTotalAsc || sortByTotalDesc) {
+            // ✅ MỚI: sort theo tổng đơn / tổng tiền ở DB (đúng phân trang)
+            Pageable pageable = PageRequest.of(page - 1, limit);
+            userPage = userRepository.findUsersOrderByAggregate(sort.toLowerCase(), pageable);
+        } else {
+            // ✅ Fallback: sort theo trường entity (nếu cần)
+            Pageable pageable = PageRequest.of(page - 1, limit);
+            userPage = userService.getAllUsers(pageable);
+        }
         List<UserListResponse> userResponses = userPage.getContent().stream()
                 .map(user -> {
                     int orders = billRepository.countOrdersByUserId(user.getId());
@@ -221,5 +254,22 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("An error occurred while resetting the password.");
         }
+    }
+
+    @GetMapping("/staff")
+    public ResponseEntity<List<StaffInfo>> getStaffList() {
+        List<StaffInfo> staffList = userService.getStaffList();
+        return ResponseEntity.ok(staffList);
+    }
+    //lay bill
+    @GetMapping("/{userId}/bills")
+    public ResponseEntity<Page<BillAdminResponse>> getBillsByUser(
+            @PathVariable Long userId,
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "10") int limit,
+            @RequestParam(defaultValue = "created_desc") String sort
+    ) {
+        Page<BillAdminResponse> bills = billService.getBillsByUser(userId, page, limit, sort);
+        return ResponseEntity.ok(bills);
     }
 }

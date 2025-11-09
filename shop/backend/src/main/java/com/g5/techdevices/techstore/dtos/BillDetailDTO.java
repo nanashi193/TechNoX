@@ -34,5 +34,4 @@ public class BillDetailDTO {
 
     @JsonProperty("Color")
     private String color;
-
 }

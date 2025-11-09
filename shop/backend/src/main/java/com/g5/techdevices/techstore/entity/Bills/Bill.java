@@ -19,7 +19,7 @@ public class Bill {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "BillId")
-    private int id;
+    private Long id;
 
     @ManyToOne
     @JoinColumn(name = "UserId")
@@ -31,8 +31,11 @@ public class Bill {
     @Column(name = "Email", columnDefinition = "varchar(100)")
     private String Email;
 
+    @Column(name = "IsActive")
+    private Boolean IsActive;
+
     @Column(name = "Status", columnDefinition = "varchar(30)")
-    private String Status;
+    private String status;
 
     @Column(name = "Total", precision = 18, scale = 2)
     private BigDecimal total;
@@ -49,6 +52,10 @@ public class Bill {
     @Column(name = "Phone", length = 20)
     private String phone;
 
-    @OneToMany(mappedBy = "bill")
+    @OneToMany(mappedBy = "bill", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<BillDetail> details;
+
+    @ManyToOne
+    @JoinColumn(name = "StaffId")
+    private User staff;
 }

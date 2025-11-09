@@ -1,0 +1,172 @@
+<section class="orders section-pad">
+    <div class="container">
+        <h1 class="title title--black">Đơn hàng của tôi</h1>
+
+        <div class="order-filters">
+            <button *ngFor="let tab of statusTabs"
+                    type="button"
+                    class="btn btn--filter"
+                    [class.active]="activeFilter === tab.key"
+                    (click)="setFilter(tab.key)">
+                {{ tab.label }}
+            </button>
+        </div>
+
+        <div *ngIf="loading" class="state">Đang tải…</div>
+        <!-- Sửa: Dùng 'filteredOrders' -->
+        <div *ngIf="!loading && !filteredOrders.length" class="state">
+            Bạn chưa có đơn hàng nào (trong mục này).
+        </div>
+
+        <div class="order-list" *ngIf="!loading && filteredOrders.length">
+            <article class="order-card" *ngFor="let o of filteredOrders; trackBy: trackById">
+                <!-- ===== Header ===== -->
+                <header class="order-head">
+                    <div class="head-left">
+                        <div class="row1">
+                            <span class="label">Mã đơn:</span>
+                            <!-- Sửa: Dùng o.billId (hoặc o.code nếu có) -->
+                            <span class="code">#{{ o.code || o.billId }}</span>
+                            <span class="dot">•</span>
+                            <!-- Sửa: Dùng o.orderDate -->
+                            <span class="time" title="{{ o.orderDate }}">
+                                {{ o.orderDate | date:'HH:mm dd/MM/yyyy' }}
+                            </span>
+                        </div>
+                        <div class="row2">
+                            <span class="label">Người giao:</span>
+                            <span class="courier">
+                                <!-- Sửa: Dùng o.staff (object) -->
+                                {{ o.staff?.fullName || 'Chưa phân công' }}
+                                <ng-container *ngIf="o.staff?.phone">
+                                  <span class="dot">•</span>
+                                    <!-- Sửa: Truyền o.staff vào helper -->
+                                  <a class="tel" [href]="safeTelHref(o.staff)">
+                                    {{ displayPhone(o.staff) }}
+                                  </a>
+                                </ng-container>
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="head-right">
+                        <span class="money">{{ formatMoney(o.total) }}</span>
+                        <!-- Sửa: Dùng trạng thái mới 'Succeed' và 'Delivering' -->
+                        <span class="status-pill"
+                              [class.ok]="o.status==='Succeed'"
+                              [class.warn]="o.status==='Delivering'"
+                              [class.info]="o.status==='Delivered'"
+                              [class.bad]="o.status==='Cancelled'">
+                          {{ o.status }}
+                        </span>
+                        <span class="pay-pill"
+                              [class.cod]="o.paymentMethod==='COD'"
+                              [class.pos]="o.paymentMethod==='PayOS'">
+                          {{ (o.paymentMethod || 'N/A') }}
+                        </span>
+                    </div>
+                </header>
+
+                <!-- ===== TÓM GỌN ===== -->
+                <div class="order-lines" *ngIf="!isExpanded(o)">
+                    <ng-container *ngIf="firstItem(o) as f; else noItemsSummary">
+                        <div class="line">
+                            <!-- Sửa: Dùng f.thumbnail (từ BillItem) -->
+                            <img *ngIf="f.thumbnail" [src]="f.thumbnail" [alt]="f.productName" class="thumb" />
+                            <div class="line-main">
+                                <!-- Sửa: Dùng f.productName -->
+                                <div class="name">{{ f.productName }}</div>
+                                <div class="meta">
+                                    <span *ngIf="f.color">Màu {{ f.color }}</span>
+                                    <!-- Sửa: Dùng f.quantity -->
+                                    <span> • x{{ f.quantity || 1 }}</span>
+                                    <!-- Sửa: Dùng o.details (từ BillAdminDetailResponse) -->
+                                    <span *ngIf="(o.details?.length || 0) > 1">
+                                        • +{{ (o.details?.length || 0) - 1 }} món khác
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="line-price">
+                                <!-- Sửa: Dùng f.quantity -->
+                                {{ formatMoney((f.price || 0) * (f.quantity || 1)) }}
+                            </div>
+                        </div>
+                    </ng-container>
+
+                    <ng-template #noItemsSummary>
+                        <div class="no-items muted">Chưa có danh sách sản phẩm cho đơn này.</div>
+                    </ng-template>
+                </div>
+
+                <!-- ===== CHI TIẾT (khi bấm Chi tiết) ===== -->
+                <section class="order-lines" *ngIf="isExpanded(o)">
+                    <!-- Sửa: Dùng o.details -->
+                    <ul class="line-list" *ngIf="o.details?.length; else noItems">
+                        <!-- Sửa: Dùng o.details -->
+                        <li class="line" *ngFor="let it of o.details">
+                            <!-- Sửa: Dùng it.thumbnail -->
+                            <img *ngIf="it.thumbnail" [src]="it.thumbnail" [alt]="it.productName" class="thumb" />
+                            <div class="line-main">
+                                <!-- Sửa: Dùng it.productName -->
+                                <div class="name">{{ it.productName }}</div>
+                                <div class="meta">
+                                    <span *ngIf="it.color">Màu {{ it.color }}</span>
+                                    <!-- Sửa: Dùng it.size (từ BillItem) -->
+                                    <span *ngIf="it.size"> • {{ it.size }}</span>
+                                    <!-- Sửa: Dùng it.quantity -->
+                                    <span> • x{{ it.quantity || 1 }}</span>
+                                </div>
+                            </div>
+                            <div class="line-price">
+                                <!-- Sửa: Dùng it.quantity -->
+                                {{ formatMoney((it.price || 0) * (it.quantity || 1)) }}
+                            </div>
+                        </li>
+                    </ul>
+
+                    <ng-template #noItems>
+                        <div class="no-items muted">Chưa có danh sách sản phẩm cho đơn này.</div>
+                    </ng-template>
+
+                    <div class="totals">
+                        <div class="row grand">
+                            <span>Tổng thanh toán</span>
+                            <span>{{ formatMoney(o.total || 0) }}</span>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ===== Actions ===== -->
+                <footer class="order-foot">
+                    <div class="actions">
+                        <button class="btn btn--ghost" type="button" (click)="toggleExpand(o)">
+                            {{ isExpanded(o) ? 'Thu gọn' : 'Chi tiết' }}
+                        </button>
+
+                        <!-- Sửa: Dùng busy[o.billId] -->
+                        <button class="btn btn--danger"
+                                [disabled]="busy[o.billId] || isCancelLocked(o)"
+                                [title]="isCancelLocked(o) ? 'Đơn đang giao/đã hoàn tất, không thể hủy' : ''"
+                                (click)="cancelOrder(o)">
+                            <!-- Sửa: Dùng busy[o.billId] -->
+                            {{ busy[o.billId] ? 'ĐANG HỦY…' : (isCancelLocked(o) ? 'KHÔNG THỂ HỦY' : 'HỦY ĐƠN') }}
+                        </button>
+
+                        <button class="btn btn--accent"
+                                *ngIf="showConfirm(o)"
+                                [disabled]="busy[o.billId]"
+                                (click)="confirmReceived(o)">
+                            <!-- Sửa: Dùng busy[o.billId] -->
+                            {{ busy[o.billId] ? 'ĐANG XÁC NHẬN…' : 'ĐÃ NHẬN HÀNG – XÁC NHẬN' }}
+                        </button>
+                    </div>
+                </footer>
+
+                <!-- Sửa: Dùng trạng thái 'Cancelled' (chính xác của backend) -->
+                <div *ngIf="o.status==='Cancelled'" class="cancel-row">
+                    Đơn hàng đã bị hủy.
+                </div>
+            </article>
+        </div>
+    </div>
+</section>

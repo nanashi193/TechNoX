@@ -7,9 +7,11 @@ import com.g5.techdevices.techstore.entity.users.User;
 import com.g5.techdevices.techstore.services.ICartService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+@CrossOrigin(origins = "http://localhost:4200")
 @RestController
 @RequestMapping("${api.prefix}/carts")
 @RequiredArgsConstructor
@@ -17,6 +19,9 @@ public class CartController {
     private final ICartService cartService;
 
     private User getCurrentUser(Authentication authentication) {
+        if (authentication == null || !authentication.isAuthenticated() || authentication.getPrincipal().equals("anonymousUser")) {
+            throw new AccessDeniedException("Bạn chưa đăng nhập hoặc phiên làm việc hết hạn");
+        }
         return (User) authentication.getPrincipal();
     }
 
@@ -36,7 +41,7 @@ public class CartController {
     }
     @DeleteMapping("/{variantId}")
     public ResponseEntity<CartDTO> removeCartItem(
-            @PathVariable Integer variantId,
+            @PathVariable Long variantId,
             Authentication authentication) {
         User currentUser = getCurrentUser(authentication);
         CartDTO cartDTO = cartService.removeProductFromCart(currentUser, variantId);
@@ -44,7 +49,7 @@ public class CartController {
     }
     @PutMapping("/{variantId}")
     public ResponseEntity<CartDTO> updateCartItemQuantity(
-            @PathVariable Integer variantId,
+            @PathVariable Long variantId,
             @RequestBody UpdateCartItemDTO updateDTO,
             Authentication authentication) {
         User currentUser = getCurrentUser(authentication);

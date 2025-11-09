@@ -1,0 +1,90 @@
+<h1 class="h-page">Danh sách người dùng</h1>
+
+<div class="toolbar">
+    <input class="search" placeholder="Search users" [(ngModel)]="q" (ngModelChange)="onSearch()">
+    <div class="right">
+
+        <div class="bulk" *ngIf="selectedCount()">
+            <span class="muted">{{ selectedCount() }} đã chọn</span>
+            <button class="btn danger" (click)="bulk('delete')">Xóa</button>
+        </div>
+    </div>
+</div>
+
+<div class="table users">
+    <div class="row thead">
+        <label class="cell check">
+            <input type="checkbox"
+                   [checked]="allSelected()"
+                   [indeterminate]="someSelected()"
+                   (change)="toggleAll($event)">
+        </label>
+        <div class="cell col-name th sortable" >
+            Tên
+        </div>
+
+        <!-- Email giữ nguyên nếu field là 'email' -->
+        <div class="cell col-email th sortable">
+            Email
+        </div>
+
+        <!-- Số điện thoại -->
+        <div class="cell col-phone th sortable">
+            Số điện thoại
+        </div>
+
+        <!-- Hoạt động -->
+        <div class="cell col-active th sortable">
+            Hoạt động
+        </div>
+
+        <!-- Số đơn hàng -->
+        <div class="cell col-orders th sortable"
+             (click)="sortBy('orders')" [attr.aria-sort]="ariaSort('orders')">
+            Số đơn hàng <span class="sort-caret" [class.asc]="isAsc('orders')" [class.desc]="isDesc('orders')"></span>
+        </div>
+
+        <!-- Tổng chi tiêu -->
+        <div class="cell col-spent th sortable"
+             (click)="sortBy('totalSpent')" [attr.aria-sort]="ariaSort('totalSpent')">
+            Tổng chi tiêu <span class="sort-caret" [class.asc]="isAsc('totalSpent')" [class.desc]="isDesc('totalSpent')"></span>
+        </div>
+    </div>
+
+    <div class="row" *ngFor="let u of users; trackBy: trackById">
+        <label class="cell check">
+            <input type="checkbox" [checked]="isSelected(u.id)" (change)="toggle(u.id,$event)">
+        </label>
+
+        <div class="cell col-name">
+            <div class="avatar sm">{{ u.FullName?.[0] | uppercase }}</div>
+            <a class="name-link" [routerLink]="['/owner/users', u.id]">{{ u.FullName }}</a>
+        </div>
+        <div class="cell col-email">{{ u.email }}</div>
+        <div class="cell col-phone">{{ u.PhoneNumber || '—' }}</div>
+        <div class="cell col-active">
+            <label class="switch">
+                <input type="checkbox" [checked]="u.IsActive" (change)="toggleActive(u)">
+                <span class="slider"></span>
+            </label>
+        </div>
+        <div class="cell col-orders">{{ u.stats?.orders || 0 }}</div>
+        <div class="cell col-spent">{{ u.stats?.totalSpent | number:'1.0-0' }} ₫</div>
+    </div>
+</div>
+
+<nav class="pagination" aria-label="Pagination">
+    <button class="pg prev" [disabled]="page === 1" (click)="prev()">Trang trước</button>
+
+    <ng-container *ngFor="let n of pages; let i = index">
+        <ng-container *ngIf="i === 0 || n - pages[i-1] === 1; else dots">
+            <button class="pg num" [class.active]="n===page" (click)="goto(n)">{{ n }}</button>
+        </ng-container>
+        <ng-template #dots>
+            <span class="muted">…</span>
+            <button class="pg num" [class.active]="n===page" (click)="goto(n)">{{ n }}</button>
+        </ng-template>
+    </ng-container>
+
+    <button class="pg next" [disabled]="page === totalPages" (click)="next()">Trang sau</button>
+</nav>

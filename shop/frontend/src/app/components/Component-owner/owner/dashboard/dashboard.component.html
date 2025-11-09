@@ -1,0 +1,112 @@
+<h1 class="page-title">Tổng quan</h1>
+
+<section class="grid-3">
+    <div class="card stat">
+        <h3>Doanh thu hôm nay</h3>
+        <p class="value">{{ kpi.revenueToday | number:'1.0-0' }} ₫</p>
+    </div>
+    <div class="card stat">
+        <h3>Đơn hàng hôm nay</h3>
+        <p class="value">{{ kpi.ordersToday }}</p>
+        <a class="link" routerLink="/owner/orders">Xem chi tiết</a>
+    </div>
+    <div class="card stat">
+        <h3>Khách hàng mới</h3>
+        <p class="value">{{ kpi.newCustomersToday }}</p>
+        <a class="link" routerLink="/owner/users">Xem chi tiết</a>
+    </div>
+</section>
+
+<section class="charts-2col">
+    <div class="card chart">
+        <div class="card-header">
+            <h3>Doanh thu của TechNoX</h3>
+            <owner-date-range (changed)="onRangeChanged($event)"></owner-date-range>
+        </div>
+
+        <!-- Loading spinner khi đang tải -->
+        <div *ngIf="loading" class="dashboard-loading">
+            <dotlottie-wc
+                    src="https://lottie.host/1aec0949-7143-49da-8ab3-dc606ec6abe2/o0OsDmy0Yh.lottie"
+                    style="width: 80px; height: 80px"
+                    autoplay loop>
+            </dotlottie-wc>
+        </div>
+
+        <!-- Charts khi không loading -->
+        <div *ngIf="!loading" class="grid-2" style="gap: 14px; margin-bottom: 20px;">
+            <!-- Chart 1: Revenue -->
+            <div class="card">
+                <h3>Doanh thu</h3>
+                <div style="height: 200px">
+                    <canvas baseChart [type]="'line'" [data]="revenueChartData" [options]="revenueOpts"></canvas>
+                </div>
+            </div>
+
+            <!-- Chart 2: Orders -->
+            <div class="card">
+                <h3>Đơn hàng</h3>
+                <div style="height: 200px">
+                    <canvas baseChart [type]="'bar'" [data]="ordersChartData" [options]="ordersOpts"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="right-column">
+        <!-- Summary card -->
+        <div class="card summary">
+            <div class="metric">
+                <div class="label">Doanh thu</div>
+                <div class="big">{{ totalsNow.revenue | number:'1.0-0' }} ₫</div>
+
+                <ng-container *ngIf="deltaRev !== null; else noRevDelta">
+                    <div class="delta" [class.pos]="deltaRev! >= 0" [class.neg]="deltaRev! < 0">
+                        <span class="arrow">{{ deltaRev! >= 0 ? '▲' : '▼' }}</span>
+                        {{ deltaRev! | number:'1.0-1' }}%
+                    </div>
+                </ng-container>
+                <ng-template #noRevDelta>
+                    <div class="delta muted">—</div>
+                </ng-template>
+            </div>
+
+            <div class="divider"></div>
+
+            <div class="metric">
+                <div class="label">Đơn hàng</div>
+                <div class="big">{{ totalsNow.orders | number }}</div>
+
+                <ng-container *ngIf="deltaOrd !== null; else noOrdDelta">
+                    <div class="delta" [class.pos]="deltaOrd! >= 0" [class.neg]="deltaOrd! < 0">
+                        <span class="arrow">{{ deltaOrd! >= 0 ? '▲' : '▼' }}</span>
+                        {{ deltaOrd! | number:'1.0-1' }}%
+                    </div>
+                </ng-container>
+                <ng-template #noOrdDelta>
+                    <div class="delta muted">—</div>
+                </ng-template>
+            </div>
+        </div>
+
+        <!-- Orders card -->
+        <div class="card orders">
+            <h3>Trạng thái đơn hàng</h3>
+            <ul>
+                <li *ngFor="let s of orderStats"
+                    (click)="navigateToOrderList(s.status)"
+                    style="cursor: pointer">
+                    <span>{{ s.label }}</span>
+                    <b>{{ s.value }}</b>
+                </li>
+            </ul>
+        </div>
+    </div>
+</section>
+
+
+<section class="grid-2-1">
+    <app-top-products [items]="topProducts"></app-top-products>
+    <app-new-products [newProducts]="newProducts"></app-new-products>
+</section>
+

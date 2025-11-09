@@ -2,8 +2,8 @@ import { Component, inject, signal } from '@angular/core';
 import { Router, NavigationEnd, RouterOutlet, ActivatedRoute } from '@angular/router';
 import { NgIf } from '@angular/common';
 import { filter, startWith } from 'rxjs';
-import { SiteHeaderComponent } from '../components/site-header/site-header.component';
-import { SiteFooterComponent } from '../components/site-footer/site-footer.component';
+import { SiteHeaderComponent } from '../components/Component-function/site-header/site-header.component';
+import { SiteFooterComponent } from '../components/Component-function/site-footer/site-footer.component';
 
 @Component({
     selector: 'app-root',

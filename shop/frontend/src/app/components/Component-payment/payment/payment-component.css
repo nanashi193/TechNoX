@@ -1,0 +1,228 @@
+/* ===== Root container ===== */
+:host {
+    display: block;
+    padding: clamp(12px, 2vw, 20px);
+    background: #0b0b0d url('/assets/Adu.jpg') center/cover no-repeat fixed;
+    font-family: 'Be Vietnam Pro', ui-sans-serif, system-ui, -apple-system,
+    'Segoe UI', Roboto, Arial, 'Noto Sans', sans-serif;
+}
+
+.frame {
+    max-width: 980px;
+    margin: 0 auto;
+    /* Toàn bộ text bên trong khung là đen */
+    color: #111;
+}
+
+/* ===== Header ===== */
+.header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin: 10px 0 16px;
+}
+
+.header h2 {
+    margin: 0;
+    font-size: clamp(22px, 3.4vw, 32px);
+    font-weight: 800;
+    /* Nền sáng để chữ đen đọc được trên ảnh nền tối */
+    background: #fff;
+    color: #111;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    padding: 6px 10px;
+}
+
+.link {
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    color: #111;
+    border-radius: 10px;
+    padding: 8px 12px;
+    cursor: pointer;
+}
+.link:hover {
+    background: #f3f4f6;
+}
+
+/* ===== Card / Section ===== */
+.card {
+    background: #fff;
+    color: #111;
+    border: 1px solid #e5e7eb;
+    border-radius: 16px;
+    padding: clamp(14px, 2vw, 18px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+    margin-bottom: 14px;
+}
+
+.card h3 {
+    margin: 0 0 10px;
+    font-size: clamp(16px, 2.4vw, 22px);
+    font-weight: 800;
+    color: #111;
+}
+
+/* ===== User grid ===== */
+.user-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px 16px;
+}
+.user-grid .full {
+    grid-column: 1 / -1;
+}
+.label {
+    color: #555;
+    margin-bottom: 6px;
+    font-size: 13px;
+}
+.value {
+    background: #fff;
+    color: #111;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    padding: 10px 12px;
+}
+
+/* ===== Payment methods (support cả .methods và .pmethods) ===== */
+.methods,
+.pmethods {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #fff;
+    color: #111;
+    border: 1px solid #e5e7eb;
+    border-radius: 999px;
+    padding: 8px 12px;
+    cursor: pointer;
+}
+
+.pill input {
+    accent-color: #111;
+}
+
+/* ===== Cart table ===== */
+.row {
+    display: grid;
+    grid-template-columns: 1fr 90px 140px 160px;
+    gap: 12px;
+    align-items: center;
+    padding: 10px 12px;
+    border-bottom: 1px dashed #e5e7eb;
+    font-variant-numeric: tabular-nums;
+    color: #111;
+}
+
+.row.head {
+    font-weight: 700;
+    border-bottom: 1px solid #111;
+}
+
+.row .name .title {
+    font-size: 15px;
+    font-weight: 700;
+    color: #111;
+}
+
+.row .name .sub {
+    font-size: 12px;
+    color: #666;
+    margin-top: 2px;
+}
+
+.col.center { text-align: center; }
+.col.right { text-align: right; }
+
+/* ===== Totals ===== */
+.summary {
+    display: flex;
+    justify-content: space-between;
+    padding: 12px 2px 0;
+    color: #111;
+}
+
+/* ===== Generic actions row (download/print/copy/pay...) ===== */
+.actions {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    margin: 8px 0;
+}
+
+/* ===== Buttons ===== */
+.btn {
+    border-radius: 10px;
+    padding: 10px 14px;
+    border: 1px solid #e5e7eb;
+    background: #fff;
+    color: #111;
+    cursor: pointer;
+}
+.btn:hover { background: #f9fafb; }
+
+.btn.primary {
+    background: #111;
+    color: #fff;
+    border-color: #111;
+    font-weight: 800;
+    letter-spacing: 0.02em;
+}
+
+.btn.ghost {
+    background: #f9fafb;
+    color: #111;
+    border-color: #e5e7eb;
+}
+
+/* ===== Helper text / states ===== */
+.hint {
+    color: #555;
+    font-size: 14px;
+}
+
+.empty {
+    background: #fafafa;
+    color: #111;
+    border: 1px dashed #e5e7eb;
+    border-radius: 10px;
+    padding: 12px;
+    text-align: center;
+}
+
+.success {
+    margin-top: 10px;
+    background: #f0fff4;           /* nền xanh nhạt */
+    border: 1px solid #22c55e;     /* viền xanh */
+    color: #111;                   /* text vẫn đen */
+    padding: 10px 12px;
+    border-radius: 10px;
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 900px) {
+    .row {
+        grid-template-columns: 1fr 70px 120px 120px;
+    }
+}
+
+@media (max-width: 600px) {
+    .row {
+        grid-template-columns: 1fr 60px 100px 100px;
+        gap: 10px;
+    }
+    .header h2 {
+        font-size: 20px;
+    }
+    .user-grid {
+        grid-template-columns: 1fr;
+    }
+}

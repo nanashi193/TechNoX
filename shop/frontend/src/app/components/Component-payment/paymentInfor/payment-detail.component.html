@@ -1,0 +1,136 @@
+<div class="container">
+    <header class="header">
+        <h1>Thanh toán – Chi tiết đơn hàng</h1>
+        <div class="order-id">
+            <span>Mã đơn hàng:</span>
+            <strong>{{ orderId() || '— sẽ được cấp khi tạo đơn' }}</strong>
+        </div>
+    </header>
+
+    <!--
+      PHẦN USER SNAPSHOT ĐÃ BỊ XÓA
+      Vì logic user$ không còn tồn tại trong file .ts mới.
+      Thông tin khách hàng giờ sẽ được nhập trực tiếp vào form bên dưới.
+    -->
+
+    <!-- FORM -->
+    <form [formGroup]="form" (ngSubmit)="proceedToPayment()" novalidate>
+        <!-- THÔNG TIN GIAO DỊCH -->
+        <section class="card">
+            <h2>Thông tin giao dịch</h2>
+
+            <div formGroupName="customer" class="customer-grid">
+                <label>
+                    Họ và Tên
+                    <input type="text" formControlName="name" placeholder="Nguyễn Văn A" />
+                    <small *ngIf="isInvalid('customer.name')">Vui lòng nhập họ tên.</small>
+                </label>
+
+                <label>
+                    Số điện thoại
+                    <input type="tel" formControlName="phone" placeholder="0901234567" />
+                    <small *ngIf="isInvalid('customer.phone')">Vui lòng nhập số điện thoại hợp lệ.</small>
+                </label>
+
+                <label class="full-width">
+                    Email
+                    <input type="email" formControlName="email" placeholder="nguyenvana@gmail.com" />
+                    <small *ngIf="isInvalid('customer.email')">Vui lòng nhập email hợp lệ.</small>
+                </label>
+                <fieldset formGroupName="address" class="address-grid full-width">
+                    <legend>Địa chỉ giao hàng</legend>
+                    <label>
+                        Số nhà, đường
+                        <input type="text" formControlName="street" placeholder="12 Nguyễn Văn Bảo" />
+                        <small *ngIf="isInvalid('customer.address.street')">Vui lòng nhập số nhà, đường.</small>
+                    </label>
+
+                    <label>
+                        Quận/Huyện
+                        <input type="text" formControlName="district" placeholder="Gò Vấp" />
+                        <small *ngIf="isInvalid('customer.address.district')">Vui lòng nhập Quận/Huyện.</small>
+                    </label>
+
+                    <label>
+                        Thành phố/Tỉnh
+                        <input type="text" formControlName="city" placeholder="TP. Hồ Chí Minh" />
+                        <small *ngIf="isInvalid('customer.address.city')">Vui lòng nhập Thành phố/Tỉnh.</small>
+                    </label>
+                </fieldset>
+            </div>
+        </section>
+
+        <!-- SẢN PHẨM -->
+        <section class="card">
+            <h2>Sản phẩm</h2>
+            <div class="table-wrap" *ngIf="!loading; else loadingTpl">
+                <div class="empty" *ngIf="loadError">{{ loadError }}</div>
+
+                <table *ngIf="!loadError && items.length > 0">
+                    <thead>
+                    <tr>
+                        <th style="width: 40%">Tên sản phẩm</th>
+                        <th>Đơn giá</th>
+                        <th>Số lượng</th>
+                        <th>Thành tiền</th>
+                    </tr>
+                    </thead>
+                    <tbody formArrayName="items">
+                    <tr *ngFor="let item of items.controls; let i = index; trackBy: trackByIndex" [formGroupName]="i">
+                        <td>
+                            <div>{{ item.get('productName')?.value }}</div>
+                            <small class="item-variant" *ngIf="item.get('color')?.value || item.get('size')?.value">
+                                {{ item.get('color')?.value }} / {{ item.get('size')?.value }}
+                            </small>
+                        </td>
+                        <td>
+                            {{ (item.get('unitPrice')?.value || 0) | currency : 'VND' : 'symbol' : '1.0-0' : 'vi-VN' }}
+                        </td>
+                        <td>{{ item.get('quantity')?.value }}</td>
+                        <td class="money">
+                            {{
+                                (item.get('unitPrice')?.value || 0) * (item.get('quantity')?.value || 0)
+                                    | currency : 'VND' : 'symbol' : '1.0-0' : 'vi-VN'
+                            }}
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+
+                <div class="empty" *ngIf="!loadError && items.length === 0">
+                    Giỏ hàng trống. Về <a routerLink="/cart">giỏ hàng</a> để thêm sản phẩm.
+                </div>
+            </div>
+
+            <ng-template #loadingTpl>
+                <div class="hint">Đang tải giỏ hàng…</div>
+            </ng-template>
+        </section>
+
+        <!-- TỔNG KẾT -->
+        <section class="card totals">
+            <div class="row">
+                <span>Tạm tính</span>
+                <strong>{{ subtotal() | currency:'VND':'symbol':'1.0-0' : 'vi-VN' }}</strong>
+            </div>
+            <div class="row">
+                <span>Thuế (10%)</span>
+                <strong>{{ tax() | currency:'VND':'symbol':'1.0-0' : 'vi-VN' }}</strong>
+            </div>
+            <div class="row grand">
+                <span>Tổng cộng</span>
+                <strong>{{ total() | currency:'VND':'symbol':'1.0-0' : 'vi-VN' }}</strong>
+            </div>
+            <button
+                    class="btn primary"
+                    type="submit"
+                    [disabled]="loading || !!loadError || form.invalid || items.length === 0 || creatingOrder"
+            >
+                {{ creatingOrder ? 'Đang xử lý...' : 'Xác nhận đặt hàng' }}
+            </button>
+            <small class="error-message" *ngIf="createOrderError">
+                {{ createOrderError }}
+            </small>
+        </section>
+    </form>
+</div>

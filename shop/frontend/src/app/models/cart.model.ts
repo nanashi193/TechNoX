@@ -6,6 +6,8 @@ export interface CartItem {
     size: string;
     price: number;
     quantity: number;
+    selected?: boolean;
+    unitPrice: number;
     // ... thêm imageUrl nếu có
 }
 

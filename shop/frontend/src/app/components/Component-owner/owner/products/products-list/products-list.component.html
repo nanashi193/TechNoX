@@ -1,0 +1,176 @@
+<h1>Danh sách sản phẩm</h1>
+<div class="toolbar">
+    <input class="search" placeholder="Tìm kiếm sản phẩm" [(ngModel)]="q" (input)="onSearch()">
+
+    <div class="right">
+        <button class="btn" (click)="create()">+ Thêm sản phẩm</button>
+
+        <div class="bulk" *ngIf="selectedCount">
+            <span class="muted">{{ selectedCount }} đã chọn</span>
+            <button class="btn danger" (click)="bulk('delete')">Xóa</button>
+        </div>
+        <button class="btn ghost" (click)="toggleFilters($event)">Filters</button>
+    </div>
+    <div class="sheet-backdrop" *ngIf="showFilters" (click)="closeFilters()"></div>
+
+    <aside class="filters-sheet" [class.open]="showFilters" (click)="$event.stopPropagation()">
+        <div class="sheet-header">
+            <h3>Bộ lọc</h3>
+            <button class="icon-btn" aria-label="Close" (click)="closeFilters()">×</button>
+        </div>
+
+        <!-- TỒN KHO -->
+        <div class="filter-group">
+            <div class="fp-label">Tồn kho</div>
+            <label class="fp-row"><input type="radio" name="stk" [(ngModel)]="flt.stock" value="all"> All</label>
+            <label class="fp-row"><input type="radio" name="stk" [(ngModel)]="flt.stock" value="in"> In stock</label>
+            <label class="fp-row"><input type="radio" name="stk" [(ngModel)]="flt.stock" value="out"> Out of stock</label>
+        </div>
+
+
+        <!-- TYPE -->
+        <div class="fp-group">
+            <div class="fg-title">Loại</div>
+
+            <ul class="radio-list">
+                <li>
+                    <label class="r">
+                        <input
+                                type="radio"
+                                name="type"
+                                [value]="''"
+                                [ngModel]="flt.categoryId ?? ''"
+                                (ngModelChange)="onChangeCategory($event)" />
+                        <span>All</span>
+                    </label>
+                </li>
+
+                <li>
+                    <label class="r" *ngFor="let c of categories">
+                        <input
+                                type="radio"
+                                name="type"
+                                [value]="c.id"
+                        [ngModel]="flt.categoryId ?? ''"
+                        (ngModelChange)="onChangeCategory($event)" />
+                        <span>{{ c.name }}</span>
+                    </label>
+                </li>
+            </ul>
+
+            <button type="button" class="link-clear" (click)="flt.categoryId = null">Clear</button>
+        </div>
+
+
+        <div class="sheet-footer">
+            <button class="btn ghost" (click)="clearFilters()">Clear all filters</button>
+            <button class="btn primary" (click)="applyFilters()">Save</button>
+        </div>
+    </aside>
+</div>
+
+<div class="table">
+    <div class="row thead">
+        <label class="cell check">
+            <input type="checkbox" [checked]="allSelected()" (change)="toggleAll($event)">
+        </label>
+
+        <div class="cell col-product th sortable"
+             (click)="sortBy('name')" [attr.aria-sort]="ariaSort('name')">
+            Tên sản phẩm
+            <span class="sort-caret" [class.asc]="isAsc('name')" [class.desc]="isDesc('name')"
+            ></span>
+        </div>
+
+        <div class="cell col-type th sortable"
+          >
+            Loại
+
+        </div>
+
+        <div class="cell col-stocks">Tồn kho</div>
+
+
+        <div class="cell col-sku th sortable"
+             (click)="sortBy('id')" [attr.aria-sort]="ariaSort('id')">
+            Mã sản phẩm
+            <span class="sort-caret" [class.asc]="isAsc('id')" [class.desc]="isDesc('id')"></span>
+        </div>
+
+        <div class="cell col-price th sortable"
+             (click)="sortBy('price')" [attr.aria-sort]="ariaSort('price')">
+            Giá
+            <span class="sort-caret" [class.asc]="isAsc('price')" [class.desc]="isDesc('price')"
+            ></span>
+        </div>
+
+        <div class="cell col-variants th sortable"
+       >
+            Biến thể
+
+        </div>
+
+        <div class="cell col-qty th sortable"
+      >
+            Số lượng
+
+        </div>
+    </div>
+
+    <div class="row" *ngFor="let p of filtered; trackBy: trackById">
+        <label class="cell check">
+            <input type="checkbox" [checked]="isSelected(p.id)" (change)="toggle(p.id,$event)">
+        </label>
+
+        <div class="cell col-product">
+            <a class="name-link" [routerLink]="['/owner/products', p.id]">
+                <img class="thumb" [src]="p.image" alt="">
+                <div class="info">
+                    <div class="name">{{ p.name }}</div>
+                </div>
+            </a>
+        </div>
+
+        <div class="cell col-type">
+            <span class="muted">{{ p.categoryName || '—' }}</span>
+        </div>
+
+        <div class="cell col-stocks">
+            <label class="switch">
+                <input type="checkbox" [checked]="p.inStock" (change)="toggleStock(p)">
+                <span class="track"></span>
+            </label>
+        </div>
+
+        <div class="cell col-sku">#{{ p.sku }}</div>
+        <div class="cell col-price">
+            <ng-container *ngIf="!p.hasPriceRange; else priceRange">
+                {{ p.minPrice | currency:'VND':'symbol-narrow':'1.0-0' }}
+            </ng-container>
+            <ng-template #priceRange>
+                {{ p.minPrice | currency:'VND':'symbol-narrow':'1.0-0' }}
+                –
+                {{ p.maxPrice | currency:'VND':'symbol-narrow':'1.0-0' }}
+            </ng-template>
+        </div>
+        <div class="cell col-variants">{{ p.variants?.length || 0 }}</div>
+        <div class="cell col-qty">{{ p.stockQty ?? 0 }}</div>
+    </div>
+
+</div>
+
+<nav class="pagination" aria-label="Pagination">
+    <button class="pg prev" [disabled]="page === 1" (click)="prev()">Trang trước</button>
+
+    <ng-container *ngFor="let n of pages; let i = index">
+        <ng-container *ngIf="i === 0 || n - pages[i-1] === 1; else dots">
+            <button class="pg num" [class.active]="n===page" (click)="goto(n)">{{ n }}</button>
+        </ng-container>
+        <ng-template #dots>
+            <span class="muted">…</span>
+            <button class="pg num" [class.active]="n===page" (click)="goto(n)">{{ n }}</button>
+        </ng-template>
+    </ng-container>
+
+    <button class="pg next" [disabled]="page === totalPages" (click)="next()">Trang sau</button>
+</nav>

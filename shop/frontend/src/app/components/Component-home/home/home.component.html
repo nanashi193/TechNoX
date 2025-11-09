@@ -1,0 +1,270 @@
+<!-- POSTER COVER (tránh *ngIf để không kẹt animation) -->
+<section
+        class="poster-cover"
+        role="dialog"
+        aria-modal="true"
+        [attr.aria-hidden]="!showCover ? 'true' : 'false'"
+        [class.hide]="!showCover"
+        [class.force-off]="forceOff"
+        (animationend)="onCoverAnimEnd($event)"
+>
+    <img
+            class="poster-media"
+            src="../../../../assets/Phone/IPhone.jpg"
+            alt="TechNoX poster"
+            width="1200"
+            height="800"
+            decoding="async"
+            fetchpriority="high"
+    />
+    <h1 class="poster-title">TECHNO<span>X</span></h1>
+</section>
+
+<main>
+    <!-- HERO -->
+    <section class="hero section-pad">
+        <div class="container hero__inner">
+            <p class="eyebrow">Chúng tôi là TechNoX</p>
+            <h1 class="hero__title">SMARTPHONES<br /> FOR EVERYONE</h1>
+            <p class="hero__desc">
+                Bán lẻ điện thoại chính hãng. Bảo hành 12–24 tháng. Trả góp 0%,
+                giao nhanh trong ngày, đổi trả dễ dàng.
+            </p>
+            <a class="btn btn--accent"  [routerLink]="['/products']" aria-label="Mua ngay">MUA NGAY</a>
+
+            <!-- Hero gallery -->
+            <div class="hero__gallery">
+                <img
+                        src="../../../../assets/Phone/IPhone.jpg"
+                        alt="Flagship phone"
+                        width="1200"
+                        height="800"
+                        loading="eager"
+                        decoding="async"
+                />
+                <img
+                        src="../../../../assets/Phone/Iphone1.jpg"
+                        alt="Flagship phone"
+                        width="1200"
+                        height="800"
+                        loading="lazy"
+                        decoding="async"
+                />
+            </div>
+        </div>
+    </section>
+
+    <!-- SẢN PHẨM NỔI BẬT -->
+    <section class="selected section-pad">
+        <div class="container selected__inner">
+            <p class="eyebrow eyebrow--gold">Dòng sản phẩm nổi bật</p>
+            <h2 class="section-title">ĐIỆN THOẠI<br />ĐƯỢC CHỌN LỌC</h2>
+            <div *ngIf="phonesLoading" class="loading-indicator" aria-live="polite">
+                Đang tải sản phẩm điện thoại...
+            </div>
+            <div *ngIf="!phonesLoading && phoneProducts.length === 0" class="no-products">
+                Không có sản phẩm trong mục này.
+            </div>
+            <div class="card-grid" *ngIf="!phonesLoading && phoneProducts.length > 0">
+                <article class="card" *ngFor="let p of phoneProducts; trackBy: trackById">
+
+                    <a class="card__media" [routerLink]="['/product', p.id]" aria-label="{{ p.name }}">
+                        <!-- Logic ảnh giữ nguyên, đổi tên #noHomeImage -> #noPhoneImg -->
+                        <img *ngIf="p.imageUrls && p.imageUrls.length > 0; else noPhoneImg"
+                             [src]="p.imageUrls[0]"
+                             [alt]="p.name"
+                             class="card__img">
+                        <ng-template #noPhoneImg>
+                            <img src="https://placehold.co/300x300/eee/ccc?text=No+Image"
+                                 [alt]="p.name"
+                                 class="card__img">
+                        </ng-template>
+                    </a>
+
+                    <div class="card__body">
+                        <span class="product-tag" *ngIf="p.categoryName">
+                            {{ p.categoryName }}
+                        </span>
+                        <h3 class="card__title">
+                            <a [routerLink]="['/product', p.id]">{{ p.name }}</a>
+                        </h3>
+                        <p class="product-price">
+                            {{ p.price | currency:'VND':'symbol':'1.0-0' }}
+                        </p>
+                    </div>
+                </article>
+            </div>
+
+            <!--
+              CẬP NHẬT: Xóa Pager (heroPrev/heroNext)
+              Cập nhật link "Xem tất cả" để trỏ đúng danh mục
+            -->
+            <div class="section-cta">
+                <a class="btn btn--black view-all"
+                   [routerLink]="['/products']"
+                   [queryParams]="{ category: 'Điện thoại' }">
+                    XEM TOÀN BỘ ĐIỆN THOẠI
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- LAPTOP -->
+    <section class="laptop-intro section-pad">
+        <div class="container">
+            <div class="split">
+                <div class="split__media">
+                    <video
+                        #heroVideo
+                        class="hero-video"
+                        autoplay
+                        muted
+                        loop
+                        playsinline
+                        preload="auto"
+                        (error)="onVideoError($event)"
+                        (canplay)="onVideoCanPlay()"
+                    >
+                        <source src="../../../../assets/Video/iPhone%2016%20Reveal%20(4K).mp4" type="video/mp4" />
+                        Trình duyệt của bạn không hỗ trợ video.
+                    </video>
+
+                    <button class="mute-btn" type="button" (click)="toggleMute(heroVideo)" aria-label="Bật/tắt âm thanh video">
+                        {{ isMuted ? '🔇' : '🔊' }}
+                    </button>
+                </div>
+
+                <div class="split__content">
+                    <p class="eyebrow">Laptop mới nhất</p>
+                    <h2 class="section-title">KHÁM PHÁ CÁC DÒNG<br/>LAPTOP HIỆN ĐẠI</h2>
+                    <p class="muted">
+                        TechNoX mang đến cho bạn các mẫu laptop hiệu năng cao, thiết kế sang trọng,
+                        phù hợp cho học tập, làm việc và giải trí. Khám phá ngay để chọn cho mình chiếc laptop ưng ý.
+                    </p>
+                    <a class="btn btn--outline" [routerLink]="['/products']" >TÌM HIỂU THÊM</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="selected section-pad" style="padding-top: 0;">
+        <div class="container">
+            <div *ngIf="laptopsLoading" class="loading-indicator" aria-live="polite">
+                Đang tải sản phẩm laptop...
+            </div>
+            <div *ngIf="!laptopsLoading && laptopProducts.length === 0" class="no-products">
+                Không có sản phẩm trong mục này.
+            </div>
+            <div class="card-grid" *ngIf="!laptopsLoading && laptopProducts.length > 0">
+                <article class="card" *ngFor="let p of laptopProducts; trackBy: trackById">
+
+                    <a class="card__media" [routerLink]="['/product', p.id]" aria-label="{{ p.name }}">
+                        <img *ngIf="p.imageUrls && p.imageUrls.length > 0; else noLaptopImg"
+                             [src]="p.imageUrls[0]"
+                             [alt]="p.name"
+                             class="card__img">
+                        <ng-template #noLaptopImg>
+                            <img src="https://placehold.co/300x300/eee/ccc?text=No+Image"
+                                 [alt]="p.name"
+                                 class="card__img">
+                        </ng-template>
+                    </a>
+
+                    <div class="card__body">
+                        <span class="product-tag" *ngIf="p.categoryName">
+                            {{ p.categoryName }}
+                        </span>
+                        <h3 class="card__title">
+                            <a [routerLink]="['/product', p.id]">{{ p.name }}</a>
+                        </h3>
+                        <p class="product-price">
+                            {{ p.price | currency:'VND':'symbol':'1.0-0' }}
+                        </p>
+                    </div>
+                </article>
+            </div>
+        </div>
+    </section>
+
+    <!-- PHỤ KIỆN -->
+    <section class="journal section-pad accessories">
+        <div class="container">
+            <p class="eyebrow eyebrow--gold">Sản phẩm kèm theo</p>
+            <h2 class="section-title">PHỤ KIỆN</h2>
+            <div *ngIf="accessoriesLoading" class="loading-indicator" aria-live="polite">
+                Đang tải sản phẩm phụ kiện...
+            </div>
+            <div *ngIf="!accessoriesLoading && accessoryProducts.length === 0" class="no-products">
+                Không có sản phẩm trong mục này.
+            </div>
+            <div class="card-grid" *ngIf="!accessoriesLoading && accessoryProducts.length > 0">
+                <article class="card" *ngFor="let p of accessoryProducts; trackBy: trackById">
+
+                    <a class="card__media" [routerLink]="['/product', p.id]" aria-label="{{ p.name }}">
+                        <!-- Dùng logic ảnh giống các mục trên -->
+                        <img *ngIf="p.imageUrls && p.imageUrls.length > 0; else noAccessoryImg"
+                             [src]="p.imageUrls[0]"
+                             [alt]="p.name"
+                             class="card__img">
+                        <ng-template #noAccessoryImg>
+                            <img src="https://placehold.co/300x300/eee/ccc?text=No+Image"
+                                 [alt]="p.name"
+                                 class="card__img">
+                        </ng-template>
+                    </a>
+                    <div class="card__body">
+                        <span class="product-tag" *ngIf="p.categoryName">
+                            {{ p.categoryName }}
+                        </span>
+                        <h3 class="card__title">
+                            <a [routerLink]="['/product', p.id]">{{ p.name }}</a>
+                        </h3>
+                        <p class="product-price">
+                            {{ p.price | currency:'VND':'symbol':'1.0-0' }}
+                        </p>
+                    </div>
+                </article>
+            </div>
+            <div class="section-cta">
+                <a class="btn btn--black view-all"
+                   [routerLink]="['/products']"
+                   [queryParams]="{ category: 'Phụ kiện' }">
+                    XEM THÊM PHỤ KIỆN
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- NEWSLETTER -->
+    <section class="newsletter">
+        <div class="container newsletter__inner">
+            <h3>Nhận ưu đãi &amp; voucher hàng tuần</h3>
+            <form class="newsletter__form" (submit)="$event.preventDefault()" aria-label="Đăng ký nhận email khuyến mãi">
+                <input type="email" placeholder="Email của bạn" required autocomplete="email" />
+                <button class="btn" type="submit">ĐĂNG KÝ</button>
+            </form>
+            <p class="muted small">Bạn có thể hủy nhận email bất cứ lúc nào.</p>
+        </div>
+    </section>
+</main>
+
+<!-- COOKIE BANNER -->
+<div
+        class="cookie"
+        *ngIf="cookieOpen"
+        role="dialog"
+        aria-live="polite"
+        aria-label="Tùy chọn cookie"
+>
+    <div class="cookie__panel">
+        <h4 class="cookie__title">Cookie preference</h4>
+        <p class="cookie__text">
+            Chúng tôi dùng cookie để cải thiện trải nghiệm của bạn trên website.
+        </p>
+        <div class="cookie__actions">
+            <button class="btn" type="button" (click)="acceptCookies()">ĐỒNG Ý</button>
+            <button class="btn" type="button" (click)="refuseCookies()">TỪ CHỐI</button>
+            <button class="btn" type="button" (click)="customCookies()">TUỲ CHỈNH</button>
+        </div>
+    </div>
+</div>

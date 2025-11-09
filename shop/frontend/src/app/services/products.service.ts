@@ -15,34 +15,6 @@ export interface ProductListResponse {
     totalItems?: number;
 }
 
-type RawVariant = { sku?: string; code?: string; quantity?: number; qty?: number; stock?: number };
-
-type RawProduct = {
-    id?: number;
-    name: string;
-    price: number | string;
-    thumbnail?: string;
-    imageUrl?: string;
-    description?: string;
-    status?: boolean;
-
-    variants?: RawVariant[] | number | null;
-    variantsCount?: number;
-
-    createdAt?: string; CreatedAt?: string;
-    categoryName?: string;
-    CategoryName?: string;
-    category?: { id: number; name: string };
-    CategoryId?: number;
-
-    sku?: string;
-    code?: string;
-    productCode?: string;
-
-    stockQty?: number;
-    quantity?: number;
-    totalQuantity?: number;
-};
 
 @Injectable({providedIn: 'root'})
 export class ProductService {

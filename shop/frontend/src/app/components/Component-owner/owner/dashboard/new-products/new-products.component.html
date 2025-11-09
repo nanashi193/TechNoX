@@ -1,0 +1,24 @@
+<div class="card new-products">
+    <div class="card-header">
+        <h3>Sản phẩm mới</h3>
+        <a class="link" routerLink="/owner/products">Xem tất cả</a>
+    </div>
+
+    <ul class="np-list">
+        <li *ngFor="let p of newProducts; trackBy: track">
+            <div class="image-wrapper">
+                <img [src]="p.image || placeholder"
+                     fill
+                     alt="{{p.name}}">
+            </div>
+            <div class="info">
+                <p class="name">{{ p.name }}</p>
+                <span class="date">{{ p.date ? (p.date | date:'dd/MM/yyyy') : '—' }}</span>
+            </div>
+            <a class="view" [routerLink]="['/owner/products', p.id]" aria-label="Xem chi tiết {{p.name}}">
+                Xem chi tiết
+            </a>
+        </li>
+        <li *ngIf="!newProducts?.length" class="muted">Chưa có sản phẩm mới.</li>
+    </ul>
+</div>

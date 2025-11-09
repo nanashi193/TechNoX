@@ -1,0 +1,188 @@
+:host {
+    display: block;
+    color: #eaeaea;
+}
+
+/* Layout */
+.container {
+    width: 92%;
+    max-width: 1180px;
+    margin: 0 auto;
+}
+.section-pad { padding-block: 36px; }
+.title { margin: 0 0 18px; font-size: 26px; font-weight: 800; opacity: .9; }
+
+.state {
+    padding: 14px 16px;
+    background: #121314;
+    border: 1px solid rgba(255,255,255,.08);
+    border-radius: 12px;
+}
+
+.order-list { display: grid; gap: 16px; }
+
+/* ===== CSS CHO THANH LỌC (MỚI) ===== */
+.order-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 24px;
+    justify-content: flex-end; /* Sửa: Di chuyển thanh lọc qua phải */
+}
+.btn--filter {
+    /* Dùng chung .btn styles (padding, font, v.v) */
+    background: #2a2b2e; /* Nền tối, hơi sáng hơn card */
+    border-color: #444;
+    color: #ccc;
+    font-weight: 500;
+}
+.btn--filter:hover {
+    background: #3a3b3e;
+    border-color: #555;
+    color: #fff;
+}
+.btn--filter.active {
+    background: transparent; /* Sửa: Nền trong suốt */
+    border-color: #4a90e2;   /* Sửa: Giữ viền xanh */
+    color: #8ec3f3;         /* Sửa: Chữ màu xanh nhạt (hợp theme tối) */
+    font-weight: 600;
+    box-shadow: inset 0 0 0 1px #4a90e2; /* Thêm viền trong cho rõ */
+}
+/* ===== KẾT THÚC CSS THANH LỌC ===== */
+
+
+/* Card */
+.order-card {
+    background: #0f0f10;
+    border: 1px solid rgba(255,255,255,.12);
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 4px 16px rgba(0,0,0,.25);
+}
+
+/* Header */
+.order-head {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 14px 16px;
+    background: #121314;
+    border-bottom: 1px solid rgba(255,255,255,.06);
+}
+.head-left { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.row1, .row2 { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.label { opacity: .75; }
+.code { font-weight: 800; letter-spacing: .02em; }
+.dot { opacity: .35; }
+.time { opacity: .85; font-size: 12px; }
+.courier { font-weight: 600; }
+.tel { color: #9ad7ff; text-decoration: none; }
+.tel:hover { text-decoration: underline; }
+
+.head-right { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.money { font-weight: 800; font-variant-numeric: tabular-nums; }
+
+/* Pills */
+.status-pill, .pay-pill {
+    padding: 4px 8px;
+    border-radius: 999px;
+    font-size: 11px;
+    line-height: 1;
+    border: 1px solid rgba(255,255,255,.14);
+    background: #1a1b1d;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    white-space: nowrap; /* Thêm */
+}
+.status-pill.ok    { background: #163824; border-color: #1f6a3f; color: #8ef5ba; } /* Succeed */
+.status-pill.warn  { background: #3a3716; border-color: #6d6321; color: #ffe69b; } /* Delivering */
+.status-pill.bad   { background: #3a1616; border-color: #6d2121; color: #ff9b9b; } /* Cancelled */
+
+/* Sửa: CSS cho paymentMethod (COD/PayOS) */
+.pay-pill.cod { background: #3a3716; border-color: #6d6321; color: #ffe69b; }
+.pay-pill.pos { background: #163824; border-color: #1f6a3f; color: #b7ffd7; }
+
+
+/* Lines (products in order) */
+.order-lines { padding: 12px 16px; }
+.line-list { list-style: none; padding: 0; margin: 0; display: grid; gap: 10px; }
+.line {
+    display: grid;
+    grid-template-columns: 56px 1fr auto;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 10px;
+    background: #0e0e0f;
+    border: 1px solid rgba(255,255,255,.06);
+    border-radius: 12px;
+}
+.thumb {
+    width: 56px; height: 56px; object-fit: cover; border-radius: 8px;
+    background: #1b1b1c;
+}
+.line-main { min-width: 0; }
+.name { font-weight: 700; }
+.meta { font-size: 12px; opacity: .8; margin-top: 2px; }
+.line-price { font-weight: 800; white-space: nowrap; }
+
+/* Totals */
+.totals {
+    margin-top: 12px;
+    border-top: 1px solid rgba(255,255,255,.06);
+    padding-top: 10px;
+    display: grid;
+    gap: 6px;
+}
+.totals .row { display: flex; justify-content: space-between; }
+.totals .grand {
+    margin-top: 4px;
+    font-weight: 800;
+    border-top: 1px dashed rgba(255,255,255,.12);
+    padding-top: 8px;
+}
+
+/* Footer & Buttons */
+.order-foot { padding: 12px 16px; background: #0f0f10; border-top: 1px solid rgba(255,255,255,.06); }
+.actions { display: flex; gap: 10px; flex-wrap: wrap; }
+
+.btn {
+    display: inline-block;
+    padding: 10px 14px;
+    border: 1px solid #555;
+    color: #fdf7f7;
+    text-decoration: none;
+    cursor: pointer;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: .02em;
+    transition: background .15s ease, filter .15s ease;
+}
+.btn--ghost  { background: transparent; }
+.btn--ghost:hover { background: #1b1b1b; }
+.btn--accent { background: #21c55d; border-color: #21c55d; color: #111; }
+.btn--accent[disabled] { opacity: .7; cursor: default; }
+.btn--danger { background: #ef4444; border-color: #ef4444; color: #111; }
+.btn--danger[disabled] { opacity: .7; cursor: default; }
+
+/* Cancel note */
+.cancel-row {
+    padding: 10px 16px;
+    color: #ffbcbc;
+    background: #3d1717;
+    border-top: 1px solid rgba(255,255,255,.06);
+}
+
+/* Responsive */
+@media (max-width: 720px) {
+    .order-head { flex-direction: column; align-items: flex-start; }
+    .head-right { justify-content: space-between; width: 100%; }
+    .line { grid-template-columns: 48px 1fr; }
+    .line-price { justify-self: end; grid-column: 1 / -1; }
+    .thumb { width: 48px; height: 48px; }
+}
+
+/* Sửa: Đổi màu tiêu đề thành màu đen để hiển thị trên nền trắng */
+.title--black {
+    color: #111 !important;
+}

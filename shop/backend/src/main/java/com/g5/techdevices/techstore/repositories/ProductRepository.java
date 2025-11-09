@@ -4,16 +4,17 @@ import com.g5.techdevices.techstore.entity.products.Category;       // NOTE: đ�
 import com.g5.techdevices.techstore.entity.products.Product;        // NOTE: đổi import
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
-public interface ProductRepository extends JpaRepository<Product, Long> {
+public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpecificationExecutor<Product> {
 
     // NOTE: đổi thành IgnoreCase cho đúng service hiện dùng
     boolean existsByNameIgnoreCase(String name);
@@ -93,7 +94,8 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     @Query("SELECT p FROM Product p WHERE p.id IN :productIds")
     List<Product> findProductsByIds(@Param("productIds") List<Long> productIds);
 
-    // NOTE: XÓA method favorites vì entity Product hiện tại của bạn KHÔNG có quan hệ favorites
-    // @Query("SELECT p FROM Product p JOIN p.favorites f WHERE f.user.id = :userId")
-    // List<Product> findFavoriteProductsByUserId(@Param("userId") Long userId);
+    // 🔹 Dùng createdAt >= :startDate để lọc trong 1 tháng gần nhất
+    @Query("SELECT p FROM Product p WHERE p.createdAt >= :startDate")
+    List<Product> findNewProductsInLastMonth(LocalDateTime startDate, org.springframework.data.domain.Pageable pageable);
+
 }

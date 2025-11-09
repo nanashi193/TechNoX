@@ -31,7 +31,7 @@
     "@popperjs/core": "^2.11.8",
     "bootstrap": "^5.3.8",
     "boxicons": "^2.1.4",
-    "chart.js": "^4.5.0",
+    "chart.js": "^4.5.1",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.2",
     "jwt-decode": "^4.0.0",
