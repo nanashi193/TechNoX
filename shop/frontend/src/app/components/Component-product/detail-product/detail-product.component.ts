@@ -25,6 +25,10 @@ export class DetailProductComponent implements OnInit {
     selectedVariant: CustomerVariant | null = null;
     quantity = 1;
     currentImageIndex: number = 0;
+    selectedColor: string | null = null;
+    selectedSize: string | null = null;
+    uniqueColors: string[] = [];
+    sizesForSelectedColor: string[] = [];
 
     ngOnInit(): void {
         const productIdString = this.route.snapshot.paramMap.get('id');
@@ -51,17 +55,72 @@ export class DetailProductComponent implements OnInit {
             .subscribe({
                 next: (data) => {
                     this.product = data;
-                    if (this.product?.variants && this.product.variants.length > 0) {
-                        this.selectedVariant = this.product.variants.find(v => v.quantity > 0) || this.product.variants[0];
-                    }
                     this.quantity = 1;
                     this.currentImageIndex = 0;
+                    if (this.product?.variants && this.product.variants.length > 0) {
+                        this.updateColorOptions();
+                        const firstAvailableColor = this.uniqueColors.find(color =>
+                            this.product!.variants.some(v => v.color === color && v.quantity > 0)
+                        );
+                        this.onColorSelect(firstAvailableColor || this.uniqueColors[0]);
+
+                    } else {
+                        this.resetSelections();
+                    }
                 },
                 error: (err) => {
                     console.error('Error loading product:', err);
                     this.product = null;
+                    this.resetSelections();
                 }
             });
+    }
+    resetSelections(): void {
+        this.selectedColor = null;
+        this.selectedSize = null;
+        this.selectedVariant = null;
+        this.uniqueColors = [];
+        this.sizesForSelectedColor = [];
+    }
+    updateColorOptions(): void {
+        if (!this.product?.variants) return;
+
+        const colors = this.product.variants
+            .map(v => v.color)
+            .filter((color): color is string => color != null);
+
+        this.uniqueColors = [...new Set(colors)];
+    }
+
+    onColorSelect(color: string): void {
+        if (this.selectedColor === color) return;
+        this.selectedColor = color;
+        const sizes = this.product!.variants
+            .filter(v => v.color === color)
+            .map(v => v.size)
+            .filter((size): size is string => size != null);
+
+        this.sizesForSelectedColor = [...new Set(sizes)]; // OK
+        const firstAvailableSize = this.sizesForSelectedColor.find(size =>
+            this.product!.variants.some(v => v.color === color && v.size === size && v.quantity > 0)
+        );
+        this.onSizeSelect(firstAvailableSize || this.sizesForSelectedColor[0]);
+    }
+
+    onSizeSelect(size: string): void {
+        this.selectedSize = size;
+        this.updateSelectedVariant();
+    }
+    updateSelectedVariant(): void {
+        if (!this.product || !this.selectedColor || !this.selectedSize) {
+            this.selectedVariant = null;
+            return;
+        }
+
+        this.selectedVariant = this.product.variants.find(v =>
+            v.color === this.selectedColor && v.size === this.selectedSize
+        ) || null;
+        this.quantity = 1;
     }
 
     selectVariant(variant: CustomerVariant): void {
@@ -69,6 +128,22 @@ export class DetailProductComponent implements OnInit {
             this.selectedVariant = variant;
             this.quantity = 1;
         }
+    }
+    isColorOutOfStock(color: string): boolean {
+        if (!this.product?.variants) {
+            return true; // Nếu không có variant, coi như hết hàng
+        }
+        return !this.product.variants.some(v => v.color === color && v.quantity > 0);
+    }
+    isSizeOutOfStock(size: string): boolean {
+        if (!this.product?.variants || !this.selectedColor) {
+            return true; // Nếu chưa chọn màu, coi như hết
+        }
+        const variant = this.product.variants.find(v =>
+            v.color === this.selectedColor &&
+            v.size === size
+        );
+        return !variant || variant.quantity <= 0;
     }
 
     // --- Helpers ---

@@ -70,20 +70,52 @@
                     </section>
 
                     <section class="panel variant-selector" *ngIf="product.variants && product.variants.length > 0">
-                        <h2 class="panel__title">Chọn phiên bản ({{ selectedVariant?.color || '...' }})</h2>
-                        <div class="colors"> <button *ngFor="let variant of product.variants"
-                                                     type="button"
-                                                     class="color-option"
-                                                     [style.background-color]="variant.color?.toLowerCase() || 'grey'"
-                                                     [class.selected]="variant === selectedVariant"
-                                                     [class.disabled]="variant.quantity <= 0"
-                                                     (click)="selectVariant(variant)"
-                                                     title="{{ variant.color }} {{ variant.quantity <= 0 ? '(Hết hàng)' : '' }}">
-                            <span *ngIf="variant.quantity <= 0" class="oos-mark">X</span> </button>
+
+                        <h2 class="panel__title">Chọn màu:
+                            <strong>{{ selectedColor || '...' }}</strong>
+                        </h2>
+                        <div class="colors">
+                            <button *ngFor="let color of uniqueColors"
+                                    type="button"
+                                    class="color-option"
+                                    [style.background-color]="color.toLowerCase() || 'grey'"
+                                    [class.selected]="color === selectedColor"
+                                    (click)="onColorSelect(color)"
+                                    title="{{ color }}">
+
+                                <span *ngIf="isColorOutOfStock(color)" class="oos-mark">X</span>
+                            </button>
                         </div>
+
+                        <ng-container *ngIf="selectedColor && sizesForSelectedColor.length > 0">
+                            <h2 class="panel__title" style="margin-top: 1rem;">Chọn kích cỡ/dung lượng:
+                                <strong>{{ selectedSize || '...' }}</strong>
+                            </h2>
+
+                            <div class="sizes">
+                                <button *ngFor="let size of sizesForSelectedColor"
+                                        type="button"
+                                        class="size-option"
+                                        [class.selected]="size === selectedSize"
+                                        (click)="onSizeSelect(size)"
+
+                                        [disabled]="isSizeOutOfStock(size)"
+                                        title="{{ size }}">
+
+                                    {{ size }}
+
+                                </button>
+                            </div>
+                        </ng-container>
+
+
                         <p class="stock-info" *ngIf="selectedVariant">
                             {{ selectedVariant.quantity > 0 ? 'Còn ' + selectedVariant.quantity + ' sản phẩm' : 'Tạm hết hàng' }}
                         </p>
+                        <p class="stock-info" *ngIf="!selectedVariant && selectedColor && selectedSize">
+                            Phiên bản này không tồn tại.
+                        </p>
+
                     </section>
 
                     <section class="panel">

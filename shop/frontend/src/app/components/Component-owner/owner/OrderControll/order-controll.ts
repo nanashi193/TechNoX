@@ -93,6 +93,7 @@ export class OrderControllComponent implements OnInit {
 
     // ====== Lifecycle (Gọi API) ======
     ngOnInit(): void {
+        this.loadData()
         combineLatest([
             this.billAdminService.getBillsForAdmin(),
             this.route.queryParams

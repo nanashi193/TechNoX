@@ -23,9 +23,9 @@ export class ComponentMyOrderComponent implements OnInit {
     busy: Record<string | number, boolean> = {};
     expanded: Record<string | number, boolean> = {};
 
-    activeFilter: OrderFilterStatus = 'Processing';
+    activeFilter: OrderFilterStatus = 'Confirmed';
     readonly statusTabs: { key: OrderFilterStatus, label: string }[] = [
-        { key: 'Processing', label: 'Đang Xử lý' },
+        // { key: 'Processing', label: 'Đang Xử lý' },
         { key: 'Confirmed', label: 'Đã xác nhận' },
         { key: 'Delivering', label: 'Đang vận chuyển' },
         { key: 'Delivered', label: 'Đã giao' },

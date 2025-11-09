@@ -40,7 +40,7 @@ export class HomeComponent implements AfterViewInit, OnDestroy, OnInit {
     accessoriesLoading = true;
 
     // Số lượng sản phẩm hiển thị cho mỗi mục (bạn có thể đổi số này)
-    private readonly productsPerCategory = 3;
+    private readonly productsPerCategory = 6;
 
     // ===== BƯỚC 2: Cập nhật ngOnInit =====
     ngOnInit(): void {
