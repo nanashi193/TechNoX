@@ -184,11 +184,15 @@ public class BillService implements IBillService {
     }
 
     @Transactional
-    public BillResponse confirmCOD(Long billId, User currentUser) throws DataNotFoundException, InvalidOperationException, InsufficientStockException {
-        Bill confirmedBill = this.confirmBillLogic(billId, "COD", false);
-        if (confirmedBill.getUser().getId() != (currentUser.getId())) {
+    public BillResponse confirmCOD(Long billId, User currentUser)
+            throws DataNotFoundException, InvalidOperationException, InsufficientStockException, AccessDeniedException {
+        Bill billToConfirm = billRepository.findById(billId)
+                .orElseThrow(() -> new DataNotFoundException("Không tìm thấy đơn hàng (bill) với ID: " + billId));
+        if (billToConfirm.getUser().getId() != (currentUser.getId())) {
             throw new AccessDeniedException("Bạn không có quyền xác nhận đơn hàng này.");
         }
+        Bill confirmedBill = this.confirmBillLogic(billId, "COD", false);
+
         return billMapper.mapToBillResponse(confirmedBill);
     }
 

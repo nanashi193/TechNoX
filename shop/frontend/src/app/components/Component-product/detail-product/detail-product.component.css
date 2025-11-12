@@ -263,3 +263,73 @@ img { max-width: 100%; display: block; height: auto; }
 /* =============== LEGACY DARK VARIANTS (when not using .detail-card) =============== */
 .detail:not(.detail-card) .product-info{ background: var(--panel); border: 1px solid var(--border); color: var(--text); }
 .detail:not(.detail-card) .state{ background: #151518; border: 1px solid var(--border); color: var(--text); }
+.variant-btn {
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+    transition: border-color 0.2s ease;
+}
+
+.size-option {
+    background-color: #1D1D1F;
+    color: #F5F5F7;
+    border: 1px solid #424245;
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 0.95rem;
+    font-weight: 500;
+}
+
+.size-option:hover:not(:disabled) {
+    border-color: #888;
+}
+
+.color-option {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 2px solid #555;
+    padding: 0;
+}
+
+.option-check {
+    display: none;
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 22px;
+    height: 22px;
+    background-color: #E53935; /* Màu đỏ */
+    clip-path: polygon(100% 0, 0 0, 100% 100%);
+}
+
+.option-check svg {
+    color: white;
+    width: 10px;
+    height: 10px;
+    position: absolute;
+    top: 2px;
+    right: 2px;
+}
+
+.variant-btn.selected {
+    border-color: #E53935 !important;
+}
+
+.size-option.selected {
+    border-width: 2px;
+    padding: 9px 13px;
+}
+
+.variant-btn.selected .option-check {
+    display: block;
+}
+.variant-btn:disabled {
+    background-color: #111;
+    color: #555;
+    border-color: #333;
+    cursor: not-allowed;
+}
+.size-option:disabled {
+    text-decoration: line-through;
+}

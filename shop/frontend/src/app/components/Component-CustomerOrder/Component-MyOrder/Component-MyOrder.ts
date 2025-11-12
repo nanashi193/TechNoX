@@ -54,8 +54,20 @@ export class ComponentMyOrderComponent implements OnInit {
         this.loading = true;
         this.errorMsg = '';
         this.billService.getMyOrders().subscribe({
-            next: (data: BillAdminDetailResponse[]) => {
-                this.orders = data;
+            next: (data: any[]) => {
+                this.orders = data.map(order => {
+                    const details = order.products?.map((item: any) => {
+                        return {
+                            ...item,
+                            price: item.unitPrice
+                        };
+                    }) || [];
+
+                    return {
+                        ...order,
+                        details: details
+                    };
+                });
                 this.loading = false;
             },
             error: (err: any) => {

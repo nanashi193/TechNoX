@@ -77,13 +77,18 @@
                         <div class="colors">
                             <button *ngFor="let color of uniqueColors"
                                     type="button"
-                                    class="color-option"
-                                    [style.background-color]="color.toLowerCase() || 'grey'"
+                                    class="variant-btn color-option" [style.background-color]="color.toLowerCase() || 'grey'"
                                     [class.selected]="color === selectedColor"
                                     (click)="onColorSelect(color)"
                                     title="{{ color }}">
 
                                 <span *ngIf="isColorOutOfStock(color)" class="oos-mark">X</span>
+
+                                <div class="option-check">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor">
+                                        <path fill-rule="evenodd" d="M12.416 3.376a.75.75 0 0 1 .208 1.04l-5 7.5a.75.75 0 0 1-1.154.114l-3-3a.75.75 0 0 1 1.06-1.06L6.5 9.87l4.354-6.53a.75.75 0 0 1 1.04-.208Z" clip-rule="evenodd" />
+                                    </svg>
+                                </div>
                             </button>
                         </div>
 
@@ -95,15 +100,18 @@
                             <div class="sizes">
                                 <button *ngFor="let size of sizesForSelectedColor"
                                         type="button"
-                                        class="size-option"
-                                        [class.selected]="size === selectedSize"
+                                        class="variant-btn size-option" [class.selected]="size === selectedSize"
                                         (click)="onSizeSelect(size)"
-
                                         [disabled]="isSizeOutOfStock(size)"
                                         title="{{ size }}">
 
                                     {{ size }}
 
+                                    <div class="option-check">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor">
+                                            <path fill-rule="evenodd" d="M12.416 3.376a.75.75 0 0 1 .208 1.04l-5 7.5a.75.75 0 0 1-1.154.114l-3-3a.75.75 0 0 1 1.06-1.06L6.5 9.87l4.354-6.53a.75.75 0 0 1 1.04-.208Z" clip-rule="evenodd" />
+                                        </svg>
+                                    </div>
                                 </button>
                             </div>
                         </ng-container>
