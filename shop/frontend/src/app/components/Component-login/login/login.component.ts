@@ -57,7 +57,13 @@ export class LoginComponent {
                             // 3) Điều hướng theo role
                             const role = (me.role ?? '').toUpperCase();
                             if (role === 'ADMIN' || role === 'OWNER') this.router.navigate(['/owner']);
-                            else if (role === 'SHIPPING_STAFF') this.router.navigate(['/staff/shipping']);
+                            else if (role === 'STAFF') {
+                                this.router.navigate(['/staff/assign-orders']);
+                            }
+                            else if (role === 'SHIPPING_STAFF') {
+                                this.router.navigate(['/staff/shipping']);
+                            }
+
                             else this.router.navigate(['/home']);
                         },
                         error: _ => {
