@@ -282,7 +282,7 @@ public class BillService implements IBillService {
         }
         User staff = userRepository.findById(staffId)
                 .orElseThrow(() -> new RuntimeException("Staff not found: " + staffId));
-        if (!Role.STAFF.equals(staff.getRole().getName().toUpperCase())) {
+        if (!Role.SHIPPING_STAFF.equals(staff.getRole().getName().toUpperCase())) {
             throw new RuntimeException("User is not a staff member: " + staffId);
         }
         bill.setStaff(staff);

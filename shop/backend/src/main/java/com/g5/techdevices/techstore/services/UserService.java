@@ -342,7 +342,7 @@ public class UserService implements IUserService{
     }
     @Override
     public List<StaffInfo> getStaffList() {
-        List<User> staffUsers = userRepository.findAllByRole_Name(Role.STAFF);
+        List<User> staffUsers = userRepository.findAllByRole_Name(Role.SHIPPING_STAFF);
         return staffUsers.stream()
                 .map(user -> new StaffInfo(user.getId(), user.getFullName(), user.getPhoneNumber()))
                 .collect(Collectors.toList());
