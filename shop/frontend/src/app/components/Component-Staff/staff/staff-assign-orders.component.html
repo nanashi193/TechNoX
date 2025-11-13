@@ -1,0 +1,167 @@
+<div class="oc-wrap">
+    <div class="oc-head">
+        <h2>Quản lí đơn hàng</h2>
+
+        <div class="oc-actions">
+            <!-- Sửa lỗi TS2367: Giá trị filter phải khớp 100% với type 'OrderStatus' (viết hoa) -->
+            <div class="seg">
+                <button [class.active]="statusFilter() === 'all'"        (click)="setFilter('all')">Tất cả</button>
+                <button [class.active]="statusFilter() === 'Processing'" (click)="setFilter('Processing')">Đang xử lí</button>
+                <button [class.active]="statusFilter() === 'Confirmed'"  (click)="setFilter('Confirmed')">Đã xác nhận</button>
+                <button [class.active]="statusFilter() === 'Delivering'"   (click)="setFilter('Delivering')">Đang vận chuyển</button>
+                <button [class.active]="statusFilter() === 'Delivering'"   (click)="setFilter('Delivered')">Đã giao</button>
+                <button [class.active]="statusFilter() === 'Succeed'"  (click)="setFilter('Succeed')">Hoàn thành</button>
+                <button [class.active]="statusFilter() === 'Cancelled'"  (click)="setFilter('Cancelled')">Đã hủy</button>
+            </div>
+
+            <input class="search"
+                   type="search"
+                   placeholder="Tìm mã, tên KH, SĐT, địa chỉ, loại đơn…"
+                   [ngModel]="search()"
+                   (ngModelChange)="search.set($event)">
+
+            <!-- Sửa lỗi TS2339: Xóa 'cleanupExpiredOrders' vì không có trong component -->
+        </div>
+    </div>
+
+    <!-- Sửa lỗi TS2339: Xóa 'autoPurgeCount' vì không có trong component -->
+    <div *ngIf="loading" class="oc-banner info">Đang tải dữ liệu…</div>
+    <!-- Sửa lỗi TS2339: Lỗi này của bạn là do 'errorMsg' và 'successMsg' không phải là string
+         Nhưng trong file Canvas .ts, chúng là 'signal<string>' nên .html này sẽ chạy đúng.
+    -->
+    <div *ngIf="errorMsg()" class="oc-banner error">{{ errorMsg() }}</div>
+    <div *ngIf="successMsg()" class="oc-banner success">{{ successMsg() }}</div>
+
+
+    <!-- ===== BẢNG 1: ĐƠN HIỆN TẠI ===== -->
+    <h3 style="margin:12px 0 6px;">Đơn hiện tại</h3>
+    <div class="oc-table-wrap">
+        <table class="orders-table">
+            <thead>
+            <tr>
+                <th>Mã đơn</th>
+                <th>Khách hàng</th>
+                <th>Loại đơn</th>
+                <th>Tổng tiền</th>
+                <th>Trạng thái</th>
+                <th>Ngày tạo</th>
+                <th>Nhân viên giao</th>
+                <!-- <th></th> Xóa cột chi tiết -->
+            </tr>
+            </thead>
+            <tbody>
+            <tr *ngIf="activeOrders().length === 0">
+                <td colspan="7" class="muted">Không có đơn nào.</td>
+            </tr>
+
+            <ng-container *ngFor="let o of activeOrders(); trackBy: trackOrder">
+                <tr class="clickable" (click)="goDetailFromEvent($event, o)">
+                    <td class="mono">{{ o.billId }}</td>
+
+                    <td>
+                        <div class="strong">{{ o.customerFullName }}</div>
+                        <div class="muted">{{ o.customerPhone }}</div>
+                    </td>
+
+                    <td>
+                        <ng-container *ngIf="o.paymentMethod; else noType1">
+                            <span class="badge" [class.paid]="o.paymentMethod==='PayOS'" [class.processing]="o.paymentMethod==='COD'">
+                              {{ o.paymentMethod }}
+                            </span>
+                        </ng-container>
+                        <ng-template #noType1><span class="muted">—</span></ng-template>
+                    </td>
+
+                    <td class="strong">{{ o.total | currency:'VND':'symbol':'1.0-0' }}</td>
+
+                    <td>
+                        <span class="badge" [class]="meta(o).color">{{ meta(o).label }}</span>
+                    </td>
+
+                    <td class="muted">{{ o.orderDate | date:'dd/MM, HH:mm' }}</td>
+
+                    <td (click)="$event.stopPropagation()">
+                        <ng-container *ngIf="o.staff; else canAssign">
+                            <div class="strong">{{ getStaffLabel(o.staff) }}</div>
+                        </ng-container>
+                        <ng-template #canAssign>
+                            <select [ngModel]="''" (change)="assignStaff(o, $event)">
+                                <option value="">— Chọn nhân viên —</option>
+                                <option *ngFor="let s of staff(); trackBy: trackStaff" [value]="s.id">
+                                    {{ s.fullName }} {{ s.phone ? '(' + s.phone + ')' : '' }}
+                                </option>
+                            </select>
+                        </ng-template>
+                    </td>
+                </tr>
+            </ng-container>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- ===== BẢNG 2: ĐƠN HOÀN THÀNH & ĐÃ HỦY ===== -->
+    <h3 style="margin:16px 0 6px;">Đơn đã xử lý (Hoàn thành / Đã hủy)</h3>
+    <div class="oc-table-wrap">
+        <table class="orders-table">
+            <thead>
+            <tr>
+                <th>Mã đơn</th>
+                <th>Khách hàng</th>
+                <th>Loại đơn</th>
+                <th>Tổng tiền</th>
+                <th>Trạng thái</th>
+                <th>Ngày tạo</th>
+                <th>Nhân viên giao</th>
+                <!-- <th></th> -->
+            </tr>
+            </thead>
+            <tbody>
+            <tr *ngIf="completedOrders().length === 0">
+                <td colspan="7" class="muted">Chưa có đơn đã xử lý.</td>
+            </tr>
+
+            <ng-container *ngFor="let o of completedOrders(); trackBy: trackOrder">
+                <tr>
+                    <td class="mono">{{ o.billId }}</td> <!-- Sửa: id -> billId -->
+                    <td>
+                        <!-- Sửa: customerName -> customerFullName -->
+                        <div class="strong">{{ o.customerFullName }}</div>
+                        <div class="muted">{{ o.customerPhone }}</div> <!-- Sửa: phone -> customerPhone -->
+                    </td>
+
+                    <td>
+                        <!-- Sửa: orderType -> paymentMethod -->
+                        <ng-container *ngIf="o.paymentMethod; else noType2">
+                            <span class="badge" [class.paid]="o.paymentMethod==='PayOS'" [class.processing]="o.paymentMethod==='COD'">
+                              {{ o.paymentMethod }}
+                            </span>
+                        </ng-container>
+                        <ng-template #noType2><span class="muted">—</span></ng-template>
+                    </td>
+
+                    <td class="strong">{{ o.total | currency:'VND':'symbol':'1.0-0' }}</td>
+
+                    <!-- Trạng thái (Sử dụng hàm meta() cho an toàn) -->
+                    <td>
+                        <span class="badge" [class]="meta(o).color">
+                            {{ meta(o).label }}
+                        </span>
+                    </td>
+
+                    <td class="muted">{{ o.orderDate | date:'dd/MM, HH:mm' }}</td> <!-- Sửa: createdAt -> orderDate -->
+
+                    <!-- Sửa lỗi TS2339: assignedStaffId -> o.staff -->
+                    <td>
+                        <ng-container *ngIf="o.staff; else noStaffDone">
+                            <div class="strong">{{ getStaffLabel(o.staff) }}</div>
+                        </ng-container>
+                        <ng-template #noStaffDone><span class="muted">—</span></ng-template>
+                    </td>
+
+                    <!-- Xóa cột chi tiết -->
+                </tr>
+            </ng-container>
+            </tbody>
+        </table>
+    </div>
+</div>
