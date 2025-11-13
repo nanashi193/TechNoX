@@ -3,7 +3,6 @@
         <h2>Đơn giao của nhân viên</h2>
 
         <div class="controls">
-            <!-- Sửa: Nối vào signal 'query' -->
             <input
                     class="search"
                     type="text"
@@ -19,7 +18,51 @@
     <div *ngIf="loading()" class="oc-banner info">Đang tải dữ liệu…</div>
     <div *ngIf="errorMsg()" class="oc-banner error">{{ errorMsg() }}</div>
 
-    <!-- ĐƠN CẦN GIAO -->
+    <!-- ĐƠN ĐƯỢC GIAO (ASSIGNED) - CARDS -->
+    <div class="section-card" *ngIf="assignedOrders().length > 0">
+        <div class="section-card__head">📦 Đơn được giao cho bạn (chờ xác nhận)</div>
+
+        <div class="section-card__body assigned-cards">
+            <div *ngFor="let o of assignedOrders()" class="card">
+                <div class="card-header">
+                    <span class="card-title">Đơn #{{ o.billId }}</span>
+                    <span class="badge waiting">Chờ xác nhận</span>
+                </div>
+                <div class="card-body">
+                    <div class="card-row">
+                        <span>Khách:</span>
+                        <strong>{{ o.customerFullName }} ({{ o.customerPhone }})</strong>
+                    </div>
+                    <div class="card-row">
+                        <span>Loại:</span>
+                        <span class="badge"
+                              [class.processing]="o.paymentMethod==='COD'"
+                              [class.paid]="o.paymentMethod==='PayOS'">
+                            {{ o.paymentMethod }}
+                        </span>
+                    </div>
+                    <div class="card-row">
+                        <span>Tiền:</span>
+                        <strong>{{ o.total | currency:'VND':'symbol':'1.0-0' }}</strong>
+                    </div>
+                    <div class="card-row">
+                        <span>Địa chỉ:</span>
+                        <strong class="addr">{{ o.shippingAddress }}</strong>
+                    </div>
+                </div>
+                <div class="card-actions">
+                    <button class="link decline" (click)="declineOrder(o)" [disabled]="loading()">
+                        ❌ Từ chối
+                    </button>
+                    <button class="link accept" (click)="acceptOrder(o)" [disabled]="loading()">
+                        ✓ Chấp nhận
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ĐƠN CẦN GIAO (DELIVERING) -->
     <div class="section-card">
         <div class="section-card__head">Đơn cần giao (Trạng thái: Delivering)</div>
 
@@ -38,16 +81,13 @@
                 </thead>
 
                 <tbody>
-                <!-- Sửa: Dùng computed signal 'deliveringOrders()' -->
                 <tr *ngFor="let o of deliveringOrders()">
-                    <!-- Sửa: Dùng tên field của DTO (billId, customerFullName, ...) -->
                     <td class="mono">{{ o.billId }}</td>
                     <td>
                         <div class="strong">{{ o.customerFullName }}</div>
                         <div class="muted mono">{{ o.customerPhone }}</div>
                     </td>
                     <td>
-                        <!-- Sửa: Dùng paymentMethod và check 'PayOS' -->
                         <span class="badge"
                               [class.processing]="o.paymentMethod==='COD'"
                               [class.paid]="o.paymentMethod==='PayOS'">
@@ -58,15 +98,12 @@
                         {{ o.total | currency:'VND':'symbol':'1.0-0' }}
                     </td>
                     <td>
-                        <!-- Bảng này chỉ có trạng thái 'Delivering' -->
                         <span class="badge shipping">Đang giao</span>
                     </td>
-                    <!-- Sửa: Dùng orderDate -->
                     <td class="mono">{{ o.orderDate | date:'HH:mm, dd/MM/yyyy' }}</td>
                     <td>
                         <div class="btns">
-                            <!-- Sửa: Dùng tên hàm đúng 'markAsCompleted' -->
-                            <button class="link" (click)="markAsCompleted(o)">
+                            <button class="link" (click)="markAsCompleted(o)" [disabled]="loading()">
                                 Đánh dấu đã giao
                             </button>
                         </div>
@@ -81,7 +118,7 @@
         </div>
     </div>
 
-    <!-- ĐƠN ĐÃ GIAO -->
+    <!-- ĐƠN ĐÃ GIAO (DELIVERED) -->
     <div class="section-card">
         <div class="section-card__head">Đơn đã giao (Trạng thái: Delivered)</div>
 
@@ -107,23 +144,23 @@
                         <div class="muted mono">{{ o.customerPhone }}</div>
                     </td>
                     <td>
-            <span class="badge"
-                  [class.processing]="o.paymentMethod==='COD'"
-                  [class.paid]="o.paymentMethod==='PayOS'">
-                {{ o.paymentMethod }}
-            </span>
+                        <span class="badge"
+                              [class.processing]="o.paymentMethod==='COD'"
+                              [class.paid]="o.paymentMethod==='PayOS'">
+                            {{ o.paymentMethod }}
+                        </span>
                     </td>
                     <td class="right mono">
                         {{ o.total | currency:'VND':'symbol':'1.0-0' }}
                     </td>
 
                     <td>
-            <span *ngIf="o.status === 'Delivered'" class="badge warn">
-                Đã giao (Waiting)
-            </span>
+                        <span *ngIf="o.status === 'Delivered'" class="badge warn">
+                            Đã giao (Waiting)
+                        </span>
                         <span *ngIf="o.status === 'Succeed'" class="badge delivered">
-                Đã hoàn tất
-            </span>
+                            Đã hoàn tất
+                        </span>
                     </td>
                     <td class="mono">{{ o.orderDate | date:'HH:mm, dd/MM/yyyy' }}</td>
                     <td>{{ getStaffLabel(o.staff) }}</td>

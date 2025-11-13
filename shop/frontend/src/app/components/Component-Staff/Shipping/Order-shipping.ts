@@ -7,6 +7,7 @@ import { StaffInfo } from '../../../models/staff-info.model';
 
 interface BillAdminUI extends BillAdminResponse {
     _expanded?: boolean;
+    _isAccepted?: boolean;
 }
 
 @Component({
@@ -35,9 +36,17 @@ export class OrderShippingComponent implements OnInit {
                 .some(v => (v ?? '').toString().toLowerCase().includes(q))
         );
     }
+
+    assignedOrders = computed(() => {
+        return this.filterOrders(
+            this.allOrders().filter(o => !o._isAccepted)
+        );
+    });
+
     deliveringOrders = computed(() => {
-        const delivering = this.allOrders().filter(o => o.status === 'Delivering');
-        return this.filterOrders(delivering);
+        return this.filterOrders(
+            this.allOrders().filter(o => o._isAccepted)
+        );
     });
 
     succeedOrders = computed(() => {
@@ -55,7 +64,13 @@ export class OrderShippingComponent implements OnInit {
 
         this.billService.getMyAssignedOrders().subscribe({
             next: (orders) => {
-                this.allOrders.set(orders as BillAdminUI[]);
+                // Khởi tạo _isAccepted = false cho tất cả đơn
+                const processedOrders = orders.map(o => ({
+                    ...o,
+                    _isAccepted: false
+                })) as BillAdminUI[];
+
+                this.allOrders.set(processedOrders);
                 this.loading.set(false);
             },
             error: (err) => {
@@ -64,6 +79,22 @@ export class OrderShippingComponent implements OnInit {
                 console.error(err);
             }
         });
+    }
+
+    acceptOrder(order: BillAdminUI): void {
+        this.allOrders.update(currentOrders =>
+            currentOrders.map(o =>
+                o.billId === order.billId
+                    ? { ...o, _isAccepted: true }
+                    : o
+            )
+        );
+    }
+
+    declineOrder(order: BillAdminUI): void {
+        this.allOrders.update(currentOrders =>
+            currentOrders.filter(o => o.billId !== order.billId)
+        );
     }
 
     markAsCompleted(order: BillAdminUI): void {
