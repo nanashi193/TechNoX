@@ -5,7 +5,6 @@ import { RegisterDTO } from '../dtos/user/register.dto';
 import {LoginDTO} from '../dtos/user/login.dto';
 import {environment} from "../environments/environment";
 import { User } from '../models/user.model';
-
 @Injectable({
     providedIn: 'root'
 })

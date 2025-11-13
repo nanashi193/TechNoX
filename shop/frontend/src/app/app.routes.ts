@@ -10,6 +10,8 @@ import { ownerGuard } from './guards/owner.guard';
 
 // Payment detail (component thường)
 import { PaymentDetailComponent } from './components/Component-payment/paymentInfor/payment-detail.component';
+import {OrderShippingComponent} from "./components/Component-Staff/Shipping/Order-shipping";
+import {StaffAssignOrdersComponent} from "./components/Component-Staff/staff/staff-assign-orders.component";
 
 export const routes: Routes = [
     { path: '', redirectTo: 'home', pathMatch: 'full' },
@@ -155,11 +157,12 @@ export const routes: Routes = [
 
     // ===== Staff (Giao hàng) =====
     {
-        path: 'staff/shipping',
-        loadComponent: () =>
-            import('./components/Component-Staff/Shipping/Order-shipping')
-                .then(m => m.OrderShippingComponent),
-        title: 'Giao hàng | Nhân viên',
+        path: 'staff',
+        children: [
+            { path: 'assign-orders', component: StaffAssignOrdersComponent },  // ← Gán đơn
+            { path: 'shipping', component: OrderShippingComponent },  // ← Shipping_Staff + Receiving
+            { path: '', redirectTo: 'shipping', pathMatch: 'full' }
+        ]
     },
 
     // ===== Owner (bật guard) =====
