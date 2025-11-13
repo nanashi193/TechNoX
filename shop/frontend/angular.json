@@ -71,7 +71,7 @@
           "builder": "@angular/build:dev-server",
           "options": {
             "allowedHosts": [
-              "yorkshire-introduction-referrals-van.trycloudflare.com",
+              "www.technox.space",
               "localhost"
             ]
           },
@@ -80,12 +80,16 @@
               "buildTarget": "App:build:production"
             },
             "development": {
-              "buildTarget": "App:build:development"
+              "buildTarget": "App:build:development",
+              "allowedHosts": [
+                "www.technox.space",
+                "localhost"
+              ]
             },
             "ngrok": {
               "buildTarget": "App:build:ngrok",
               "allowedHosts": [
-                "yorkshire-introduction-referrals-van.trycloudflare.com",
+                "www.technox.space",
                 "localhost"
               ]
             }
