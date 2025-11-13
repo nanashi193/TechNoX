@@ -498,7 +498,6 @@ a:focus-visible, button:focus-visible, .btn:focus-visible {
     border-bottom: 1px solid #eee;
 }
 
-/* Nội dung co giãn, tiêu đề 2 dòng */
 .story__body{
     padding: 14px 16px;
     display: grid;
@@ -520,7 +519,6 @@ a:focus-visible, button:focus-visible, .btn:focus-visible {
     font-size: 12px;
 }
 
-/* Nút thêm vào giỏ: full-width ở đáy thẻ, đồng bộ với .btn--block */
 .story__btn{
     margin: 0;
     border-top: 1px solid #eee;
@@ -528,8 +526,170 @@ a:focus-visible, button:focus-visible, .btn:focus-visible {
     padding-block: 12px;
 }
 
-/* Mobile không “bật” hover */
 @media (hover: none){
     .story:hover{ transform:none; box-shadow:0 10px 30px rgba(0,0,0,.04); }
+}
+.price-container {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    flex-wrap: wrap;
+    min-height: 2.2em;
+    margin-top: 4px;
+}
+
+.selling-price {
+    color: #D70018;
+    font-weight: bold;
+    font-size: 1.1rem;
+}
+
+.original-price {
+    text-decoration: line-through;
+    color: #777;
+    font-size: 0.9rem;
+}
+.hot-sale-container {
+    background: linear-gradient(180deg, #422828, #3e3c3c);
+    border-radius: 20px;
+    padding: 16px;
+    padding-bottom: 32px;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+    overflow: hidden;
+}
+
+
+.hot-sale-header {
+    text-align: center;
+    margin-bottom: 16px;
+}
+
+.hot-sale-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-bottom: 16px;
+}
+.hot-sale-header h2 {
+    font-size: 2rem;
+    font-weight: 900;
+    color: #fff;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    text-transform: uppercase;
+    margin: 0;
+}
+.countdown-timer {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    color: white;
+    font-weight: bold;
+}
+.countdown-label {
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    margin-right: 8px;
+    @media (max-width: 500px) {
+        display: none;
+    }
+}
+.countdown-box {
+    background-color: #333;
+    color: white;
+    padding: 8px 10px;
+    border-radius: 5px;
+    font-size: 1.2rem;
+    min-width: 40px;
+    text-align: center;
+    font-family: 'Courier New', Courier, monospace;
+}
+.countdown-separator {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: white;
+    padding: 0 2px;
+}
+
+
+.hot-sale-grid-wrapper {
+    overflow-x: auto;
+    overflow-y: hidden;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+.hot-sale-grid-wrapper::-webkit-scrollbar {
+    display: none;
+}
+
+.hot-sale-grid {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 16px;
+    padding-bottom: 4px;
+    padding-left: 4px;
+    padding-right: 4px;
+}
+
+.hot-sale-grid .card {
+    flex-shrink: 0;
+    width: 250px;
+    background-color: #fff;
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+}
+.hot-sale-scroller-with-nav {
+    position: relative;
+}
+
+.hot-sale-nav-btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 100;
+    background-color: rgba(255, 255, 255, 0.9);
+    border: none;
+    border-radius: 50%;
+    width: 36px;
+    height: 36px;
+    cursor: pointer;
+    font-size: 1.8rem;
+    font-weight: 900;
+    color: #333;
+    line-height: 36px;
+    text-align: center;
+
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+}
+
+.hot-sale-nav-btn:hover {
+    background-color: #fff;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+}
+
+.hot-sale-nav-btn.prev {
+    left: 10px;
+    padding-right: 3px;
+}
+
+.hot-sale-nav-btn.next {
+    right: 10px;
+    padding-left: 3px;
+}
+@media (max-width: 768px) {
+    .hot-sale-nav-btn {
+        width: 30px;
+        height: 30px;
+        font-size: 1.5rem;
+        line-height: 30px;
+        left: 5px;
+        right: 5px;
+    }
 }
 

@@ -60,7 +60,7 @@
               "fileReplacements": [
                 {
                   "replace": "src/app/environments/environment.ts",
-                  "with": "src/app/environments/environment.ngrok.ts"
+                  "with": "src/app/environments/environment.prod.ts"
                 }
               ]
             }
@@ -71,7 +71,7 @@
           "builder": "@angular/build:dev-server",
           "options": {
             "allowedHosts": [
-              ".ngrok-free.app",
+              "yorkshire-introduction-referrals-van.trycloudflare.com",
               "localhost"
             ]
           },
@@ -85,7 +85,7 @@
             "ngrok": {
               "buildTarget": "App:build:ngrok",
               "allowedHosts": [
-                ".ngrok-free.app",
+                "yorkshire-introduction-referrals-van.trycloudflare.com",
                 "localhost"
               ]
             }

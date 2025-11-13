@@ -166,11 +166,9 @@ export class DetailProductComponent implements OnInit {
         return v.toLocaleString('vi-VN') + ' ₫';
     }
 
-    // --- Actions ---
     decQty() { if (this.quantity > 1) this.quantity--; }
 
     incQty() {
-        // Giới hạn số lượng tối đa theo variant đang chọn (nếu có)
         const maxQty = this.selectedVariant?.quantity;
         if (maxQty === undefined || this.quantity < maxQty) {
             this.quantity++;
@@ -179,7 +177,6 @@ export class DetailProductComponent implements OnInit {
         }
     }
 
-    // --- Logic Giỏ hàng (Cart) ---
     addToCart() {
         if (!this.product) return;
 
@@ -219,27 +216,28 @@ export class DetailProductComponent implements OnInit {
 
         const variantToAddId = this.selectedVariant?.variantId;
         if (this.product.variants && this.product.variants.length > 0 && !variantToAddId) {
-            alert('Vui lòng chọn phiên bản (màu sắc/kích thước).');
+            console.warn('Vui lòng chọn phiên bản (màu sắc/kích thước).');
+            // Bạn có thể dùng một modal/toast tùy chỉnh ở đây
             return;
         }
         if (this.selectedVariant && this.selectedVariant.quantity < this.quantity) {
-            alert('Số lượng tồn kho không đủ.');
+            console.warn('Số lượng tồn kho không đủ.');
             return;
         }
         if (!this.product.variants || this.product.variants.length === 0) {
-            alert('Chức năng mua ngay sản phẩm không có biến thể chưa được hỗ trợ.');
+            console.warn('Chức năng mua ngay sản phẩm không có biến thể chưa được hỗ trợ.');
             return;
         }
-
         if (variantToAddId) {
             this.cartService.addItem(variantToAddId, this.quantity).subscribe({
                 next: () => {
-                    alert('Đã thêm vào giỏ hàng! Chuyển sang thanh toán.');
-                    this.router.navigate(['/payment-detail']);
+                    this.cartService.selectItem(variantToAddId);
+
+                    this.router.navigate(['/cart']);
                 },
                 error: (err) => {
                     console.error("Lỗi thêm vào giỏ (Buy Now):", err);
-                    alert(err?.error?.message || 'Có lỗi xảy ra, vui lòng thử lại.');
+                    console.error(err?.error?.message || 'Có lỗi xảy ra, vui lòng thử lại.');
                 }
             });
         }
@@ -248,8 +246,6 @@ export class DetailProductComponent implements OnInit {
     goBack() {
         this.router.navigate(['/home']);
     }
-
-    // --- HÀM MỚI: Logic chuyển ảnh ---
     /** Chuyển đến ảnh tiếp theo. Nếu đang ở ảnh cuối, quay lại ảnh đầu tiên. */
     nextImage(): void {
         if (this.product && this.product.imageUrls && this.product.imageUrls.length > 0) {

@@ -22,7 +22,7 @@ export class PaymentCancelComponent implements OnInit {
     constructor(private route: ActivatedRoute) {}
 
     ngOnInit(): void {
-        this.orderId = this.route.snapshot.queryParamMap.get('orderId') ?? '—';
+        this.orderId = this.route.snapshot.queryParamMap.get('billId') ?? '—';
         // hoặc theo dõi thay đổi:
         // this.route.queryParamMap.subscribe(q => this.orderId = q.get('orderId') ?? '—');
     }

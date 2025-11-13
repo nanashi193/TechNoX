@@ -54,5 +54,5 @@ payos:
   checksum-key: "9b29f7a3c6e22b89de0a5ec080f949a03c16ee96a0401604adfc90e8ebabd94b"
 app:
   frontend:
-    url: "http://localhost:4200" #Thay ngrok frontend ở đây!!!
+    url: "https://yorkshire-introduction-referrals-van.trycloudflare.com" #Thay ngrok frontend ở đây!!!
 

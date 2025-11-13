@@ -1,4 +1,4 @@
-<!-- POSTER COVER (tránh *ngIf để không kẹt animation) -->
+<!-- POSTER COVER (Giữ nguyên) -->
 <section
         class="poster-cover"
         role="dialog"
@@ -21,7 +21,7 @@
 </section>
 
 <main>
-    <!-- HERO -->
+    <!-- HERO (Giữ nguyên) -->
     <section class="hero section-pad">
         <div class="container hero__inner">
             <p class="eyebrow">Chúng tôi là TechNoX</p>
@@ -31,8 +31,6 @@
                 giao nhanh trong ngày, đổi trả dễ dàng.
             </p>
             <a class="btn btn--accent"  [routerLink]="['/products']" aria-label="Mua ngay">MUA NGAY</a>
-
-            <!-- Hero gallery -->
             <div class="hero__gallery">
                 <img
                         src="../../../../assets/Phone/IPhone.jpg"
@@ -53,8 +51,83 @@
             </div>
         </div>
     </section>
+    <section class="hot-sale-section section-pad">
+        <div class="container">
+            <!-- 1. Khung màu đỏ bo góc (Giữ nguyên) -->
+            <div class="hot-sale-container">
+                <!-- 2. Tiêu đề (Banner) với đồng hồ (Giữ nguyên) -->
+                <div class="hot-sale-header">
+                    <h2>🔔 Số lượng có hạn</h2>
+                    <div class="countdown-timer" *ngIf="!hotSaleLoading">
+                        <span class="countdown-label">KẾT THÚC TRONG:</span>
+                        <span class="countdown-box">{{ countdown.days }}</span>
+                        <span class="countdown-separator">:</span>
+                        <span class="countdown-box">{{ countdown.hours }}</span>
+                        <span class="countdown-separator">:</span>
+                        <span class="countdown-box">{{ countdown.minutes }}</span>
+                        <span class="countdown-separator">:</span>
+                        <span class="countdown-box">{{ countdown.seconds }}</span>
+                    </div>
+                </div>
 
-    <!-- SẢN PHẨM NỔI BẬT -->
+                <!-- 3. Loading / Empty States (Giữ nguyên) -->
+                <div *ngIf="hotSaleLoading" class="loading-indicator" aria-live="polite" style="color: white; text-align: center;">
+                    Đang tải sản phẩm sale...
+                </div>
+                <div *ngIf="!hotSaleLoading && hotSaleProducts.length === 0" class="no-products" style="color: white; text-align: center;">
+                    Chưa có sản phẩm sale.
+                </div>
+
+                <div class="hot-sale-scroller-with-nav" *ngIf="!hotSaleLoading && hotSaleProducts.length > 0">
+                    <div class="hot-sale-grid-wrapper" #hotSaleScroller>
+                        <div class="hot-sale-grid">
+                            <article class="card" *ngFor="let p of hotSaleProducts; trackBy: trackById">
+                                <a class="card__media" [routerLink]="['/product', p.id]" [attr.aria-label]="p.name">
+                                    <img *ngIf="p.imageUrls && p.imageUrls.length > 0; else noSaleImg"
+                                         [src]="p.imageUrls[0]"
+                                         [alt]="p.name"
+                                         class="card__img">
+                                    <ng-template #noSaleImg>
+                                        <img src="https://placehold.co/300x300/eee/ccc?text=No+Image"
+                                             [alt]="p.name"
+                                             class="card__img">
+                                    </ng-template>
+                                </a>
+                                <div class="card__body">
+                                    <h3 class="card__title">
+                                        <a [routerLink]="['/product', p.id]">{{ p.name }}</a>
+                                    </h3>
+                                    <div class="price-container">
+                                        <span class="selling-price">
+                                            {{ p.price | currency:'VND':'symbol':'1.0-0' }}
+                                        </span>
+<!--                                        <span class="original-price" *ngIf="getOriginalPrice(p.price) > (p.price || 0)">-->
+<!--                                            {{ getOriginalPrice(p.price) | currency:'VND':'symbol':'1.0-0' }}-->
+<!--                                        </span>-->
+                                    </div>
+                                </div>
+                            </article>
+                        </div>
+                    </div>
+                    <button type="button"
+                            class="hot-sale-nav-btn prev"
+                            (click)="scrollHotSale('prev')"
+                            aria-label="Cuộn sang trái">
+                        ‹
+                    </button>
+                    <button type="button"
+                            class="hot-sale-nav-btn next"
+                            (click)="scrollHotSale('next')"
+                            aria-label="Cuộn sang phải">
+                        ›
+                    </button>
+
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SẢN PHẨM NỔI BẬT (ĐIỆN THOẠI) -->
     <section class="selected section-pad">
         <div class="container selected__inner">
             <p class="eyebrow eyebrow--gold">Dòng sản phẩm nổi bật</p>
@@ -69,7 +142,7 @@
                 <article class="card" *ngFor="let p of phoneProducts; trackBy: trackById">
 
                     <a class="card__media" [routerLink]="['/product', p.id]" aria-label="{{ p.name }}">
-                        <!-- Logic ảnh giữ nguyên, đổi tên #noHomeImage -> #noPhoneImg -->
+                        <!-- Logic ảnh (giữ nguyên) -->
                         <img *ngIf="p.imageUrls && p.imageUrls.length > 0; else noPhoneImg"
                              [src]="p.imageUrls[0]"
                              [alt]="p.name"
@@ -88,17 +161,22 @@
                         <h3 class="card__title">
                             <a [routerLink]="['/product', p.id]">{{ p.name }}</a>
                         </h3>
-                        <p class="product-price">
-                            {{ p.price | currency:'VND':'symbol':'1.0-0' }}
-                        </p>
+
+                        <div class="price-container">
+                            <!-- Giá bán thật -->
+                            <span class="selling-price">
+                                {{ p.price | currency:'VND':'symbol':'1.0-0' }}
+                            </span>
+                            <!-- Giá gốc "ảo" (chỉ hiện khi giá ảo > giá bán) -->
+<!--                            <span class="original-price" *ngIf="getOriginalPrice(p.price) > (p.price || 0)">-->
+<!--                                {{ getOriginalPrice(p.price) | currency:'VND':'symbol':'1.0-0' }}-->
+<!--                            </span>-->
+                        </div>
                     </div>
                 </article>
             </div>
 
-            <!--
-              CẬP NHẬT: Xóa Pager (heroPrev/heroNext)
-              Cập nhật link "Xem tất cả" để trỏ đúng danh mục
-            -->
+            <!-- Link "Xem tất cả" (giữ nguyên) -->
             <div class="section-cta">
                 <a class="btn btn--black view-all"
                    [routerLink]="['/products']"
@@ -109,7 +187,7 @@
         </div>
     </section>
 
-    <!-- LAPTOP -->
+    <!-- LAPTOP (Giữ nguyên phần video) -->
     <section class="laptop-intro section-pad">
         <div class="container">
             <div class="split">
@@ -147,6 +225,7 @@
         </div>
     </section>
 
+    <!-- Lưới sản phẩm Laptop -->
     <section class="selected section-pad" style="padding-top: 0;">
         <div class="container">
             <div *ngIf="laptopsLoading" class="loading-indicator" aria-live="polite">
@@ -159,6 +238,7 @@
                 <article class="card" *ngFor="let p of laptopProducts; trackBy: trackById">
 
                     <a class="card__media" [routerLink]="['/product', p.id]" aria-label="{{ p.name }}">
+                        <!-- Logic ảnh (giữ nguyên) -->
                         <img *ngIf="p.imageUrls && p.imageUrls.length > 0; else noLaptopImg"
                              [src]="p.imageUrls[0]"
                              [alt]="p.name"
@@ -177,9 +257,18 @@
                         <h3 class="card__title">
                             <a [routerLink]="['/product', p.id]">{{ p.name }}</a>
                         </h3>
-                        <p class="product-price">
-                            {{ p.price | currency:'VND':'symbol':'1.0-0' }}
-                        </p>
+
+                        <!-- *** THAY ĐỔI KHỐI GIÁ 2 *** -->
+                        <div class="price-container">
+                            <span class="selling-price">
+                                {{ p.price | currency:'VND':'symbol':'1.0-0' }}
+                            </span>
+<!--                            <span class="original-price" *ngIf="getOriginalPrice(p.price) > (p.price || 0)">-->
+<!--                                {{ getOriginalPrice(p.price) | currency:'VND':'symbol':'1.0-0' }}-->
+<!--                            </span>-->
+                        </div>
+                        <!-- *** KẾT THÚC THAY ĐỔI 2 *** -->
+
                     </div>
                 </article>
             </div>
@@ -201,7 +290,7 @@
                 <article class="card" *ngFor="let p of accessoryProducts; trackBy: trackById">
 
                     <a class="card__media" [routerLink]="['/product', p.id]" aria-label="{{ p.name }}">
-                        <!-- Dùng logic ảnh giống các mục trên -->
+                        <!-- Logic ảnh (giữ nguyên) -->
                         <img *ngIf="p.imageUrls && p.imageUrls.length > 0; else noAccessoryImg"
                              [src]="p.imageUrls[0]"
                              [alt]="p.name"
@@ -219,12 +308,22 @@
                         <h3 class="card__title">
                             <a [routerLink]="['/product', p.id]">{{ p.name }}</a>
                         </h3>
-                        <p class="product-price">
-                            {{ p.price | currency:'VND':'symbol':'1.0-0' }}
-                        </p>
+
+                        <!-- *** THAY ĐỔI KHỐI GIÁ 3 *** -->
+                        <div class="price-container">
+                            <span class="selling-price">
+                                {{ p.price | currency:'VND':'symbol':'1.0-0' }}
+                            </span>
+<!--                            <span class="original-price" *ngIf="getOriginalPrice(p.price) > (p.price || 0)">-->
+<!--                                {{ getOriginalPrice(p.price) | currency:'VND':'symbol':'1.0-0' }}-->
+<!--                            </span>-->
+                        </div>
+                        <!-- *** KẾT THÚC THAY ĐỔI 3 *** -->
+
                     </div>
                 </article>
             </div>
+            <!-- Link "Xem tất cả" (giữ nguyên) -->
             <div class="section-cta">
                 <a class="btn btn--black view-all"
                    [routerLink]="['/products']"
@@ -235,7 +334,7 @@
         </div>
     </section>
 
-    <!-- NEWSLETTER -->
+    <!-- NEWSLETTER (Giữ nguyên) -->
     <section class="newsletter">
         <div class="container newsletter__inner">
             <h3>Nhận ưu đãi &amp; voucher hàng tuần</h3>
@@ -248,7 +347,7 @@
     </section>
 </main>
 
-<!-- COOKIE BANNER -->
+<!-- COOKIE BANNER (Giữ nguyên) -->
 <div
         class="cookie"
         *ngIf="cookieOpen"

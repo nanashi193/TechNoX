@@ -3,9 +3,7 @@
         <p class="eyebrow">Danh mục</p>
         <h2 class="section-title" style="font-size:clamp(28px,6vw,44px)">Tất cả sản phẩm</h2>
 
-        <!-- FILTER BAR -->
         <div class="filter-grid" style="position:relative; z-index: 5;">
-            <!-- Search -->
             <div class="field">
                 <label for="q">Tìm kiếm</label>
                 <input
@@ -20,7 +18,6 @@
                 />
             </div>
 
-            <!-- Device filter -->
             <div class="field">
                 <label for="deviceSelect">Thiết bị</label>
                 <select
@@ -37,7 +34,6 @@
                 </select>
             </div>
 
-            <!-- Sort (FE: chỉ giá) -->
             <div class="field">
                 <label for="sortSelect">Sắp xếp</label>
                 <select
@@ -54,14 +50,12 @@
             </div>
         </div>
 
-        <!-- PAGER -->
         <div class="pager" *ngIf="!loading && totalPages > 1">
             <button class="pager__btn" type="button" (click)="prevPage()" [disabled]="currentPage===1" aria-label="Trang trước">‹</button>
             <div class="pager__info">Trang {{currentPage}} / {{totalPages}}</div>
             <button class="pager__btn" type="button" (click)="nextPage()" [disabled]="currentPage===totalPages" aria-label="Trang sau">›</button>
         </div>
 
-        <!-- GRID -->
         <div class="card-grid" *ngIf="!loading" style="position:relative; z-index: 1;">
             <article class="card" *ngFor="let p of products; trackBy: trackById">
                 <a class="card__media" [routerLink]="['/product', p.id]" aria-label="{{ p.name }}">
@@ -84,15 +78,15 @@
                     <h3 class="card__title">
                         <a [routerLink]="['/product', p.id]">{{ p.name }}</a>
                     </h3>
+                    <div class="price-container">
+                        <span class="selling-price">{{ formatPrice(p.price) }}</span>
 
-                    <div>
-                        <span class="price">{{ formatPrice(p.price) }}</span>
+<!--                        <span class="original-price" *ngIf="getOriginalPrice(p.price) > p.price">-->
+<!--                            {{ formatPrice(getOriginalPrice(p.price)) }}-->
+<!--                        </span>-->
+
                         <span *ngIf="p.inStock === false" class="chip chip--oos">Hết hàng</span>
                     </div>
-
-                    <button class="btn btn--accent btn--block" type="button" [disabled]="p.inStock === false">
-                        Thêm vào giỏ
-                    </button>
                 </div>
             </article>
         </div>

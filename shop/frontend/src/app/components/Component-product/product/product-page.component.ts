@@ -24,7 +24,6 @@ export class ProductPageComponent implements OnInit {
     products: CustomerProduct[] = [];
     loading = true;
 
-    // Phân trang (FE 1-based)
     currentPage = 1;
     totalPages = 1;
     totalItems = 0;
@@ -32,8 +31,8 @@ export class ProductPageComponent implements OnInit {
 
     // Bộ lọc/sắp xếp
     searchTerm = '';
-    deviceFilter: DeviceFilter = 'all'; // all | laptop | ipad | phone
-    sortKey: SortKey = 'relevance';     // chỉ sort FE theo giá
+    deviceFilter: DeviceFilter = 'all';
+    sortKey: SortKey = 'relevance';
 
     ngOnInit(): void {
         this.loadProducts(this.currentPage);
@@ -44,8 +43,8 @@ export class ProductPageComponent implements OnInit {
         switch (this.deviceFilter) {
             case 'laptop': return 'Laptop';
             case 'ipad':   return 'iPad';
-            case 'phone':  return 'Điện thoại'; // đổi thành 'Phone' nếu BE dùng tiếng Anh
-            default:       return undefined;     // all
+            case 'phone':  return 'Điện thoại';
+            default:       return undefined;
         }
     }
 
@@ -57,7 +56,6 @@ export class ProductPageComponent implements OnInit {
         } else if (this.sortKey === 'price_desc') {
             this.products = [...this.products].sort((a, b) => num(b.price) - num(a.price));
         }
-        // 'relevance' -> giữ nguyên thứ tự nhận từ API
     }
 
     /** Gọi API lấy danh sách sản phẩm */
@@ -68,7 +66,6 @@ export class ProductPageComponent implements OnInit {
         const category    = this.deviceToCategoryName();    // 'Laptop' | 'iPad' | 'Điện thoại' | undefined
         const search      = this.searchTerm.trim() || undefined;
 
-        // Gửi sortKey lên cũng được, nhưng ta sẽ ALWAYS sort FE theo giá sau khi load
         this.productSvc
             .getProducts(pageIndex, this.pageSize, category, search, this.sortKey)
             .pipe(finalize(() => (this.loading = false)))
@@ -79,20 +76,16 @@ export class ProductPageComponent implements OnInit {
                 this.totalPages  = meta.totalPages ?? 1;
                 this.totalItems  = meta.totalElements ?? this.totalPages * this.pageSize;
                 this.currentPage = (meta.number ?? pageIndex) + 1;
-
-                // Áp sort giá ở FE
                 this.applyPriceSort();
             });
     }
 
-    // Handlers
     onSearch(): void {
         this.currentPage = 1;
         this.loadProducts(this.currentPage);
     }
 
     onSortChange(): void {
-        // Chỉ cần sort FE cho danh sách đang hiển thị
         this.applyPriceSort();
     }
 
@@ -102,7 +95,6 @@ export class ProductPageComponent implements OnInit {
         this.loadProducts(this.currentPage);
     }
 
-    // Phân trang
     nextPage(): void { if (this.currentPage < this.totalPages) this.loadProducts(this.currentPage + 1); }
     prevPage(): void { if (this.currentPage > 1) this.loadProducts(this.currentPage - 1); }
     goToPage(n: number): void {
@@ -110,12 +102,24 @@ export class ProductPageComponent implements OnInit {
         if (target !== this.currentPage) this.loadProducts(target);
     }
 
-    // Helpers UI
     trackById: TrackByFunction<CustomerProduct> = (_i, p) => p.id;
+
     formatPrice(v: unknown): string {
         const n = Number(v) || 0;
         return n.toLocaleString('vi-VN') + ' ₫';
     }
+    /**
+     * Tính giá "gốc" (ảo) cao hơn 20% so với giá bán.
+     * @param v Giá bán từ DB
+     * @returns Số tiền đã tăng 20% và làm tròn
+     */
+    // getOriginalPrice(v: unknown): number {
+    //     const n = Number(v) || 0;
+    //     if (n === 0) return 0;
+    //     const originalPrice = n * 1.20;
+    //
+    //     return Math.round(originalPrice / 10000) * 10000;
+    // }
     viewProduct(p: CustomerProduct): void {
         this.router.navigate(['/product', p.id]);
     }
