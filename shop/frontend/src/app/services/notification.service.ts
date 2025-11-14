@@ -1,7 +1,9 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import * as Stomp from 'stompjs';
 import SockJS from 'sockjs-client';
-import { Subject } from 'rxjs';
+import {ToastService} from "../shared/toast/toast.service";
+import {AuthService} from "./auth.service";
+// import { Subject } from 'rxjs';
 export interface NotificationDTO {
     message: string;
     link: string;
@@ -14,34 +16,40 @@ export class NotificationService {
     private stompClient: Stomp.Client | null = null;
     private backendUrl = 'https://api.technox.space/ws';
 
-    // Dùng Subject để "đẩy" thông báo ra các component
-    public notificationSubject = new Subject<NotificationDTO>();
-
+    private toastService = inject(ToastService);
+    private authService = inject(AuthService);
     constructor() { }
 
     public connect() {
-        // Chỉ kết nối nếu là admin/staff (bạn có thể kiểm tra role ở đây)
-        // Và chỉ kết nối nếu chưa kết nối
         if (this.stompClient && this.stompClient.connected) {
             return;
         }
+        const token = this.authService.token;
+        if (!token) {
+            console.log('Không thể kết nối WebSocket: Chưa đăng nhập.');
+            return;
+        }
+        const headers = {
+            'Authorization': `Bearer ${token}`
+        };
 
         const socket = new SockJS(this.backendUrl);
         this.stompClient = Stomp.over(socket);
-
-        // Tắt log debug của STOMP
         this.stompClient.debug = () => {};
 
-        this.stompClient.connect({}, (frame) => {
-            console.log('Connected to WebSocket: ' + frame);
-
-            // Lắng nghe kênh /topic/admin-notifications
-            this.stompClient?.subscribe('/topic/admin-notifications', (message) => {
+        this.stompClient.connect(headers, (frame) => {
+            console.log('Connected to WebSocket (Authenticated): ' + frame);
+            const callback = (message: Stomp.Message) => {
                 const notification: NotificationDTO = JSON.parse(message.body);
-
-                // Đẩy thông báo ra cho ai đang lắng nghe
-                this.notificationSubject.next(notification);
-            });
+                this.toastService.show(
+                    notification.message,
+                    notification.link,
+                    'info',
+                    20000
+                );
+            };
+            this.stompClient?.subscribe('/topic/admin-notifications', callback);
+            this.stompClient?.subscribe('/user/queue/notifications', callback);
         });
     }
 

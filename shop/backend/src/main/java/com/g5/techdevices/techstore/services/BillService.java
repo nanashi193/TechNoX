@@ -22,6 +22,7 @@ import com.g5.techdevices.techstore.repositories.cart.ProductVariantRepository;
 import com.g5.techdevices.techstore.responses.AdminBillsResponse.BillAdminResponse;
 import com.g5.techdevices.techstore.responses.AdminBillsResponse.BillFullDetailResponse;
 import com.g5.techdevices.techstore.responses.BillResponse;
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Sort;
@@ -42,7 +43,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
-
+@Slf4j
 @Service
 public class BillService implements IBillService {
 
@@ -196,10 +197,6 @@ public class BillService implements IBillService {
             throw new AccessDeniedException("Bạn không có quyền xác nhận đơn hàng này.");
         }
         Bill confirmedBill = this.confirmBillLogic(billId, "COD", false);
-        String message = "Bạn vừa có một đơn hàng mới. Hãy sẵn sàng đóng gói!";
-        String link = "/owner/orders";
-        NotificationDTO notification = new NotificationDTO(message, link);
-        messagingTemplate.convertAndSend("/topic/admin-notifications", notification);
         return billMapper.mapToBillResponse(confirmedBill);
     }
 
@@ -225,6 +222,10 @@ public class BillService implements IBillService {
         }
         this.deductStock(bill);
         this.sendConfirmationEmail(bill, paymentMethod);
+        String message = "\uD83D\uDD14 Bạn vừa có một đơn hàng mới!";
+        String link = "/owner/orders";
+        NotificationDTO notification = new NotificationDTO(message, link);
+        messagingTemplate.convertAndSend("/topic/admin-notifications", notification);
         return billRepository.save(bill);
     }
 
@@ -295,6 +296,14 @@ public class BillService implements IBillService {
         bill.setStaff(staff);
         bill.setStatus("Assigned");
         Bill savedBill = billRepository.save(bill);
+        String message = "\uD83D\uDD14 Bạn có một đơn hàng #" + savedBill.getId()+ " đã đóng gói và chờ giao.";
+        String link = "/staff/shipping";
+        NotificationDTO notification = new NotificationDTO(message, link);
+        messagingTemplate.convertAndSendToUser(
+                staff.getEmail(),
+                "/queue/notifications",
+                notification
+        );
         return billAdminMapper.mapToBillAdminResponse(savedBill);
     }
 
@@ -421,30 +430,21 @@ public class BillService implements IBillService {
         };
     }
     private Bill getBillAndValidateStaff(Long billId) {
-        // 1. Lấy thông tin staff đang đăng nhập
         User currentStaff = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-
-        // 2. Tìm đơn hàng
         Bill bill = billRepository.findById(billId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy đơn hàng: " + billId));
-
-        // 3. Kiểm tra logic nghiệp vụ và bảo mật
-        // Phải đúng là trạng thái "Assigned"
         if (!"Assigned".equalsIgnoreCase(bill.getStatus())) {
             throw new InvalidOperationException("Chỉ có thể thao tác với đơn hàng ở trạng thái 'Assigned'.");
         }
-        // Phải đúng là staff này được gán
         if (bill.getStaff() == null || bill.getStaff().getId() != currentStaff.getId()) {
             throw new AccessDeniedException("Bạn không có quyền thao tác trên đơn hàng này.");
         }
 
         return bill;
     }
-    @Transactional // Đảm bảo việc cập nhật là an toàn
+    @Transactional
     public BillAdminResponse acceptOrder(Long billId) {
         Bill bill = getBillAndValidateStaff(billId);
-
-        // 4. Cập nhật trạng thái
         bill.setStatus("Delivering");
         Bill savedBill = billRepository.save(bill);
 
@@ -454,12 +454,12 @@ public class BillService implements IBillService {
     @Transactional
     public BillAdminResponse rejectOrder(Long billId) {
         Bill bill = getBillAndValidateStaff(billId);
-
-        // 4. Cập nhật trạng thái VÀ xóa staff
-        bill.setStatus("Confirmed"); // Trả về cho Admin
-        bill.setStaff(null);         // Xóa staff hiện tại để gán lại
+        bill.setStatus("Confirmed");
+        bill.setStaff(null);
         Bill savedBill = billRepository.save(bill);
 
         return billAdminMapper.mapToBillAdminResponse(savedBill);
     }
+
+
 }
