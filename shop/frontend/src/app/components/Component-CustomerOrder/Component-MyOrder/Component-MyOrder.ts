@@ -4,7 +4,7 @@ import { RouterLink } from '@angular/router';
 import { BillService } from '../../../services/bill.service';
 import { BillAdminDetailResponse, BillItem } from '../../../models/bill-admin.model';
 import { StaffInfo } from '../../../models/staff-info.model';
-export type OrderStatus = 'Processing' | 'Confirmed' | 'Delivering' | 'Delivered' | 'Succeed' | 'Cancelled';
+export type OrderStatus = 'Processing' | 'Confirmed' | 'Assigned' | 'Delivering' | 'Delivered' | 'Succeed' | 'Cancelled';
 export type OrderFilterStatus = OrderStatus | 'all';
 
 @Component({
@@ -27,6 +27,7 @@ export class ComponentMyOrderComponent implements OnInit {
     readonly statusTabs: { key: OrderFilterStatus, label: string }[] = [
         // { key: 'Processing', label: 'Đang Xử lý' },
         { key: 'Confirmed', label: 'Đã xác nhận' },
+        { key: 'Assigned' , label: 'Đã bàn giao' },
         { key: 'Delivering', label: 'Đang vận chuyển' },
         { key: 'Delivered', label: 'Đã giao' },
         { key: 'Succeed', label: 'Hoàn thành' },

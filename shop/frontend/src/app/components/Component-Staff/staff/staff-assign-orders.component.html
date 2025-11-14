@@ -6,8 +6,8 @@
             <!-- Sửa lỗi TS2367: Giá trị filter phải khớp 100% với type 'OrderStatus' (viết hoa) -->
             <div class="seg">
                 <button [class.active]="statusFilter() === 'all'"        (click)="setFilter('all')">Tất cả</button>
-                <button [class.active]="statusFilter() === 'Processing'" (click)="setFilter('Processing')">Đang xử lí</button>
                 <button [class.active]="statusFilter() === 'Confirmed'"  (click)="setFilter('Confirmed')">Đã xác nhận</button>
+                <button [class.active]="statusFilter() === 'Assigned'" (click)="setFilter('Assigned')">Đã bàn giao</button>
                 <button [class.active]="statusFilter() === 'Delivering'"   (click)="setFilter('Delivering')">Đang vận chuyển</button>
                 <button [class.active]="statusFilter() === 'Delivering'"   (click)="setFilter('Delivered')">Đã giao</button>
                 <button [class.active]="statusFilter() === 'Succeed'"  (click)="setFilter('Succeed')">Hoàn thành</button>

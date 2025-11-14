@@ -8,7 +8,7 @@ import {BillAdminService} from "../../../services/bill-admin.service";
 import {ActivatedRoute, Router} from "@angular/router";
 import {combineLatest} from "rxjs";
 
-export type OrderStatus = 'Processing' | 'Confirmed' | 'Delivering' | 'Delivered' | 'Succeed' | 'Cancelled';
+export type OrderStatus = 'Processing' | 'Confirmed' | 'Delivering' | 'Delivered' | 'Succeed' | 'Cancelled' | 'Assigned';
 export type PaymentMethod = 'COD' | 'POS';
 
 interface BillAdminUI extends BillAdminResponse {
@@ -53,6 +53,7 @@ export class StaffAssignOrdersComponent implements OnInit {
     readonly statusMeta: Record<OrderStatus, { label: string; color: string }> = {
         Processing: {label: 'Đang xử lý',     color: 'processing'},
         Confirmed:  {label: 'Đã xác nhận',   color: 'paid'},
+        Assigned: {label: 'Đã bàn giao',   color: 'Delivering'},
         Delivering: {label: 'Đang vận chuyển', color: 'Delivering'},
         Delivered:  {label: 'Đã giao (Chờ KH)', color: 'processing'},
         Succeed:    {label: 'Hoàn tất',      color: 'delivered'},
@@ -74,6 +75,7 @@ export class StaffAssignOrdersComponent implements OnInit {
         return this.orders().filter(o => {
             // SỬA: Bỏ 'Delivered' ra khỏi Đơn hiện tại
             const isActive = o.status === 'Processing' || o.status === 'Confirmed' ||
+                o.status === 'Assigned' ||
                 o.status === 'Delivering';
             const pass = (sf === 'all' && isActive) || (sf === o.status);
             return isActive && pass && this.matchSearch(o, q);
@@ -182,8 +184,11 @@ export class StaffAssignOrdersComponent implements OnInit {
         const selectElement = event.target as HTMLSelectElement;
         const staffId = selectElement.value ? parseInt(selectElement.value, 10) : null;
 
-        if (order.status === 'Succeed' || order.status === 'Cancelled') return; // Đơn đã xong -> không đổi
-        if (order.staff) { // Đã phân công rồi -> chặn (backend trả về staff object)
+        if (order.status !== 'Confirmed') {
+            this.showError('Chỉ có thể gán khi đơn hàng đã được xác nhận.');
+            selectElement.value = order.staff ? order.staff.id.toString() : '';
+            return;
+        }        if (order.staff) { // Đã phân công rồi -> chặn (backend trả về staff object)
             this.showError('Đơn đã phân công, không thể thay đổi.');
             // Reset dropdown về giá trị cũ
             selectElement.value = order.staff.id.toString();

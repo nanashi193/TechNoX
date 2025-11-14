@@ -286,7 +286,7 @@ public class BillService implements IBillService {
             throw new RuntimeException("User is not a staff member: " + staffId);
         }
         bill.setStaff(staff);
-        bill.setStatus("Delivering");
+        bill.setStatus("Assigned");
         Bill savedBill = billRepository.save(bill);
         return billAdminMapper.mapToBillAdminResponse(savedBill);
     }
