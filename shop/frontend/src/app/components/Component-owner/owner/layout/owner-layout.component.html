@@ -38,7 +38,8 @@
                 </span><span class="text">Đơn hàng</span>
             </a>
 
-            <a class="item" routerLink="/owner/users" routerLinkActive="active">
+            <a class="item" routerLink="/owner/users" routerLinkActive="active"
+               *ngIf="(me$ | async)?.role !== 'STAFF'">
                 <span class="icon ico-mask" style="--ico:url('../../../../../assets/icons/user-key.svg')">
                 </span><span class="text">Người dùng</span>
             </a>
@@ -63,3 +64,9 @@
         <router-outlet></router-outlet>
     </main>
 </div>
+<app-toast-notification
+        *ngIf="currentNotification"
+        [message]="currentNotification.message"
+        [link]="currentNotification.link"
+        (close)="closeToast()">
+</app-toast-notification>

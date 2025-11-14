@@ -26,7 +26,7 @@ const checkOwnerRole = (router: Router): boolean => {
         }
         //Kiểm tra vai trò
         const role = decodedToken.roleName.toUpperCase();
-        if (role === 'ADMIN' || role === 'OWNER') {
+        if (role === 'ADMIN' || role === 'OWNER' || role === 'STAFF') {
             return true; // OK, cho phép truy cập
         } else {
             //Đã đăng nhập nhưng sai vai trò -> Đá về trang chủ

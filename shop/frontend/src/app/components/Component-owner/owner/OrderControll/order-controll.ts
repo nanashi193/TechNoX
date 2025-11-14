@@ -74,7 +74,9 @@ export class OrderControllComponent implements OnInit {
         const sf = this.statusFilter();
         return this.orders().filter(o => {
             // SỬA: Bỏ 'Delivered' ra khỏi Đơn hiện tại
-            const isActive = o.status === 'Processing' || o.status === 'Confirmed' ||
+            const isActive = o.status === 'Processing' ||
+                o.status === 'Confirmed' ||
+                o.status === 'Delivered' ||
                 o.status === 'Assigned' ||
                 o.status === 'Delivering';
             const pass = (sf === 'all' && isActive) || (sf === o.status);
@@ -87,7 +89,7 @@ export class OrderControllComponent implements OnInit {
         const sf = this.statusFilter();
         return this.orders().filter(o => {
             // SỬA: Thêm 'Delivered' vào Đơn đã xử lý
-            const isDone = o.status === 'Delivered' || o.status === 'Succeed' || o.status === 'Cancelled';
+            const isDone = o.status === 'Succeed' || o.status === 'Cancelled';
             const pass = (sf === 'all' && isDone) || (sf === o.status);
             return isDone && pass && this.matchSearch(o, q);
         });

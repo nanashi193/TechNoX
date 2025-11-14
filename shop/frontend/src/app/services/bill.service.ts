@@ -47,5 +47,15 @@ export class BillService {
             {}
         );
     }
+    acceptOrder(billId: number): Observable<BillAdminResponse> {
+        return this.http.put<BillAdminResponse>(`${this.baseUrl}/staff/${billId}/accept`, {});
+    }
+
+    /**
+     * Staff từ chối đơn hàng (Assigned -> Confirmed)
+     */
+    declineOrder(billId: number): Observable<BillAdminResponse> {
+        return this.http.put<BillAdminResponse>(`${this.baseUrl}/staff/${billId}/reject`, {});
+    }
 }
 

@@ -35,7 +35,9 @@ export class SiteHeaderComponent implements OnDestroy {
         this.itemCount$   = this.cartService.itemCount$;
     }
     isOwner(user: any): boolean {
-        return user?.roleName === 'Owner' || user?.authorities?.includes('OWNER');
+        return user?.roleName === 'Owner' || user?.authorities?.includes('OWNER')
+            || user?.roleName === 'Admin' || user?.authorities?.includes('Admin')
+            || user?.roleName === 'Staff' || user?.authorities?.includes('Staff');
     }
 
     // ===== Mobile menu =====

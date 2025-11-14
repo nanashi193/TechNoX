@@ -25,6 +25,7 @@ import com.g5.techdevices.techstore.responses.BillResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Sort;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -52,13 +53,15 @@ public class BillService implements IBillService {
     private final BillMapper billMapper;
     private final BillAdminMapper billAdminMapper;
     private final PayTransactionRepository payTransactionRepository;
+    private final SimpMessagingTemplate messagingTemplate;
+    public record NotificationDTO(String message, String link) {}
 
     private static final Logger logger = LoggerFactory.getLogger(BillService.class);
 
     public BillService(BillRepository billRepository, BillDetailRepository billDetailRepository,
                        ProductVariantRepository variantRepository, UserRepository userRepository, EmailService emailService,
-                       BillMapper billMapper,  BillAdminMapper billAdminMapper,
-                       PayTransactionRepository payTransactionRepository) {
+                       BillMapper billMapper, BillAdminMapper billAdminMapper,
+                       PayTransactionRepository payTransactionRepository, SimpMessagingTemplate messagingTemplate) {
         this.billRepository = billRepository;
         this.variantRepository = variantRepository;
         this.userRepository = userRepository;
@@ -66,6 +69,7 @@ public class BillService implements IBillService {
         this.billMapper = billMapper;
         this.billAdminMapper = billAdminMapper;
         this.payTransactionRepository = payTransactionRepository;
+        this.messagingTemplate = messagingTemplate;
     }
     // ================== CREATE BILL ==================
     @Override
@@ -192,7 +196,10 @@ public class BillService implements IBillService {
             throw new AccessDeniedException("Bạn không có quyền xác nhận đơn hàng này.");
         }
         Bill confirmedBill = this.confirmBillLogic(billId, "COD", false);
-
+        String message = "Bạn vừa có một đơn hàng mới. Hãy sẵn sàng đóng gói!";
+        String link = "/owner/orders";
+        NotificationDTO notification = new NotificationDTO(message, link);
+        messagingTemplate.convertAndSend("/topic/admin-notifications", notification);
         return billMapper.mapToBillResponse(confirmedBill);
     }
 
@@ -294,7 +301,7 @@ public class BillService implements IBillService {
     public List<BillAdminResponse> getOrdersForCurrentStaff() {
         User currentStaff = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         int currentStaffId = currentStaff.getId();
-        List<String> statuses = List.of("Delivering", "Delivered", "Succeed");
+        List<String> statuses = List.of("Assigned", "Delivering", "Delivered", "Succeed");
         List<Bill> bills = billRepository.findByStaffIdAndStatusIn(
                 currentStaffId,
                 statuses,
@@ -412,5 +419,47 @@ public class BillService implements IBillService {
             case "total_asc"  -> Sort.by("total").ascending();
             default           -> Sort.by("orderDate").descending(); // date_desc (mặc định)
         };
+    }
+    private Bill getBillAndValidateStaff(Long billId) {
+        // 1. Lấy thông tin staff đang đăng nhập
+        User currentStaff = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+        // 2. Tìm đơn hàng
+        Bill bill = billRepository.findById(billId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy đơn hàng: " + billId));
+
+        // 3. Kiểm tra logic nghiệp vụ và bảo mật
+        // Phải đúng là trạng thái "Assigned"
+        if (!"Assigned".equalsIgnoreCase(bill.getStatus())) {
+            throw new InvalidOperationException("Chỉ có thể thao tác với đơn hàng ở trạng thái 'Assigned'.");
+        }
+        // Phải đúng là staff này được gán
+        if (bill.getStaff() == null || bill.getStaff().getId() != currentStaff.getId()) {
+            throw new AccessDeniedException("Bạn không có quyền thao tác trên đơn hàng này.");
+        }
+
+        return bill;
+    }
+    @Transactional // Đảm bảo việc cập nhật là an toàn
+    public BillAdminResponse acceptOrder(Long billId) {
+        Bill bill = getBillAndValidateStaff(billId);
+
+        // 4. Cập nhật trạng thái
+        bill.setStatus("Delivering");
+        Bill savedBill = billRepository.save(bill);
+
+        return billAdminMapper.mapToBillAdminResponse(savedBill);
+    }
+
+    @Transactional
+    public BillAdminResponse rejectOrder(Long billId) {
+        Bill bill = getBillAndValidateStaff(billId);
+
+        // 4. Cập nhật trạng thái VÀ xóa staff
+        bill.setStatus("Confirmed"); // Trả về cho Admin
+        bill.setStaff(null);         // Xóa staff hiện tại để gán lại
+        Bill savedBill = billRepository.save(bill);
+
+        return billAdminMapper.mapToBillAdminResponse(savedBill);
     }
 }

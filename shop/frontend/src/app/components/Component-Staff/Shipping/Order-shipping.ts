@@ -5,11 +5,6 @@ import { BillService } from '../../../services/bill.service';
 import { BillAdminResponse} from '../../../models/bill-admin.model';
 import { StaffInfo } from '../../../models/staff-info.model';
 
-interface BillAdminUI extends BillAdminResponse {
-    _expanded?: boolean;
-    _isAccepted?: boolean;
-}
-
 @Component({
     selector: 'app-staff-delivery',
     standalone: true,
@@ -25,9 +20,9 @@ export class OrderShippingComponent implements OnInit {
     errorMsg = signal('');
     query = signal('');
 
-    allOrders = signal<BillAdminUI[]>([]);
+    allOrders = signal<BillAdminResponse[]>([]);
 
-    private filterOrders(orders: BillAdminUI[]): BillAdminUI[] {
+    private filterOrders(orders: BillAdminResponse[]): BillAdminResponse[] {
         const q = this.query().trim().toLowerCase();
         if (!q) return orders;
 
@@ -39,19 +34,20 @@ export class OrderShippingComponent implements OnInit {
 
     assignedOrders = computed(() => {
         return this.filterOrders(
-            this.allOrders().filter(o => !o._isAccepted)
+            this.allOrders().filter(o => o.status === 'Assigned')
         );
     });
 
     deliveringOrders = computed(() => {
         return this.filterOrders(
-            this.allOrders().filter(o => o._isAccepted)
+            this.allOrders().filter(o => o.status === 'Delivering')
         );
     });
 
     succeedOrders = computed(() => {
-        const succeed = this.allOrders().filter(o => o.status === 'Delivered' || o.status === 'Succeed');
-        return this.filterOrders(succeed);
+        return this.filterOrders(
+            this.allOrders().filter(o => o.status === 'Delivered' || o.status === 'Succeed')
+        );
     });
 
     ngOnInit(): void {
@@ -64,13 +60,7 @@ export class OrderShippingComponent implements OnInit {
 
         this.billService.getMyAssignedOrders().subscribe({
             next: (orders) => {
-                // Khởi tạo _isAccepted = false cho tất cả đơn
-                const processedOrders = orders.map(o => ({
-                    ...o,
-                    _isAccepted: false
-                })) as BillAdminUI[];
-
-                this.allOrders.set(processedOrders);
+                this.allOrders.set(orders);
                 this.loading.set(false);
             },
             error: (err) => {
@@ -81,31 +71,54 @@ export class OrderShippingComponent implements OnInit {
         });
     }
 
-    acceptOrder(order: BillAdminUI): void {
-        this.allOrders.update(currentOrders =>
-            currentOrders.map(o =>
-                o.billId === order.billId
-                    ? { ...o, _isAccepted: true }
-                    : o
-            )
-        );
+    acceptOrder(order: BillAdminResponse): void {
+        this.loading.set(true);
+        this.billService.acceptOrder(order.billId).subscribe({
+            next: (updatedBill) => {
+                // Cập nhật đơn hàng trong signal
+                this.allOrders.update(currentOrders =>
+                    currentOrders.map(o =>
+                        o.billId === updatedBill.billId ? updatedBill : o
+                    )
+                );
+                this.loading.set(false);
+            },
+            error: (err) => {
+                this.errorMsg.set('Chấp nhận thất bại: ' + (err.error?.message || 'Lỗi máy chủ'));
+                this.loading.set(false);
+            }
+        });
     }
 
-    declineOrder(order: BillAdminUI): void {
-        this.allOrders.update(currentOrders =>
-            currentOrders.filter(o => o.billId !== order.billId)
-        );
+    declineOrder(order: BillAdminResponse): void {
+        // Hỏi xác nhận trước khi từ chối
+        if (!confirm(`Bạn có chắc muốn từ chối đơn hàng #${order.billId}? Đơn hàng sẽ được trả lại cho quản lý.`)) {
+            return;
+        }
+
+        this.loading.set(true);
+        this.billService.declineOrder(order.billId).subscribe({
+            next: (updatedBill) => {
+                this.allOrders.update(currentOrders =>
+                    currentOrders.filter(o => o.billId !== order.billId)
+                );
+                this.loading.set(false);
+            },
+            error: (err) => {
+                this.errorMsg.set('Từ chối thất bại: ' + (err.error?.message || 'Lỗi máy chủ'));
+                this.loading.set(false);
+            }
+        });
     }
 
-    markAsCompleted(order: BillAdminUI): void {
-        if (order.status !== 'Delivering') return;
-
+    markAsCompleted(order: BillAdminResponse): void {
+        // Sửa: Đổi tên hàm từ service cho đúng
         this.loading.set(true);
         this.billService.completeOrder(order.billId).subscribe({
             next: (updatedBill) => {
                 this.allOrders.update(currentOrders =>
                     currentOrders.map(o =>
-                        o.billId === updatedBill.billId ? (updatedBill as BillAdminUI) : o
+                        o.billId === updatedBill.billId ? updatedBill : o
                     )
                 );
                 this.loading.set(false);
