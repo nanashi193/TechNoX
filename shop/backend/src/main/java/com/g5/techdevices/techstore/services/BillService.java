@@ -222,11 +222,28 @@ public class BillService implements IBillService {
         }
         this.deductStock(bill);
         this.sendConfirmationEmail(bill, paymentMethod);
-        String message = "\uD83D\uDD14 Bạn vừa có một đơn hàng mới!";
-        String link = "/owner/orders";
-        NotificationDTO notification = new NotificationDTO(message, link);
-        messagingTemplate.convertAndSend("/topic/admin-notifications", notification);
-        return billRepository.save(bill);
+        Bill savedBill = billRepository.save(bill);
+        String adminMessage = "\uD83D\uDD14 Bạn vừa có một đơn hàng mới!";
+        String adminLink = "/owner/orders";
+        NotificationDTO adminNotification = new NotificationDTO(adminMessage, adminLink);
+        messagingTemplate.convertAndSend("/topic/admin-notifications", adminNotification);
+
+        // 2. Gửi thông báo cho CUSTOMER (Private - Kênh riêng)
+        User customer = savedBill.getUser(); // Lấy customer từ đơn hàng
+        if (customer != null) {
+            String customerMessage = "\uD83D\uDD14 Đơn hàng #" + savedBill.getId() + " của bạn đã được xác nhận!";
+            String customerLink = "/my-orders";
+            NotificationDTO customerNotification = new NotificationDTO(customerMessage, customerLink);
+
+            // Gửi tin nhắn riêng tư cho customer
+            log.info("Đang gửi thông báo (Confirmed) cho Customer: " + customer.getEmail());
+            messagingTemplate.convertAndSendToUser(
+                    customer.getEmail(),      // Gửi cho khách hàng
+                    "/queue/notifications", // Kênh riêng tư
+                    customerNotification
+            );
+        }
+        return savedBill;
     }
 
     private void deductStock(Bill bill) throws InsufficientStockException, DataNotFoundException {
@@ -336,6 +353,19 @@ public class BillService implements IBillService {
         }
         bill.setStatus("Delivered");
         Bill savedBill = billRepository.save(bill);
+        User customer = bill.getUser();
+        if (customer != null) {
+            // 6. Tạo tin nhắn và link
+            String message = "\uD83D\uDD14 Đơn hàng #" + savedBill.getId() + " của bạn đã được giao. Vui lòng kiểm tra!";
+            String link = "/my-orders";
+            NotificationDTO notification = new NotificationDTO(message, link);
+            log.info("Đang gửi thông báo (Đã giao) cho Customer: " + customer.getEmail());
+            messagingTemplate.convertAndSendToUser(
+                    customer.getEmail(),
+                    "/queue/notifications",
+                    notification
+            );
+        }
         return billAdminMapper.mapToBillAdminResponse(savedBill);
     }
 

@@ -22,10 +22,15 @@ export class OrderShippingComponent implements OnInit {
 
     allOrders = signal<BillAdminResponse[]>([]);
 
+    showDeclineModal = signal(false);
+    orderToDecline = signal<BillAdminResponse | null>(null);
+    showCompleteModal = signal(false);
+    orderToComplete = signal<BillAdminResponse | null>(null);
+    selectedImagePreview = signal<string | null>(null);
+
     private filterOrders(orders: BillAdminResponse[]): BillAdminResponse[] {
         const q = this.query().trim().toLowerCase();
         if (!q) return orders;
-
         return orders.filter(o =>
             [o.customerFullName, o.customerPhone, o.billId, o.shippingAddress, o.paymentMethod]
                 .some(v => (v ?? '').toString().toLowerCase().includes(q))
@@ -57,7 +62,6 @@ export class OrderShippingComponent implements OnInit {
     loadMyOrders(): void {
         this.loading.set(true);
         this.errorMsg.set('');
-
         this.billService.getMyAssignedOrders().subscribe({
             next: (orders) => {
                 this.allOrders.set(orders);
@@ -75,7 +79,6 @@ export class OrderShippingComponent implements OnInit {
         this.loading.set(true);
         this.billService.acceptOrder(order.billId).subscribe({
             next: (updatedBill) => {
-                // Cập nhật đơn hàng trong signal
                 this.allOrders.update(currentOrders =>
                     currentOrders.map(o =>
                         o.billId === updatedBill.billId ? updatedBill : o
@@ -91,10 +94,18 @@ export class OrderShippingComponent implements OnInit {
     }
 
     declineOrder(order: BillAdminResponse): void {
-        // Hỏi xác nhận trước khi từ chối
-        if (!confirm(`Bạn có chắc muốn từ chối đơn hàng #${order.billId}? Đơn hàng sẽ được trả lại cho quản lý.`)) {
-            return;
-        }
+        this.orderToDecline.set(order);
+        this.showDeclineModal.set(true);
+    }
+
+    closeDeclineModal() {
+        this.showDeclineModal.set(false);
+        this.orderToDecline.set(null);
+    }
+
+    confirmDeclineOrder() {
+        const order = this.orderToDecline();
+        if (!order) return;
 
         this.loading.set(true);
         this.billService.declineOrder(order.billId).subscribe({
@@ -103,16 +114,55 @@ export class OrderShippingComponent implements OnInit {
                     currentOrders.filter(o => o.billId !== order.billId)
                 );
                 this.loading.set(false);
+                this.closeDeclineModal();
             },
             error: (err) => {
                 this.errorMsg.set('Từ chối thất bại: ' + (err.error?.message || 'Lỗi máy chủ'));
                 this.loading.set(false);
+                this.closeDeclineModal();
             }
         });
     }
 
     markAsCompleted(order: BillAdminResponse): void {
-        // Sửa: Đổi tên hàm từ service cho đúng
+        if (order.status !== 'Delivering') return;
+
+        this.orderToComplete.set(order);
+        this.selectedImagePreview.set(null);
+        this.showCompleteModal.set(true);
+    }
+
+    closeCompleteModal() {
+        this.showCompleteModal.set(false);
+        this.orderToComplete.set(null);
+        this.selectedImagePreview.set(null);
+    }
+
+    onFileSelected(event: Event): void {
+        const element = event.target as HTMLInputElement;
+        const file = element.files?.[0];
+
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                this.selectedImagePreview.set(e.target?.result as string);
+            };
+            reader.readAsDataURL(file);
+        } else {
+            this.selectedImagePreview.set(null);
+        }
+    }
+
+    confirmCompleteOrder() {
+        const order = this.orderToComplete();
+        if (!order) return;
+
+        if (!this.selectedImagePreview()) {
+            this.errorMsg.set('Vui lòng đính kèm ảnh xác nhận.');
+            setTimeout(() => this.errorMsg.set(''), 3000);
+            return;
+        }
+
         this.loading.set(true);
         this.billService.completeOrder(order.billId).subscribe({
             next: (updatedBill) => {
@@ -122,10 +172,12 @@ export class OrderShippingComponent implements OnInit {
                     )
                 );
                 this.loading.set(false);
+                this.closeCompleteModal(); // Đóng modal khi thành công
             },
             error: (err) => {
                 this.errorMsg.set('Cập nhật thất bại: ' + (err.error?.message || 'Lỗi máy chủ'));
                 this.loading.set(false);
+                // (Không đóng modal khi lỗi, để user thử lại)
             }
         });
     }

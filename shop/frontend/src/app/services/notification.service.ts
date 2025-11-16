@@ -32,7 +32,6 @@ export class NotificationService {
         const headers = {
             'Authorization': `Bearer ${token}`
         };
-
         const socket = new SockJS(this.backendUrl);
         this.stompClient = Stomp.over(socket);
         this.stompClient.debug = () => {};
@@ -45,11 +44,18 @@ export class NotificationService {
                     notification.message,
                     notification.link,
                     'info',
-                    20000
+                    30000
                 );
             };
-            this.stompClient?.subscribe('/topic/admin-notifications', callback);
             this.stompClient?.subscribe('/user/queue/notifications', callback);
+
+            if (this.authService.hasRole('ROLE_ADMIN') ||
+                this.authService.hasRole('ROLE_OWNER') ||
+                this.authService.hasRole('ROLE_STAFF')) {
+
+                this.stompClient?.subscribe('/topic/admin-notifications', callback);
+                console.log("Admin/Staff user connected, subscribing to admin topic.");
+            }
         });
     }
 

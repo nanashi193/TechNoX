@@ -30,8 +30,5 @@ bootstrapApplication(App, appConfig)
         const toast = injector.get(ToastService);
         const zone  = injector.get(NgZone);
         patchAlert(toast, zone);
-
-        // sanity check: bắn 1 toast sau khi app khởi động
-         zone.run(() => toast.info('Toast ready ✔'));
     })
     .catch(err => console.error(err));

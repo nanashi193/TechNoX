@@ -10,10 +10,8 @@ import { RouterModule } from '@angular/router';
     imports: [CommonModule, RouterModule],
     encapsulation: ViewEncapsulation.None, // global CSS để không bị đè
     template: `
-        <!-- Vùng chứa, đặt ở góc trên phải -->
         <div class="g5-toast-wrap g5-toast-wrap--top">
 
-            <!-- V(ngFor) duyệt qua các toast -->
             <div class="g5-toast"
                  *ngFor="let t of toasts"
                  [class.g5-success]="t.type==='success'"
@@ -21,10 +19,8 @@ import { RouterModule } from '@angular/router';
                  [class.g5-info]="t.type==='info'"
                  role="status" aria-live="polite">
 
-                <!-- 1. Tin nhắn (luôn hiển thị) -->
                 <span class="g5-toast-message">{{ t.message }}</span>
 
-                <!-- 2. Nút "Xem" (chỉ hiển thị khi có link) -->
                 <a *ngIf="t.link"
                    [routerLink]="t.link"
                    (click)="removeToast(t.id)"
@@ -32,7 +28,6 @@ import { RouterModule } from '@angular/router';
                     Xem
                 </a>
 
-                <!-- 3. Nút đóng (X) -->
                 <button (click)="removeToast(t.id)" class="g5-toast-close" aria-label="Đóng">×</button>
             </div>
 
@@ -146,17 +141,15 @@ import { RouterModule } from '@angular/router';
     `]
 })
 export class ToastContainerComponent implements OnDestroy {
-    toasts: (Toast & { link?: string | null })[] = []; // Cho phép 'link' ở đây
+    toasts: (Toast & { link?: string | null })[] = [];
     private sub = new Subscription();
 
     constructor(private toast: ToastService){
         this.sub.add(
             this.toast.toasts$.subscribe(t => {
-                // NEWEST ON TOP: thêm vào đầu mảng để toast mới hiện trên cùng
                 this.toasts = [t, ...this.toasts];
                 const ms = t.duration ?? 3000;
 
-                // Tự động xóa sau (ms) giây
                 setTimeout(() => {
                     this.removeToast(t.id);
                 }, ms);
@@ -164,7 +157,6 @@ export class ToastContainerComponent implements OnDestroy {
         );
     }
 
-    // Thêm hàm này để cho phép đóng bằng tay (hoặc khi bấm link)
     removeToast(id: number) {
         this.toasts = this.toasts.filter(x => x.id !== id);
     }

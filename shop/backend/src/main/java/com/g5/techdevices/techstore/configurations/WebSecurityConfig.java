@@ -75,15 +75,15 @@ public class WebSecurityConfig {
                         .requestMatchers(GET, apiPrefix + "/bills/status/**").permitAll() // FE tra cứu
 
                         // Quản trị sản phẩm
-                        .requestMatchers(POST, apiPrefix + "/products").hasAnyRole(Role.ADMIN, Role.OWNER)
-                        .requestMatchers(POST, apiPrefix + "/products/uploads/**").hasAnyRole(Role.ADMIN, Role.OWNER)
-                        .requestMatchers(POST, apiPrefix + "/products/*/variants").hasAnyRole(Role.ADMIN, Role.OWNER)
-                        .requestMatchers(POST, apiPrefix + "/products/*/variants/**").hasAnyRole(Role.ADMIN, Role.OWNER)
-                        .requestMatchers(DELETE, apiPrefix + "/products/*").hasAnyRole(Role.ADMIN, Role.OWNER)
-                        .requestMatchers(DELETE, apiPrefix + "/products/*/images/**").hasAnyRole(Role.ADMIN, Role.OWNER)
+                        .requestMatchers(POST, apiPrefix + "/products").hasAnyRole(Role.ADMIN, Role.OWNER, Role.STAFF)
+                        .requestMatchers(POST, apiPrefix + "/products/uploads/**").hasAnyRole(Role.ADMIN, Role.OWNER, Role.STAFF)
+                        .requestMatchers(POST, apiPrefix + "/products/*/variants").hasAnyRole(Role.ADMIN, Role.OWNER, Role.STAFF)
+                        .requestMatchers(POST, apiPrefix + "/products/*/variants/**").hasAnyRole(Role.ADMIN, Role.OWNER, Role.STAFF)
+                        .requestMatchers(DELETE, apiPrefix + "/products/*").hasAnyRole(Role.ADMIN, Role.OWNER, Role.STAFF)
+                        .requestMatchers(DELETE, apiPrefix + "/products/*/images/**").hasAnyRole(Role.ADMIN, Role.OWNER, Role.STAFF)
                         .requestMatchers(PUT, apiPrefix + "/products/*/thumbnail/from-image/*")
-                        .hasAnyRole(Role.ADMIN, Role.OWNER)
-                        .requestMatchers(PUT, apiPrefix + "/products/**").hasAnyRole(Role.ADMIN, Role.OWNER)
+                        .hasAnyRole(Role.ADMIN, Role.OWNER, Role.STAFF)
+                        .requestMatchers(PUT, apiPrefix + "/products/**").hasAnyRole(Role.ADMIN, Role.OWNER, Role.STAFF)
 
                         // Bills
                         .requestMatchers(POST, apiPrefix + "/bills").authenticated()

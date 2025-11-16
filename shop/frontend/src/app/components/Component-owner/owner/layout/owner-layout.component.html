@@ -38,7 +38,8 @@
                 </span><span class="text">Đơn hàng</span>
             </a>
 
-            <a class="item" routerLink="/owner/users" routerLinkActive="active">
+            <a *ngIf="(me$ | async)?.role !== 'STAFF'"
+               class="item" routerLink="/owner/users" routerLinkActive="active">
                 <span class="icon ico-mask" style="--ico:url('../../../../../assets/icons/user-key.svg')">
                 </span><span class="text">Người dùng</span>
             </a>

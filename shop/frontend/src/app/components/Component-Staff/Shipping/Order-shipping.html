@@ -13,15 +13,10 @@
             />
         </div>
     </div>
-
-    <!-- Thông báo lỗi/loading -->
     <div *ngIf="loading()" class="oc-banner info">Đang tải dữ liệu…</div>
     <div *ngIf="errorMsg()" class="oc-banner error">{{ errorMsg() }}</div>
-
-    <!-- ĐƠN ĐƯỢC GIAO (ASSIGNED) - CARDS -->
     <div class="section-card" *ngIf="assignedOrders().length > 0">
         <div class="section-card__head">📦 Đơn được giao cho bạn (chờ xác nhận)</div>
-
         <div class="section-card__body assigned-cards">
             <div *ngFor="let o of assignedOrders()" class="card">
                 <div class="card-header">
@@ -61,10 +56,8 @@
             </div>
         </div>
     </div>
-
-    <!-- ĐƠN CẦN GIAO (DELIVERING) -->
     <div class="section-card">
-        <div class="section-card__head">Đơn cần giao (Trạng thái: Delivering)</div>
+        <div class="section-card__head">Đơn cần giao</div>
 
         <div class="table-wrap section-card__body">
             <table class="orders">
@@ -118,9 +111,8 @@
         </div>
     </div>
 
-    <!-- ĐƠN ĐÃ GIAO (DELIVERED) -->
     <div class="section-card">
-        <div class="section-card__head">Đơn đã giao (Trạng thái: Delivered)</div>
+        <div class="section-card__head">Đơn đã giao</div>
 
         <div class="table-wrap section-card__body">
             <table class="orders">
@@ -156,7 +148,7 @@
 
                     <td>
                         <span *ngIf="o.status === 'Delivered'" class="badge warn">
-                            Đã giao (Waiting)
+                            Đã giao
                         </span>
                         <span *ngIf="o.status === 'Succeed'" class="badge delivered">
                             Đã hoàn tất
@@ -172,4 +164,58 @@
             </table>
         </div>
     </div>
+</div>
+<div *ngIf="showDeclineModal()" class="custom-modal-overlay">
+
+    <div class="custom-modal-content">
+        <h3>Xác nhận từ chối</h3>
+        <p>Bạn có chắc muốn từ chối đơn hàng
+            <strong *ngIf="orderToDecline()">#{{ orderToDecline()?.billId }}</strong>?
+        </p>
+        <p class="modal-note">Đơn hàng sẽ được trả lại cho quản lý để phân công.</p>
+
+        <div class="custom-modal-actions">
+            <button class="btn-secondary" (click)="closeDeclineModal()">
+                Không
+            </button>
+            <button class="btn-danger" (click)="confirmDeclineOrder()">
+                Có, từ chối
+            </button>
+        </div>
+    </div>
+
+</div>
+<div *ngIf="showCompleteModal()" class="custom-modal-overlay">
+
+    <div class="custom-modal-content">
+        <h3>Xác nhận đã giao hàng</h3>
+        <p>Xác nhận đã giao thành công đơn hàng
+            <strong *ngIf="orderToComplete()">#{{ orderToComplete()?.billId }}</strong>?
+        </p>
+
+        <div class="image-upload-area">
+            <label for="delivery-proof-input">Vui lòng kèm theo hình ảnh xác thực:</label>
+            <input id="delivery-proof-input"
+                   type="file"
+                   accept="image/*"
+                   capture="environment"
+                   (change)="onFileSelected($event)">
+            <img *ngIf="selectedImagePreview()"
+                 [src]="selectedImagePreview()"
+                 alt="Xem trước ảnh"
+                 class="image-preview">
+        </div>
+
+        <div class="custom-modal-actions">
+            <button class="btn-secondary" (click)="closeCompleteModal()">
+                Hủy
+            </button>
+            <button class="btn-success"
+                    (click)="confirmCompleteOrder()"
+                    [disabled]="!selectedImagePreview()">
+                Xác nhận đã giao
+            </button>
+        </div>
+    </div>
+
 </div>
