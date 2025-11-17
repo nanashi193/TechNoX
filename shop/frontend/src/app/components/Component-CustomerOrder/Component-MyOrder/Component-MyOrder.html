@@ -162,7 +162,6 @@
                     </div>
                 </footer>
 
-                <!-- Sửa: Dùng trạng thái 'Cancelled' (chính xác của backend) -->
                 <div *ngIf="o.status==='Cancelled'" class="cancel-row">
                     Đơn hàng đã bị hủy.
                 </div>
@@ -170,3 +169,23 @@
         </div>
     </div>
 </section>
+<div *ngIf="showCancelModal" class="custom-modal-overlay">
+
+    <div class="custom-modal-content">
+        <h3>Xác nhận hủy đơn</h3>
+        <p>Bạn có chắc chắn muốn hủy đơn hàng
+            <strong *ngIf="orderToCancel">#{{ orderToCancel?.billId }}</strong>
+            không?
+        </p>
+        <p class="modal-note">Lưu ý: Đơn hàng chỉ có thể hủy khi chưa được bàn giao.</p>
+        <div class="custom-modal-actions">
+            <button class="btn-secondary" (click)="closeCancelModal()">
+                Không
+            </button>
+            <button class="btn-danger" (click)="confirmCancelOrder()">
+                Có, hủy đơn
+            </button>
+        </div>
+    </div>
+
+</div>

@@ -1,9 +1,12 @@
 <div class="app-shell">
     <app-site-header *ngIf="showChrome()"></app-site-header>
 
-    <main class="app-main">
+    <main class="app-main" style="position:relative; z-index:1">
         <router-outlet></router-outlet>
     </main>
 
     <app-site-footer *ngIf="showChrome()"></app-site-footer>
+
+    <!-- Toast nổi toàn app (đặt cuối để luôn phủ trên nội dung) -->
+    <app-toast-container></app-toast-container>
 </div>

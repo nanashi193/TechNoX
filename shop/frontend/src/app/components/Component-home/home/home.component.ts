@@ -13,46 +13,53 @@ import { CustomerProduct } from '../../../models/customer-product.model'; // Imp
     styleUrls: ['./home.component.css'],
 })
 export class HomeComponent implements AfterViewInit, OnDestroy, OnInit {
-    // ===== Header/Menu/Cookies (GIỮ NGUYÊN) =====
     mobileMenuOpen = false;
     cookieOpen = true;
-
-    // ===== Poster cover (GIỮ NGUYÊN) =====
     showCover = true;
     forceOff  = false;
 
-    // ===== Video refs & state (GIỮ NGUYÊN) =====
     @ViewChild('heroVideo') heroVideo!: ElementRef<HTMLVideoElement>;
+    @ViewChild('hotSaleScroller') hotSaleScrollerRef!: ElementRef<HTMLDivElement>;
     isMuted = true;
     private _timeouts: any[] = [];
-
-    // ===== Service (GIỮ NGUYÊN) =====
     private productSvc = inject(CustomerProductService);
 
-    // ===== BƯỚC 1: Thay thế logic "Featured" bằng 3 danh mục =====
     phoneProducts: CustomerProduct[] = [];
     laptopProducts: CustomerProduct[] = [];
     accessoryProducts: CustomerProduct[] = [];
+    hotSaleProducts: CustomerProduct[] = [];
 
-    // Thêm 3 cờ loading riêng biệt
     phonesLoading = true;
     laptopsLoading = true;
     accessoriesLoading = true;
+    hotSaleLoading = true;
+    countdown: { days: string, hours: string, minutes: string, seconds: string } = { days: '00', hours: '00', minutes: '00', seconds: '00' };
+    private countdownInterval: any;
+    private saleEndDate!: Date;
 
-    // Số lượng sản phẩm hiển thị cho mỗi mục (bạn có thể đổi số này)
-    private readonly productsPerCategory = 3;
+    private readonly productsPerCategory = 6;
+    private readonly hotSaleProductCount = 10;
 
-    // ===== BƯỚC 2: Cập nhật ngOnInit =====
+
     ngOnInit(): void {
-        // Tải cả 3 danh mục
         this.loadCategoryProducts('Điện thoại');
         this.loadCategoryProducts('Laptop');
         this.loadCategoryProducts('Phụ kiện');
+        this.loadHotSaleProducts();
+        const today = new Date();
+        const dayOfWeek = today.getDay();
+        // (Nếu hôm nay là CN, daysUntilSunday = 7, sale kết thúc CN tuần sau)
+        const daysUntilSunday = (dayOfWeek === 0 ? 7 : 7 - dayOfWeek);
+        // Đặt sale kết thúc vào 00:00:00 (nửa đêm) Chủ Nhật
+        this.saleEndDate = new Date(today.getFullYear(), today.getMonth(), today.getDate() + daysUntilSunday, 0, 0, 0);
+        //Cập nhật đồng hồ ngay lập tức và sau đó mỗi giây
+        this.updateCountdown(); // Chạy 1 lần ngay
+        this.countdownInterval = setInterval(() => {
+            this.updateCountdown();
+        }, 1000);
     }
 
-    // ===== BƯỚC 3: Thêm hàm tải theo danh mục =====
     loadCategoryProducts(categoryName: 'Điện thoại' | 'Laptop' | 'Phụ kiện'): void {
-
         let loadingFlag: 'phonesLoading' | 'laptopsLoading' | 'accessoriesLoading';
         switch (categoryName) {
             case 'Điện thoại':
@@ -69,17 +76,11 @@ export class HomeComponent implements AfterViewInit, OnDestroy, OnInit {
                 break;
         }
 
-        /**
-         * Giả định: hàm getProducts chấp nhận (pageIndex, pageSize, categoryName)
-         * Chúng ta lấy trang 0 (trang đầu tiên) và số lượng 3 sản phẩm
-         */
-        this.productSvc.getProducts(0, this.productsPerCategory, categoryName)
+        this.productSvc.getProducts(0, this.productsPerCategory, categoryName, undefined, 'relevance')
             .pipe(finalize(() => {
-                // Tắt cờ loading khi hoàn tất
                 this[loadingFlag] = false;
             }))
             .subscribe(response => {
-                // Gán dữ liệu, đảm bảo imageUrls luôn là một mảng
                 const products = response.content.map(p => ({
                     ...p,
                     imageUrls: p.imageUrls || []
@@ -99,23 +100,36 @@ export class HomeComponent implements AfterViewInit, OnDestroy, OnInit {
             });
     }
 
-    // ===== BƯỚC 4: Cập nhật trackById (để gõ chữ mạnh hơn) =====
+    /**
+     * Tải sản phẩm Hot Sale
+     * Không lọc category, sắp xếp 'id_desc' (mới nhất/từ dưới lên)
+     */
+    loadHotSaleProducts(): void {
+        this.hotSaleLoading = true;
+        this.productSvc.getProducts(0, this.hotSaleProductCount, undefined, undefined, 'id_desc')
+            .pipe(finalize(() => {
+                this.hotSaleLoading = false;
+            }))
+            .subscribe(response => {
+                this.hotSaleProducts = response.content.map(p => ({
+                    ...p,
+                    imageUrls: p.imageUrls || []
+                }));
+            });
+    }
     trackById(index: number, item: CustomerProduct): number {
         return item.id;
     }
 
-    // ===== Menu / cookies (GIỮ NGUYÊN) =====
     toggleMenu(){ this.mobileMenuOpen = !this.mobileMenuOpen; }
     closeMenu(){ this.mobileMenuOpen = false; }
     acceptCookies(){ this.cookieOpen = false; }
     refuseCookies(){ this.cookieOpen = false; }
     customCookies(){ this.cookieOpen = false; }
 
-    // ===== Lifecycle (GIỮ NGUYÊN) =====
     ngAfterViewInit(): void {
         this._timeouts.push(setTimeout(() => { this.showCover = false; }, 2300));
         this._timeouts.push(setTimeout(() => { this.forceOff = true; this.showCover = false; }, 3500));
-        // Ép autoplay video (đa số trình duyệt yêu cầu muted)
         const v = this.heroVideo?.nativeElement;
         if (v) {
             v.muted = true;
@@ -131,9 +145,52 @@ export class HomeComponent implements AfterViewInit, OnDestroy, OnInit {
 
     ngOnDestroy(): void {
         this._timeouts.forEach(t => clearTimeout(t));
+        if (this.countdownInterval) {
+            clearInterval(this.countdownInterval);
+        }
     }
+    private pad(num: number): string {
+        return num < 10 ? '0' + num : num.toString();
+    }
+    updateCountdown() {
+        const now = new Date().getTime();
+        const distance = this.saleEndDate.getTime() - now;
 
-    // ===== Poster cover anim handler (GIỮ NGUYÊN) =====
+        if (distance < 0) {
+            // Hết giờ sale
+            this.countdown = { days: '00', hours: '00', minutes: '00', seconds: '00' };
+            if (this.countdownInterval) {
+                clearInterval(this.countdownInterval);
+            }
+            return;
+        }
+        const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+        // Gán vào biến
+        this.countdown = {
+            days: this.pad(days),
+            hours: this.pad(hours),
+            minutes: this.pad(minutes),
+            seconds: this.pad(seconds)
+        };
+    }
+    scrollHotSale(direction: 'prev' | 'next'): void {
+        try {
+            const el = this.hotSaleScrollerRef.nativeElement;
+            const scrollAmount = el.clientWidth * 0.8;
+
+            if (direction === 'prev') {
+                el.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
+            } else {
+                el.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+            }
+        } catch (error) {
+            console.error("Lỗi khi cuộn Hot Sale:", error);
+        }
+    }
     onCoverAnimEnd(e: AnimationEvent) {
         if (e.target !== e.currentTarget) return;
         if (e.animationName === 'cover-out-up' || e.animationName === 'cover-out') {
@@ -144,7 +201,13 @@ export class HomeComponent implements AfterViewInit, OnDestroy, OnInit {
         console.log('Thêm vào giỏ hàng:', product);
     }
 
-    // ===== Video handlers (GIỮ NGUYÊN) =====
+    getOriginalPrice(v: number | undefined | null): number {
+        const n = Number(v) || 0;
+        if (n === 0) return 0;
+        const originalPrice = n * 1.20;
+        return Math.round(originalPrice / 10000) * 10000;
+    }
+
     toggleMute(videoEl: HTMLVideoElement) {
         this.isMuted = !this.isMuted;
         videoEl.muted = this.isMuted;
@@ -159,11 +222,4 @@ export class HomeComponent implements AfterViewInit, OnDestroy, OnInit {
     onVideoCanPlay() {
         // Hook khi video đã đủ dữ liệu để play
     }
-
-    // ===== CÁC HÀM CŨ ĐÃ BỊ XÓA =====
-    // - Mảng `accessories` tĩnh (giờ tải từ API)
-    // - các hàm `page`, `pageSize`, `totalPages`, `pagedAccessories`, `paged`, `nextPage`, `prevPage`
-    // - `featuredProducts`
-    // - `loadFeaturedProducts`
-    // - `heroPaged`, `heroPage`, `heroTotalPages`, `heroNext`, `heroPrev`
 }

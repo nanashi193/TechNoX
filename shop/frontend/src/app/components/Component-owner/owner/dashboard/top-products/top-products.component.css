@@ -58,3 +58,14 @@
 
 :host .table-wrap { box-shadow: none !important; }
 
+.name {
+    display: inline-block;
+    max-width: 40%; /* điều chỉnh theo layout, cột chiếm 40% */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    vertical-align: middle;
+    cursor: pointer;
+}
+
+

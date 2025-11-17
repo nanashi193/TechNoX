@@ -22,9 +22,11 @@ import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
@@ -45,7 +47,8 @@ import java.util.concurrent.ConcurrentHashMap;
 @RequestMapping("${api.prefix}/bills")
 @RequiredArgsConstructor
 public class BillController {
-
+    @Value("${app.frontend.url}")
+    private String frontendUrl;
     private final BillService billService;
     private final PayOS payOS;               // bean từ PayOSConfig
     private final PayTransactionService payTransactionService;
@@ -81,8 +84,8 @@ public class BillController {
         payTransactionService.createPending(billId, total, orderCode);
 
         // 3. Tạo link PayOS
-        String returnUrl = "http://localhost:4200/payment/success?billId=" + billId;
-        String cancelUrl = "http://localhost:4200/payment/cancel?billId=" + billId;
+        String returnUrl = frontendUrl + "/payment/success?billId=" + billId;
+        String cancelUrl = frontendUrl + "/payment/cancel?billId=" + billId;
 
         CreatePaymentLinkRequest req = CreatePaymentLinkRequest.builder()
                 .orderCode(orderCode)
@@ -244,10 +247,10 @@ public class BillController {
     //Staff lay don Delevering & Succeed
     @GetMapping("/staff/my-orders")
     public ResponseEntity<List<BillAdminResponse>> getMyAssignedOrders() {
-        System.out.println(">>> ĐÃ VÀO CONTROLLER");
         List<BillAdminResponse> bills = billService.getOrdersForCurrentStaff();
         return ResponseEntity.ok(bills);
     }
+
     //staff cap nhat don thành đã giao tới - phía staff
     @PutMapping("/staff/complete/{billId}")
     public ResponseEntity<BillAdminResponse> setBillToSucceed(@PathVariable Long billId) {
@@ -270,6 +273,20 @@ public class BillController {
     @PutMapping("/my-orders/{billId}/confirm-received")
     public ResponseEntity<BillAdminResponse> confirmOrderReceived(@PathVariable Long billId) {
         BillAdminResponse updatedBill = billService.confirmOrderReceived(billId);
+        return ResponseEntity.ok(updatedBill);
+    }
+
+    @PutMapping("/staff/{billId}/accept")
+    @PreAuthorize("hasRole('SHIPPING_STAFF')")
+    public ResponseEntity<BillAdminResponse> acceptOrder(@PathVariable Long billId) {
+        BillAdminResponse updatedBill = billService.acceptOrder(billId);
+        return ResponseEntity.ok(updatedBill);
+    }
+
+    @PutMapping("/staff/{billId}/reject")
+    @PreAuthorize("hasRole('SHIPPING_STAFF')")
+    public ResponseEntity<BillAdminResponse> rejectOrder(@PathVariable Long billId) {
+        BillAdminResponse updatedBill = billService.rejectOrder(billId);
         return ResponseEntity.ok(updatedBill);
     }
 }

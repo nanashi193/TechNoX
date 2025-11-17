@@ -165,29 +165,3 @@
         </table>
     </div>
 </div>
-<div *ngIf="showAssignModal()" class="custom-modal-overlay">
-
-    <div class="custom-modal-content">
-        <h3>Xác nhận gán đơn</h3>
-
-        <!-- Hiển thị thông tin để Admin chắc chắn -->
-        <p>Bạn có chắc chắn muốn gán đơn hàng
-            <strong>#{{ orderToAssign()?.billId }}</strong>
-            cho nhân viên
-            <strong>{{ staffToAssign()?.name }}</strong>?
-        </p>
-
-        <div class="custom-modal-actions">
-            <!-- Nút "Hủy" (đóng modal, reset dropdown) -->
-            <button class="btn-secondary" (click)="closeAssignModal(true)">
-                Hủy
-            </button>
-
-            <!-- Nút "Xác nhận" (gọi API) -->
-            <button class="btn-primary" (click)="confirmAssignStaff()">
-                Xác nhận
-            </button>
-        </div>
-    </div>
-
-</div>
