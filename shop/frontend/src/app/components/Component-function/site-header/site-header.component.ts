@@ -1,6 +1,6 @@
 import { Component, OnDestroy } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
-import { AsyncPipe, NgOptimizedImage, NgIf } from '@angular/common'; // 👈 THÊM NgIf
+import { AsyncPipe, NgOptimizedImage, NgIf } from '@angular/common';
 import { AuthService } from '../../../services/auth.service';
 import { CartService } from '../../../services/cart.service';
 import { Observable } from 'rxjs';
@@ -13,7 +13,7 @@ import { Observable } from 'rxjs';
         RouterLinkActive,
         AsyncPipe,
         NgOptimizedImage,
-        NgIf, // 👈 THÊM NgIf
+        NgIf,
     ],
     templateUrl: './site-header.component.html',
     styleUrls: ['./site-header.component.css']
@@ -35,7 +35,9 @@ export class SiteHeaderComponent implements OnDestroy {
         this.itemCount$   = this.cartService.itemCount$;
     }
     isOwner(user: any): boolean {
-        return user?.roleName === 'Owner' || user?.authorities?.includes('OWNER');
+        return user?.roleName === 'Owner' || user?.authorities?.includes('OWNER')
+            || user?.roleName === 'Admin' || user?.authorities?.includes('Admin')
+            || user?.roleName === 'Staff' || user?.authorities?.includes('Staff');
     }
 
     // ===== Mobile menu =====

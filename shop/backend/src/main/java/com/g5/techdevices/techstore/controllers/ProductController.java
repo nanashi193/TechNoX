@@ -261,7 +261,7 @@ public class ProductController {
             ProductVariant savedVariant = productService.upsertVariant(productId, dto);
             return ResponseEntity.ok(savedVariant);
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }
     }
 

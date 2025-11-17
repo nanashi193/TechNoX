@@ -27,7 +27,7 @@
             <tr *ngFor="let p of items">
                 <td class="col-item item">
                     <img [src]="p.image" alt="" class="thumb"/>
-                    <span class="name">{{ p.name }}</span>
+                    <span class="name" [matTooltip]="p.name">{{ p.name }}</span>
                 </td>
 
                 <td class="col-change change"

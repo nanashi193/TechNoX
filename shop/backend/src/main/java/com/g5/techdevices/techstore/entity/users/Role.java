@@ -32,5 +32,6 @@ public class Role {
     public static String CUSTOMER = "CUSTOMER";
     public static String OWNER = "OWNER";
     public static String STAFF = "STAFF";
+    public static String SHIPPING_STAFF = "SHIPPING_STAFF";
 }
 

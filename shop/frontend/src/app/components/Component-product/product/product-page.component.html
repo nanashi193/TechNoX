@@ -1,95 +1,94 @@
-<!--<section class="hero">-->
-<!--    <div class="container">-->
-<!--        <p class="eyebrow eyebrow&#45;&#45;gold">New Arrivals</p>-->
-<!--        <h1 class="section-title">Sản phẩm mới</h1>-->
-
-<!--        <div class="hero__carousel">-->
-<!--            <button class="hero__arrow left" type="button"-->
-<!--                    (click)="heroPrev()" [disabled]="heroAll.length <= heroPageSize" aria-label="Trang trước">‹</button>-->
-
-<!--            <div #heroGrid class="hero-grid">-->
-<!--                <article class="card" *ngFor="let p of heroWindow; trackBy: trackById">-->
-<!--                    <a class="card__media"-->
-<!--                       [routerLink]="['/product', p.id]"-->
-<!--                       [state]="{ product: p }"-->
-<!--                       [ngStyle]="bgImg(p.image)" aria-hidden="true"></a>-->
-
-<!--                    <div class="card__body">-->
-<!--                        <h3 class="card__title">-->
-<!--                            <a [routerLink]="['/product', p.id]" [state]="{ product: p }">{{ p.name }}</a>-->
-<!--                        </h3>-->
-
-<!--                        <div class="chip-row" *ngIf="p.tags?.length">-->
-<!--                            <span class="chip" *ngFor="let t of p.tags">{{ t }}</span>-->
-<!--                        </div>-->
-
-<!--                        <div><span class="price">{{ formatPrice(p.price) }}</span></div>-->
-
-<!--                        <button class="btn btn&#45;&#45;accent btn&#45;&#45;block" type="button" [disabled]="!p.inStock">-->
-<!--                            Thêm vào giỏ-->
-<!--                        </button>-->
-<!--                        &lt;!&ndash; Hoặc dùng hàm TS:-->
-<!--                        <button class="btn btn&#45;&#45;ghost btn&#45;&#45;block" type="button" (click)="viewProduct(p)">Xem chi tiết</button>-->
-<!--                        &ndash;&gt;-->
-<!--                    </div>-->
-<!--                </article>-->
-<!--            </div>-->
-
-<!--            <button class="hero__arrow right" type="button"-->
-<!--                    (click)="heroNext()" [disabled]="heroAll.length <= heroPageSize" aria-label="Trang sau">›</button>-->
-<!--        </div>-->
-<!--    </div>-->
-<!--</section>-->
-
 <section class="selected">
     <div class="container">
         <p class="eyebrow">Danh mục</p>
         <h2 class="section-title" style="font-size:clamp(28px,6vw,44px)">Tất cả sản phẩm</h2>
 
-        <div class="filter-grid">
-            <input type="search" placeholder="Tìm kiếm..."
-                   [(ngModel)]="searchTerm" (ngModelChange)="onSearch()" />
-            <select [(ngModel)]="categoryFilter" (ngModelChange)="onFilterChange()">
-                <option *ngFor="let c of categories" [value]="c">{{ c === 'all' ? 'Tất cả' : c }}</option>
-            </select>
-            <select [(ngModel)]="sortKey" (ngModelChange)="onSortChange()">
-                <option value="relevance">Mặc định</option>
-                <option value="priceAsc">Giá tăng dần</option>
-                <option value="priceDesc">Giá giảm dần</option>
-                <option value="nameAsc">Tên A → Z</option>
-            </select>
+        <div class="filter-grid" style="position:relative; z-index: 5;">
+            <div class="field">
+                <label for="q">Tìm kiếm</label>
+                <input
+                        id="q"
+                        type="search"
+                        placeholder="Tìm kiếm..."
+                        [(ngModel)]="searchTerm"
+                        (ngModelChange)="onSearch()"
+                        class="control"
+                        aria-label="Tìm kiếm sản phẩm"
+                        autocomplete="off"
+                />
+            </div>
+
+            <div class="field">
+                <label for="deviceSelect">Thiết bị</label>
+                <select
+                        id="deviceSelect"
+                        [(ngModel)]="deviceFilter"
+                        (ngModelChange)="onDeviceFilterChange($event)"
+                        class="control"
+                        aria-label="Lọc theo thiết bị"
+                >
+                    <option value="all">Tất cả</option>
+                    <option value="laptop">Laptop</option>
+                    <option value="ipad">iPad</option>
+                    <option value="phone">Điện thoại</option>
+                </select>
+            </div>
+
+            <div class="field">
+                <label for="sortSelect">Sắp xếp</label>
+                <select
+                        id="sortSelect"
+                        [(ngModel)]="sortKey"
+                        (ngModelChange)="onSortChange()"
+                        class="control"
+                        aria-label="Sắp xếp"
+                >
+                    <option value="relevance">Mặc định</option>
+                    <option value="price_asc">Giá tăng dần</option>
+                    <option value="price_desc">Giá giảm dần</option>
+                </select>
+            </div>
         </div>
 
-        <div class="pager" *ngIf="!loading && totalPages > 1"> <button class="pager__btn" type="button" (click)="prevPage()" [disabled]="currentPage===1" aria-label="Trang trước">‹</button>
+        <div class="pager" *ngIf="!loading && totalPages > 1">
+            <button class="pager__btn" type="button" (click)="prevPage()" [disabled]="currentPage===1" aria-label="Trang trước">‹</button>
             <div class="pager__info">Trang {{currentPage}} / {{totalPages}}</div>
             <button class="pager__btn" type="button" (click)="nextPage()" [disabled]="currentPage===totalPages" aria-label="Trang sau">›</button>
         </div>
 
-        <div #catalogGrid class="card-grid" *ngIf="!loading"> <article class="card" *ngFor="let p of products; trackBy: trackById">
-            <a class="card__media" [routerLink]="['/product', p.id]" aria-label="{{ p.name }}">
-                <img *ngIf="p.imageUrls && p.imageUrls.length > 0; else noImageList"
-                     [src]="p.imageUrls[0]"
-                     [alt]="p.name"
-                     class="card__img">
-                <ng-template #noImageList>
-                    <img src="https://placehold.co/300x300/eee/ccc?text=No+Image"
-                         [alt]="p.name"
-                         class="card__img">
-                </ng-template>
-            </a>
+        <div class="card-grid" *ngIf="!loading" style="position:relative; z-index: 1;">
+            <article class="card" *ngFor="let p of products; trackBy: trackById">
+                <a class="card__media" [routerLink]="['/product', p.id]" aria-label="{{ p.name }}">
+                    <img
+                            *ngIf="p.imageUrls?.length; else fallbackImg"
+                            [src]="p.imageUrls[0]"
+                            [alt]="p.name"
+                            class="card__img"
+                    />
+                    <ng-template #fallbackImg>
+                        <img
+                                [src]="p.image || 'https://placehold.co/300x300/eee/ccc?text=No+Image'"
+                                [alt]="p.name"
+                                class="card__img"
+                        />
+                    </ng-template>
+                </a>
 
-            <div class="card__body">
-                <h3 class="card__title">
-                    <a [routerLink]="['/product', p.id]">{{ p.name }}</a> </h3>
+                <div class="card__body">
+                    <h3 class="card__title">
+                        <a [routerLink]="['/product', p.id]">{{ p.name }}</a>
+                    </h3>
+                    <div class="price-container">
+                        <span class="selling-price">{{ formatPrice(p.price) }}</span>
 
-                <div>
-                    <span class="price">{{ formatPrice(p.price) }}</span> <span *ngIf="!p.inStock" class="chip chip--oos">Hết hàng</span> </div>
+<!--                        <span class="original-price" *ngIf="getOriginalPrice(p.price) > p.price">-->
+<!--                            {{ formatPrice(getOriginalPrice(p.price)) }}-->
+<!--                        </span>-->
 
-                <button class="btn btn--accent btn--block" type="button" [disabled]="!p.inStock" >
-                    Thêm vào giỏ
-                </button>
-            </div>
-        </article>
+                        <span *ngIf="p.inStock === false" class="chip chip--oos">Hết hàng</span>
+                    </div>
+                </div>
+            </article>
         </div>
 
         <div *ngIf="loading" class="loading-indicator">Đang tải...</div>

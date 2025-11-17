@@ -3,11 +3,13 @@ import { CommonModule, NgOptimizedImage } from '@angular/common';
 import {TopProduct} from "../../../../../models/top-product.model";
 import {RouterLink} from "@angular/router";
 import {LucideAngularModule} from "lucide-angular";
+import { MatTooltipModule } from '@angular/material/tooltip';
+
 
 @Component({
     selector: 'app-top-products',
     standalone: true,
-    imports: [CommonModule, NgOptimizedImage, RouterLink, LucideAngularModule],
+    imports: [CommonModule, NgOptimizedImage, RouterLink, LucideAngularModule, MatTooltipModule],
     templateUrl: './top-products.component.html',
     styleUrls: ['./top-products.component.css'],
     changeDetection: ChangeDetectionStrategy.OnPush
