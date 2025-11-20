@@ -117,10 +117,6 @@ export class UsersListComponent implements OnInit {
         else this.users.forEach(u => this.selected.delete(u.id));
     }
 
-    edit(id: number) {
-        this.router.navigate(['/owner/users', id]);
-    }
-
     toggleActive(u: User) {
         const prev = u.IsActive;
         u.IsActive = !prev;

@@ -1,6 +1,5 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
-import { RouterLink } from '@angular/router';
 import { BillService } from '../../../services/bill.service';
 import { BillAdminDetailResponse, BillItem } from '../../../models/bill-admin.model';
 import { StaffInfo } from '../../../models/staff-info.model';
@@ -10,7 +9,7 @@ export type OrderFilterStatus = OrderStatus | 'all';
 @Component({
     selector: 'app-my-orders',
     standalone: true,
-    imports: [CommonModule, RouterLink, DatePipe],
+    imports: [CommonModule, DatePipe],
     templateUrl: './Component-MyOrder.html',
     styleUrls: ['./Component-MyOrder.css']
 })
@@ -90,16 +89,12 @@ export class ComponentMyOrderComponent implements OnInit {
         return digits ? `tel:${digits}` : null;
     }
 
-    isExpanded(o: BillAdminDetailResponse): boolean { return !!this.expanded[o.billId]; }
+    isExpanded(o: BillAdminDetailResponse): boolean { return this.expanded[o.billId]; }
     toggleExpand(o: BillAdminDetailResponse): void { this.expanded[o.billId] = !this.expanded[o.billId]; }
 
     firstItem(o: BillAdminDetailResponse): BillItem | null {
         const arr = o.details;
         return (arr && arr.length) ? arr[0] : null;
-    }
-
-    otherItems(o: BillAdminDetailResponse): BillItem[] {
-        return o.details?.slice(1) ?? [];
     }
 
     /** Khóa hủy: (Sửa: dùng trạng thái backend) */

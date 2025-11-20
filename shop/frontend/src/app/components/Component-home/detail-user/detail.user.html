@@ -16,16 +16,16 @@
             </div>
 
             <div class="title">
-                <h1>{{ user?.FullName }}</h1>
+                <h1>{{ user.FullName }}</h1>
                 <div class="meta">
                     <span class="badge"
-                          [class.badge--green]="user?.IsActive"
-                          [class.badge--gray]="!user?.IsActive">
-                      {{ user?.IsActive ? 'ACTIVE' : 'INACTIVE' }}
+                          [class.badge--green]="user.IsActive"
+                          [class.badge--gray]="!user.IsActive">
+                      {{ user.IsActive ? 'ACTIVE' : 'INACTIVE' }}
                     </span>
                     <span class="dot">•</span>
                     <span class="muted">
-            ID: {{ user?.id }}
+            ID: {{ user.id }}
                         <button class="link" (click)="copy(user.id.toString())">copy</button>
           </span>
                 </div>
@@ -105,11 +105,11 @@
                 <h2>Thống kê</h2>
                 <div class="stats">
                     <div class="stat">
-                        <div class="stat-value">{{ user.stats?.orders || 0 }}</div>
+                        <div class="stat-value">{{ user.stats.orders || 0 }}</div>
                         <div class="stat-label">Đơn đã mua</div>
                     </div>
                     <div class="stat">
-                        <div class="stat-value">{{ (user.stats?.totalSpent || 0) | currency:'VND':'symbol':'1.0-0' }}</div>
+                        <div class="stat-value">{{ (user.stats.totalSpent || 0) | currency:'VND':'symbol':'1.0-0' }}</div>
                         <div class="stat-label">Tổng chi tiêu</div>
                     </div>
                 </div>

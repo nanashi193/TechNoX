@@ -71,7 +71,7 @@
           "builder": "@angular/build:dev-server",
           "options": {
             "allowedHosts": [
-              "www.technox.space",
+              "www.technoz.site",
               "localhost"
             ]
           },
@@ -82,14 +82,14 @@
             "development": {
               "buildTarget": "App:build:development",
               "allowedHosts": [
-                "www.technox.space",
+                "www.technoz.site",
                 "localhost"
               ]
             },
             "ngrok": {
               "buildTarget": "App:build:ngrok",
               "allowedHosts": [
-                "www.technox.space",
+                "www.technoz.site",
                 "localhost"
               ]
             }

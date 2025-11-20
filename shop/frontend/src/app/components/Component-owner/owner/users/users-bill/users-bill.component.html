@@ -22,7 +22,7 @@
                      <i class="dot"></i>{{ r.paymentStatus }}
                 </span>
             </div>
-            <div class="cell col-total">{{ (r.total ?? 0) | currency:'VND':'symbol-narrow':'1.0-0' }}</div>
+            <div class="cell col-total">{{ (r.total) | currency:'VND':'symbol-narrow':'1.0-0' }}</div>
             <div class="cell col-invoice">
                 <button class="btn small" type="button">Invoice</button>
             </div>
