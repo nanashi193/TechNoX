@@ -1,0 +1,54 @@
+version: '3.8'
+
+services:
+  # 1. DATABASE SQL SERVER
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: technox-db
+    environment:
+      - ACCEPT_EULA=Y
+      - MSSQL_SA_PASSWORD=${MSSQL_SA_PASSWORD}
+    ports:
+      - "1433:1433"
+    volumes:
+      - sqlserver_data:/var/opt/mssql
+    networks:
+      - technox-network
+
+  # 2. BACKEND SPRING BOOT
+  backend:
+    build: ./shop/backend
+    container_name: technox-api
+    ports:
+      - "8080:8080"
+    depends_on:
+       sqlserver:
+         condition: service_healthy
+    environment:
+      - DB_URL=${DB_URL}
+      - DB_USERNAME=${DB_USERNAME}
+      - DB_PASSWORD=${DB_PASSWORD}
+
+      - JWT_SECRET=${JWT_SECRET}
+
+      - MAIL_USERNAME=${MAIL_USERNAME}
+      - MAIL_PASSWORD=${MAIL_PASSWORD}
+
+      - CLOUDINARY_NAME=${CLOUDINARY_NAME}
+      - CLOUDINARY_API_KEY=${CLOUDINARY_API_KEY}
+      - CLOUDINARY_API_SECRET=${CLOUDINARY_API_SECRET}
+
+      - PAYOS_CLIENT_ID=${PAYOS_CLIENT_ID}
+      - PAYOS_API_KEY=${PAYOS_API_KEY}
+      - PAYOS_CHECKSUM_KEY=${PAYOS_CHECKSUM_KEY}
+
+      - APP_FRONTEND_URL=${APP_FRONTEND_URL}
+    networks:
+      - technox-network
+
+volumes:
+  sqlserver_data:
+
+networks:
+  technox-network:
+    driver: bridge
