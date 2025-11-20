@@ -30,6 +30,7 @@
     "@angular/platform-browser": "^20.3.0",
     "@angular/router": "^20.3.0",
     "@popperjs/core": "^2.11.8",
+    "@stomp/stompjs": "^7.2.1",
     "bootstrap": "^5.3.8",
     "boxicons": "^2.1.4",
     "buffer": "^6.0.3",

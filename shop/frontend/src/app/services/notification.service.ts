@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { Client, IMessage } from '@stomp/stompjs';
+import { Client, IMessage, IFrame } from '@stomp/stompjs'; // Thêm IFrame vào import
 import SockJS from 'sockjs-client';
 import { ToastService } from "../shared/toast/toast.service";
 import { AuthService } from "./auth.service";
@@ -13,7 +13,6 @@ export interface NotificationDTO {
     providedIn: 'root'
 })
 export class NotificationService {
-    // Khai báo client theo kiểu mới
     private client: Client | null = null;
     private backendUrl = 'https://api.technox.site/ws';
 
@@ -30,34 +29,25 @@ export class NotificationService {
             return;
         }
 
-        // Nếu đã có client và đang active thì không connect lại
         if (this.client && this.client.active) {
             return;
         }
 
-        // Khởi tạo Client với cấu hình chuẩn object
         this.client = new Client({
-            // Dùng webSocketFactory để bọc SockJS
             webSocketFactory: () => new SockJS(this.backendUrl),
-
-            // Cấu hình Header chứa Token
             connectHeaders: {
                 'Authorization': `Bearer ${token}`
             },
-
-            // Tắt log debug cho gọn console (hoặc bật lên nếu cần debug)
-            debug: (str) => {
+            // FIX LỖI 1: Thêm kiểu 'string' cho str
+            debug: (str: string) => {
                 // console.log(str);
             },
-
-            // Tự động connect lại sau 5s nếu mất mạng
             reconnectDelay: 5000,
 
-            // Hàm chạy khi kết nối thành công
-            onConnect: (frame) => {
+            // FIX LỖI 2: Thêm kiểu 'IFrame' cho frame
+            onConnect: (frame: IFrame) => {
                 console.log('Connected to WebSocket (Authenticated)');
 
-                // Hàm xử lý tin nhắn nhận được
                 const callback = (message: IMessage) => {
                     if (message.body) {
                         const notification: NotificationDTO = JSON.parse(message.body);
@@ -70,10 +60,8 @@ export class NotificationService {
                     }
                 };
 
-                // Subscribe kênh chung user
                 this.client?.subscribe('/user/queue/notifications', callback);
 
-                // Subscribe kênh Admin nếu có quyền
                 if (this.authService.hasRole('ROLE_ADMIN') ||
                     this.authService.hasRole('ROLE_OWNER') ||
                     this.authService.hasRole('ROLE_STAFF')) {
@@ -83,20 +71,18 @@ export class NotificationService {
                 }
             },
 
-            // Xử lý lỗi khi kết nối
-            onStompError: (frame) => {
+            // FIX LỖI 3: Thêm kiểu 'IFrame' cho frame
+            onStompError: (frame: IFrame) => {
                 console.error('Broker reported error: ' + frame.headers['message']);
                 console.error('Additional details: ' + frame.body);
             }
         });
 
-        // Kích hoạt kết nối
         this.client.activate();
     }
 
     public disconnect() {
         if (this.client) {
-            // Deactivate thay cho disconnect
             this.client.deactivate();
             console.log('Disconnected from WebSocket');
         }
