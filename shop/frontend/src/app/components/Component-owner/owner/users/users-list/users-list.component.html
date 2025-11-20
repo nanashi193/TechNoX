@@ -57,7 +57,7 @@
         </label>
 
         <div class="cell col-name">
-            <div class="avatar sm">{{ u.FullName | uppercase }}</div>
+            <span class="icon ico-img" style="--ico:url('assets/icons/people.png'); --size:22px"></span>
             <a class="name-link" [routerLink]="['/owner/users', u.id]">{{ u.FullName }}</a>
         </div>
         <div class="cell col-email">{{ u.email }}</div>

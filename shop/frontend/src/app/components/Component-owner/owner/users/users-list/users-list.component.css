@@ -305,3 +305,15 @@
     .toolbar{ flex-wrap: wrap; }
     .toolbar .right{ width:100%; justify-content:flex-end; }
 }
+.icon{
+    width: var(--size, 18px);
+    height: var(--size, 18px);
+    display: inline-block;
+    flex: 0 0 var(--size, 18px);
+}
+
+.ico-img{
+    background: var(--ico) center/contain no-repeat;
+    -webkit-mask: none;
+    mask: none;
+}

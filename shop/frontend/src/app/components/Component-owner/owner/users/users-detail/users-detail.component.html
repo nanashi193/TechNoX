@@ -6,7 +6,7 @@
         </div>
 
         <div class="hero">
-            <div class="avatar lg">{{ initial() }}</div>
+<!--            <span class="icon ico-img" style="&#45;&#45;ico:url('assets/icons/people.png')"></span>-->
             <div class="info">
                 <div class="name" *ngIf="!editMode; else nameEdit">{{ user!.FullName }}</div>
                 <ng-template #nameEdit>
