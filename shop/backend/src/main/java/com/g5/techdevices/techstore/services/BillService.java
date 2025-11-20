@@ -22,9 +22,11 @@ import com.g5.techdevices.techstore.repositories.cart.ProductVariantRepository;
 import com.g5.techdevices.techstore.responses.AdminBillsResponse.BillAdminResponse;
 import com.g5.techdevices.techstore.responses.AdminBillsResponse.BillFullDetailResponse;
 import com.g5.techdevices.techstore.responses.BillResponse;
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Sort;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -41,7 +43,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
-
+@Slf4j
 @Service
 public class BillService implements IBillService {
 
@@ -52,13 +54,15 @@ public class BillService implements IBillService {
     private final BillMapper billMapper;
     private final BillAdminMapper billAdminMapper;
     private final PayTransactionRepository payTransactionRepository;
+    private final SimpMessagingTemplate messagingTemplate;
+    public record NotificationDTO(String message, String link) {}
 
     private static final Logger logger = LoggerFactory.getLogger(BillService.class);
 
     public BillService(BillRepository billRepository, BillDetailRepository billDetailRepository,
                        ProductVariantRepository variantRepository, UserRepository userRepository, EmailService emailService,
-                       BillMapper billMapper,  BillAdminMapper billAdminMapper,
-                       PayTransactionRepository payTransactionRepository) {
+                       BillMapper billMapper, BillAdminMapper billAdminMapper,
+                       PayTransactionRepository payTransactionRepository, SimpMessagingTemplate messagingTemplate) {
         this.billRepository = billRepository;
         this.variantRepository = variantRepository;
         this.userRepository = userRepository;
@@ -66,6 +70,7 @@ public class BillService implements IBillService {
         this.billMapper = billMapper;
         this.billAdminMapper = billAdminMapper;
         this.payTransactionRepository = payTransactionRepository;
+        this.messagingTemplate = messagingTemplate;
     }
     // ================== CREATE BILL ==================
     @Override
@@ -192,7 +197,6 @@ public class BillService implements IBillService {
             throw new AccessDeniedException("Bạn không có quyền xác nhận đơn hàng này.");
         }
         Bill confirmedBill = this.confirmBillLogic(billId, "COD", false);
-
         return billMapper.mapToBillResponse(confirmedBill);
     }
 
@@ -218,7 +222,28 @@ public class BillService implements IBillService {
         }
         this.deductStock(bill);
         this.sendConfirmationEmail(bill, paymentMethod);
-        return billRepository.save(bill);
+        Bill savedBill = billRepository.save(bill);
+        String adminMessage = "\uD83D\uDD14 Bạn vừa có một đơn hàng mới!";
+        String adminLink = "/owner/orders";
+        NotificationDTO adminNotification = new NotificationDTO(adminMessage, adminLink);
+        messagingTemplate.convertAndSend("/topic/admin-notifications", adminNotification);
+
+        // 2. Gửi thông báo cho CUSTOMER (Private - Kênh riêng)
+        User customer = savedBill.getUser(); // Lấy customer từ đơn hàng
+        if (customer != null) {
+            String customerMessage = "\uD83D\uDD14 Đơn hàng #" + savedBill.getId() + " của bạn đã được xác nhận!";
+            String customerLink = "/my-orders";
+            NotificationDTO customerNotification = new NotificationDTO(customerMessage, customerLink);
+
+            // Gửi tin nhắn riêng tư cho customer
+            log.info("Đang gửi thông báo (Confirmed) cho Customer: " + customer.getEmail());
+            messagingTemplate.convertAndSendToUser(
+                    customer.getEmail(),      // Gửi cho khách hàng
+                    "/queue/notifications", // Kênh riêng tư
+                    customerNotification
+            );
+        }
+        return savedBill;
     }
 
     private void deductStock(Bill bill) throws InsufficientStockException, DataNotFoundException {
@@ -288,13 +313,21 @@ public class BillService implements IBillService {
         bill.setStaff(staff);
         bill.setStatus("Assigned");
         Bill savedBill = billRepository.save(bill);
+        String message = "\uD83D\uDD14 Bạn có một đơn hàng #" + savedBill.getId()+ " đã đóng gói và chờ giao.";
+        String link = "/staff/shipping";
+        NotificationDTO notification = new NotificationDTO(message, link);
+        messagingTemplate.convertAndSendToUser(
+                staff.getEmail(),
+                "/queue/notifications",
+                notification
+        );
         return billAdminMapper.mapToBillAdminResponse(savedBill);
     }
 
     public List<BillAdminResponse> getOrdersForCurrentStaff() {
         User currentStaff = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         int currentStaffId = currentStaff.getId();
-        List<String> statuses = List.of("Delivering", "Delivered", "Succeed");
+        List<String> statuses = List.of("Assigned", "Delivering", "Delivered", "Succeed");
         List<Bill> bills = billRepository.findByStaffIdAndStatusIn(
                 currentStaffId,
                 statuses,
@@ -320,6 +353,19 @@ public class BillService implements IBillService {
         }
         bill.setStatus("Delivered");
         Bill savedBill = billRepository.save(bill);
+        User customer = bill.getUser();
+        if (customer != null) {
+            // 6. Tạo tin nhắn và link
+            String message = "\uD83D\uDD14 Đơn hàng #" + savedBill.getId() + " của bạn đã được giao. Vui lòng kiểm tra!";
+            String link = "/my-orders";
+            NotificationDTO notification = new NotificationDTO(message, link);
+            log.info("Đang gửi thông báo (Đã giao) cho Customer: " + customer.getEmail());
+            messagingTemplate.convertAndSendToUser(
+                    customer.getEmail(),
+                    "/queue/notifications",
+                    notification
+            );
+        }
         return billAdminMapper.mapToBillAdminResponse(savedBill);
     }
 
@@ -413,4 +459,37 @@ public class BillService implements IBillService {
             default           -> Sort.by("orderDate").descending(); // date_desc (mặc định)
         };
     }
+    private Bill getBillAndValidateStaff(Long billId) {
+        User currentStaff = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Bill bill = billRepository.findById(billId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy đơn hàng: " + billId));
+        if (!"Assigned".equalsIgnoreCase(bill.getStatus())) {
+            throw new InvalidOperationException("Chỉ có thể thao tác với đơn hàng ở trạng thái 'Assigned'.");
+        }
+        if (bill.getStaff() == null || bill.getStaff().getId() != currentStaff.getId()) {
+            throw new AccessDeniedException("Bạn không có quyền thao tác trên đơn hàng này.");
+        }
+
+        return bill;
+    }
+    @Transactional
+    public BillAdminResponse acceptOrder(Long billId) {
+        Bill bill = getBillAndValidateStaff(billId);
+        bill.setStatus("Delivering");
+        Bill savedBill = billRepository.save(bill);
+
+        return billAdminMapper.mapToBillAdminResponse(savedBill);
+    }
+
+    @Transactional
+    public BillAdminResponse rejectOrder(Long billId) {
+        Bill bill = getBillAndValidateStaff(billId);
+        bill.setStatus("Confirmed");
+        bill.setStaff(null);
+        Bill savedBill = billRepository.save(bill);
+
+        return billAdminMapper.mapToBillAdminResponse(savedBill);
+    }
+
+
 }

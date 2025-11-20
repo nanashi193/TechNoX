@@ -52,6 +52,8 @@ public class WebSecurityConfig {
 
                         // Cho preflight
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                        .requestMatchers(GET, "/ws/**").permitAll()
+                        .requestMatchers(POST, "/ws/**").permitAll()
 
                         // Auth public
                         .requestMatchers(POST, apiPrefix + "/users/register").permitAll()
@@ -73,15 +75,15 @@ public class WebSecurityConfig {
                         .requestMatchers(GET, apiPrefix + "/bills/status/**").permitAll() // FE tra cứu
 
                         // Quản trị sản phẩm
-                        .requestMatchers(POST, apiPrefix + "/products").hasAnyRole(Role.ADMIN, Role.OWNER)
-                        .requestMatchers(POST, apiPrefix + "/products/uploads/**").hasAnyRole(Role.ADMIN, Role.OWNER)
-                        .requestMatchers(POST, apiPrefix + "/products/*/variants").hasAnyRole(Role.ADMIN, Role.OWNER)
-                        .requestMatchers(POST, apiPrefix + "/products/*/variants/**").hasAnyRole(Role.ADMIN, Role.OWNER)
-                        .requestMatchers(DELETE, apiPrefix + "/products/*").hasAnyRole(Role.ADMIN, Role.OWNER)
-                        .requestMatchers(DELETE, apiPrefix + "/products/*/images/**").hasAnyRole(Role.ADMIN, Role.OWNER)
+                        .requestMatchers(POST, apiPrefix + "/products").hasAnyRole(Role.ADMIN, Role.OWNER, Role.STAFF)
+                        .requestMatchers(POST, apiPrefix + "/products/uploads/**").hasAnyRole(Role.ADMIN, Role.OWNER, Role.STAFF)
+                        .requestMatchers(POST, apiPrefix + "/products/*/variants").hasAnyRole(Role.ADMIN, Role.OWNER, Role.STAFF)
+                        .requestMatchers(POST, apiPrefix + "/products/*/variants/**").hasAnyRole(Role.ADMIN, Role.OWNER, Role.STAFF)
+                        .requestMatchers(DELETE, apiPrefix + "/products/*").hasAnyRole(Role.ADMIN, Role.OWNER, Role.STAFF)
+                        .requestMatchers(DELETE, apiPrefix + "/products/*/images/**").hasAnyRole(Role.ADMIN, Role.OWNER, Role.STAFF)
                         .requestMatchers(PUT, apiPrefix + "/products/*/thumbnail/from-image/*")
-                        .hasAnyRole(Role.ADMIN, Role.OWNER)
-                        .requestMatchers(PUT, apiPrefix + "/products/**").hasAnyRole(Role.ADMIN, Role.OWNER)
+                        .hasAnyRole(Role.ADMIN, Role.OWNER, Role.STAFF)
+                        .requestMatchers(PUT, apiPrefix + "/products/**").hasAnyRole(Role.ADMIN, Role.OWNER, Role.STAFF)
 
                         // Bills
                         .requestMatchers(POST, apiPrefix + "/bills").authenticated()
@@ -91,13 +93,13 @@ public class WebSecurityConfig {
                         .requestMatchers(GET, apiPrefix + "/bills/my-orders").authenticated()
                         .requestMatchers(PUT, apiPrefix + "/bills/my-orders/*/cancel").authenticated()
                         .requestMatchers(PUT, apiPrefix + "/bills/my-orders/*/confirm-received").authenticated()
-                        .requestMatchers(GET, apiPrefix + "/bills/admin").hasAnyRole(Role.ADMIN, Role.OWNER)
-                        .requestMatchers(PATCH, apiPrefix + "/bills/*/assign-staff").hasAnyRole(Role.ADMIN, Role.OWNER)
+                        .requestMatchers(GET, apiPrefix + "/bills/admin").hasAnyRole(Role.ADMIN, Role.OWNER, Role.STAFF)
+                        .requestMatchers(PATCH, apiPrefix + "/bills/*/assign-staff").hasAnyRole(Role.ADMIN, Role.OWNER, Role.STAFF)
                         .requestMatchers(GET, apiPrefix + "/bills/staff/my-orders").hasAnyRole(Role.SHIPPING_STAFF)
                         .requestMatchers(PUT, apiPrefix + "/bills/staff/complete/*").hasAnyRole(Role.SHIPPING_STAFF)
                         .requestMatchers(PUT, apiPrefix + "/users/**").authenticated()
                         .requestMatchers(GET, apiPrefix + "/users").hasAnyRole(Role.ADMIN, Role.OWNER)
-                        .requestMatchers(GET, apiPrefix + "/users/staff").hasAnyRole(Role.ADMIN, Role.OWNER)
+                        .requestMatchers(GET, apiPrefix + "/users/staff").hasAnyRole(Role.ADMIN, Role.OWNER, Role.STAFF)
                         .requestMatchers(DELETE, apiPrefix + "/users/**").hasAnyRole(Role.ADMIN, Role.OWNER)
                         .requestMatchers(PATCH, apiPrefix + "/users/**").hasAnyRole(Role.ADMIN, Role.OWNER)
                         .requestMatchers(PUT, apiPrefix + "/users/restore/**").hasAnyRole(Role.ADMIN, Role.OWNER)

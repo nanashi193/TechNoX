@@ -17,6 +17,13 @@ type OrdPoint = { date: string; orders: number };
 type RowPoint = { date: string; revenue: number; orders: number };
 type RangeTotals = { revenue: number; orders: number };
 
+function getDefaultDateRange(): DateRange {
+    const end = new Date();
+    const start = new Date();
+    start.setDate(end.getDate() - 2);
+    return { start, end };
+}
+
 @Component({
     selector: 'app-dashboard',
     standalone: true,
@@ -35,8 +42,7 @@ export class DashboardComponent implements OnInit {
     loading: boolean = false;
 
     // mặc định là hôm nay; có thể đổi sang 7 ngày gần nhất nếu muốn
-    range: DateRange = new OwnerDateRangeComponent().lastNDays(3);
-
+    range: DateRange = getDefaultDateRange();
     /** DATA cho cột */
     revenueChartData: ChartConfiguration<'line'>['data'] = {
         labels: [],

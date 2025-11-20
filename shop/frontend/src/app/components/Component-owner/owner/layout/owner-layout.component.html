@@ -38,13 +38,13 @@
                 </span><span class="text">Đơn hàng</span>
             </a>
 
-            <a class="item" routerLink="/owner/users" routerLinkActive="active">
+            <a *ngIf="(me$ | async)?.role !== 'STAFF'"
+               class="item" routerLink="/owner/users" routerLinkActive="active">
                 <span class="icon ico-mask" style="--ico:url('../../../../../assets/icons/user-key.svg')">
                 </span><span class="text">Người dùng</span>
             </a>
         </div>
 
-        <!-- CTA -->
         <div class="promo">
             <div class="h">Welcome back Sir!</div>
             <p>Creating or adding new product couldn’t be easier</p>
@@ -57,8 +57,6 @@
             <button type="button" class="link logout" (click)="onLogout()">Đăng xuất</button>
         </div>
     </aside>
-
-    <!-- Content -->
     <main class="owner-main">
         <router-outlet></router-outlet>
     </main>
