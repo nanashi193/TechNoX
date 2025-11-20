@@ -2,7 +2,7 @@ spring:
   application:
     name: techstore
   datasource:
-    url: ${DB_URL}
+    url: jdbc:sqlserver://localhost:1433;databaseName=TEStore;encrypt=true;trustServerCertificate=true
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
   jpa:
@@ -53,4 +53,4 @@ payos:
 
 app:
   frontend:
-    url: "https://www.technox.space"
+    url: "https://technox.site"
