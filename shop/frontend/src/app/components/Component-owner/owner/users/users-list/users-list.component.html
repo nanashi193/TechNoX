@@ -57,7 +57,7 @@
         </label>
 
         <div class="cell col-name">
-            <div class="avatar sm">{{ u.FullName?.[0] | uppercase }}</div>
+            <span class="icon ico-img" style="--ico:url('assets/icons/people.png'); --size:22px"></span>
             <a class="name-link" [routerLink]="['/owner/users', u.id]">{{ u.FullName }}</a>
         </div>
         <div class="cell col-email">{{ u.email }}</div>
@@ -68,8 +68,8 @@
                 <span class="slider"></span>
             </label>
         </div>
-        <div class="cell col-orders">{{ u.stats?.orders || 0 }}</div>
-        <div class="cell col-spent">{{ u.stats?.totalSpent | number:'1.0-0' }} ₫</div>
+        <div class="cell col-orders">{{ u.stats.orders || 0 }}</div>
+        <div class="cell col-spent">{{ u.stats.totalSpent | number:'1.0-0' }} ₫</div>
     </div>
 </div>
 

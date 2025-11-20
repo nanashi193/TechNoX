@@ -37,7 +37,7 @@ public class EmailService {
         String url;
         switch (type) {
             case VERIFY_ACCOUNT -> {
-                subject = "Xác nhận tài khoản TechNox của bạn";
+                subject = "Xác nhận tài khoản TechNoZ của bạn";
                 title = "Xác nhận Email";
                 mainText = "Cảm ơn bạn đã đăng ký. Vui lòng nhấp vào nút bên dưới để xác nhận địa chỉ email của bạn:";
                 buttonText = "Xác nhận tài khoản";
@@ -67,7 +67,7 @@ public class EmailService {
      * (Đây là nơi bạn chỉnh sửa giao diện email)
      */
     private String buildHtmlEmail(String userName, String title, String mainText, String buttonUrl, String buttonText) {
-        String storeName = "TechNox";
+        String storeName = "TechNoz";
 
         return String.format("""
             <!DOCTYPE html>
@@ -133,7 +133,7 @@ public class EmailService {
         );
     }
     public void sendOrderConfirmationEmail(Bill bill) {
-        String subject = String.format("TechNoX - Xác nhận đơn hàng #%d", bill.getId());
+        String subject = String.format("TechNoZ - Xác nhận đơn hàng #%d", bill.getId());
         String body = buildOrderConfirmationEmailBody(bill);
 
         try {
@@ -141,7 +141,7 @@ public class EmailService {
             message.setTo(bill.getEmail());
             message.setSubject(subject);
             message.setText(body);
-            message.setFrom(env.getProperty("spring.mail.username", "noreply@technox.com"));
+            message.setFrom(env.getProperty("spring.mail.username", "noreply@technoz.com"));
             mailSender.send(message);
             System.out.println("Order confirmation email sent successfully to " + bill.getEmail());
         } catch (MailException e) {
@@ -152,7 +152,7 @@ public class EmailService {
     private String buildOrderConfirmationEmailBody(Bill bill) {
         StringBuilder body = new StringBuilder();
         body.append(String.format("Chào %s,\n\n", bill.getFullName()));
-        body.append(String.format("Cảm ơn bạn đã đặt hàng tại TechNoX! Đơn hàng #%d của bạn đã được xác nhận.\n\n", bill.getId()));
+        body.append(String.format("Cảm ơn bạn đã đặt hàng tại TechNoZ! Đơn hàng #%d của bạn đã được xác nhận.\n\n", bill.getId()));
         body.append("Thông tin đơn hàng:\n");
         body.append("--------------------\n");
         for (BillDetail detail : bill.getDetails()) {
@@ -171,7 +171,7 @@ public class EmailService {
         body.append(String.format("- Địa chỉ: %s\n", bill.getShippingAddress()));
         body.append(String.format("- Thanh toán: %s\n\n", bill.getPaymentMethod()));
         body.append("Chúng tôi sẽ thông báo cho bạn khi đơn hàng được vận chuyển.\n\n");
-        body.append("Trân trọng,\nĐội ngũ TechNoX");
+        body.append("Trân trọng,\nĐội ngũ TechNoZ");
 
         return body.toString();
     }

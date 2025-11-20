@@ -1,22 +1,19 @@
 spring:
   application:
     name: techstore
-
   datasource:
     url: jdbc:sqlserver://localhost:1433;databaseName=TEStore;encrypt=true;trustServerCertificate=true
-    username: sa
-    password: 12345
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
   jpa:
     hibernate:
       naming:
         physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
-    ddl-auto: none
-    show-sql: true
-    database-platform: org.hibernate.dialect.SQLServerDialect
-
+      ddl-auto: none
+      show-sql: true
+      database-platform: org.hibernate.dialect.SQLServerDialect
   autoconfigure:
     exclude: org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration
-
   servlet:
     multipart:
       max-file-size: 10MB
@@ -24,8 +21,8 @@ spring:
   mail:
     host: smtp.gmail.com
     port: 587
-    username: trungdinh.dev@gmail.com
-    password: oprk lrcy ncki xnuc
+    username: ${MAIL_USERNAME}
+    password: ${MAIL_PASSWORD}
     properties:
       mail:
         smtp:
@@ -40,19 +37,20 @@ api:
   prefix: /api/v1
 
 jwt:
-  expiration: 2592000 #30 days = 30 * 24 * 60 * 60
-  expiration-refresh-token: 5184000 #60 days = 60 * 24 * 60 * 60
-  secretKey: TaqlmGv1iEDMRiFp/pHuID1+T84IABfuA0xXh4GhiUI=
+  expiration: 2592000
+  expiration-refresh-token: 5184000
+  secretKey: ${JWT_SECRET}
 
 cloudinary:
-  cloud_name: dqegrlmu5
-  api_key: 221414681247595
-  api_secret: fGpSsgYohp9viyPq-iEpb18cNf0
+  cloud_name: ${CLOUDINARY_NAME}
+  api_key: ${CLOUDINARY_API_KEY}
+  api_secret: ${CLOUDINARY_API_SECRET}
+
 payos:
-  client-id: "99a29df5-118e-422f-9787-84cace775a72"
-  api-key: "93e32e86-5361-4068-a341-5c7a29b68595"
-  checksum-key: "9b29f7a3c6e22b89de0a5ec080f949a03c16ee96a0401604adfc90e8ebabd94b"
+  client-id: ${PAYOS_CLIENT_ID}
+  api-key: ${PAYOS_API_KEY}
+  checksum-key: ${PAYOS_CHECKSUM_KEY}
+
 app:
   frontend:
-    url: "https://www.technox.space" #Thay frontend ở đây!!!
-
+    url: "https://technoz.site"

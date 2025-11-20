@@ -1,5 +1,5 @@
 import { Component, OnInit, inject } from '@angular/core';
-import { CommonModule, CurrencyPipe } from '@angular/common';
+import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { finalize } from 'rxjs';
 import { FormsModule } from '@angular/forms';
@@ -10,7 +10,7 @@ import { CartService } from '../../../services/cart.service'; // Import CartServ
 @Component({
     selector: 'app-detail-product',
     standalone: true,
-    imports: [CommonModule, RouterLink, FormsModule, CurrencyPipe],
+    imports: [CommonModule, RouterLink, FormsModule],
     templateUrl: './detail-product.component.html',
     styleUrls: ['./detail-product.component.css']
 })
@@ -138,14 +138,14 @@ export class DetailProductComponent implements OnInit {
         this.quantity = 1;
     }
 
-    selectVariant(variant: CustomerVariant): void {
-        if (variant.quantity > 0) {
-            this.selectedVariant = variant;
-            this.quantity = 1;
-        } else {
-            alert('Biến thể này hiện đã hết hàng.');
-        }
-    }
+    // selectVariant(variant: CustomerVariant): void {
+    //     if (variant.quantity > 0) {
+    //         this.selectedVariant = variant;
+    //         this.quantity = 1;
+    //     } else {
+    //         alert('Biến thể này hiện đã hết hàng.');
+    //     }
+    // }
 
     isColorOutOfStock(color: string): boolean {
         if (!this.product?.variants) return true;

@@ -1,14 +1,14 @@
 import {Component, inject, OnDestroy, OnInit} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
-import {ActivatedRoute, Router} from '@angular/router';
+import {ActivatedRoute, Router, RouterLink} from '@angular/router';
 import {finalize} from 'rxjs/operators';
 import {AuthService} from '../../../services/auth.service';
 
 @Component({
     standalone: true,
     selector: 'app-verify-pending',
-    imports: [CommonModule, ReactiveFormsModule],
+    imports: [CommonModule, ReactiveFormsModule, RouterLink],
     templateUrl: './verify-pending.component.html',
     styleUrls: ['./verify-pending.component.css', '../../../styles/shared-styles.css']
 })
