@@ -49,7 +49,7 @@ Bạn có thể khởi chạy toàn bộ hệ thống (Backend + Database) chỉ
 
 ### Các bước thực hiện
 
-1. **Clone repository**
+1. **Clone repository**  
     git clone https://github.com/nanashi193/TechNoX.git
     cd TechNoX
 
