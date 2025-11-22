@@ -39,36 +39,24 @@
 
 ---
 
-## 🚀 Hướng Dẫn Cài Đặt Nhanh (Docker)
+# 🚀 Installation & Setup
 
-Bạn có thể khởi chạy toàn bộ hệ thống (Backend + Database) chỉ với một lệnh nhờ Docker.
+## 💻 Option 1: For Windows / Linux Users (Recommended)
 
-### Yêu cầu
-- Đã cài đặt Docker Desktop.
-- Đã cài đặt Git.
+Docker runs natively and stable on these platforms. The system will automatically set up the Database, seed sample data, and start the Backend.
 
-### Các bước thực hiện
-
-1. **Clone repository**  
-    git clone https://github.com/nanashi193/TechNoX.git
-    cd TechNoX
-
-2. **Cấu hình biến môi trường**  
-   Tạo file `.env` dựa trên mẫu:  
-   cp .env.example .env
-   Sau đó mở file `.env` và điền các thông tin thực tế của bạn (Mật khẩu DB, thông tin Mail, Cloudinary, PayOS...)
-
-3. **Khởi động hệ thống**
+### **1. Clone & Configure Env**
+```bash
+git clone https://github.com/nanashi193/TechNoX.git
+cd TechNoX
+cp .env.example .env
+# Open .env and update your credentials (EMAIL, PAYOS, CLOUDINARY...)
+```
+### **2. Run with Docker Compose**
+```bash
    docker-compose up -d
-   Lệnh này sẽ:
-   - Kéo image SQL Server (Azure SQL Edge tối ưu cho chip M1/M2)
-   - Khởi tạo database
-   - Build và khởi động Spring Boot backend
-
-4. **Truy cập hệ thống**
-   - Giao diện người dùng: [http://localhost:4200](http://localhost:4200) (nếu chạy Angular local)
-   - Backend API: [http://localhost:8080/api/v1](http://localhost:8080/api/v1)
-   - Swagger UI: [http://localhost:8080/swagger-ui.html](http://localhost:8080/swagger-ui.html)
+```
+   Wait about 30–60 seconds for SQL Server to initialize and seed data automatically.
 
 >  Mọi đóng góp, phản hồi và pull request đều được chào đón!
 
