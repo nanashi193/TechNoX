@@ -1,3 +1,12 @@
+/* 1. TẠO DATABASE NẾU CHƯA CÓ */
+IF NOT EXISTS (SELECT * FROM sys.databases WHERE name = 'TEStore')
+BEGIN
+    CREATE DATABASE TEStore;
+END
+GO
+
+USE TEStore;
+GO
 
 /* 2. TẠO BẢNG (STRUCTURE) */
 
@@ -257,6 +266,7 @@ CREATE TABLE dbo.Tokens (
                             CONSTRAINT UQ_Tokens_Token UNIQUE (Token),
                             CONSTRAINT FK_Tokens_User FOREIGN KEY (UserId) REFERENCES dbo.Users(UserId)
 );
+GO
 
 /* 3. DỮ LIỆU MẪU (DATA SEEDING) */
 -- Bước 1: Dữ liệu nền (Roles, Category, Address)
@@ -319,11 +329,10 @@ INSERT INTO dbo.Cart (UserId,CreatedAt) VALUES
                                             (4,'2025-11-08 09:23:01.2575637'),
                                             (5,'2025-11-08 09:23:01.2575637');
 
--- CHÚ Ý: Tôi đã sửa VariantId=10 thành VariantId=1 vì ở trên bạn chỉ tạo 5 variant (ID 1-5)
--- Nếu để 10 sẽ bị lỗi
 INSERT INTO dbo.CartItem (CartId,VariantId,ProductId,Quantity,AddedAt) VALUES
     (2, 1, 36,1,'2025-11-20 13:15:39.7559255');
 
 -- Bước 6: Tokens - Phụ thuộc Users
 INSERT INTO dbo.Tokens (Token,TokenType,ExpirationDate,Revoked,Expire,UserId) VALUES
     (N'bfd65945-47a3-44fc-b033-9ca591513b0c',N'0','2025-11-20 12:33:43.68',0,0,6);
+GO
