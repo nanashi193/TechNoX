@@ -84,11 +84,13 @@ User: sa
 Password: (Mật khẩu bạn đã đặt trong .env)
 ```
 **Chạy Script:**
-```bash
+
 Mở file:
+```bash
  shop/example-data.sql.
 ```
 Chạy toàn bộ file này (Execute) để tạo Database TEStore, tạo bảng và nạp dữ liệu mẫu.
+>Nếu bạn dùng DBeaver, hãy xóa những ký tự "GO" và chạy bình thường
 
 #### **Bước 3: Khởi động lại Backend**
 

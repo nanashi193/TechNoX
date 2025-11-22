@@ -23,8 +23,7 @@ services:
     ports:
       - "8080:8080"
     depends_on:
-       sqlserver:
-         condition: service_healthy
+      - sqlserver  # Chỉ cần chờ container sqlserver bật lên là được
     environment:
       - DB_URL=${DB_URL}
       - DB_USERNAME=${DB_USERNAME}
