@@ -45,18 +45,57 @@
 
 Docker runs natively and stable on these platforms. The system will automatically set up the Database, seed sample data, and start the Backend.
 
-### **1. Clone & Configure Env**
+#### **1. Clone & Configure Env**
 ```bash
 git clone https://github.com/nanashi193/TechNoX.git
 cd TechNoX
 cp .env.example .env
 # Open .env and update your credentials (EMAIL, PAYOS, CLOUDINARY...)
 ```
-### **2. Run with Docker Compose**
+#### **2. Run with Docker Compose**
 ```bash
    docker-compose up -d
 ```
    Wait about 30–60 seconds for SQL Server to initialize and seed data automatically.
+
+## 🍎 Option 2: For macOS (Apple Silicon M1/M2/M3)
+
+Do hạn chế về hiệu năng của SQL Server trên chip Apple Silicon, quá trình khởi tạo Database tự động có thể không hoạt động. Bạn cần làm theo 3 bước sau:
+
+#### **Bước 1: Khởi chạy Docker**
+
+Chạy lệnh sau để bật Database và Backend:
+```bash
+docker-compose up -d
+```
+⚠️ Lưu ý: Sau bước này, container technox-db sẽ chạy (xanh), nhưng technox-api sẽ tự động tắt (Exited) do Database chưa có dữ liệu TEStore. Điều này là bình thường.
+#### **Bước 2: Nạp dữ liệu (Manual Seeding)**
+
+Sử dụng công cụ quản lý Database của bạn (DBeaver, Azure Data Studio, IntelliJ...):
+
+Kết nối:
+
+Host: localhost
+
+Port: 1433
+
+User: sa
+
+Password: (Mật khẩu bạn đã đặt trong .env)
+
+Chạy Script:
+
+Mở file: shop/example-data.sql.
+
+Chạy toàn bộ file này (Execute) để tạo Database TEStore, tạo bảng và nạp dữ liệu mẫu.
+
+#### **Bước 3: Khởi động lại Backend**
+
+Sau khi Database đã có dữ liệu, hãy bật lại Backend:
+```bash
+docker start technox-api
+```
+Lúc này Backend sẽ kết nối thành công và hệ thống sẵn sàng hoạt động.
 
 >  Mọi đóng góp, phản hồi và pull request đều được chào đón!
 
