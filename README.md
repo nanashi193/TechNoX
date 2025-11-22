@@ -54,9 +54,9 @@ cp .env.example .env
 ```
 #### **2. Run with Docker Compose**
 ```bash
-   docker-compose up -d
+docker-compose up -d
 ```
-   Wait about 30–60 seconds for SQL Server to initialize and seed data automatically.
+> Wait about 30–60 seconds for SQL Server to initialize and seed data automatically.
 
 ## 🍎 Option 2: For macOS (Apple Silicon M1/M2/M3)
 
@@ -99,5 +99,3 @@ docker start technox-api
 Lúc này Backend sẽ kết nối thành công và hệ thống sẵn sàng hoạt động.
 
 >  Mọi đóng góp, phản hồi và pull request đều được chào đón!
-
-
