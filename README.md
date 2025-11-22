@@ -68,7 +68,7 @@ Chạy lệnh sau để bật Database và Backend:
 ```bash
 docker-compose up -d
 ```
-⚠️ Lưu ý: Sau bước này, container technox-db sẽ chạy (xanh), nhưng technox-api sẽ tự động tắt (Exited) do Database chưa có dữ liệu TEStore. Điều này là bình thường.
+>⚠️ Lưu ý: Sau bước này, container technox-db sẽ chạy (xanh), nhưng technox-api sẽ tự động tắt (Exited) do Database chưa có dữ liệu TEStore. Điều này là bình thường.
 #### **Bước 2: Nạp dữ liệu (Manual Seeding)**
 
 Sử dụng công cụ quản lý Database của bạn (DBeaver, Azure Data Studio, IntelliJ...):
@@ -84,9 +84,10 @@ User: sa
 Password: (Mật khẩu bạn đã đặt trong .env)
 ```
 **Chạy Script:**
-
-Mở file: shop/example-data.sql.
-
+```bash
+Mở file:
+ shop/example-data.sql.
+```
 Chạy toàn bộ file này (Execute) để tạo Database TEStore, tạo bảng và nạp dữ liệu mẫu.
 
 #### **Bước 3: Khởi động lại Backend**
