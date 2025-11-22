@@ -73,8 +73,8 @@ docker-compose up -d
 
 Sử dụng công cụ quản lý Database của bạn (DBeaver, Azure Data Studio, IntelliJ...):
 
-Kết nối:
-
+**Kết nối:**
+```bash
 Host: localhost
 
 Port: 1433
@@ -82,8 +82,8 @@ Port: 1433
 User: sa
 
 Password: (Mật khẩu bạn đã đặt trong .env)
-
-Chạy Script:
+```
+**Chạy Script:**
 
 Mở file: shop/example-data.sql.
 
