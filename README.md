@@ -1,29 +1,30 @@
 # 🛍️ TechNoX - Modern Ecommerce Platform
 
-![GitHub release (latest by date)](https://img.shields.io/github/v/release/nanashi193/TechNoX?color=blue)  
-![Docker](https://img.shields.io/badge/Docker-Enabled-2496ED?logo=docker&logoColor=white)  
+![GitHub release (latest by date)](https://img.shields.io/github/v/release/nanashi193/TechNoX?color=blue) 
+![Docker](https://img.shields.io/badge/Docker-Enabled-2496ED?logo=docker&logoColor=white) 
+![Docker Image Size](https://img.shields.io/docker/image-size/nanashi193/technox-backend)   
 ![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.0-brightgreen?logo=springboot)  
 ![Angular](https://img.shields.io/badge/Angular-17-red?logo=angular)
 
-**TechNoX** là nền tảng thương mại điện tử full-stack hiện đại, tối ưu về hiệu năng và khả năng mở rộng. Dự án hỗ trợ toàn bộ luồng mua sắm, từ tìm kiếm sản phẩm đến thanh toán và quản lý đơn hàng.
+**TechNoX** is a modern full-stack e-commerce platform optimized for performance and scalability. The project supports the entire shopping flow, from product search to checkout and order management.
 
 🌐 **Live Demo:** [https://technoz.site](https://technoz.site)  
 🔌 **API Endpoint:** `https://api.technoz.site`
 
 ---
 
-## ✨ Tính Năng Nổi Bật
+## ✨ Main Features
 
-- **Xác thực:** Đăng nhập/Đăng ký an toàn với JWT & phân quyền theo vai trò.
-- **Mua sắm:** Tìm kiếm, lọc sản phẩm, quản lý giỏ hàng.
-- **Thanh toán:** Tích hợp PayOS cho xử lý thanh toán trực tuyến.
-- **Thông báo:** Gửi email xác nhận tự động qua SMTP (Gmail).
-- **Media:** Lưu trữ ảnh trên cloud qua Cloudinary.
-- **Bảo mật:** Hỗ trợ HTTPS hoàn toàn, thiết lập CORS, mã hóa biến môi trường.
+- **Authentication:** Secure login/registration using JWT with role-based authorization.
+- **Shopping:** Product search, filtering, and cart management.
+- **Checkout:** PayOS integration for online payment processing..
+- **Notifications:** Automatic confirmation emails sent via SMTP (Gmail).
+- **Media:** Image storage on the cloud via Cloudinary.
+- **Security:**  Full HTTPS support, CORS configuration, and encryption of environment variables.
 
 ---
 
-## 🛠️ Công Nghệ & Kiến Trúc
+## 🛠️ Technology & Architecture
 
 ### Frontend
 - **Framework:** Angular 17 (Standalone Components)
@@ -35,7 +36,7 @@
 - **ORM:** Hibernate / JPA
 - **Database:** Microsoft SQL Server 2022
 - **Docker:** Docker & Docker Compose
-- **Hạ tầng:** Cloudflare Tunnel (Zero Trust) phục vụ public localhost an toàn
+- **Infrastructure:** Cloudflare Tunnel (Zero Trust) for securely exposing localhost to the public
 
 ---
 
@@ -45,14 +46,14 @@
 
 Docker runs natively and stable on these platforms. The system will automatically set up the Database, seed sample data, and start the Backend.
 
-#### **1. Clone & Configure Env**
+### **1. Clone & Configure Env**
 ```bash
 git clone https://github.com/nanashi193/TechNoX.git
 cd TechNoX
 cp .env.example .env
 # Open .env and update your credentials (EMAIL, PAYOS, CLOUDINARY...)
 ```
-#### **2. Run with Docker Compose**
+### **2. Run with Docker Compose**
 ```bash
 docker-compose up -d
 ```
@@ -60,20 +61,20 @@ docker-compose up -d
 
 ## 🍎 Option 2: For macOS (Apple Silicon M1/M2/M3)
 
-Do hạn chế về hiệu năng của SQL Server trên chip Apple Silicon, quá trình khởi tạo Database tự động có thể không hoạt động. Bạn cần làm theo 3 bước sau:
+Due to SQL Server performance limitations on Apple Silicon chips, the automatic database initialization may not work. You need to follow these 3 steps:
 
-#### **Bước 1: Khởi chạy Docker**
+### **Step 1: Start Docker**
 
-Chạy lệnh sau để bật Database và Backend:
+Run the following command to start the Database and Backend:
 ```bash
 docker-compose up -d
 ```
->⚠️ Lưu ý: Sau bước này, container technox-db sẽ chạy (xanh), nhưng technox-api sẽ tự động tắt (Exited) do Database chưa có dữ liệu TEStore. Điều này là bình thường.
-#### **Bước 2: Nạp dữ liệu (Manual Seeding)**
+>⚠️ Note: After this step, the technox-db container will be running (green), but technox-api will automatically stop (Exited) because the database does not yet contain TEStore data. This is normal.
+### **Step 2: Load Data (Manual Seeding)**
 
-Sử dụng công cụ quản lý Database của bạn (DBeaver, Azure Data Studio, IntelliJ...):
+Use your database management tool (DBeaver, Azure Data Studio, IntelliJ, etc.):
 
-**Kết nối:**
+**Connect:**
 ```bash
 Host: localhost
 
@@ -81,23 +82,22 @@ Port: 1433
 
 User: sa
 
-Password: (Mật khẩu bạn đã đặt trong .env)
+Password: (Your password in .env)
 ```
-**Chạy Script:**
+**Run Script:**
 
-Mở file:
+Open file:
 ```bash
  shop/example-data.sql.
 ```
-Chạy toàn bộ file này (Execute) để tạo Database TEStore, tạo bảng và nạp dữ liệu mẫu.
->Nếu bạn dùng DBeaver, hãy xóa những ký tự "GO" và chạy bình thường
+Execute the entire file to create the TEStore database, set up the tables, and load the sample data.
+>If you are using DBeaver, remove all "GO" statements and execute normally.
 
-#### **Bước 3: Khởi động lại Backend**
+### **Step 3: Restart Backend**
 
-Sau khi Database đã có dữ liệu, hãy bật lại Backend:
+Once the database contains data, restart the Backend:
 ```bash
 docker start technox-api
 ```
-Lúc này Backend sẽ kết nối thành công và hệ thống sẵn sàng hoạt động.
-
+At this point, the Backend will connect successfully, and the system will be ready to operate.
 >  Mọi đóng góp, phản hồi và pull request đều được chào đón!
