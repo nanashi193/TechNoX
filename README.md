@@ -28,8 +28,8 @@
 
 ### Frontend
 - **Framework:** Angular 17 (Standalone Components)
-- **Giao diện:** Bootstrap 5, CSS3
-- **Triển khai:** Cloudflare Pages (Auto CI/CD)
+- **Interface:** Bootstrap 5, CSS3
+- **Deploy:** Cloudflare Pages (Auto CI/CD)
 
 ### Backend
 - **Framework:** Spring Boot 3 (Java 21)
