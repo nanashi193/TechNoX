@@ -44,6 +44,7 @@ public class WebSecurityConfig {
 
                 // Ủy quyền
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/actuator/**").permitAll()
                         .requestMatchers(POST, apiPrefix + "/auth/me").authenticated()
                         // Health/Probe (để kiểm tra nhanh)
                         .requestMatchers(GET, apiPrefix + "/_health/**").permitAll()
