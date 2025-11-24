@@ -54,3 +54,15 @@ payos:
 app:
   frontend:
     url: "https://technoz.site, https://www.technoz.site, https://technox.pages.dev"
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus # Mở cổng Prometheus
+  endpoint:
+    health:
+      show-details: always
+  metrics:
+    tags:
+      application: ${spring.application.name}
