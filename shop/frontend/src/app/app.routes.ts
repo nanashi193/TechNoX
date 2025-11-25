@@ -1,17 +1,17 @@
 import { Routes } from '@angular/router';
-import { LoginComponent } from './components/Component-login/login/login.component';
-import { SignupComponent } from './components/Component-login/signup/signup.component';
+import { LoginComponent } from './components/auth/login/login.component';
+import { SignupComponent } from './components/auth/signup/signup.component';
 import { HomeComponent } from './components/Component-home/home/home.component';
-import { ForgotPasswordComponent } from './components/Component-login/forgot-password/forgot-password.component';
+import { ForgotPasswordComponent } from './components/auth/forgot-password/forgot-password.component';
 import { ProductPageComponent } from './components/Component-product/product/product-page.component';
-import { CartComponent } from './components/Component-cart/cart/cart.component';
+import { CartComponent } from './components/cart/cart/cart.component';
 import { loginGuard } from './guards/login.guard';
 import { ownerGuard } from './guards/owner.guard';
 
 // Payment detail (component thường)
 import { PaymentDetailComponent } from './components/Component-payment/paymentInfor/payment-detail.component';
-import {OrderShippingComponent} from "./components/Component-Staff/Shipping/Order-shipping";
-import {StaffAssignOrdersComponent} from "./components/Component-Staff/staff/staff-assign-orders.component";
+import {OrderShippingComponent} from "./components/staff/Shipping/Order-shipping";
+import {StaffAssignOrdersComponent} from "./components/staff/staff/staff-assign-orders.component";
 
 export const routes: Routes = [
     { path: '', redirectTo: 'home', pathMatch: 'full' },
@@ -58,14 +58,14 @@ export const routes: Routes = [
     {
         path: 'verify-email',
         loadComponent: () =>
-            import('./components/Component-function/verify-email/verify-email.component')
+            import('./components/function/verify-email/verify-email.component')
                 .then(m => m.VerifyEmailComponent),
         data: { hideChrome: true, title: 'Xác minh email | TechNoZ' }
     },
     {
         path: 'verify-email/pending',
         loadComponent: () =>
-            import('./components/Component-function/verify-pending/verify-pending.component')
+            import('./components/function/verify-pending/verify-pending.component')
                 .then(m => m.VerifyPendingComponent),
         data: { hideChrome: true, title: 'Đang chờ xác minh | TechNoZ' }
     },
@@ -73,7 +73,7 @@ export const routes: Routes = [
     {
         path: 'reset-password',
         loadComponent: () =>
-            import('./components/Component-login/reset-password/reset-password.component')
+            import('./components/auth/reset-password/reset-password.component')
                 .then(m => m.ResetPasswordComponent),
         title: 'Đặt lại mật khẩu | TechNoZ',
         data: { hideChrome: true }
@@ -104,7 +104,7 @@ export const routes: Routes = [
     {
         path: 'my-orders',
         loadComponent: () =>
-            import('./components/Component-CustomerOrder/Component-MyOrder/Component-MyOrder')
+            import('./components/Component-MyOrder/Component-MyOrder')
                 .then(m => m.ComponentMyOrderComponent),
         title: 'Đơn hàng của tôi | TechNoZ'
     },
@@ -113,41 +113,41 @@ export const routes: Routes = [
     {
         path: 'legal',
         loadComponent: () =>
-            import('./components/Component-owner/owner/legal/legal-layout/legal-layout.component')
+            import('./components/owner/legal/legal-layout/legal-layout.component')
                 .then(m => m.LegalLayoutComponent),
         children: [
             {
                 path: 'about',
                 loadComponent: () =>
-                    import('./components/Component-owner/owner/legal/about/about.component')
+                    import('./components/owner/legal/about/about.component')
                         .then(m => m.AboutComponent),
                 title: 'Giới thiệu | TechNoZ'
             },
             {
                 path: 'privacy-policy',
                 loadComponent: () =>
-                    import('./components/Component-owner/owner/legal/privacy-policy/privacy-policy.component')
+                    import('./components/owner/legal/privacy-policy/privacy-policy.component')
                         .then(m => m.PrivacyPolicyComponent),
                 title: 'Chính sách bảo mật | TechNoZ'
             },
             {
                 path: 'terms',
                 loadComponent: () =>
-                    import('./components/Component-owner/owner/legal/terms/terms.component')
+                    import('./components/owner/legal/terms/terms.component')
                         .then(m => m.TermsComponent),
                 title: 'Điều khoản sử dụng | TechNoZ'
             },
             {
                 path: 'warranty',
                 loadComponent: () =>
-                    import('./components/Component-owner/owner/legal/warranty/warranty.component')
+                    import('./components/owner/legal/warranty/warranty.component')
                         .then(m => m.WarrantyComponent),
                 title: 'Chính sách bảo hành | TechNoZ'
             },
             {
                 path: 'returns',
                 loadComponent: () =>
-                    import('./components/Component-owner/owner/legal/returns/returns.component')
+                    import('./components/owner/legal/returns/returns.component')
                         .then(m => m.ReturnsComponent),
                 title: 'Hủy giao dịch, đổi trả | TechNoZ'
             },
@@ -170,14 +170,14 @@ export const routes: Routes = [
         path: 'owner',
         canActivate: [ownerGuard],
         loadComponent: () =>
-            import('./components/Component-owner/owner/layout/owner-layout.component')
+            import('./components/owner/layout/owner-layout.component')
                 .then(m => m.OwnerLayoutComponent),
         children: [
             { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
             {
                 path: 'dashboard',
                 loadComponent: () =>
-                    import('./components/Component-owner/owner/dashboard/dashboard.component')
+                    import('./components/owner/dashboard/dashboard.component')
                         .then(m => m.DashboardComponent),
                 title: 'Tổng quan | Owner'
             },
@@ -186,14 +186,14 @@ export const routes: Routes = [
             {
                 path: 'orders',
                 loadComponent: () =>
-                    import('./components/Component-owner/owner/OrderControll/order-controll')
+                    import('./components/owner/OrderControll/order-controll')
                         .then(m => m.OrderControllComponent),
                 title: 'Quản lý đơn hàng | Owner'
             },
             {
                 path: 'orders/:billId',
                 loadComponent: () =>
-                    import('./components/Component-owner/owner/OrderControll/orders-detail/orders-detail.component')
+                    import('./components/owner/OrderControll/orders-detail/orders-detail.component')
                         .then(m => m.OrdersDetailComponent),
                 title: 'Chi tiết đơn hàng | Owner'
             },
@@ -201,14 +201,14 @@ export const routes: Routes = [
             {
                 path: 'products',
                 loadComponent: () =>
-                    import('./components/Component-owner/owner/products/products-list/products-list.component')
+                    import('./components/owner/products/products-list/products-list.component')
                         .then(m => m.ProductsListComponent),
                 title: 'Quản lý sản phẩm | Owner'
             },
             {
                 path: 'products/new',
                 loadComponent: () =>
-                    import('./components/Component-owner/owner/products/products-detail/products-detail.component')
+                    import('./components/owner/products/products-detail/products-detail.component')
                         .then(m => m.ProductsDetailComponent),
                 title: 'Thêm sản phẩm | Owner'
             },
@@ -217,27 +217,27 @@ export const routes: Routes = [
                 // nếu bạn muốn '/owner/products/:id/edit', đổi 'owner/products/:id/edit' -> 'products/:id/edit'
                 path: 'owner/products/:id/edit',
                 loadComponent: () =>
-                    import('./components/Component-owner/owner/products/products-detail/products-detail.component')
+                    import('./components/owner/products/products-detail/products-detail.component')
                         .then(m => m.ProductsDetailComponent)
             },
             {
                 path: 'products/:id',
                 loadComponent: () =>
-                    import('./components/Component-owner/owner/products/products-detail/products-detail.component')
+                    import('./components/owner/products/products-detail/products-detail.component')
                         .then(m => m.ProductsDetailComponent),
                 title: 'Sửa sản phẩm | Owner'
             },
             {
                 path: 'users',
                 loadComponent: () =>
-                    import('./components/Component-owner/owner/users/users-list/users-list.component')
+                    import('./components/owner/users/users-list/users-list.component')
                         .then(m => m.UsersListComponent),
                 title: 'Người dùng của TechNoZ'
             },
             {
                 path: 'users/:id',
                 loadComponent: () =>
-                    import('./components/Component-owner/owner/users/users-detail/users-detail.component')
+                    import('./components/owner/users/users-detail/users-detail.component')
                         .then(m => m.UserDetailComponent)
             }
         ]

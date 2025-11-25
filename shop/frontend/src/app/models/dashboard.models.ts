@@ -1,4 +1,4 @@
-import {OrderStatus} from "../components/Component-owner/owner/OrderControll/order-controll";
+import {OrderStatus} from "../components/owner/OrderControll/order-controll";
 
 export interface Kpi {
     revenueToday: number;
