@@ -1,15 +1,10 @@
 import {Component, HostListener, inject, OnInit} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import {Product, ProductListItem} from "../../../../models/products.model";
+import {ProductListItem} from "../../../../models/products.model";
 import {ProductService} from "../../../../services/products.service";
 import {Router, RouterLink} from "@angular/router";
 import {CATEGORIES, categoryName, CategoryOpt} from "../../../../../data/categories";
-
-type ProductRow = {
-    id:number; name:string; image:string; type:string;
-    sku:string; price:number; variants:number; inStock:boolean;
-};
 
 type SortDir = 'asc' | 'desc';
 type SortField = 'id' | 'name' | 'price';

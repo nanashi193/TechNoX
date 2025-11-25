@@ -4,7 +4,6 @@ import {FormBuilder, FormGroup, FormControl, Validators, ReactiveFormsModule} fr
 import {Router, RouterModule} from '@angular/router';
 import {AuthService} from '../../../services/auth.service';
 import {finalize} from 'rxjs/operators';
-import { jwtDecode } from 'jwt-decode';
 
 type Me = { id: number | string; name: string; email: string; role?: string; avatar?: string };
 
