@@ -1,0 +1,63 @@
+<div class="owner-wrap owner-scope" [class.mini]="mini">
+    <!-- Sidebar -->
+    <aside class="owner-aside" [class.mini]="mini">
+        <!-- TOP: profile + collapse -->
+        <div class="aside-head">
+            <div class="avatar-wrap" aria-hidden="true">
+                <img class="avatar" src="../../../../assets/icons/owner-avatar.png" alt="Avatar chủ cửa hàng">
+            </div>
+
+            <div class="who">
+                <div class="role">Welcome, </div>
+                <div class="name" title="{{ (me$ | async)?.name || '—' }}">
+                    {{ (me$ | async)?.name || '—' }}
+                </div>
+            </div>
+        </div>
+
+
+        <!-- MAIN -->
+        <div class="aside-section">
+            <a class="item" routerLink="/owner/dashboard" routerLinkActive="active">
+                <span class="icon ico-mask" style="--ico:url('../../../../assets/icons/overview-v2.svg')">
+                </span><span class="text">Tổng quan</span>
+            </a>
+
+            <a class="item" routerLink="/owner/products" routerLinkActive="active">
+                <span class="icon ico-mask" style="--ico:url('../../../../assets/icons/product.svg')">
+                </span><span class="text">Sản phẩm</span>
+            </a>
+
+<!--            <a class="item" routerLink="/owner/catalogys" routerLinkActive="active">-->
+<!--                <span class="icon ico-mask" style="&#45;&#45;ico:url('../../../../../assets/icons/catalogy.png')">-->
+<!--                </span><span class="text">Danh mục sản phẩm</span>-->
+<!--            </a>-->
+
+            <a class="item" routerLink="/owner/orders" routerLinkActive="active">
+                <span class="icon ico-mask" style="--ico:url('../../../../assets/icons/order.svg')">
+                </span><span class="text">Đơn hàng</span>
+            </a>
+
+            <a *ngIf="(me$ | async)?.role !== 'STAFF'"
+               class="item" routerLink="/owner/users" routerLinkActive="active">
+                <span class="icon ico-mask" style="--ico:url('../../../../assets/icons/user-key.svg')">
+                </span><span class="text">Người dùng</span>
+            </a>
+        </div>
+
+        <div class="promo">
+            <div class="h">Welcome back Sir!</div>
+            <p>Creating or adding new product couldn’t be easier</p>
+            <button class="cta" (click)="create()">+ Add Product</button>
+        </div>
+
+        <div class="aside-foot">
+            <a routerLink="/" class="back-site">← Về trang chủ</a>
+            <span class="sep">•</span>
+            <button type="button" class="link logout" (click)="onLogout()">Đăng xuất</button>
+        </div>
+    </aside>
+    <main class="owner-main">
+        <router-outlet></router-outlet>
+    </main>
+</div>
