@@ -1,4 +1,4 @@
-@import 'app/components/owner/legal/_shared/legal-base.css';
+@import '../_shared/legal-base.css';
 
 .legal-container { max-width: 900px; padding: 40px 20px 60px; }
 .legal-heading { margin: 0 0 12px; font-size: 2rem; font-weight: 700; color: #111827; }
