@@ -1,8 +1,8 @@
 import { Routes } from '@angular/router';
-import { LoginComponent } from './components/Component-login/login/login.component';
-import { SignupComponent } from './components/Component-login/signup/signup.component';
+import { LoginComponent } from './components/auth/login/login.component';
+import { SignupComponent } from './components/auth/signup/signup.component';
 import { HomeComponent } from './components/Component-home/home/home.component';
-import { ForgotPasswordComponent } from './components/Component-login/forgot-password/forgot-password.component';
+import { ForgotPasswordComponent } from './components/auth/forgot-password/forgot-password.component';
 import { ProductPageComponent } from './components/Component-product/product/product-page.component';
 import { CartComponent } from './components/cart/cart/cart.component';
 import { loginGuard } from './guards/login.guard';
@@ -10,8 +10,8 @@ import { ownerGuard } from './guards/owner.guard';
 
 // Payment detail (component thường)
 import { PaymentDetailComponent } from './components/Component-payment/paymentInfor/payment-detail.component';
-import {OrderShippingComponent} from "./components/Component-Staff/Shipping/Order-shipping";
-import {StaffAssignOrdersComponent} from "./components/Component-Staff/staff/staff-assign-orders.component";
+import {OrderShippingComponent} from "./components/staff/Shipping/Order-shipping";
+import {StaffAssignOrdersComponent} from "./components/staff/staff/staff-assign-orders.component";
 
 export const routes: Routes = [
     { path: '', redirectTo: 'home', pathMatch: 'full' },
@@ -58,14 +58,14 @@ export const routes: Routes = [
     {
         path: 'verify-email',
         loadComponent: () =>
-            import('./components/Component-function/verify-email/verify-email.component')
+            import('./components/function/verify-email/verify-email.component')
                 .then(m => m.VerifyEmailComponent),
         data: { hideChrome: true, title: 'Xác minh email | TechNoZ' }
     },
     {
         path: 'verify-email/pending',
         loadComponent: () =>
-            import('./components/Component-function/verify-pending/verify-pending.component')
+            import('./components/function/verify-pending/verify-pending.component')
                 .then(m => m.VerifyPendingComponent),
         data: { hideChrome: true, title: 'Đang chờ xác minh | TechNoZ' }
     },
@@ -73,7 +73,7 @@ export const routes: Routes = [
     {
         path: 'reset-password',
         loadComponent: () =>
-            import('./components/Component-login/reset-password/reset-password.component')
+            import('./components/auth/reset-password/reset-password.component')
                 .then(m => m.ResetPasswordComponent),
         title: 'Đặt lại mật khẩu | TechNoZ',
         data: { hideChrome: true }
@@ -104,7 +104,7 @@ export const routes: Routes = [
     {
         path: 'my-orders',
         loadComponent: () =>
-            import('./components/Component-CustomerOrder/Component-MyOrder/Component-MyOrder')
+            import('./components/Component-MyOrder/Component-MyOrder')
                 .then(m => m.ComponentMyOrderComponent),
         title: 'Đơn hàng của tôi | TechNoZ'
     },

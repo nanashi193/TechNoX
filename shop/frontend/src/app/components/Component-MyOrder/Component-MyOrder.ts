@@ -1,8 +1,8 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
-import { BillService } from '../../../services/bill.service';
-import { BillAdminDetailResponse, BillItem } from '../../../models/bill-admin.model';
-import { StaffInfo } from '../../../models/staff-info.model';
+import { BillService } from '../../services/bill.service';
+import { BillAdminDetailResponse, BillItem } from '../../models/bill-admin.model';
+import { StaffInfo } from '../../models/staff-info.model';
 export type OrderStatus = 'Processing' | 'Confirmed' | 'Assigned' | 'Delivering' | 'Delivered' | 'Succeed' | 'Cancelled';
 export type OrderFilterStatus = OrderStatus | 'all';
 

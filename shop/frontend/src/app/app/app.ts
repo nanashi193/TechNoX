@@ -3,8 +3,8 @@ import { Router, NavigationEnd, RouterOutlet, ActivatedRoute } from '@angular/ro
 import { NgIf } from '@angular/common';
 import { filter, startWith } from 'rxjs';
 
-import { SiteHeaderComponent } from '../components/Component-function/site-header/site-header.component';
-import { SiteFooterComponent } from '../components/Component-function/site-footer/site-footer.component';
+import { SiteHeaderComponent } from '../components/function/site-header/site-header.component';
+import { SiteFooterComponent } from '../components/function/site-footer/site-footer.component';
 import { ToastContainerComponent } from '../shared/toast/toast-container.component';
 import { NotificationService } from '../services/notification.service';
 import { AuthService } from '../services/auth.service';
