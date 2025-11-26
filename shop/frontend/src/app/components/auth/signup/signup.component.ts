@@ -1,5 +1,5 @@
 import { Component, CUSTOM_ELEMENTS_SCHEMA, OnDestroy } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import {CommonModule, NgOptimizedImage} from '@angular/common';
 import {
     AbstractControl,
     FormBuilder,
@@ -17,7 +17,7 @@ import { RegisterDTO } from '../../../dtos/user/register.dto';
 @Component({
     selector: 'app-signup',
     standalone: true,
-    imports: [CommonModule, ReactiveFormsModule, RouterModule],
+    imports: [CommonModule, ReactiveFormsModule, RouterModule, NgOptimizedImage],
     templateUrl: './signup.component.html',
     styleUrls: ['./signup.component.css', '../../../styles/shared-styles.css'],
     schemas: [CUSTOM_ELEMENTS_SCHEMA]

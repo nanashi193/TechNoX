@@ -57,23 +57,24 @@
 }
 
 .socials {
-    margin-top: auto;
     display: flex;
-    gap: 16px;
+    align-items: center; /* Căn giữa theo chiều dọc */
+    gap: 15px;           /* Khoảng cách giữa các icon */
 }
 
-.socials a {
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    background: #fff;
-    color: #111;
-    display: grid;
-    place-items: center;
-    font-weight: 700;
-    text-decoration: none;
+.social-icon {
+    width: 32px;
+    height: 32px;
+    object-fit: contain;
+
+
+    transition: transform 0.2s;
+    cursor: pointer;
 }
 
+.social-icon:hover {
+    transform: scale(1.1);
+}
 .card input::placeholder {
     font-size: 14px;
     color: #aaa;
