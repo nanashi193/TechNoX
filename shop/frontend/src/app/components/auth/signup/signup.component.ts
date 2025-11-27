@@ -50,7 +50,6 @@ export class SignupComponent implements OnDestroy {
         );
     }
 
-    // ✅ Custom validator kiểm tra password match
     match(a: string, b: string) {
         return (group: AbstractControl): ValidationErrors | null => {
             const v1 = group.get(a)?.value;
@@ -59,14 +58,12 @@ export class SignupComponent implements OnDestroy {
         };
     }
 
-    // ✅ Getter tiện cho template
     get fullnameCtrl() { return this.form.get('fullname') as FormControl; }
     get emailCtrl() { return this.form.get('email') as FormControl; }
     get phoneCtrl() { return this.form.get('phone') as FormControl; }
     get genderCtrl() { return this.form.get('gender') as FormControl; }
     get passwordCtrl() { return this.form.get('password') as FormControl; }
 
-    // ✅ Submit form
     onSubmit() {
         if (this.form.invalid || this.loading) return;
         this.errorMsg = '';
@@ -112,7 +109,6 @@ export class SignupComponent implements OnDestroy {
         });
     }
 
-// ✅ Xử lý lỗi
     private handleError(msg?: string) {
         this.signupSuccess = false;
         this.errorMsg = msg || 'Đăng ký thất bại. Vui lòng thử lại.';

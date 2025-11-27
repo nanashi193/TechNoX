@@ -45,15 +45,12 @@ export class LoginComponent {
                     const token = res?.token;
                     if (!token) { this.errorMsg = 'Lỗi đăng nhập: Không nhận được token.'; return; }
 
-                    // 1) Lưu token (đơn giản: luôn dùng localStorage; nếu cần remember thật, thêm cờ 'auth.remember')
                     localStorage.setItem('auth.token', token);
                     localStorage.setItem('auth.remember', String(!!remember));
 
-                    // 2) Lấy hồ sơ từ /auth/me
                     this.auth.me().subscribe({
                         next: (me: Me) => {
                             localStorage.setItem('auth.user', JSON.stringify(me));
-                            // 3) Điều hướng theo role
                             const role = (me.role ?? '').toUpperCase();
                             if (role === 'ADMIN' || role === 'OWNER' || role === 'STAFF') this.router.navigate(['/owner']);
                             // else if (role === 'STAFF') {
