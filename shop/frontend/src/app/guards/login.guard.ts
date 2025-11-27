@@ -22,7 +22,7 @@ const checkLoggedIn = (router: Router): boolean => {
         return true;
     }
 };
-export const loginGuard: CanActivateFn = (route, state) => {
+export const loginGuard: CanActivateFn = () => {
     const router = inject(Router);
     return checkLoggedIn(router);
 };
