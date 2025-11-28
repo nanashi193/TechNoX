@@ -1,4 +1,4 @@
-# 🛍️ TechNoX - Modern Ecommerce Platform
+# 🛍️ TechNoZ - Modern Ecommerce Platform
 
 ![GitHub release (latest by date)](https://img.shields.io/github/v/release/nanashi193/TechNoX?color=blue) 
 ![Docker](https://img.shields.io/badge/Docker-Enabled-2496ED?logo=docker&logoColor=white) 
@@ -13,7 +13,7 @@
 
 ---
 
-## ✨ Main Features
+## ✨ Key Features
 
 - **Authentication:** Secure login/registration using JWT with role-based authorization.
 - **Shopping:** Product search, filtering, and cart management.
