@@ -6,7 +6,7 @@
 ![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.0-brightgreen?logo=springboot)  
 ![Angular](https://img.shields.io/badge/Angular-17-red?logo=angular)
 
-**TechNoX** is a modern full-stack e-commerce platform optimized for performance and scalability. The project supports the entire shopping flow, from product search to checkout and order management.
+**TechNoZ** is a modern full-stack e-commerce platform optimized for performance and scalability. The project supports the entire shopping flow, from product search to checkout and order management.
 
 🌐 **Live Demo:** [https://technoz.site](https://technoz.site)  
 🔌 **API Endpoint:** `https://api.technoz.site`
@@ -90,7 +90,7 @@ Port: 1433
 
 User: sa
 
-Password: (Your password in .env)
+Password: (your password in .env)
 ```
 **Run Script:**
 
@@ -98,7 +98,7 @@ Open file:
 ```bash
  shop/example-data.sql.
 ```
-Execute the entire file to create the TEStore database, set up the tables, and load the sample data.
+Execute the entire file to create the 'TEStore' database, set up the tables, and load the sample data.
 >If you are using DBeaver, remove all "GO" statements and execute normally.
 
 #### **Step 3: Restart Backend**
