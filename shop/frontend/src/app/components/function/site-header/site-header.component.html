@@ -9,13 +9,19 @@
                 aria-controls="mobileMenu"
                 [attr.aria-expanded]="mobileMenuOpen ? 'true' : 'false'">☰</button>
 
-        <!-- Logo (ngSrc) -->
         <a class="brand" routerLink="/" aria-label="Trang chủ TechNoZ">
             <img class="brand__logo"
                  ngSrc="assets/icons/x-logo-circle.png"
-                 alt="TechNoZ" width="200" height="200" priority />
+                 alt="TechNoZ" width="902" height="902" priority />
             <span class="brand__name">TechNoZ</span>
         </a>
+
+        <nav class="desktop-nav">
+            <a routerLink="/products" routerLinkActive="active">Điện thoại</a>
+            <a routerLink="/products" routerLinkActive="active">Phụ kiện</a>
+            <a routerLink="/products" routerLinkActive="active">Laptop</a>
+            <a routerLink="/legal/privacy-policy" routerLinkActive="active">Chính sách</a>
+        </nav>
 
         <!-- Right actions -->
         <div class="header-actions">
