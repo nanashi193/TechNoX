@@ -1,65 +1,54 @@
 <header class="site-header">
-    <div class="container header-inner">
-        <!-- Menu button -->
-        <button
-                class="icon-btn mobile-toggle"
-                type="button"
-                (click)="toggleMenu()"
-                aria-label="Mở menu"
-                aria-controls="mobileMenu"
-                [attr.aria-expanded]="mobileMenuOpen ? 'true' : 'false'">☰</button>
+    <div class="container">
 
-        <a class="brand" routerLink="/" aria-label="Trang chủ TechNoZ">
-            <img class="brand__logo"
-                 ngSrc="assets/icons/x-logo-circle.png"
-                 alt="TechNoZ" width="902" height="902" priority />
-            <span class="brand__name">TechNoZ</span>
-        </a>
+        <div class="header-top">
+            <button class="icon-btn mobile-toggle" type="button" (click)="toggleMenu()">☰</button>
+
+            <a class="brand" routerLink="/">
+                <img class="brand__logo" ngSrc="assets/icons/x-logo-circle.png" alt="TechNoZ" width="40" height="40" priority />
+                <span class="brand__name">TechNoZ</span>
+            </a>
+
+            <div class="search-box">
+                <button class="search-btn"><i class="fas fa-search"></i></button>
+                <input type="text" placeholder="Bạn tìm gì..." class="search-input">
+            </div>
+
+            <div class="header-actions">
+                @if (currentUser$ | async; as user) {
+                    <div class="user-menu">
+                        <button class="user-trigger" type="button" (click)="toggleUserMenu($event)">
+                            {{ user.fullName || user.sub }} ▾
+                        </button>
+                        <ul class="user-dropdown" *ngIf="userMenuOpen" (click)="$event.stopPropagation()">
+                            <li><a routerLink="/profile" (click)="closeUserMenu($event)">Hồ sơ</a></li>
+                            <li><a routerLink="/my-orders" (click)="closeUserMenu($event)">Đơn hàng</a></li>
+                            @if (isOwner(user)) { <li><a routerLink="/owner">Quản lý</a></li> }
+                            <li><button type="button" (click)="logout($event)">Đăng xuất</button></li>
+                        </ul>
+                    </div>
+                } @else {
+                    <a class="link-auth" routerLink="/login">Đăng nhập</a>
+                    <a class="btn btn--accent btn-auth" routerLink="/signup">Đăng ký</a>
+                }
+
+                <a routerLink="/cart" class="cart">
+                    <i class="fas fa-shopping-cart"></i>
+                    <span style="margin-left: 6px;">({{ itemCount$ | async }})</span>
+                </a>
+            </div>
+        </div>
 
         <nav class="desktop-nav">
-            <a routerLink="/products" routerLinkActive="active">Sản phẩm</a>
-            <a routerLink="/legal/privacy-policy" routerLinkActive="active">Chính sách</a>
+            <a routerLink="/products" routerLinkActive="active">iPhone</a>
+            <a routerLink="/products" routerLinkActive="active">iPad</a>
+            <a routerLink="/products" routerLinkActive="active">Mac</a>
+            <a routerLink="/products" routerLinkActive="active">Watch</a>
+            <a routerLink="/products" routerLinkActive="active">Âm thanh</a>
+            <a routerLink="/products" routerLinkActive="active">Phụ kiện</a>
+            <a routerLink="/legal/privacy-policy" routerLinkActive="active">Dịch vụ</a>
         </nav>
 
-        <!-- Right actions -->
-        <div class="header-actions">
-            @if (currentUser$ | async; as user) {
-                <div class="user-menu">
-                    <button class="user-trigger" type="button"
-                            (click)="toggleUserMenu($event)"
-                            aria-haspopup="menu"
-                            [attr.aria-expanded]="userMenuOpen ? 'true' : 'false'">
-                        {{ user.fullName || user.sub }} ▾
-                    </button>
-                    <ul class="user-dropdown" *ngIf="userMenuOpen"
-                        role="menu" aria-label="Tài khoản"
-                        (click)="$event.stopPropagation()">
-                        <li role="none">
-                            <a role="menuitem" routerLink="/profile" (click)="closeUserMenu($event)">Chỉnh sửa hồ sơ</a>
-                        </li>
-                        <li role="none">
-                            <a role="menuitem" routerLink="/my-orders" (click)="closeUserMenu($event)">Đơn hàng của tôi</a>
-                        </li>
-                        @if (isOwner(user)) {
-                            <li role="none">
-                                <a role="menuitem" routerLink="/owner" (click)="closeUserMenu($event)">Về trang quản lý</a>
-                            </li>
-                        }
-                        <li role="none">
-                            <button role="menuitem" type="button" (click)="logout($event)">Đăng xuất</button>
-                        </li>
-                    </ul>
-                </div>
-            } @else {
-                <a class="link-auth" routerLink="/login">Đăng nhập</a>
-                <a class="btn btn--accent btn-auth" routerLink="/signup">Đăng ký</a>
-            }
-
-            <a routerLink="/cart" routerLinkActive="active" class="cart" aria-label="Giỏ hàng">
-                <i class="fas fa-shopping-cart" style="font-size: 16px;"></i>
-                <span style="margin-left: 6px;">({{ itemCount$ | async }})</span>
-            </a>
-        </div>
     </div>
 </header>
 
